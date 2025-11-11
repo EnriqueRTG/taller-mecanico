@@ -1,0 +1,57 @@
+# =======================================
+# IGNORAR ARCHIVOS TEMPORALES / VISUAL STUDIO
+# =======================================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =======================================
+# BINARIOS Y COMPILADOS
+# =======================================
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+Logs/
+*.exe
+*.dll
+*.pdb
+
+# =======================================
+# PAQUETES NUGET
+# =======================================
+packages/
+*.nupkg
+*.snupkg
+*.nuspec
+
+# =======================================
+# BASE DE DATOS Y MIGRACIONES TEMPORALES
+# =======================================
+*.mdf
+*.ldf
+*Migrations*/__EFMigrationsHistory*
+
+# =======================================
+# IDEs ADICIONALES
+# =======================================
+.idea/
+.vscode/
+
+# =======================================
+# CONFIGURACIONES LOCALES
+# =======================================
+appsettings.Development.json
+appsettings.Local.json
+
+# =======================================
+# ARCHIVOS VARIOS / SISTEMA
+# =======================================
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+*.cache
+*.dbmdl
+*.db

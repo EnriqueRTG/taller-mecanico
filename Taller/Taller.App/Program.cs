@@ -83,6 +83,9 @@ namespace Taller.App
 
                 // 2.3) Formularios/UI (inyectables). Agregar aquí otros forms a medida que aparecen.
                 builder.Services.AddTransient<MainForm>();
+                builder.Services.AddTransient<ClientesForm>();
+                builder.Services.AddTransient<ClienteEditForm>();
+                //builder.Services.AddTransient<>();
 
                 // 3) Construcción del Host: congela la configuración y arma el ServiceProvider
                 using var host = builder.Build();

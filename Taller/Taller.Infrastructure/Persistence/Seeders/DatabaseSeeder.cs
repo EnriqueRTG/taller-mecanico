@@ -42,8 +42,11 @@ namespace Taller.Infrastructure.Persistence.Seeders
 
                 // 2️⃣ Ejecutar seeders definidos (idempotentes)
                 logger.LogInformation("🌱 Iniciando seeding de datos base...");
+
                 await ServicioSeeder.SeedAsync(db, logger, ct);
                 await RepuestoSeeder.SeedAsync(db, logger, ct);
+                await ClienteSeeder.SeedAsync(db, logger, ct);
+
                 logger.LogInformation("✅ Seeding completado exitosamente.");
             }
             catch (Exception ex)

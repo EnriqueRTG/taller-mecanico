@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Taller.Pruebas</RootNamespace>
+    <AssemblyName>Taller.Pruebas</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="8.8.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Taller.Aplicacion\Taller.Aplicacion.csproj" />
+    <ProjectReference Include="..\Taller.Domain\Taller.Dominio.csproj" />
+    <ProjectReference Include="..\Taller.Infrastructure\Taller.Infraestructura.csproj" />
+  </ItemGroup>
+
+</Project>

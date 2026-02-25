@@ -24,6 +24,13 @@ namespace Taller.Presentacion.Formularios
         /// </summary>
         private long? _clienteId;
 
+        /// <summary>
+        /// Id del cliente creado o editado al guardar correctamente.
+        /// Si es null, significa que no se guardó nada (o se canceló).
+        /// </summary>
+        public long? ClienteIdResultado { get; private set; }
+
+
         public FrmClienteEdicion(TallerDbContext db, ILogger<FrmClienteEdicion> logger)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -286,6 +293,8 @@ namespace Taller.Presentacion.Formularios
 
                     await _db.SaveChangesAsync();
 
+                    ClienteIdResultado = cliente.Id;
+
                     _logger.LogInformation(
                         "Cliente actualizado correctamente. Id={Id}, Nombre={Nombre}, Apellido={Apellido}",
                         cliente.Id, cliente.Nombre, cliente.Apellido);
@@ -316,6 +325,8 @@ namespace Taller.Presentacion.Formularios
 
                     _db.Clientes.Add(cliente);
                     await _db.SaveChangesAsync();
+
+                    ClienteIdResultado = cliente.Id;
 
                     _logger.LogInformation(
                         "Cliente creado correctamente. Id={Id}, Nombre={Nombre}, Apellido={Apellido}",

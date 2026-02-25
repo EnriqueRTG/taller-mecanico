@@ -52,7 +52,14 @@ namespace Taller.Presentacion.Formularios
         /// Carga los clientes desde base de datos aplicando el filtro (si lo hubiera)
         /// y los vuelca en la grilla.
         /// </summary>
-        private async Task CargarClientesAsync()
+        private Task CargarClientesAsync()
+        {
+            // Recarga sin seleccionar ningún cliente en particular
+            return RecargarClientesSeleccionandoAsync(null);
+        }
+
+
+        private async Task RecargarClientesSeleccionandoAsync(long? idSeleccionar)
         {
             try
             {
@@ -76,7 +83,7 @@ namespace Taller.Presentacion.Formularios
                     .Select(c => new
                     {
                         c.Id,
-                        Nombre = c.Apellido + ", " + c.Nombre, // nombre completo para la grilla
+                        Nombre = c.Apellido + ", " + c.Nombre,
                         c.Email,
                         c.Telefono,
                         c.DocTipo,
@@ -87,6 +94,22 @@ namespace Taller.Presentacion.Formularios
 
                 gridClientes.DataSource = lista;
                 gridClientes.AutoResizeColumns();
+
+                // --- Seleccionar fila del cliente afectado (si corresponde) ---
+                if (idSeleccionar.HasValue)
+                {
+                    foreach (DataGridViewRow row in gridClientes.Rows)
+                    {
+                        // Como el DataSource es un tipo anónimo, tomamos el Id desde la celda
+                        if (row.Cells["Id"].Value is long idFila && idFila == idSeleccionar.Value)
+                        {
+                            row.Selected = true;
+                            gridClientes.CurrentCell = row.Cells[0];
+                            gridClientes.FirstDisplayedScrollingRowIndex = row.Index;
+                            break;
+                        }
+                    }
+                }
 
                 _logger.LogInformation("Clientes cargados correctamente. Cantidad: {Cantidad}", lista.Count);
             }
@@ -104,7 +127,6 @@ namespace Taller.Presentacion.Formularios
                 btnBuscar.Enabled = btnActualizar.Enabled = true;
             }
         }
-
 
 
         #region Eventos de UI
@@ -127,18 +149,17 @@ namespace Taller.Presentacion.Formularios
             _logger.LogInformation("Acción: Alta de cliente (abrir formulario).");
 
             using var form = _serviceProvider.GetRequiredService<FrmClienteEdicion>();
-
             form.StartPosition = FormStartPosition.CenterParent;
 
             var result = form.ShowDialog(this);
 
-            if (result == DialogResult.OK)
+            if (result == DialogResult.OK && form.ClienteIdResultado.HasValue)
             {
-                // Si se guardó un cliente nuevo, refrescamos la grilla.
-                await CargarClientesAsync();
+                // Recarga y hace foco en el cliente recién creado
+                await RecargarClientesSeleccionandoAsync(form.ClienteIdResultado.Value);
             }
-
         }
+
 
         private async void btnEditar_Click(object sender, EventArgs e)
         {
@@ -163,7 +184,7 @@ namespace Taller.Presentacion.Formularios
 
             var result = form.ShowDialog(this);
 
-            if (result == DialogResult.OK)
+            if (result == DialogResult.OK && form.ClienteIdResultado.HasValue)
             {
                 // Si el usuario guardo cambios, refresca la lista
                 await CargarClientesAsync();

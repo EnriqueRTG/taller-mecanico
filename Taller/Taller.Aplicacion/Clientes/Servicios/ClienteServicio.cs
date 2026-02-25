@@ -30,7 +30,7 @@ public class ClienteServicio : IClienteServicio
                 Apellido = c.Apellido,
                 DocTipo = c.DocTipo,
                 DocNro = c.DocNro,
-                Telefono = c.Telefono,
+                Telefono = c.Telefono,   
                 Email = c.Email,
                 Direccion = c.Direccion,
                 Activo = c.Activo
@@ -59,21 +59,47 @@ public class ClienteServicio : IClienteServicio
 
     public async Task<long> CrearAsync(ClienteDto dto)
     {
-        var existeDoc = await _repositorio.ExistePorDocumentoAsync(dto.DocNro);
+        if (dto is null)
+            throw new ArgumentNullException(nameof(dto));
+
+        // Normalizar y validar campos obligatorios
+        var nombre = dto.Nombre?.Trim();
+        var apellido = dto.Apellido?.Trim();
+        var docTipo = dto.DocTipo?.Trim();
+        var docNro = dto.DocNro?.Trim();
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new ArgumentException("El nombre es obligatorio.", nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(apellido))
+            throw new ArgumentException("El apellido es obligatorio.", nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(docTipo))
+            throw new ArgumentException("El tipo de documento es obligatorio.", nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(docNro))
+            throw new ArgumentException("El número de documento es obligatorio.", nameof(dto));
+
+        // Verificar que no exista ya un cliente con ese documento
+        var existeDoc = await _repositorio.ExistePorDocumentoAsync(docNro!);
         if (existeDoc)
             throw new InvalidOperationException("Ya existe un cliente con ese documento.");
 
+        // Normalizar opcionales: si vienen vacíos, guardamos null
+        string? telefono = string.IsNullOrWhiteSpace(dto.Telefono) ? null : dto.Telefono.Trim();
+        string? email = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim();
+        string? direccion = string.IsNullOrWhiteSpace(dto.Direccion) ? null : dto.Direccion.Trim();
+
         var cliente = new Cliente
         {
-            Nombre = dto.Nombre,
-            Apellido = dto.Apellido,
-            DocTipo = dto.DocTipo,
-            DocNro  = dto.DocNro,
-            Telefono = dto.Telefono,
-            Email = dto.Email,
-            Direccion = dto.Direccion,
-            Activo = true,
-
+            Nombre = nombre!,     // ya validado
+            Apellido = apellido!,   // ya validado
+            DocTipo = docTipo!,    // ya validado
+            DocNro = docNro!,     // ya validado
+            Telefono = telefono,
+            Email = email,
+            Direccion = direccion,
+            Activo = true
         };
 
         await _repositorio.AgregarAsync(cliente);
@@ -82,20 +108,51 @@ public class ClienteServicio : IClienteServicio
 
     public async Task ActualizarAsync(ClienteDto dto)
     {
-        var cliente = await _repositorio.ObtenerPorIdAsync(dto.Id)
-            ?? throw new InvalidOperationException("Cliente no encontrado.");
+        if (dto is null)
+            throw new ArgumentNullException(nameof(dto));
 
-        var existeDoc = await _repositorio.ExistePorDocumentoAsync(dto.DocNro, dto.Id);
+        if (dto.Id <= 0)
+            throw new ArgumentException("Id de cliente inválido.", nameof(dto));
+
+        var cliente = await _repositorio.ObtenerPorIdAsync(dto.Id)
+                      ?? throw new InvalidOperationException("Cliente no encontrado.");
+
+        // Normalizar y validar obligatorios
+        var nombre = dto.Nombre?.Trim();
+        var apellido = dto.Apellido?.Trim();
+        var docTipo = dto.DocTipo?.Trim();
+        var docNro = dto.DocNro?.Trim();
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new ArgumentException("El nombre es obligatorio.", nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(apellido))
+            throw new ArgumentException("El apellido es obligatorio.", nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(docTipo))
+            throw new ArgumentException("El tipo de documento es obligatorio.", nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(docNro))
+            throw new ArgumentException("El número de documento es obligatorio.", nameof(dto));
+
+        // Validar unicidad de documento, excluyendo al propio cliente
+        var existeDoc = await _repositorio.ExistePorDocumentoAsync(docNro!, dto.Id);
         if (existeDoc)
             throw new InvalidOperationException("Ya existe otro cliente con ese documento.");
 
-        cliente.Nombre = dto.Nombre;
-        cliente.Apellido = dto.Apellido;
-        cliente.DocTipo = dto.DocTipo;
-        cliente.DocNro = dto.DocNro;
-        cliente.Telefono = dto.Telefono;
-        cliente.Email = dto.Email;
-        cliente.Direccion = dto.Direccion;
+        // Normalizar opcionales
+        string? telefono = string.IsNullOrWhiteSpace(dto.Telefono) ? null : dto.Telefono.Trim();
+        string? email = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim();
+        string? direccion = string.IsNullOrWhiteSpace(dto.Direccion) ? null : dto.Direccion.Trim();
+
+        // Mapear cambios a la entidad
+        cliente.Nombre = nombre!;
+        cliente.Apellido = apellido!;
+        cliente.DocTipo = docTipo!;
+        cliente.DocNro = docNro!;
+        cliente.Telefono = telefono;
+        cliente.Email = email;
+        cliente.Direccion = direccion;
         cliente.Activo = dto.Activo;
 
         await _repositorio.ActualizarAsync(cliente);
@@ -104,7 +161,7 @@ public class ClienteServicio : IClienteServicio
     public async Task EliminarAsync(long id)
     {
         var cliente = await _repositorio.ObtenerPorIdAsync(id)
-            ?? throw new InvalidOperationException("Cliente no encontrado.");
+                      ?? throw new InvalidOperationException("Cliente no encontrado.");
 
         await _repositorio.EliminarAsync(cliente);
     }

@@ -15,8 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Taller.Aplicacion\Taller.Aplicacion.csproj" />
-    <ProjectReference Include="..\Taller.Domain\Taller.Dominio.csproj" />
-    <ProjectReference Include="..\Taller.Infrastructure\Taller.Infraestructura.csproj" />
   </ItemGroup>
 
 </Project>

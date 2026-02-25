@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.22">
       <PrivateAssets>all</PrivateAssets>
@@ -23,7 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Taller.Domain\Taller.Dominio.csproj" />
+    <ProjectReference Include="..\Taller.Aplicacion\Taller.Aplicacion.csproj" />
+    <ProjectReference Include="..\Taller.Compartido\Taller.Compartido.csproj" />
+    <ProjectReference Include="..\Taller.Dominio\Taller.Dominio.csproj" />
   </ItemGroup>
 
 </Project>

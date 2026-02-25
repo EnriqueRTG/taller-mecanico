@@ -11,17 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="FluentValidation" Version="12.1.0" />
-    <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.22">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageReference Include="QuestPDF" Version="2025.7.4" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
@@ -31,7 +26,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Taller.Aplicacion\Taller.Aplicacion.csproj" />
-    <ProjectReference Include="..\Taller.Infrastructure\Taller.Infraestructura.csproj" />
+    <ProjectReference Include="..\Taller.Compartido\Taller.Compartido.csproj" />
+    <ProjectReference Include="..\Taller.Infraestructura\Taller.Infraestructura.csproj" />
   </ItemGroup>
 
   <ItemGroup>

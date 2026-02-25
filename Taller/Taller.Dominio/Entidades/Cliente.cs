@@ -7,22 +7,19 @@ namespace Taller.Dominio.Entidades
     /// </summary>
     public sealed class Cliente
     {
-        public long Id { get; init; }
+        public long Id { get; set; }
 
-        /// <summary>Nombre de pila del cliente.</summary>
+        // Campos obligatorios (NO nullables)
         public string Nombre { get; set; } = null!;
-
-        /// <summary>Apellido del cliente.</summary>
         public string Apellido { get; set; } = null!;
-        public string? Email { get; set; }
-        public string? Telefono { get; set; }
-        public string? DocTipo { get; set; }
-        public string? DocNro { get; set; }
+        public string DocTipo { get; set; } = null!;
+        public string DocNro { get; set; } = null!;
 
-        /// <summary>Dirección postal del cliente (libre).</summary>
+        // Campos opcionales (pueden ser null)
+        public string? Telefono { get; set; }
+        public string? Email { get; set; }
         public string? Direccion { get; set; }
 
-        /// <summary>Baja lógica. True = activo, False = dado de baja.</summary>
         public bool Activo { get; set; } = true;
 
         /// <summary>

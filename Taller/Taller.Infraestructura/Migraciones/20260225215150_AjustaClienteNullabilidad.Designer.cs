@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Taller.Infraestructura.Persistencia;
 
@@ -11,9 +12,11 @@ using Taller.Infraestructura.Persistencia;
 namespace Taller.Infraestructura.Migraciones
 {
     [DbContext(typeof(TallerDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225215150_AjustaClienteNullabilidad")]
+    partial class AjustaClienteNullabilidad
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,10 +48,12 @@ namespace Taller.Infraestructura.Migraciones
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("DocNro")
+                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("DocTipo")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 

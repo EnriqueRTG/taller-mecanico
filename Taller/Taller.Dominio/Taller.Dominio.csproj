@@ -8,4 +8,8 @@
     <AssemblyName>Taller.Dominio</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Taller.Compartido\Taller.Compartido.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -3,17 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36203.30
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Presentacion", "Taller.App\Taller.Presentacion.csproj", "{1EA5F2B1-02F4-4B7E-8D6C-41C1A78DE91A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Presentacion", "Taller.Presentacion\Taller.Presentacion.csproj", "{1EA5F2B1-02F4-4B7E-8D6C-41C1A78DE91A}"
 	ProjectSection(ProjectDependencies) = postProject
-		{01F6802A-F24A-47AE-9513-0895F3B418B0} = {01F6802A-F24A-47AE-9513-0895F3B418B0}
-		{BD62F4EB-2901-4E7D-86A6-1EE30C83BE42} = {BD62F4EB-2901-4E7D-86A6-1EE30C83BE42}
+		
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Dominio", "Taller.Domain\Taller.Dominio.csproj", "{FAC21C46-02FC-451B-AE5A-19D3A93A6C1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Dominio", "Taller.Dominio\Taller.Dominio.csproj", "{FAC21C46-02FC-451B-AE5A-19D3A93A6C1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Infraestructura", "Taller.Infrastructure\Taller.Infraestructura.csproj", "{01F6802A-F24A-47AE-9513-0895F3B418B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Infraestructura", "Taller.Infraestructura\Taller.Infraestructura.csproj", "{01F6802A-F24A-47AE-9513-0895F3B418B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Compartido", "Taller.Shared\Taller.Compartido.csproj", "{25B1A5A3-0AF4-42B6-8449-5F356CF8B8E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Compartido", "Taller.Compartido\Taller.Compartido.csproj", "{25B1A5A3-0AF4-42B6-8449-5F356CF8B8E6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentacion", "Presentacion", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -23,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infraestructura", "Infraest
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Compartido", "Compartido", "{32BFAA7A-5036-4A38-861B-A2D848941091}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Pruebas", "Taller.Tests\Taller.Pruebas.csproj", "{E631B12F-4938-4FEE-B7BB-B9FCE4E7BBF8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Pruebas", "Taller.Pruebas\Taller.Pruebas.csproj", "{E631B12F-4938-4FEE-B7BB-B9FCE4E7BBF8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pruebas", "Pruebas", "{547F16D8-45D8-4E73-B732-8DA19E46FB86}"
 EndProject

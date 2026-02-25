@@ -21,18 +21,22 @@
 //   En PROD conviene aplicarlas vía script/CI y dejar el seeding controlado.
 // -----------------------------------------------------------------------------
 
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Windows.Forms;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Taller.Dominio.Repositorios;
+using Taller.Infraestructura.Persistencia;
+using Taller.Infraestructura.Persistencia.Repositorios;
+using Taller.Aplicacion.Clientes.Servicios;
+using Taller.Presentacion.Formularios;
 using Serilog;
-using Taller.Infrastructure.Persistence;
-using Taller.Infrastructure.Persistence.Seeders;
 
-namespace Taller.App
+namespace Taller.Presentacion
 {
     /// <summary>
     /// Clase estática de arranque. Orquesta la creación del Host, el registro de
@@ -79,15 +83,15 @@ namespace Taller.App
 
                 // 2.2) DbContext: EF Core con SQL Server
                 // El provider (Microsoft.EntityFrameworkCore.SqlServer) está referenciado en Infrastructure.
-                builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(connectionString));
+                builder.Services.AddDbContext<TallerDbContext>(opt => opt.UseSqlServer(connectionString));
 
                 // 2.3) Formularios/UI (inyectables). Agregar aquí otros forms a medida que aparecen.
-                builder.Services.AddTransient<MainForm>();
-                builder.Services.AddTransient<ClientesForm>();
-                builder.Services.AddTransient<ClienteEditForm>();
+                builder.Services.AddTransient<FrmPrincipal>();
+                builder.Services.AddTransient<FrmClientes>();
+                builder.Services.AddTransient<FrmClienteEdicion>();
                 //builder.Services.AddTransient<>();
 
-                // 3) Construcción del Host: congela la configuración y arma el ServiceProvider
+                // 3) Construcción del Host: congela la configuracióTallerDbContextn y arma el ServiceProvider
                 using var host = builder.Build();
 
                 // 4) Alcance (scope) de DI para resolver servicios con lifetime Scoped/Transient
@@ -102,11 +106,11 @@ namespace Taller.App
                 //    - Aplica migraciones pendientes (en DEV)
                 //    - Ejecuta seeders idempotentes (no duplican por Código)
                 // Si se requiere no bloquear, convertir Main a async o usar Task.Run + Wait.
-                var db = sp.GetRequiredService<AppDbContext>();
-                DatabaseSeeder.EnsureSeededAsync(db, startupLogger).GetAwaiter().GetResult();
+                var db = sp.GetRequiredService<TallerDbContext>();
+                Infraestructura.Persistencia.Semillas.DatabaseSeeder.EnsureSeededAsync(db, startupLogger).GetAwaiter().GetResult();
 
                 // 5) Lanzamiento de la UI
-                var mainForm = sp.GetRequiredService<MainForm>();
+                var mainForm = sp.GetRequiredService<FrmPrincipal>();
                 Application.Run(mainForm);
             }
             catch (Exception ex)

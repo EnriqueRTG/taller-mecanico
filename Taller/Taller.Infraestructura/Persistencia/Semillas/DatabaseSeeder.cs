@@ -46,6 +46,8 @@ namespace Taller.Infraestructura.Persistencia.Semillas
                 await ServicioSemillas.SeedAsync(db, logger, ct);
                 await RepuestoSemillas.SeedAsync(db, logger, ct);
                 await ClienteSemillas.SeedAsync(db, logger, ct);
+                await VehiculoSemillas.SeedAsync(db, logger, ct);
+
 
                 logger.LogInformation("✅ Seeding completado exitosamente.");
             }

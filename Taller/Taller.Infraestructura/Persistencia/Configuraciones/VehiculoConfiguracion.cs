@@ -12,24 +12,40 @@ namespace Taller.Infraestructura.Persistencia.Configuraciones
         public void Configure(EntityTypeBuilder<Vehiculo> e)
         {
             e.ToTable("vehiculos");
-            e.HasKey(x => x.Id);
 
-            e.Property(x => x.Patente)
+            e.HasKey(v => v.Id);
+
+            e.Property(v => v.Patente)
              .IsRequired()
-             .HasMaxLength(15);
+             .HasMaxLength(10);
 
-            e.HasIndex(x => x.Patente).IsUnique();      // no permitir patentes duplicadas
+            e.Property(v => v.Marca)
+                .IsRequired()
+                .HasMaxLength(60);
 
-            e.Property(x => x.Marca).HasMaxLength(60);
-            e.Property(x => x.Modelo).HasMaxLength(80);
+            e.Property(v => v.Modelo)
+                .HasMaxLength(60);
 
-            // VIN opcional; si lo usás, solemos limitar longitud
-            e.Property(x => x.Vin).HasMaxLength(30);
+            e.Property(v => v.Color)
+                .HasMaxLength(40);
+
+            e.Property(v => v.Vin)
+                .HasMaxLength(30);
+
+            e.Property(v => v.Observaciones)
+                .HasMaxLength(500);
+
+            e.Property(v => v.Activo)
+                .HasDefaultValue(true);
+
+            // Indice de patente único para evitar duplicados
+            e.HasIndex(v => v.Patente)
+                .IsUnique();
 
             // Relación N:1 con Cliente (sin borrado en cascada)
-            e.HasOne<Cliente>()
-             .WithMany()
-             .HasForeignKey(x => x.ClienteId)
+            e.HasOne(v => v.Cliente)
+             .WithMany(c => c.Vehiculos)
+             .HasForeignKey(v => v.ClienteId)
              .OnDelete(DeleteBehavior.Restrict);
         }
     }

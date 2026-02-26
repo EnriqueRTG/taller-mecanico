@@ -33,6 +33,7 @@ using Taller.Dominio.Repositorios;
 using Taller.Infraestructura.Persistencia;
 using Taller.Infraestructura.Persistencia.Repositorios;
 using Taller.Aplicacion.Clientes.Servicios;
+using Taller.Aplicacion.Vehiculos.Servicios;
 using Taller.Presentacion.Formularios;
 using Serilog;
 
@@ -85,10 +86,19 @@ namespace Taller.Presentacion
                 // El provider (Microsoft.EntityFrameworkCore.SqlServer) está referenciado en Infrastructure.
                 builder.Services.AddDbContext<TallerDbContext>(opt => opt.UseSqlServer(connectionString));
 
-                // 2.3) Formularios/UI (inyectables). Agregar aquí otros forms a medida que aparecen.
+                // 2.3) Repositorios (Infraestructura)
+                builder.Services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
+                builder.Services.AddScoped<IVehiculoRepositorio, VehiculoRepositorio>();
+
+                // 2.4) Servicios de aplicación (Capa Aplicación)
+                builder.Services.AddScoped<IClienteServicio, ClienteServicio>();
+                builder.Services.AddScoped<IVehiculoServicio, VehiculoServicio>();
+
+                // 2.5) Formularios/UI (inyectables)
                 builder.Services.AddTransient<FrmPrincipal>();
                 builder.Services.AddTransient<FrmClientes>();
                 builder.Services.AddTransient<FrmClienteEdicion>();
+                // builder.Services.AddTransient<FrmVehiculos>();  // cuando lo crees
                 //builder.Services.AddTransient<>();
 
                 // 3) Construcción del Host: congela la configuracióTallerDbContextn y arma el ServiceProvider

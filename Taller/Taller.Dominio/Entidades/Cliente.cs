@@ -20,6 +20,9 @@ namespace Taller.Dominio.Entidades
         public string? Email { get; set; }
         public string? Direccion { get; set; }
 
+        // Relacion con Vehículos (un cliente puede tener varios vehículos)
+        public ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
+
         public bool Activo { get; set; } = true;
 
         /// <summary>

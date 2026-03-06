@@ -226,6 +226,7 @@ namespace Taller.Presentacion.Formularios
                     return;
                 }
 
+                // Baja lógica: marcar como inactivo
                 cliente.Activo = false;
                 await _db.SaveChangesAsync();
 

@@ -21,7 +21,8 @@ namespace Taller.Infraestructura.Persistencia.Semillas
                     Telefono = "3794-111111",
                     Direccion = "San Martín 123", 
                     DocTipo = "DNI", 
-                    DocNro = "30123456"
+                    DocNro = "30123456",
+                    Activo = true
                 },
                 new()
                 {
@@ -31,7 +32,8 @@ namespace Taller.Infraestructura.Persistencia.Semillas
                     Telefono = "3794-222222",
                     Direccion = "Belgrano 456",
                     DocTipo = "DNI", 
-                    DocNro = "28999888"
+                    DocNro = "28999888",
+                    Activo = true
                 },
                 new()
                 {
@@ -41,7 +43,8 @@ namespace Taller.Infraestructura.Persistencia.Semillas
                     Telefono = "3794-333333",
                     Direccion = "Rivadavia 789",
                     DocTipo = "DNI", 
-                    DocNro = "27555444"
+                    DocNro = "27555444",
+                    Activo = true
                 },
             };
 
@@ -54,17 +57,18 @@ namespace Taller.Infraestructura.Persistencia.Semillas
                 c.Telefono = c.Telefono?.Trim();
                 c.Direccion = c.Direccion?.Trim();
                 c.DocTipo = c.DocTipo?.Trim();
+                c.DocNro = c.DocNro?.Trim();
             }
 
-            // Evitar duplicados por Nombre+Apellido (ejemplo simple)
+            // Evitar duplicados por DocTipo + DocNro
             var existentes = await db.Clientes
                 .AsNoTracking()
-                .Select(x => new { x.Nombre, x.Apellido })
+                .Select(x => new { x.DocTipo, x.DocNro })
                 .ToListAsync(ct);
 
             var nuevos = seed
                 .Where(s => !existentes.Any(e =>
-                    e.Nombre == s.Nombre && e.Apellido == s.Apellido))
+                    e.DocTipo == s.DocTipo && e.DocNro == s.DocNro))
                 .ToList();
 
             if (nuevos.Count == 0)
@@ -76,7 +80,7 @@ namespace Taller.Infraestructura.Persistencia.Semillas
             await db.Clientes.AddRangeAsync(nuevos, ct);
             await db.SaveChangesAsync(ct);
 
-            logger.LogInformation("ClienteSeeder: agregados {Cantidad} clientes de prueba.", nuevos.Count);
+            logger.LogInformation("ClienteSemillas: agregados {Cantidad} clientes de prueba.", nuevos.Count);
         }
     }
 }

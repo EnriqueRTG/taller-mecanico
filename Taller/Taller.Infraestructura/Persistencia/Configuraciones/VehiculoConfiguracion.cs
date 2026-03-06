@@ -26,6 +26,9 @@ namespace Taller.Infraestructura.Persistencia.Configuraciones
             e.Property(v => v.Modelo)
                 .HasMaxLength(60);
 
+            e.Property(v => v.Anio)
+                .HasColumnType("int");
+
             e.Property(v => v.Color)
                 .HasMaxLength(40);
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,9 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
+using Taller.Dominio.Entidades;
 using Taller.Infraestructura.Persistencia;
 
 namespace Taller.Presentacion.Formularios
@@ -64,24 +65,18 @@ namespace Taller.Presentacion.Formularios
                 btnBuscar.Enabled = btnActualizar.Enabled = false;
 
                 var filtro = txtBuscar.Text?.Trim();
-                var query = _db.Vehiculos
+                IQueryable<Vehiculo> query = _db.Vehiculos
                     .AsNoTracking()
-                    .Include(v => v.Cliente); // para mostrar el nombre del cliente en la grilla
+                    .Include(v => v.Cliente);
 
-                if (!string.IsNullOrWhiteSpace(filtro))
-                {
-                    filtro = filtro.ToUpperInvariant();
-
-                    query = query.Where(v =>
-                        (v.Patente != null && v.Patente.ToUpper().Contains(filtro)) ||
-                        (v.Marca != null && v.Marca.ToUpper().Contains(filtro)) ||
-                        (v.Modelo != null && v.Modelo.ToUpper().Contains(filtro)) ||
-                        ((v.Cliente.Apellido + " " + v.Cliente.Nombre).ToUpper().Contains(filtro))
-                    );
-                }
+                query = query.Where(v =>
+                    (v.Patente != null && v.Patente.ToUpper().Contains(filtro)) ||
+                    (v.Marca != null && v.Marca.ToUpper().Contains(filtro)) ||
+                    (v.Modelo != null && v.Modelo.ToUpper().Contains(filtro)) ||
+                    ((v.Cliente.Apellido + " " + v.Cliente.Nombre).ToUpper().Contains(filtro)));
 
                 // traer solo activos como default
-                // query = query.Where(v => v.Activo);
+                query = query.Where(v => (bool)v.Activo);
 
                 var lista = await query
                     .OrderBy(v => v.Patente)
@@ -91,9 +86,8 @@ namespace Taller.Presentacion.Formularios
                         v.Patente,
                         v.Marca,
                         v.Modelo,
-                        anio = v.Anio,
+                        v.Anio,
                         Cliente = v.Cliente.Apellido + " " + v.Cliente.Nombre,
-                        v.Activo
                     })
                     .ToListAsync();
 
@@ -153,9 +147,9 @@ namespace Taller.Presentacion.Formularios
 
             var resultado = form.ShowDialog(this);
 
-            if (resultado == DialogResult.OK && form.VehiculoResultado.HasValue)
+            if (resultado == DialogResult.OK && form.VehiculoIdResultado.HasValue)
             {
-                await RecargarVehiculosSeleccionandoAsync(form.VehiculoResultado.Value);
+                await RecargarVehiculosSeleccionandoAsync(form.VehiculoIdResultado.Value);
             }
         }
 
@@ -177,9 +171,9 @@ namespace Taller.Presentacion.Formularios
 
             var resultado = form.ShowDialog(this);
 
-            if (resultado == DialogResult.OK && form.VehiculoResultado.HasValue)
+            if (resultado == DialogResult.OK && form.VehiculoIdResultado.HasValue)
             {
-                await RecargarVehiculosSeleccionandoAsync(form.VehiculoResultado.Value);
+                await RecargarVehiculosSeleccionandoAsync(form.VehiculoIdResultado.Value);
             }
         }
 
@@ -199,7 +193,7 @@ namespace Taller.Presentacion.Formularios
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
-            if (confirmar == DialogResult.Yes)
+            if (confirmar != DialogResult.Yes)
                 return;
 
             try
@@ -220,12 +214,30 @@ namespace Taller.Presentacion.Formularios
                 _logger.LogInformation("Vehículo dado de baja lógicamente. Id={Id}, Patente={Patente}",
                     vehiculo.Id, vehiculo.Patente);
 
-                await CargarVehiculosAsync(null);
+                await CargarVehiculosAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al eliminar vehículo Id={Id}", id);
                 MessageBox.Show("Ocurrió un error al eliminar el vehículo. Por favor, intente nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void btnPaginaAnterior_Click(object sender, EventArgs e)
+        {
+            if (_paginaActual > 1)
+            {
+                _paginaActual--;
+                await CargarVehiculosAsync();
+            }
+        }
+
+        private async void btnPaginaSiguiente_Click(object sender, EventArgs e)
+        {
+            if (_paginaActual < _totalPaginas)
+            {
+                _paginaActual++;
+                await CargarVehiculosAsync();
             }
         }
 

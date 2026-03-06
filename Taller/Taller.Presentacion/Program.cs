@@ -98,7 +98,8 @@ namespace Taller.Presentacion
                 builder.Services.AddTransient<FrmPrincipal>();
                 builder.Services.AddTransient<FrmClientes>();
                 builder.Services.AddTransient<FrmClienteEdicion>();
-                // builder.Services.AddTransient<FrmVehiculos>();  // cuando lo crees
+                builder.Services.AddTransient<FrmVehiculos>();
+                builder.Services.AddTransient<FrmVehiculoEdicion>();
                 //builder.Services.AddTransient<>();
 
                 // 3) Construcción del Host: congela la configuracióTallerDbContextn y arma el ServiceProvider

@@ -119,6 +119,7 @@ namespace Taller.Presentacion.Formularios
             _logger.LogInformation("Navegación: Vehículos.");
             lblTitulo.Text = "Gestión de vehículos";
             // TODO: abrir pantalla de Vehículos.
+            MostrarEnPanel<FrmVehiculos>();   // <-- ahora realm
         }
 
         private void btnOrdenes_Click(object sender, EventArgs e)

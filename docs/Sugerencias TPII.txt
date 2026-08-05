@@ -1,0 +1,46 @@
+Entre el diagnostico, presupuesto y la orden de trabajo puede ocurrir que el cliente acepte ciertos trabajos que el diagnostico sugiere y el presupuesto se ajusta acorde a ello  y por ende, tambien la orden de trabajo. Es decir, tras el diagnostico puede ocurrir que se acepte un presupuesto por el total de los trabajos a realizar y se eleva una orden de trabajo que refleja dicha decision. Pero tambien puede ocurrir que el cliente rechase el presupuesto generado en base al diagnostico por lo cual no existe orden de trabajo. Pero tambien puede ocurri que el cliente rechaze parcialmente, de ser posible, parte del presupuesto basado en el diagnostico porque opta por aceptar parte del trabajo a realizar (lo mas economico o lo que se crea mas urgente) y la orden de trabajo se realiza en base a dicho presupuesto modificado.
+
+
+Tambien seria interesante que mas alla de que el vehiculo entrara por un trabajo se hiciese o no, o saliera con algun trabajo... exista la posibilidad de que, en alguna instancia adecuada o de forma adecuada, se registre a modo de observacion aquellos trabajos pendientes a realizar o que deberian hacerse de forma preventiva, aunque el motivo de la visita al taller fuera por un motivo distinto. Es decir, aunque se ejecute o no algun trabajo, el diagnostico puede identificar los problemas localizado segun criterio del cliente, pero deberia ser responsabilidad del personal sugerir en observaciones, cualquier anomalia o detalle que sea de importacia para prevenir al cliente de posibles problemas escondidos o probables problemas futuros que pudiesen aparecer.
+
+LEER DOCUMENTO DRIVE "CASOS DE USO TPII" -> antes de seguir codeando el proyecto deberias modelar bien los casos de uso, sirve para armar la documentacion y para enfocar bien los esfuerzos a la hora de implementar funciones y codigo.
+
+
+* Confeccionar Diagrama de Clases, DER, Diccionario de datos y Diagrama de Casos de Uso.
+* Confeccionar ERS.
+* Realizar la auditoria de lo implementado en Vehiculos y Clientes para corroborar que su estructura o implementacion coincidan con el Diagrama de Clases, DER y diccionario de datos a confeccionar.
+* Marca y Modelo deberian ser otras entidades relacionables a Vehiculo y no ser un atributo guardables como strings.
+* Hay que refactorizar la estructura, puede mejorar la organizacion de las carpetas y archivos, ademas de las dependencias entre capas. Pero se revisara luego de terminar con la ERS.
+
+> HACER PRIMERO EL DIAGRAMA UML DE LOS CASOS DE USO DEFINIDOS
+> DIAGRAMA DE CLASES DEFINIDO (DE ANALISIS/DOMINIO)
+> DIAGRAMA DE CLASES MAS TECNICA (DISENIO/IMPLEMENTACION)
+> DER + DICCIONARIO DE DATOS
+> ERS 
+> LUEGO AUDITAR ARQUITECTURA/CODIGO CONTRA LOS DOCUMENTOS ANTERIORES
+> REFACTORIZAR
+> CONTINUAR IMPLEMENTACION
+> MANUALES Y CIERRE
+
+- Reescribi en el Dominio/Entidades/Vehiculos (public bool? Activo {get; set;}) -> (public bool Activo {get; set;})
+- Reescribi en el Aplicacion/Vehiculos/Servicios/VehiculoServicio (Observaciones = string.IsNullOrWhiteSpace(dto.Color? null: dto.Color.Trim()) -> (Observaciones = string.IsNullOrWhiteSpace(dto.Observaciones) ? null : dto.Observaciones.Trim())
+
+
+05/08
+- SE DETERMINA QUE LOS USUARIOS SOLO PUEDEN TENER 1 (UN) ROL -> repercute en los CU donde de forma ambigua se dio a entender que los usuarios podian tener mas de un rol asignado
+- AL TENER TANTOS CU A LA HORA DE REPRENSENTARLOS EN EL DIAGRAMA UML DE CASOS DE USO TENER EN CUENTA LA UTILIACION DE UNA ESTRUCTURA JERARQUICA POR MEDIO DE <<include>> <<extend>> Y NO LAS 54 FUNCIONALIDADES COMO CASOS INDEPENDIENTES
+- EL CU28 Y CU30 NECESITAN AJUSTE POR UN SOLAPAMIENTO DE RESPONSABILIDADES, DETERMINAR DETERMINAR QUE CU HACE QUE Y SEPARAR PARA RESOLVER ESTE INCONVENIENTE.
+- SE FORMALIZA LOS ESTADOS DE ORDEN EN: Borrador → modificable. Pendiente de aprobación → quizá modificable antes de ser comunicado, o no. Aprobado → inmutable. Rechazado → inmutable. Vencido → inmutable.
+- LOS CU21 Y CU22 SE UNIFICAN CONCEPTUALMENTE, NO SE REENUMERAN O SE VUELVE A REDACTAR COMO UNO SOLO, PERO EN SU REPRESENTACION UML SE TRATAN COMO ESPECIALIZACIONES DE -> Registrar Respuesta al Presupuesto--> (Aprobar) : (Rechazar)
+- CU24 SE AJUSTO LA REGLA DE NEGOCIO. LA ELEGIDA: Ingreso ↓ Diagnóstico ↓ Presupuesto ↓ Aprobación ↓ OrdenTrabajo. Por tanto:Toda Orden de Trabajo se genera a partir de un presupuesto aprobado.
+- EN EL CU 42 SE ESPECIFICO EN LA PRECONDICION QUE PUEDE DEBERSE A UNA ORDEN DE TRABAJO FINALIZADA O POR UN PRESUPUESTO RECHAZADO MAS UN INGRESO SIN REPARACION
+- PARA CU12 HAY QUE DEFINIR EL CICLO DE VIDA O ESTADOS DEL INGRESO. SUGERENCIA: registrado, en_diagnostico, diagnosticado, presupuestado, aprobado, en_reparacion, finalizado, rechazado, sin_reparacion, entregado.
+- CU09 PROBABLEMENTE GENERE UNA ENTIDAD: CLIENTEVEHICULO: id, clienteId, vehiculoId, fechaDesde, fechaHasta, esActual. ASI INGRESO VEHICULO CONSERVA REFERENCIA A LA VINCULACION DE CUANDO OCURRIO CON : INGRESOVEHICULO: clienteVehiculoId.
+- CU23 Y CU 26 CAMBIOS: no deberían mostrar “responsable actual al momento de la consulta” como dato histórico principal. Deberían mostrar:responsable asociado al ingreso/operación al momento en que fue registrada, pudiendo adicionalmente mostrar el responsable actual del vehículo.
+- CU10 MUESTRA LOS TRABAJOS DE LOS VEHUICULOS RELACIONADOS HISTORICAMENTE CON EL CLIENTE. REVISAR Y VERIFICAR QUE EFECTIVAMENTE SOLO SE MUESTREN TRABAJOS REALIZADOS DURANTE EL PERIODO EN EL QUE DICHA VINCULACION ENTRE CLIENTE Y VEHICULO EXISTIO Y NO SOBRE OTRAS RELACIONES FUTURAS SOBRE OTROS CLIENTES. ESTE ITEM VA DE LA MANO CON LOS CU23 Y CU26 EN EL CORRECTO MANEJO DE "RESPONSABLE ACTUAL" Y "RESPONSABLE ASOCIADO AL INGRESO".  
+- FALTA REACTIVACION EN TODOS LOS CASOS DE USO EXISTE UNA BAJA LOGICA, ES UNA MANERA CONTROLADA DE RECUPERAR: usuario, rol, cliente, vehiculo, servicio y repuesto.
+- PARA DEFINIR LA UNICIDAD EXACTA DE MIS CLIENTES VOY A UTILIZAR LA COMBINACION DE TIPO Y NUMERO DE DOCUMENTO, DEBO REVISAR LA REFERENCIA DE ESTO EN MIS CU IMPLICADOS
+- CU25 IMPLICA UNA RELACION MUCHOS A MUCHOS: OrdenTrabajo N --- N Usuario. SE NECESITA ALGO COMO: OrdenAsignacion: OrdenTrabajoId, UsuarioId, FechaAsignacion, FechaDesasignacion, AsignadoPorUsuarioId, Activo. ESTO HAY QUE REFLEJARLO EN EL DIAGRAMA DE CLASES O DER.
+- CU27 HABLA DE TRANSICIONES PERMITIDAS, PERO NO ESTAN DEFINIDAS. UNA PROPUESTA SERIA: PENDIENTE_ASIGNACION ↓ ASIGNADA ↓ EN_PROCESO  ↙   ↘ EN_ESPERA 1 || CANCELADA 2  ↓ EN_PROCESO 1 || ↓ FINALIZADA 1 || ↓ ENTREGADA 1 ||
+Y excepcionalmente: FINALIZADA ↓ REABIERTA ↓ EN_PROCESO. Luego CU31, CU32 y CU54 son transiciones especiales con validaciones adicionales.
+- ME QUEDE EN EL ITEM 14 QUE SUGERIA CHATGPT PARA LA REVISION DE LOS CU. 

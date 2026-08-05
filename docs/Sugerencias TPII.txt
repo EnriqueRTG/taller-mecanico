@@ -44,3 +44,7 @@ LEER DOCUMENTO DRIVE "CASOS DE USO TPII" -> antes de seguir codeando el proyecto
 - CU27 HABLA DE TRANSICIONES PERMITIDAS, PERO NO ESTAN DEFINIDAS. UNA PROPUESTA SERIA: PENDIENTE_ASIGNACION ↓ ASIGNADA ↓ EN_PROCESO  ↙   ↘ EN_ESPERA 1 || CANCELADA 2  ↓ EN_PROCESO 1 || ↓ FINALIZADA 1 || ↓ ENTREGADA 1 ||
 Y excepcionalmente: FINALIZADA ↓ REABIERTA ↓ EN_PROCESO. Luego CU31, CU32 y CU54 son transiciones especiales con validaciones adicionales.
 - ME QUEDE EN EL ITEM 14 QUE SUGERIA CHATGPT PARA LA REVISION DE LOS CU. 
+
+ERS: https://docs.google.com/document/d/1-2ybYtoXRuurufPtFUcyBUjSLKIuxGC1loKB9thd9Tk/edit?tab=t.0
+CU: https://docs.google.com/document/d/1pCrJM7t5prI4_LgffhG-Ratp7NRaGjmFhJky527RmNc/edit?tab=t.0
+Notas: https://docs.google.com/document/d/1iCB7sWoxVbMwVM8BKvRYPVSJoWuhz7nbnOR82jq1EV8/edit?tab=t.0

@@ -1,28 +1,41 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
-namespace Taller.Infraestructura.Persistencia
+namespace Taller.Infraestructura.Persistencia;
+
+public sealed class TallerDbContextFactory
+    : IDesignTimeDbContextFactory<TallerDbContext>
 {
-    /// <summary>
-    /// Factory de diseño para EF Core (CLI/PMC). Permite crear <see cref="TallerDbContext"/>
-    /// sin levantar la UI (necesaria para Add-Migration / Update-Database).
-    /// </summary>
-    public class TallerDbContextFactory : IDesignTimeDbContextFactory<TallerDbContext>
+    public TallerDbContext CreateDbContext(string[] args)
     {
-        /// <summary>
-        /// Crea el contexto con una cadena de conexión de diseño.
-        /// Prioriza variable de entorno "SGTM_CONN", luego usa un valor por defecto.
-        /// </summary>
-        public TallerDbContext CreateDbContext(string[] args)
-        {
-            // 1) Tomar cadena desde variable de entorno si está definida (útil en CI)
-            var conn = System.Environment.GetEnvironmentVariable("SGTM_CONN")
-                       ?? "Server=.\\SQLEXPRESS;Database=SGTM_DB;Trusted_Connection=True;TrustServerCertificate=True";
+        var presentationPath = Path.GetFullPath(
+            Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "Taller.Presentacion"));
 
-            var optionsBuilder = new DbContextOptionsBuilder<TallerDbContext>();
-            optionsBuilder.UseSqlServer(conn);
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(presentationPath)
+            .AddJsonFile(
+                "appsettings.json",
+                optional: false)
+            .AddJsonFile(
+                "appsettings.Local.json",
+                optional: true)
+            .AddEnvironmentVariables()
+            .Build();
 
-            return new TallerDbContext(optionsBuilder.Options);
-        }
+        var connectionString =
+            Environment.GetEnvironmentVariable("SGTM_CONN")
+            ?? configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException(
+                "No se encontró una cadena de conexión para SGTM.");
+
+        var optionsBuilder =
+            new DbContextOptionsBuilder<TallerDbContext>();
+
+        optionsBuilder.UseSqlServer(connectionString);
+
+        return new TallerDbContext(optionsBuilder.Options);
     }
 }

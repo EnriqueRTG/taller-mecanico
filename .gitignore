@@ -13,7 +13,8 @@
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-Logs/
+[Ll]ogs/
+*.log
 *.exe
 *.dll
 *.pdb
@@ -27,11 +28,10 @@ packages/
 *.nuspec
 
 # =======================================
-# BASE DE DATOS Y MIGRACIONES TEMPORALES
+# BASES DE DATOS LOCALES
 # =======================================
 *.mdf
 *.ldf
-*Migrations*/__EFMigrationsHistory*
 
 # =======================================
 # IDEs ADICIONALES

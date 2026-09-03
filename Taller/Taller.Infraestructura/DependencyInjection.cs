@@ -10,8 +10,18 @@ using Taller.Infraestructura.Seguridad;
 
 namespace Taller.Infraestructura;
 
+/// <summary>
+/// Clase de extensión para registrar los servicios de la capa de infraestructura en el contenedor de dependencias.
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Registra los servicios de la capa de infraestructura en el contenedor de dependencias.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <returns>El contenedor de dependencias con los servicios registrados.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public static IServiceCollection AddInfraestructura(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -39,6 +49,9 @@ public static class DependencyInjection
         // Registra el servicio encargado de generar
         // y verificar hashes de contraseñas.
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+        // Registra el servicio concreto utilizado para las operaciones de persistencia de clientes.
+        services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
 
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.

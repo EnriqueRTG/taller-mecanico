@@ -44,6 +44,7 @@
             borrar = new Button();
             button1 = new Button();
             tabla_usuario = new DataGridView();
+            eliminar = new DataGridViewButtonColumn();
             ((System.ComponentModel.ISupportInitialize)tabla_usuario).BeginInit();
             SuspendLayout();
             // 
@@ -172,6 +173,7 @@
             borrar.TabIndex = 12;
             borrar.Text = "Borrar";
             borrar.UseVisualStyleBackColor = false;
+            borrar.Click += borrar_Click;
             // 
             // button1
             // 
@@ -186,11 +188,20 @@
             // tabla_usuario
             // 
             tabla_usuario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            tabla_usuario.Columns.AddRange(new DataGridViewColumn[] { eliminar });
             tabla_usuario.Location = new Point(185, 443);
             tabla_usuario.Name = "tabla_usuario";
             tabla_usuario.RowHeadersWidth = 51;
             tabla_usuario.Size = new Size(1000, 279);
             tabla_usuario.TabIndex = 14;
+            // 
+            // eliminar
+            // 
+            eliminar.HeaderText = "Eliminar";
+            eliminar.MinimumWidth = 6;
+            eliminar.Name = "eliminar";
+            eliminar.Text = "Eliminar";
+            eliminar.Width = 125;
             // 
             // usuario_crud
             // 
@@ -216,6 +227,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "usuario_crud";
             Text = "CRUD Usuario";
+            Click += usuario_crud_Click;
             ((System.ComponentModel.ISupportInitialize)tabla_usuario).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -238,5 +250,6 @@
         private Button borrar;
         private Button button1;
         private DataGridView tabla_usuario;
+        private DataGridViewButtonColumn eliminar;
     }
 }

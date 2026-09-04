@@ -11,7 +11,7 @@ namespace Taller.Presentacion.Formularios.Administrador
         public usuario_crud(DataTable tablaUsuarios)
         {
             InitializeComponent();
-            this.usersTable = tablaUsuarios;            
+            this.usersTable = tablaUsuarios;
         }
         private void InicializarTabla()
         {
@@ -22,7 +22,7 @@ namespace Taller.Presentacion.Formularios.Administrador
             usersTable.Columns.Add("Rol");
 
             tabla_usuario.DataSource = usersTable;
-        }       
+        }
 
         private void crudUusario_Click(object sender, EventArgs e)
         {
@@ -102,6 +102,16 @@ namespace Taller.Presentacion.Formularios.Administrador
             text_usuario.Clear();
             text_contraseña.Clear();
             combo_rol.SelectedIndex = -1;
+        }
+
+        private void usuario_crud_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void borrar_Click(object sender, EventArgs e)
+        {
+            ClearForm();
         }
     }
 }

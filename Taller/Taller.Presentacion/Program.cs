@@ -7,6 +7,7 @@ using Taller.Infraestructura.Persistencia.Inicializacion;
 
 // Luego mover para ID en Presentacion
 using Taller.Presentacion.Formularios.Autenticacion;
+using Taller.Presentacion.Formularios.Vehiculos;
 
 namespace Taller.Presentacion;
 
@@ -38,6 +39,8 @@ internal static class Program
 
         // Luego mover para ID en Presentacion
         builder.Services.AddScoped<Login>();
+        
+        builder.Services.AddScoped<FrmAltaVehiculo>();
 
         using var host = builder.Build();
 
@@ -52,6 +55,8 @@ internal static class Program
         var login = scope.ServiceProvider
         .GetRequiredService<Login>();
 
-        Application.Run(login);
+        var altaVehiculo = scope.ServiceProvider.GetRequiredService<FrmAltaVehiculo>();
+
+        Application.Run(altaVehiculo);
     }
 }

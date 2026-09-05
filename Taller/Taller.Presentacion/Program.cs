@@ -46,6 +46,7 @@ internal static class Program
 
         var inicializador = scope.ServiceProvider.GetRequiredService<InicializadorDatos>();
 
+        // 
         await inicializador.InicializarAsync();
 
         var login = scope.ServiceProvider

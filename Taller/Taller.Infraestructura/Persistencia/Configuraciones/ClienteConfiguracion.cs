@@ -17,51 +17,51 @@ public sealed class ClienteConfiguracion : IEntityTypeConfiguration<Cliente>
         // Clave primaria
         builder.HasKey(c => c.IdCliente);
 
-        // Configuración de la propiedad IdCliente para que se genere automáticamente al agregar un nuevo cliente
+        // Configuración de la propiedad IdCliente autoincremental
         builder.Property(c => c.IdCliente)
             .ValueGeneratedOnAdd();
 
-        // Configuración de la propiedad Documento
+        // Numero de documento del cliente
         builder.Property(c => c.Documento)
             .IsRequired()
             .HasMaxLength(20);
-        
-        // Configuración de la propiedad TipoDocumento
+
+        // Tipo de documento del cliente
         builder.Property(c => c.TipoDocumento)
             .IsRequired()
             .HasMaxLength(20);
 
-        // Configuración de la propiedad Nombre
+        // Nombre del cliente
         builder.Property(c => c.Nombre)
             .IsRequired()
             .HasMaxLength(80);
 
-        // Configuración de la propiedad Apellido
+        // Apellido del cliente
         builder.Property(c => c.Apellido)
             .IsRequired()
             .HasMaxLength(80);
 
-        // Configuración de la propiedad Telefono
+        // Teléfono del cliente
         builder.Property(c => c.Telefono)
             .HasMaxLength(30);
 
-        // Configuración de la propiedad Email
+        // Email del cliente
         builder.Property(c => c.Email)
             .HasMaxLength(120);
 
-        // Configuración de la propiedad Direccion
+        // Dirección del cliente
         builder.Property(c => c.Direccion)
             .HasMaxLength(200);
 
-        // Configuración de la propiedad Activo
+        // Baja lógica del cliente
         builder.Property(c => c.Activo)
             .IsRequired();
 
-        // Configuración de la propiedad FechaAlta
+        // Fecha de alta del cliente
         builder.Property(c => c.FechaAlta)
             .IsRequired();
 
-        // Configuración de la restricción de unicidad para Documento y TipoDocumento
+        // No permitir duplicados en la combinación de TipoDocumento y Documento
         builder.HasIndex(c => new
         {
             c.TipoDocumento,

@@ -18,6 +18,8 @@ public static class DependencyInjection
         services.AddScoped<UsuarioServicio>();
         services.AddScoped<AutenticacionServicio>();
         services.AddScoped<ClienteServicio>();
+        services.AddScoped<VehiculoServicio>();
+        services.AddScoped<AtencionServicio>();
 
         return services;
     }

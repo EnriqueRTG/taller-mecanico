@@ -1,6 +1,5 @@
 ﻿namespace Taller.Dominio.Entidades;
 
-
 /// <summary>
 /// Representa un cliente en el sistema.
 /// </summary>
@@ -16,4 +15,9 @@ public sealed class Cliente
     public string? Direccion { get; set; }
     public bool Activo { get; set; } = true;
     public DateTime FechaAlta { get; set; } = DateTime.Now;
+
+    /// <summary>
+    /// Representa la coleccion de atenciones asociadas a este cliente.
+    /// </summary>
+    public ICollection<Atencion> Atenciones { get; set; } = new List<Atencion>();
 }

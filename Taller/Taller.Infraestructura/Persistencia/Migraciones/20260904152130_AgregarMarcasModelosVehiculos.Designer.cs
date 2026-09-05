@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Taller.Infraestructura.Persistencia;
 
@@ -11,9 +12,11 @@ using Taller.Infraestructura.Persistencia;
 namespace Taller.Infraestructura.Persistencia.Migraciones
 {
     [DbContext(typeof(TallerDbContext))]
-    partial class TallerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260904152130_AgregarMarcasModelosVehiculos")]
+    partial class AgregarMarcasModelosVehiculos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,50 +24,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Taller.Dominio.Entidades.Atencion", b =>
-                {
-                    b.Property<int>("IdAtencion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAtencion"));
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<DateTime>("FechaApertura")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaCierre")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdCliente")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdUsuarioRecepcion")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdVehiculo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MotivoConsulta")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("IdAtencion");
-
-                    b.HasIndex("IdCliente");
-
-                    b.HasIndex("IdUsuarioRecepcion");
-
-                    b.HasIndex("IdVehiculo");
-
-                    b.ToTable("Atenciones", (string)null);
-                });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Cliente", b =>
                 {
@@ -238,9 +197,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("FechaAlta")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -309,33 +265,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.ToTable("Vehiculos", (string)null);
                 });
 
-            modelBuilder.Entity("Taller.Dominio.Entidades.Atencion", b =>
-                {
-                    b.HasOne("Taller.Dominio.Entidades.Cliente", "Cliente")
-                        .WithMany("Atenciones")
-                        .HasForeignKey("IdCliente")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioRecepcion")
-                        .WithMany("AtencionesRecepcionadas")
-                        .HasForeignKey("IdUsuarioRecepcion")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Taller.Dominio.Entidades.Vehiculo", "Vehiculo")
-                        .WithMany("Atenciones")
-                        .HasForeignKey("IdVehiculo")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Cliente");
-
-                    b.Navigation("UsuarioRecepcion");
-
-                    b.Navigation("Vehiculo");
-                });
-
             modelBuilder.Entity("Taller.Dominio.Entidades.Modelo", b =>
                 {
                     b.HasOne("Taller.Dominio.Entidades.Marca", "Marca")
@@ -369,11 +298,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Modelo");
                 });
 
-            modelBuilder.Entity("Taller.Dominio.Entidades.Cliente", b =>
-                {
-                    b.Navigation("Atenciones");
-                });
-
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>
                 {
                     b.Navigation("Modelos");
@@ -387,16 +311,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
             modelBuilder.Entity("Taller.Dominio.Entidades.Rol", b =>
                 {
                     b.Navigation("Usuarios");
-                });
-
-            modelBuilder.Entity("Taller.Dominio.Entidades.Usuario", b =>
-                {
-                    b.Navigation("AtencionesRecepcionadas");
-                });
-
-            modelBuilder.Entity("Taller.Dominio.Entidades.Vehiculo", b =>
-                {
-                    b.Navigation("Atenciones");
                 });
 #pragma warning restore 612, 618
         }

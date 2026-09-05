@@ -42,7 +42,7 @@
             combo_rol = new ComboBox();
             guardar = new Button();
             borrar = new Button();
-            button1 = new Button();
+            modificar = new Button();
             tabla_usuario = new DataGridView();
             eliminar = new DataGridViewButtonColumn();
             ((System.ComponentModel.ISupportInitialize)tabla_usuario).BeginInit();
@@ -110,6 +110,7 @@
             text_nombre.Name = "text_nombre";
             text_nombre.Size = new Size(382, 27);
             text_nombre.TabIndex = 5;
+            text_nombre.KeyPress += text_nombre_KeyPress;
             // 
             // text_apellido
             // 
@@ -117,6 +118,7 @@
             text_apellido.Name = "text_apellido";
             text_apellido.Size = new Size(382, 27);
             text_apellido.TabIndex = 6;
+            text_apellido.KeyPress += text_apellido_KeyPress;
             // 
             // text_usuario
             // 
@@ -175,15 +177,16 @@
             borrar.UseVisualStyleBackColor = false;
             borrar.Click += borrar_Click;
             // 
-            // button1
+            // modificar
             // 
-            button1.BackColor = Color.SteelBlue;
-            button1.Location = new Point(1036, 389);
-            button1.Name = "button1";
-            button1.Size = new Size(99, 41);
-            button1.TabIndex = 13;
-            button1.Text = "Modificar";
-            button1.UseVisualStyleBackColor = false;
+            modificar.BackColor = Color.SteelBlue;
+            modificar.Location = new Point(1036, 389);
+            modificar.Name = "modificar";
+            modificar.Size = new Size(99, 41);
+            modificar.TabIndex = 13;
+            modificar.Text = "Modificar";
+            modificar.UseVisualStyleBackColor = false;
+            modificar.Click += modificar_Click;
             // 
             // tabla_usuario
             // 
@@ -194,6 +197,7 @@
             tabla_usuario.RowHeadersWidth = 51;
             tabla_usuario.Size = new Size(1000, 279);
             tabla_usuario.TabIndex = 14;
+            tabla_usuario.CellContentClick += tabla_usuario_CellContentClick;
             // 
             // eliminar
             // 
@@ -210,7 +214,7 @@
             BackColor = Color.Beige;
             ClientSize = new Size(1336, 744);
             Controls.Add(tabla_usuario);
-            Controls.Add(button1);
+            Controls.Add(modificar);
             Controls.Add(borrar);
             Controls.Add(guardar);
             Controls.Add(combo_rol);
@@ -248,7 +252,7 @@
         private ComboBox combo_rol;
         private Button guardar;
         private Button borrar;
-        private Button button1;
+        private Button modificar;
         private DataGridView tabla_usuario;
         private DataGridViewButtonColumn eliminar;
     }

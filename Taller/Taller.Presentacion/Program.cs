@@ -7,6 +7,7 @@ using Taller.Infraestructura.Persistencia.Inicializacion;
 
 // Luego mover para ID en Presentacion
 using Taller.Presentacion.Formularios.Autenticacion;
+using Taller.Presentacion.Formularios.Clientes;
 using Taller.Presentacion.Formularios.Vehiculos;
 
 namespace Taller.Presentacion;
@@ -42,6 +43,8 @@ internal static class Program
         
         builder.Services.AddScoped<FrmAltaVehiculo>();
 
+        builder.Services.AddTransient<FrmAltaCliente>();
+
         using var host = builder.Build();
 
         // Crea un alcance de servicios para ejecutar la inicializacion de datos al comenzar la apliacion
@@ -52,11 +55,12 @@ internal static class Program
         // 
         await inicializador.InicializarAsync();
 
-        var login = scope.ServiceProvider
-        .GetRequiredService<Login>();
+        var login = scope.ServiceProvider.GetRequiredService<Login>();
 
         var altaVehiculo = scope.ServiceProvider.GetRequiredService<FrmAltaVehiculo>();
 
-        Application.Run(altaVehiculo);
+        var altaCliente = scope.ServiceProvider.GetRequiredService<FrmAltaCliente>();
+
+        Application.Run(altaCliente);
     }
 }

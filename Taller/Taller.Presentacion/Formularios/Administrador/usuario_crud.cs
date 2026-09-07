@@ -115,7 +115,7 @@ namespace Taller.Presentacion.Formularios.Administrador
 
             MessageBox.Show("Usuario guardado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             ClearForm();
-
+            /*
             using (SqlConnection conexion = TallerDbContext.ObtenerConexion())
             {
                 try
@@ -147,7 +147,7 @@ namespace Taller.Presentacion.Formularios.Administrador
                     MessageBox.Show("Error al insertar el usuario: " + ex.Message);
                     return;
                 }
-            }
+            }*/
         }
 
         private void ClearForm()

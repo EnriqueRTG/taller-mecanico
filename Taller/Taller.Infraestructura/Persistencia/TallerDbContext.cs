@@ -14,12 +14,6 @@ public sealed class TallerDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(TallerDbContext).Assembly);
-    }
-    public static Microsoft.Data.SqlClient.SqlConnection ObtenerConexion()
-    {
-        var factory = new TallerDbContextFactory();
-        var context = factory.CreateDbContext(System.Array.Empty<string>());
-        return (Microsoft.Data.SqlClient.SqlConnection)context.Database.GetDbConnection();
-    }
+            typeof(TallerDbContext).Assembly);    }
+   
 }

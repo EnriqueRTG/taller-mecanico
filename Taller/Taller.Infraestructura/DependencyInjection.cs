@@ -65,6 +65,10 @@ public static class DependencyInjection
         // Registrar el servicio concreto utilizado para las operaciones de persistencia de atenciones.
         services.AddScoped<IAtencionRepositorio, AtencionRepositorio>();
 
+        services.AddScoped<IRolRepositorio, RolRepositorio>();
+
+
+
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.
         services.AddScoped<InicializadorDatos>();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Servicios;
 
 namespace Taller.Aplicacion;
@@ -15,6 +16,8 @@ public static class DependencyInjection
     /// <returns>El contenedor de dependencias con los servicios registrados.</returns>
     public static IServiceCollection AddAplicacion(this IServiceCollection services)
     {
+        services.AddSingleton<SesionUsuario>();
+        services.AddScoped<IRolRepositorio, RolRepositorio>();
         services.AddScoped<UsuarioServicio>();
         services.AddScoped<AutenticacionServicio>();
         services.AddScoped<ClienteServicio>();

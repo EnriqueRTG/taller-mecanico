@@ -1,5 +1,6 @@
 ﻿using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Servicios;
+using Taller.Dominio.Entidades;
 
 namespace Taller.Presentacion.Formularios.Vehiculos;
 
@@ -8,6 +9,8 @@ public partial class FrmAltaVehiculo : Form
     private readonly VehiculoServicio _vehiculoServicio;
     private readonly IMarcaRepositorio _marcaRepositorio;
     private readonly IModeloRepositorio _modeloRepositorio;
+
+    public Vehiculo? VehiculoCreado { get; private set; }
 
     public FrmAltaVehiculo(
         VehiculoServicio vehiculoServicio,
@@ -102,9 +105,7 @@ public partial class FrmAltaVehiculo : Form
         }
     }
 
-    private async void btnGuardar_Click(
-        object sender,
-        EventArgs e)
+    private async void btnGuardar_Click(object sender, EventArgs e)
     {
         try
         {
@@ -132,14 +133,14 @@ public partial class FrmAltaVehiculo : Form
                 return;
             }
 
-            var vehiculo = await _vehiculoServicio.RegistrarAsync(
+            VehiculoCreado = await _vehiculoServicio.RegistrarAsync(
                 txtDominio.Text,
                 (int)nudAnio.Value,
                 txtColor.Text,
                 idModelo);
 
             MessageBox.Show(
-                $"Vehículo {vehiculo.Dominio} registrado correctamente.",
+                $"Vehículo {VehiculoCreado.Dominio} registrado correctamente.",
                 "Alta de vehículo",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);

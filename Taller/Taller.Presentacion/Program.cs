@@ -4,10 +4,13 @@ using Microsoft.Extensions.Hosting;
 using Taller.Aplicacion;
 using Taller.Infraestructura;
 using Taller.Infraestructura.Persistencia.Inicializacion;
+using Taller.Presentacion.Formularios.Atenciones;
+
 
 // Luego mover para ID en Presentacion
 using Taller.Presentacion.Formularios.Autenticacion;
 using Taller.Presentacion.Formularios.Clientes;
+using Taller.Presentacion.Formularios.Usuarios;
 using Taller.Presentacion.Formularios.Vehiculos;
 
 namespace Taller.Presentacion;
@@ -45,6 +48,10 @@ internal static class Program
 
         builder.Services.AddTransient<FrmAltaCliente>();
 
+        builder.Services.AddTransient<FrmNuevaAtencion>();
+
+        builder.Services.AddTransient<FrmAltaUsuario>();
+
         using var host = builder.Build();
 
         // Crea un alcance de servicios para ejecutar la inicializacion de datos al comenzar la apliacion
@@ -61,6 +68,20 @@ internal static class Program
 
         var altaCliente = scope.ServiceProvider.GetRequiredService<FrmAltaCliente>();
 
-        Application.Run(altaCliente);
+
+
+        // a modo de prueba
+
+        if (login.ShowDialog() != DialogResult.OK)
+        {
+            return;
+        }
+
+        var altaUsuario = scope.ServiceProvider.GetRequiredService<FrmAltaUsuario>();
+
+        var nuevaAtencion = scope.ServiceProvider.GetRequiredService<FrmNuevaAtencion>();
+
+
+        Application.Run(altaUsuario);
     }
 }

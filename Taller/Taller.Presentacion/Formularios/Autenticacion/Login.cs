@@ -9,33 +9,32 @@ namespace Taller.Presentacion.Formularios.Autenticacion;
 public partial class Login : Form
 {
     private readonly AutenticacionServicio _autenticacionServicio;
+    private readonly SesionUsuario _sesionUsuario;
 
     /// <summary>
     /// Inicializa el formulario utilizando el servicio
     /// de autenticación de la aplicación.
     /// </summary>
-    public Login(AutenticacionServicio autenticacionServicio)
+    public Login(
+     AutenticacionServicio autenticacionServicio,
+     SesionUsuario sesionUsuario)
     {
         InitializeComponent();
 
         _autenticacionServicio = autenticacionServicio;
+        _sesionUsuario = sesionUsuario;
     }
 
     /// <summary>
     /// Intenta autenticar al usuario utilizando
     /// las credenciales ingresadas.
     /// </summary>
-    private async void iniciar_Click(
-        object? sender,
-        EventArgs e)
+    private async void iniciar_Click(object? sender, EventArgs e)
     {
         var nombreUsuario = textBox_usuario.Text.Trim();
         var password = textBox_contraseña.Text;
 
-        var usuario =
-            await _autenticacionServicio.AutenticarAsync(
-                nombreUsuario,
-                password);
+        var usuario = await _autenticacionServicio.AutenticarAsync(nombreUsuario, password);
 
         if (usuario is null)
         {
@@ -48,11 +47,9 @@ public partial class Login : Form
             return;
         }
 
-        MessageBox.Show(
-            $"Bienvenido {usuario.Nombre} {usuario.Apellido}.\n" +
-            $"Rol: {usuario.Rol.Nombre}",
-            "Inicio de sesión",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        _sesionUsuario.Iniciar(usuario);
+
+        DialogResult = DialogResult.OK;
+        Close();
     }
 }

@@ -5,7 +5,7 @@
         /// <summary>
         /// Contenedor de componentes utilizado por Windows Forms.
         /// </summary>
-        private System.ComponentModel.IContainer? components = null;
+        private System.ComponentModel.IContainer components = null;
 
         /// <summary>
         /// Libera los recursos utilizados por el formulario.

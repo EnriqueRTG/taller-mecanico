@@ -17,7 +17,6 @@ public static class DependencyInjection
     public static IServiceCollection AddAplicacion(this IServiceCollection services)
     {
         services.AddSingleton<SesionUsuario>();
-        services.AddScoped<IRolRepositorio, RolRepositorio>();
         services.AddScoped<UsuarioServicio>();
         services.AddScoped<AutenticacionServicio>();
         services.AddScoped<ClienteServicio>();

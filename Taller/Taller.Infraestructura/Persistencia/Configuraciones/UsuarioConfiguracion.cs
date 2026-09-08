@@ -37,6 +37,10 @@ public sealed class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.Activo)
             .IsRequired();
 
+        // Fecha de registro del usuario en el sistema
+        builder.Property(u => u.FechaAlta)
+            .IsRequired();
+
         // No puede haber dos usuarios con el mismo nombre de acceso
         builder.HasIndex(u => u.NombreUsuario)
             .IsUnique();

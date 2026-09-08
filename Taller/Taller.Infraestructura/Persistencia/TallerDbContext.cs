@@ -13,7 +13,7 @@ public sealed class TallerDbContext : DbContext
     /// Inicializa el contexto utilizando las opciones configuradas
     /// mediante inyección de dependencias (proveedor SQL Server,
     /// cadena de conexión, etc.).
-    /// </summary
+    /// </summary>
     public TallerDbContext(DbContextOptions<TallerDbContext> options)
         : base(options)
     {
@@ -25,6 +25,21 @@ public sealed class TallerDbContext : DbContext
 
     // Conjunto de roles administrados por Entity Framework Core.
     public DbSet<Rol> Roles => Set<Rol>();
+
+    // Conjunto de clientes administrados por Entity Framework Core.
+    public DbSet<Cliente> Clientes => Set<Cliente>();
+
+    // Conjunto de marcas administradas por Entity Framework Core.
+    public DbSet<Marca> Marcas => Set<Marca>();
+
+    // Conjunto de modelos administrados por Entity Framework Core.
+    public DbSet<Modelo> Modelos => Set<Modelo>();
+
+    // Conjunto de vehículos administrados por Entity Framework Core.
+    public DbSet<Vehiculo> Vehiculos => Set<Vehiculo>();
+
+    // Conjunto de atenciones administrados por Entity Framework Core.
+    public DbSet<Atencion> Atenciones => Set<Atencion>();
 
     /// <summary>
     /// Configura el modelo de datos que utilizará Entity Framework Core.
@@ -41,7 +56,7 @@ public sealed class TallerDbContext : DbContext
         // Por ejemplo:
         // - UsuarioConfiguracion
         // - RolConfiguracion
-        //
+        // - ClienteConfiguracion
         // De esta manera no es necesario registrar manualmente cada
         // configuración mediante ApplyConfiguration(...).
         modelBuilder.ApplyConfigurationsFromAssembly(

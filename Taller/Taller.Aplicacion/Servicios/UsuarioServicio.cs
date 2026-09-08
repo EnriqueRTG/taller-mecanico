@@ -7,11 +7,13 @@ namespace Taller.Aplicacion.Servicios;
 public sealed class UsuarioServicio
 {
     private readonly IUsuarioRepositorio _usuarioRepositorio;
+    private readonly IRolRepositorio _rolRepositorio;
     private readonly IPasswordHasher _passwordHasher;
 
-    public UsuarioServicio(IUsuarioRepositorio usuarioRepositorio, IPasswordHasher passwordHasher)
+    public UsuarioServicio(IUsuarioRepositorio usuarioRepositorio, IRolRepositorio rolRepositorio, IPasswordHasher passwordHasher)
     {
         _usuarioRepositorio = usuarioRepositorio;
+        _rolRepositorio = rolRepositorio;
         _passwordHasher = passwordHasher;
     }
 
@@ -25,36 +27,89 @@ public sealed class UsuarioServicio
         return await _usuarioRepositorio.ObtenerPorIdAsync(id);
     }
 
-    public async Task CrearAsync(string nombreUsuario, string password, string nombre, string apellido, int rolId)
+    public async Task<Usuario> CrearAsync(
+    string nombreUsuario,
+    string password,
+    string nombre,
+    string apellido,
+    int rolId)
     {
-        if (string.IsNullOrWhiteSpace(nombreUsuario))
-            throw new ArgumentException("El nombre de usuario es obligatorio.");
+        nombreUsuario = NormalizarObligatorio(
+            nombreUsuario,
+            nameof(nombreUsuario),
+            "El nombre de usuario es obligatorio.");
 
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException("La contraseña es obligatoria.");
+        password = NormalizarObligatorio(
+            password,
+            nameof(password),
+            "La contraseña es obligatoria.");
 
-        if (string.IsNullOrWhiteSpace(nombre))
-            throw new ArgumentException("El nombre es obligatorio.");
+        nombre = NormalizarObligatorio(
+            nombre,
+            nameof(nombre),
+            "El nombre es obligatorio.");
 
-        if (string.IsNullOrWhiteSpace(apellido))
-            throw new ArgumentException("El apellido es obligatorio.");
+        apellido = NormalizarObligatorio(
+            apellido,
+            nameof(apellido),
+            "El apellido es obligatorio.");
 
-        var existeUsuario = await _usuarioRepositorio.ExisteNombreUsuarioAsync(nombreUsuario);
+        if (rolId <= 0)
+        {
+            throw new ArgumentException(
+                "Debe seleccionar un rol válido.",
+                nameof(rolId));
+        }
 
-        if (existeUsuario)
-            throw new InvalidOperationException("El nombre de usuario ya se encuentra registrado.");
+        var rol = await _rolRepositorio.ObtenerPorIdAsync(rolId);
 
-        var usuario = new Usuario()
+        if (rol is null)
+        {
+            throw new InvalidOperationException(
+                "El rol seleccionado no existe.");
+        }
+
+        if (!rol.Activo)
+        {
+            throw new InvalidOperationException(
+                "El rol seleccionado se encuentra inactivo.");
+        }
+
+        if (await _usuarioRepositorio.ExisteNombreUsuarioAsync(nombreUsuario))
+        {
+            throw new InvalidOperationException(
+                "El nombre de usuario ya se encuentra registrado.");
+        }
+
+        var usuario = new Usuario
         {
             NombreUsuario = nombreUsuario,
             PasswordHash = _passwordHasher.Hash(password),
-            Nombre = nombre.Trim(),
-            Apellido = apellido.Trim(),
+            Nombre = nombre,
+            Apellido = apellido,
             RolId = rolId,
-            Activo = true
+            Activo = true,
+            FechaAlta = DateTime.Now
         };
 
         await _usuarioRepositorio.AgregarAsync(usuario);
+
+        return usuario;
+    }
+
+    private static string NormalizarObligatorio(
+    string? valor,
+    string nombreParametro,
+    string mensaje)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            throw new ArgumentException(
+                mensaje,
+                nombreParametro);
+        }
+
+        return valor.Trim();
     }
 
 }

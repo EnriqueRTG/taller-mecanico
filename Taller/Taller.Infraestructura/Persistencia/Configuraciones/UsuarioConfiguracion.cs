@@ -1,56 +1,65 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
-
 
 namespace Taller.Infraestructura.Persistencia.Configuraciones;
 
-public sealed class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
+/// <summary>
+/// Define la configuración de persistencia de la entidad
+/// <see cref="Usuario"/> mediante Entity Framework Core.
+/// </summary>
+public sealed class UsuarioConfiguracion
+    : IEntityTypeConfiguration<Usuario>
 {
-    public void Configure(EntityTypeBuilder<Usuario> builder)
+    /// <summary>
+    /// Configura la tabla, propiedades, restricciones, índices
+    /// y relaciones correspondientes a los usuarios.
+    /// </summary>
+    /// <param name="builder">
+    /// Constructor utilizado por Entity Framework Core para
+    /// configurar la entidad <see cref="Usuario"/>.
+    /// </param>
+    public void Configure(
+        EntityTypeBuilder<Usuario> builder)
     {
-        // Nombre de la tabla en la base de datos
         builder.ToTable("Usuarios");
 
-        // Clave primaria
-        builder.HasKey(u => u.Id);
+        builder.HasKey(usuario => usuario.Id);
 
-        // Nombre utilizado por el usuario para iniciar sesión
-        builder.Property(u => u.NombreUsuario)
+        builder.Property(usuario => usuario.NombreUsuario)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(
+                UsuarioRestricciones.NombreUsuarioMaximo);
 
-        // Hash de la contraseña del usuario
-        builder.Property(u => u.PasswordHash)
+        builder.Property(usuario => usuario.PasswordHash)
             .IsRequired()
-            .HasMaxLength(255);
+            .HasMaxLength(
+                UsuarioRestricciones.PasswordHashMaximo);
 
-        // Datos identificatorios del usuario
-        builder.Property(u => u.Nombre)
+        builder.Property(usuario => usuario.Nombre)
             .IsRequired()
-            .HasMaxLength(100);
-        builder.Property(u => u.Apellido)
-            .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(
+                UsuarioRestricciones.NombreMaximo);
 
-        // Permite realizar una baja logica del usuario
-        builder.Property(u => u.Activo)
+        builder.Property(usuario => usuario.Apellido)
+            .IsRequired()
+            .HasMaxLength(
+                UsuarioRestricciones.ApellidoMaximo);
+
+        builder.Property(usuario => usuario.Activo)
             .IsRequired();
 
-        // Fecha de registro del usuario en el sistema
-        builder.Property(u => u.FechaAlta)
+        builder.Property(usuario => usuario.FechaAlta)
             .IsRequired();
 
-        // No puede haber dos usuarios con el mismo nombre de acceso
-        builder.HasIndex(u => u.NombreUsuario)
+        builder.HasIndex(usuario => usuario.NombreUsuario)
             .IsUnique();
 
-        // Relacion
-        // un Rol puede tener muchos Usuarios, pero cada Usuario pertenece a un unico Rol
-        builder.HasOne(u => u.Rol)
-            .WithMany(r => r.Usuarios)
-            .HasForeignKey(u => u.RolId)
+        builder.HasOne(usuario => usuario.Rol)
+            .WithMany(rol => rol.Usuarios)
+            .HasForeignKey(usuario => usuario.RolId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
-

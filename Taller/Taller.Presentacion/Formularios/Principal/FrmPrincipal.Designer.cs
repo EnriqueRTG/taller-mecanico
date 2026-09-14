@@ -32,9 +32,7 @@
             pnlOpciones = new Panel();
             btnRespaldo = new Button();
             btnReportes = new Button();
-            btnEntregas = new Button();
             btnComprobantes = new Button();
-            btnTrabajos = new Button();
             btnPresupuestos = new Button();
             btnDiagnosticos = new Button();
             btnAtenciones = new Button();
@@ -79,9 +77,7 @@
             pnlOpciones.AutoScroll = true;
             pnlOpciones.Controls.Add(btnRespaldo);
             pnlOpciones.Controls.Add(btnReportes);
-            pnlOpciones.Controls.Add(btnEntregas);
             pnlOpciones.Controls.Add(btnComprobantes);
-            pnlOpciones.Controls.Add(btnTrabajos);
             pnlOpciones.Controls.Add(btnPresupuestos);
             pnlOpciones.Controls.Add(btnDiagnosticos);
             pnlOpciones.Controls.Add(btnAtenciones);
@@ -105,7 +101,7 @@
             btnRespaldo.FlatStyle = FlatStyle.Flat;
             btnRespaldo.Font = new Font("Segoe UI", 9.5F);
             btnRespaldo.ForeColor = Color.FromArgb(220, 231, 245);
-            btnRespaldo.Location = new Point(0, 530);
+            btnRespaldo.Location = new Point(0, 434);
             btnRespaldo.Name = "btnRespaldo";
             btnRespaldo.Padding = new Padding(20, 0, 0, 0);
             btnRespaldo.Size = new Size(213, 48);
@@ -113,6 +109,7 @@
             btnRespaldo.Text = "Respaldo y restauración";
             btnRespaldo.TextAlign = ContentAlignment.MiddleLeft;
             btnRespaldo.UseVisualStyleBackColor = false;
+            btnRespaldo.Click += btnRespaldo_Click;
             // 
             // btnReportes
             // 
@@ -124,7 +121,7 @@
             btnReportes.FlatStyle = FlatStyle.Flat;
             btnReportes.Font = new Font("Segoe UI", 9.5F);
             btnReportes.ForeColor = Color.FromArgb(220, 231, 245);
-            btnReportes.Location = new Point(0, 482);
+            btnReportes.Location = new Point(0, 386);
             btnReportes.Name = "btnReportes";
             btnReportes.Padding = new Padding(20, 0, 0, 0);
             btnReportes.Size = new Size(213, 48);
@@ -133,26 +130,7 @@
             btnReportes.Text = "Reportes";
             btnReportes.TextAlign = ContentAlignment.MiddleLeft;
             btnReportes.UseVisualStyleBackColor = false;
-            // 
-            // btnEntregas
-            // 
-            btnEntregas.Cursor = Cursors.Hand;
-            btnEntregas.Dock = DockStyle.Top;
-            btnEntregas.FlatAppearance.BorderSize = 0;
-            btnEntregas.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 83, 151);
-            btnEntregas.FlatAppearance.MouseOverBackColor = Color.FromArgb(35, 59, 92);
-            btnEntregas.FlatStyle = FlatStyle.Flat;
-            btnEntregas.Font = new Font("Segoe UI", 9.5F);
-            btnEntregas.ForeColor = Color.FromArgb(220, 231, 245);
-            btnEntregas.Location = new Point(0, 434);
-            btnEntregas.Name = "btnEntregas";
-            btnEntregas.Padding = new Padding(20, 0, 0, 0);
-            btnEntregas.Size = new Size(213, 48);
-            btnEntregas.TabIndex = 13;
-            btnEntregas.TabStop = false;
-            btnEntregas.Text = "Entregas";
-            btnEntregas.TextAlign = ContentAlignment.MiddleLeft;
-            btnEntregas.UseVisualStyleBackColor = false;
+            btnReportes.Click += btnReportes_Click;
             // 
             // btnComprobantes
             // 
@@ -163,7 +141,7 @@
             btnComprobantes.FlatStyle = FlatStyle.Flat;
             btnComprobantes.Font = new Font("Segoe UI", 9.5F);
             btnComprobantes.ForeColor = Color.FromArgb(220, 231, 245);
-            btnComprobantes.Location = new Point(0, 386);
+            btnComprobantes.Location = new Point(0, 338);
             btnComprobantes.Name = "btnComprobantes";
             btnComprobantes.Padding = new Padding(20, 0, 0, 0);
             btnComprobantes.Size = new Size(213, 48);
@@ -172,26 +150,7 @@
             btnComprobantes.Text = "Comprobantes y pagos";
             btnComprobantes.TextAlign = ContentAlignment.MiddleLeft;
             btnComprobantes.UseVisualStyleBackColor = false;
-            // 
-            // btnTrabajos
-            // 
-            btnTrabajos.Cursor = Cursors.Hand;
-            btnTrabajos.Dock = DockStyle.Top;
-            btnTrabajos.FlatAppearance.BorderSize = 0;
-            btnTrabajos.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 83, 151);
-            btnTrabajos.FlatAppearance.MouseOverBackColor = Color.FromArgb(35, 59, 92);
-            btnTrabajos.FlatStyle = FlatStyle.Flat;
-            btnTrabajos.Font = new Font("Segoe UI", 9.5F);
-            btnTrabajos.ForeColor = Color.FromArgb(220, 231, 245);
-            btnTrabajos.Location = new Point(0, 338);
-            btnTrabajos.Name = "btnTrabajos";
-            btnTrabajos.Padding = new Padding(20, 0, 0, 0);
-            btnTrabajos.Size = new Size(213, 48);
-            btnTrabajos.TabIndex = 11;
-            btnTrabajos.TabStop = false;
-            btnTrabajos.Text = "Trabajos aceptados";
-            btnTrabajos.TextAlign = ContentAlignment.MiddleLeft;
-            btnTrabajos.UseVisualStyleBackColor = false;
+            btnComprobantes.Click += btnComprobantes_Click;
             // 
             // btnPresupuestos
             // 
@@ -212,6 +171,7 @@
             btnPresupuestos.Text = "Presupuestos";
             btnPresupuestos.TextAlign = ContentAlignment.MiddleLeft;
             btnPresupuestos.UseVisualStyleBackColor = false;
+            btnPresupuestos.Click += btnPresupuestos_Click;
             // 
             // btnDiagnosticos
             // 
@@ -232,6 +192,7 @@
             btnDiagnosticos.Text = "Diagnósticos";
             btnDiagnosticos.TextAlign = ContentAlignment.MiddleLeft;
             btnDiagnosticos.UseVisualStyleBackColor = false;
+            btnDiagnosticos.Click += btnDiagnosticos_Click;
             // 
             // btnAtenciones
             // 
@@ -252,6 +213,7 @@
             btnAtenciones.Text = "Atenciones";
             btnAtenciones.TextAlign = ContentAlignment.MiddleLeft;
             btnAtenciones.UseVisualStyleBackColor = false;
+            btnAtenciones.Click += btnAtenciones_Click;
             // 
             // btnVehiculos
             // 
@@ -272,6 +234,7 @@
             btnVehiculos.Text = "Vehículos";
             btnVehiculos.TextAlign = ContentAlignment.MiddleLeft;
             btnVehiculos.UseVisualStyleBackColor = false;
+            btnVehiculos.Click += btnVehiculos_Click;
             // 
             // btnClientes
             // 
@@ -292,6 +255,7 @@
             btnClientes.Text = "Clientes";
             btnClientes.TextAlign = ContentAlignment.MiddleLeft;
             btnClientes.UseVisualStyleBackColor = false;
+            btnClientes.Click += btnClientes_Click;
             // 
             // btnUsuarios
             // 
@@ -526,8 +490,6 @@
         private Button btnInicio;
         private Button btnRespaldo;
         private Button btnReportes;
-        private Button btnEntregas;
         private Button btnComprobantes;
-        private Button btnTrabajos;
     }
 }

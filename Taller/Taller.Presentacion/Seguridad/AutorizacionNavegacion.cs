@@ -41,7 +41,6 @@ public sealed class AutorizacionNavegacion
             PermisoAplicacion.ConsultarDiagnosticos,
             PermisoAplicacion.GestionarDecisionPresupuesto,
             PermisoAplicacion.GestionarComprobantesPagos,
-            PermisoAplicacion.GestionarEntregas,
             PermisoAplicacion.ConsultarReportesOperativos
         ];
 
@@ -50,7 +49,7 @@ public sealed class AutorizacionNavegacion
             PermisoAplicacion.ConsultarAtencionesAsignadas,
             PermisoAplicacion.GestionarDiagnosticos,
             PermisoAplicacion.GestionarPresupuestosTecnicos,
-            PermisoAplicacion.RegistrarEjecucionTrabajo,
+            PermisoAplicacion.RegistrarFinalizacionTecnica,
             PermisoAplicacion.ConsultarHistorialVehiculo,
             PermisoAplicacion.ConsultarReportesTecnicos
         ];

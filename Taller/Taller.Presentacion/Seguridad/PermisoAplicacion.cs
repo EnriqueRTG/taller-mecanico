@@ -19,14 +19,13 @@ public enum PermisoAplicacion
     ConsultarDiagnosticos,
     GestionarDecisionPresupuesto,
     GestionarComprobantesPagos,
-    GestionarEntregas,
     ConsultarReportesOperativos,
 
     // Técnico
     ConsultarAtencionesAsignadas,
     GestionarDiagnosticos,
     GestionarPresupuestosTecnicos,
-    RegistrarEjecucionTrabajo,
+    RegistrarFinalizacionTecnica,
     ConsultarHistorialVehiculo,
     ConsultarReportesTecnicos
 }

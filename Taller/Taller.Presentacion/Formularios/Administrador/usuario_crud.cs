@@ -3,6 +3,9 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Text.RegularExpressions;
 using Taller.Infraestructura.Persistencia;
+using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Servicios;
+using Taller.Dominio.Entidades;
 
 namespace Taller.Presentacion.Formularios.Administrador
 {
@@ -15,25 +18,6 @@ namespace Taller.Presentacion.Formularios.Administrador
             this.usersTable = tablaUsuarios;
         }
         
-        public DataTable ObtenerUsuarios()
-        {
-            DataTable tabla = new DataTable();
-
-            using (SqlConnection con = TallerDbContext.ObtenerConexion())
-            {
-                string query = "SELECT * FROM Usuarios"; // Reemplaza por tu tabla o columnas reales
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                    {
-                        con.Open();
-                        adapter.Fill(tabla);
-                    }
-                }
-            }
-            return tabla;
-        }
         private void InicializarTabla()
         {
             usersTable.Columns.Add("Nombre");
@@ -42,7 +26,7 @@ namespace Taller.Presentacion.Formularios.Administrador
             usersTable.Columns.Add("Contraseña");
             usersTable.Columns.Add("Rol");
 
-            tabla_usuario.DataSource = usersTable;
+            usuarios_grid.DataSource = usersTable;
         }
 
         private void crudUusario_Click(object sender, EventArgs e)
@@ -109,45 +93,13 @@ namespace Taller.Presentacion.Formularios.Administrador
             row["Contraseña"] = text_usuario.Text;
             row["Nombre"] = text_nombre.Text;
             row["Apellido"] = text_apellido.Text;
+            //row["Activo"] = text_apellido.Text;
             row["Rol"] = perfilSeleccionado;            
 
             usersTable.Rows.Add(row);
 
             MessageBox.Show("Usuario guardado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            ClearForm();
-            /*
-            using (SqlConnection conexion = TallerDbContext.ObtenerConexion())
-            {
-                try
-                {
-                    conexion.Open();
-                    string query = "INSERT INTO Clientes (Usuario, Contraseña, Nombre, Apellido, Activo, Rol) OUTPUT INSERTED.id_cliente " +
-                                   "VALUES (@NombreUsuario, @PasswordHash, @Nombre, @Apellido, @Activo, @RolId)";
-
-                    using (SqlCommand comando = new SqlCommand(query, conexion))
-                    {
-                        comando.Parameters.AddWithValue("@NombreUsuario", text_usuario.Text.Trim());
-                        comando.Parameters.AddWithValue("@PasswordHash", text_contraseña.Text.Trim());
-                        comando.Parameters.AddWithValue("@Nombre", text_nombre.Text.Trim());
-                        comando.Parameters.AddWithValue("@Apellido", text_apellido.Text.Trim());
-                        comando.Parameters.AddWithValue("@Activo", "Activo");
-                        comando.Parameters.AddWithValue("@RolId", combo_rol.Text.Trim());                        
-
-                        int idUsuario = (int)comando.ExecuteScalar();
-
-                        this.Tag = idUsuario;
-
-                        MessageBox.Show("Usuario agregado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        ClearForm();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error al insertar el usuario: " + ex.Message);
-                    return;
-                }
-            }*/
+            ClearForm();            
         }
 
         private void ClearForm()
@@ -188,13 +140,13 @@ namespace Taller.Presentacion.Formularios.Administrador
         private void modificar_Click(object sender, EventArgs e)
         {
             // Valida si hay una fila seleccionada antes de hacer alguna modificacion
-            if (tabla_usuario.SelectedRows.Count == 0)
+            if (usuarios_grid.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Por favor, selecciona una fila para modificar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            DataGridViewRow filaSeleccionada = tabla_usuario.SelectedRows[0];
+            DataGridViewRow filaSeleccionada = usuarios_grid.SelectedRows[0];
             int idUsuario = Convert.ToInt32(filaSeleccionada.Cells["Id"].Value);
 
             string nuevoNombre = text_nombre.Text.Trim();
@@ -208,25 +160,21 @@ namespace Taller.Presentacion.Formularios.Administrador
             //refrescar la tabla y limpiar los campos
             //activos();
             ClearForm();
-            tabla_usuario.ClearSelection();
+            usuarios_grid.ClearSelection();
         }
 
         private void tabla_usuario_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == tabla_usuario.Columns["eliminar"].Index && e.RowIndex >= 0)
+            if (e.ColumnIndex == usuarios_grid.Columns["inhabilitar"].Index && e.RowIndex >= 0)
             {
                 // Obtiene el id del usuario desde la fila seleccionada
-                int idUsuario = Convert.ToInt32(tabla_usuario.Rows[e.RowIndex].Cells["Id"].Value);
+                int idUsuario = Convert.ToInt32(usuarios_grid.Rows[e.RowIndex].Cells["Id"].Value);
 
                 // Actualizar la base de datos
                 UpdateStatusInDatabase(idUsuario, "No activo");
 
                 // Remover la fila del DataGridView
-                tabla_usuario.Rows.RemoveAt(e.RowIndex);
-
-                usuarios_eliminados usuarios_Eliminados = new usuarios_eliminados(this);
-                usuarios_Eliminados.Show();
-                this.Hide();
+                usuarios_grid.Rows.RemoveAt(e.RowIndex);                  
             }
         }
         private void UpdateStatusInDatabase(int idUsuario, string newState)

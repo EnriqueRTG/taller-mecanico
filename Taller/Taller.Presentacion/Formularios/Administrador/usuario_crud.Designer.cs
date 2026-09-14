@@ -43,9 +43,6 @@
             guardar = new Button();
             borrar = new Button();
             modificar = new Button();
-            tabla_usuario = new DataGridView();
-            eliminar = new DataGridViewButtonColumn();
-            ((System.ComponentModel.ISupportInitialize)tabla_usuario).BeginInit();
             SuspendLayout();
             // 
             // crudUusario
@@ -53,7 +50,7 @@
             crudUusario.AutoSize = true;
             crudUusario.Font = new Font("Georgia", 22.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             crudUusario.ForeColor = Color.MidnightBlue;
-            crudUusario.Location = new Point(528, 66);
+            crudUusario.Location = new Point(499, 120);
             crudUusario.Name = "crudUusario";
             crudUusario.Size = new Size(373, 43);
             crudUusario.TabIndex = 0;
@@ -65,7 +62,7 @@
             usuario.AutoSize = true;
             usuario.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             usuario.ForeColor = Color.MidnightBlue;
-            usuario.Location = new Point(696, 188);
+            usuario.Location = new Point(671, 276);
             usuario.Name = "usuario";
             usuario.Size = new Size(72, 23);
             usuario.TabIndex = 1;
@@ -76,7 +73,7 @@
             nombre.AutoSize = true;
             nombre.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             nombre.ForeColor = Color.MidnightBlue;
-            nombre.Location = new Point(185, 188);
+            nombre.Location = new Point(160, 276);
             nombre.Name = "nombre";
             nombre.Size = new Size(77, 23);
             nombre.TabIndex = 2;
@@ -87,7 +84,7 @@
             contraseña.AutoSize = true;
             contraseña.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             contraseña.ForeColor = Color.MidnightBlue;
-            contraseña.Location = new Point(696, 300);
+            contraseña.Location = new Point(671, 388);
             contraseña.Name = "contraseña";
             contraseña.Size = new Size(101, 23);
             contraseña.TabIndex = 3;
@@ -98,7 +95,7 @@
             apellido.AutoSize = true;
             apellido.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             apellido.ForeColor = Color.MidnightBlue;
-            apellido.Location = new Point(185, 300);
+            apellido.Location = new Point(160, 388);
             apellido.Name = "apellido";
             apellido.Size = new Size(76, 23);
             apellido.TabIndex = 4;
@@ -106,7 +103,7 @@
             // 
             // text_nombre
             // 
-            text_nombre.Location = new Point(267, 188);
+            text_nombre.Location = new Point(242, 276);
             text_nombre.Name = "text_nombre";
             text_nombre.Size = new Size(382, 27);
             text_nombre.TabIndex = 5;
@@ -114,7 +111,7 @@
             // 
             // text_apellido
             // 
-            text_apellido.Location = new Point(267, 296);
+            text_apellido.Location = new Point(242, 384);
             text_apellido.Name = "text_apellido";
             text_apellido.Size = new Size(382, 27);
             text_apellido.TabIndex = 6;
@@ -122,14 +119,14 @@
             // 
             // text_usuario
             // 
-            text_usuario.Location = new Point(803, 187);
+            text_usuario.Location = new Point(778, 275);
             text_usuario.Name = "text_usuario";
             text_usuario.Size = new Size(382, 27);
             text_usuario.TabIndex = 7;
             // 
             // text_contraseña
             // 
-            text_contraseña.Location = new Point(803, 296);
+            text_contraseña.Location = new Point(778, 384);
             text_contraseña.Name = "text_contraseña";
             text_contraseña.Size = new Size(382, 27);
             text_contraseña.TabIndex = 8;
@@ -140,7 +137,7 @@
             rol.AutoSize = true;
             rol.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             rol.ForeColor = Color.MidnightBlue;
-            rol.Location = new Point(185, 397);
+            rol.Location = new Point(160, 485);
             rol.Name = "rol";
             rol.Size = new Size(39, 23);
             rol.TabIndex = 9;
@@ -149,7 +146,7 @@
             // combo_rol
             // 
             combo_rol.FormattingEnabled = true;
-            combo_rol.Location = new Point(267, 396);
+            combo_rol.Location = new Point(242, 484);
             combo_rol.Name = "combo_rol";
             combo_rol.Size = new Size(382, 28);
             combo_rol.TabIndex = 10;
@@ -158,7 +155,7 @@
             // guardar
             // 
             guardar.BackColor = Color.LightGreen;
-            guardar.Location = new Point(767, 389);
+            guardar.Location = new Point(742, 477);
             guardar.Name = "guardar";
             guardar.Size = new Size(99, 41);
             guardar.TabIndex = 11;
@@ -169,7 +166,7 @@
             // borrar
             // 
             borrar.BackColor = Color.IndianRed;
-            borrar.Location = new Point(898, 389);
+            borrar.Location = new Point(873, 477);
             borrar.Name = "borrar";
             borrar.Size = new Size(99, 41);
             borrar.TabIndex = 12;
@@ -180,7 +177,7 @@
             // modificar
             // 
             modificar.BackColor = Color.SteelBlue;
-            modificar.Location = new Point(1036, 389);
+            modificar.Location = new Point(1011, 477);
             modificar.Name = "modificar";
             modificar.Size = new Size(99, 41);
             modificar.TabIndex = 13;
@@ -188,32 +185,12 @@
             modificar.UseVisualStyleBackColor = false;
             modificar.Click += modificar_Click;
             // 
-            // tabla_usuario
-            // 
-            tabla_usuario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            tabla_usuario.Columns.AddRange(new DataGridViewColumn[] { eliminar });
-            tabla_usuario.Location = new Point(185, 443);
-            tabla_usuario.Name = "tabla_usuario";
-            tabla_usuario.RowHeadersWidth = 51;
-            tabla_usuario.Size = new Size(1000, 279);
-            tabla_usuario.TabIndex = 14;
-            tabla_usuario.CellContentClick += tabla_usuario_CellContentClick;
-            // 
-            // eliminar
-            // 
-            eliminar.HeaderText = "Eliminar";
-            eliminar.MinimumWidth = 6;
-            eliminar.Name = "eliminar";
-            eliminar.Text = "Eliminar";
-            eliminar.Width = 125;
-            // 
             // usuario_crud
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Beige;
             ClientSize = new Size(1336, 744);
-            Controls.Add(tabla_usuario);
             Controls.Add(modificar);
             Controls.Add(borrar);
             Controls.Add(guardar);
@@ -232,7 +209,6 @@
             Name = "usuario_crud";
             Text = "CRUD Usuario";
             Click += usuario_crud_Click;
-            ((System.ComponentModel.ISupportInitialize)tabla_usuario).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -253,7 +229,5 @@
         private Button guardar;
         private Button borrar;
         private Button modificar;
-        private DataGridView tabla_usuario;
-        private DataGridViewButtonColumn eliminar;
     }
 }

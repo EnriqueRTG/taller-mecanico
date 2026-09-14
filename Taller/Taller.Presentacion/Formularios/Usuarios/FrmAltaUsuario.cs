@@ -69,7 +69,6 @@ public partial class FrmAltaUsuario : Form
         txtNombre.MaxLength = 100;
         txtApellido.MaxLength = 100;
         txtNombreUsuario.MaxLength = 50;
-
         txtPassword.MaxLength = 100;
         txtConfirmarPassword.MaxLength = 100;
 
@@ -79,6 +78,11 @@ public partial class FrmAltaUsuario : Form
         chkMostrarPassword.Checked = false;
 
         cmbRol.DropDownStyle = ComboBoxStyle.DropDownList;
+
+        AcceptButton = btnGuardar;
+        CancelButton = btnCancelar;
+
+        btnCancelar.DialogResult = DialogResult.Cancel;
     }
 
     /// <summary>
@@ -103,31 +107,34 @@ public partial class FrmAltaUsuario : Form
         object sender,
         EventArgs e)
     {
+        if (txtPassword.Text != txtConfirmarPassword.Text)
+        {
+            MessageBox.Show(
+                "Las contraseñas no coinciden.",
+                "Datos inválidos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            txtConfirmarPassword.SelectAll();
+            txtConfirmarPassword.Focus();
+            return;
+        }
+
+        if (cmbRol.SelectedValue is not int idRol)
+        {
+            MessageBox.Show(
+                "Debe seleccionar un rol.",
+                "Datos incompletos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            cmbRol.Focus();
+            return;
+        }
+
         try
         {
-            if (txtPassword.Text != txtConfirmarPassword.Text)
-            {
-                MessageBox.Show(
-                    "Las contraseñas no coinciden.",
-                    "Datos inválidos",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                txtConfirmarPassword.Focus();
-                return;
-            }
-
-            if (cmbRol.SelectedValue is not int idRol)
-            {
-                MessageBox.Show(
-                    "Debe seleccionar un rol.",
-                    "Datos incompletos",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                cmbRol.Focus();
-                return;
-            }
+            CambiarEstadoGuardado(true);
 
             UsuarioCreado = await _usuarioServicio.CrearAsync(
                 txtNombreUsuario.Text,
@@ -138,7 +145,7 @@ public partial class FrmAltaUsuario : Form
 
             MessageBox.Show(
                 $"Usuario '{UsuarioCreado.NombreUsuario}' registrado correctamente.",
-                "Alta de usuario",
+                "Nuevo usuario",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
@@ -169,6 +176,13 @@ public partial class FrmAltaUsuario : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
+        finally
+        {
+            if (!IsDisposed && !Disposing)
+            {
+                CambiarEstadoGuardado(false);
+            }
+        }
     }
 
     /// <summary>
@@ -194,5 +208,30 @@ public partial class FrmAltaUsuario : Form
 
         txtPassword.UseSystemPasswordChar = ocultar;
         txtConfirmarPassword.UseSystemPasswordChar = ocultar;
+    }
+
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+        txtNombre.Focus();
+    }
+
+    private void CambiarEstadoGuardado(bool guardando)
+    {
+        txtNombre.Enabled = !guardando;
+        txtApellido.Enabled = !guardando;
+        txtNombreUsuario.Enabled = !guardando;
+        txtPassword.Enabled = !guardando;
+        txtConfirmarPassword.Enabled = !guardando;
+        chkMostrarPassword.Enabled = !guardando;
+        cmbRol.Enabled = !guardando;
+        btnGuardar.Enabled = !guardando;
+        btnCancelar.Enabled = !guardando;
+
+        btnGuardar.Text = guardando
+            ? "Guardando..."
+            : "Guardar usuario";
+
+        UseWaitCursor = guardando;
     }
 }

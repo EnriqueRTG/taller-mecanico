@@ -4,21 +4,15 @@ using Microsoft.Extensions.Hosting;
 using Taller.Aplicacion;
 using Taller.Infraestructura;
 using Taller.Infraestructura.Persistencia.Inicializacion;
-using Taller.Presentacion.Formularios.Atenciones;
-
-
-// Luego mover para ID en Presentacion
 using Taller.Presentacion.Formularios.Autenticacion;
-using Taller.Presentacion.Formularios.Clientes;
-using Taller.Presentacion.Formularios.Usuarios;
-using Taller.Presentacion.Formularios.Vehiculos;
+using Taller.Presentacion.Formularios.Principal;
 
 namespace Taller.Presentacion;
 
 internal static class Program
 {
     [STAThread]
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
 
@@ -34,54 +28,29 @@ internal static class Program
                 optional: true,
                 reloadOnChange: true);
 
-        // Registra los servicios pertenecientes a la capa de Aplicación.
+        // Registra los servicios de la capa de Aplicación.
         builder.Services.AddAplicacion();
 
-        // Registra los servicios tecnicos de Infraestructura, incluyendo persistencia, repositorios y seguridad
+        // Registra persistencia, repositorios y seguridad.
         builder.Services.AddInfraestructura(
             builder.Configuration);
 
-        // Luego mover para ID en Presentacion
-        builder.Services.AddScoped<Login>();
-        
-        builder.Services.AddScoped<FrmAltaVehiculo>();
-
-        builder.Services.AddTransient<FrmAltaCliente>();
-
-        builder.Services.AddTransient<FrmNuevaAtencion>();
-
-        builder.Services.AddTransient<FrmAltaUsuario>();
+        // Registra formularios y componentes de Presentación.
+        builder.Services.AddPresentacion();
 
         using var host = builder.Build();
-
-        // Crea un alcance de servicios para ejecutar la inicializacion de datos al comenzar la apliacion
         using var scope = host.Services.CreateScope();
 
-        var inicializador = scope.ServiceProvider.GetRequiredService<InicializadorDatos>();
+        var inicializador =
+            scope.ServiceProvider
+                .GetRequiredService<InicializadorDatos>();
 
-        // 
         await inicializador.InicializarAsync();
 
-        var login = scope.ServiceProvider.GetRequiredService<Login>();
+        var aplicacionContexto =
+            scope.ServiceProvider
+                .GetRequiredService<AplicacionContexto>();
 
-        var altaVehiculo = scope.ServiceProvider.GetRequiredService<FrmAltaVehiculo>();
-
-        var altaCliente = scope.ServiceProvider.GetRequiredService<FrmAltaCliente>();
-
-
-
-        // a modo de prueba
-
-        if (login.ShowDialog() != DialogResult.OK)
-        {
-            return;
-        }
-
-        var altaUsuario = scope.ServiceProvider.GetRequiredService<FrmAltaUsuario>();
-
-        var nuevaAtencion = scope.ServiceProvider.GetRequiredService<FrmNuevaAtencion>();
-
-
-        Application.Run(altaUsuario);
+        Application.Run(aplicacionContexto);
     }
 }

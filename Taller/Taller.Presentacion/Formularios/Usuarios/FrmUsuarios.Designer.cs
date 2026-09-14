@@ -30,8 +30,9 @@
         {
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
             dgvUsuarios = new DataGridView();
             tlpPrincipal = new TableLayoutPanel();
             pnlCabecera = new Panel();
@@ -85,15 +86,15 @@
             dgvUsuarios.ColumnHeadersHeight = 42;
             dgvUsuarios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgvUsuarios.Columns.AddRange(new DataGridViewColumn[] { colId, colNombreUsuario, colNombreCompleto, colRol, colEstado, colFechaAlta });
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = Color.White;
-            dataGridViewCellStyle4.Font = new Font("Segoe UI", 9.5F);
-            dataGridViewCellStyle4.ForeColor = Color.FromArgb(30, 41, 59);
-            dataGridViewCellStyle4.Padding = new Padding(6, 0, 6, 0);
-            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(219, 234, 254);
-            dataGridViewCellStyle4.SelectionForeColor = Color.FromArgb(30, 64, 175);
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
-            dgvUsuarios.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = Color.White;
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9.5F);
+            dataGridViewCellStyle5.ForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle5.Padding = new Padding(6, 0, 6, 0);
+            dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(219, 234, 254);
+            dataGridViewCellStyle5.SelectionForeColor = Color.FromArgb(30, 64, 175);
+            dataGridViewCellStyle5.WrapMode = DataGridViewTriState.False;
+            dgvUsuarios.DefaultCellStyle = dataGridViewCellStyle5;
             dgvUsuarios.Dock = DockStyle.Fill;
             dgvUsuarios.EnableHeadersVisualStyles = false;
             dgvUsuarios.GridColor = Color.FromArgb(226, 232, 240);
@@ -321,6 +322,8 @@
             // colEstado
             // 
             colEstado.DataPropertyName = "Estado";
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            colEstado.DefaultCellStyle = dataGridViewCellStyle3;
             colEstado.FillWeight = 75F;
             colEstado.HeaderText = "Estado";
             colEstado.Name = "colEstado";
@@ -329,9 +332,9 @@
             // colFechaAlta
             // 
             colFechaAlta.DataPropertyName = "FechaAlta";
-            dataGridViewCellStyle3.Format = "d";
-            dataGridViewCellStyle3.NullValue = null;
-            colFechaAlta.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle4.Format = "d";
+            dataGridViewCellStyle4.NullValue = null;
+            colFechaAlta.DefaultCellStyle = dataGridViewCellStyle4;
             colFechaAlta.FillWeight = 95F;
             colFechaAlta.HeaderText = "Fecha de alta";
             colFechaAlta.Name = "colFechaAlta";

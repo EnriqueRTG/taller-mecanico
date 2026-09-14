@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Taller.Dominio.Constantes;
+﻿namespace Taller.Dominio.Constantes;
 
 /// <summary>
-/// Identificadores de los roles fijos disponibles
-/// en el sistema.
+/// Define los roles fijos reconocidos por el sistema.
 /// </summary>
 public static class RolesSistema
 {
@@ -17,4 +12,29 @@ public static class RolesSistema
     public const string Administrador = "Administrador";
     public const string Administrativo = "Administrativo";
     public const string Tecnico = "Técnico";
+
+    /// <summary>
+    /// Indica si el identificador corresponde a uno
+    /// de los roles definidos por el sistema.
+    /// </summary>
+    public static bool EsRolValido(int rolId)
+    {
+        return rolId == AdministradorId
+            || rolId == AdministrativoId
+            || rolId == TecnicoId;
+    }
+
+    /// <summary>
+    /// Obtiene el nombre esperado para un rol del sistema.
+    /// </summary>
+    public static string? ObtenerNombreEsperado(int rolId)
+    {
+        return rolId switch
+        {
+            AdministradorId => Administrador,
+            AdministrativoId => Administrativo,
+            TecnicoId => Tecnico,
+            _ => null
+        };
+    }
 }

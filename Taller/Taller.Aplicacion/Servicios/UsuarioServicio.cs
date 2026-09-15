@@ -115,11 +115,156 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Obtiene un usuario mediante su identificador.
     /// </summary>
-    public async Task<Usuario?> ObtenerPorIdAsync(int id)
+    public async Task<Usuario?> ObtenerPorIdAsync(
+        int id)
     {
         ValidarId(id);
 
         return await _usuarioRepositorio.ObtenerPorIdAsync(id);
+    }
+
+    /// <summary>
+    /// Actualiza los datos personales y el rol de un usuario existente.
+    /// </summary>
+    /// <param name="usuarioId">
+    /// Identificador del usuario que será modificado.
+    /// </param>
+    /// <param name="nombre">
+    /// Nuevo nombre del usuario.
+    /// </param>
+    /// <param name="apellido">
+    /// Nuevo apellido del usuario.
+    /// </param>
+    /// <param name="rolId">
+    /// Identificador del nuevo rol.
+    /// </param>
+    /// <param name="usuarioEjecutorId">
+    /// Identificador del administrador que realiza la operación.
+    /// </param>
+    /// <remarks>
+    /// Esta operación no modifica las credenciales, el estado,
+    /// la fecha de alta ni el identificador del usuario.
+    ///
+    /// Solamente un administrador activo puede realizarla.
+    /// Un administrador no puede quitarse a sí mismo el rol
+    /// de Administrador.
+    /// </remarks>
+    /// <exception cref="ValidacionException">
+    /// Se produce cuando alguno de los datos recibidos no es válido.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Se produce cuando el usuario o el rol no existen, están
+    /// inactivos o no cumplen las reglas de la aplicación.
+    /// </exception>
+    public async Task ActualizarDatosAsync(
+        int usuarioId,
+        string? nombre,
+        string? apellido,
+        int rolId,
+        int usuarioEjecutorId)
+    {
+        ValidarId(usuarioId);
+        ValidarId(usuarioEjecutorId);
+
+        nombre = NormalizarObligatorio(
+            nombre,
+            UsuarioRestricciones.NombreMaximo,
+            nameof(nombre),
+            "El nombre es obligatorio.",
+            $"El nombre no puede superar " +
+            $"{UsuarioRestricciones.NombreMaximo} caracteres.");
+
+        apellido = NormalizarObligatorio(
+            apellido,
+            UsuarioRestricciones.ApellidoMaximo,
+            nameof(apellido),
+            "El apellido es obligatorio.",
+            $"El apellido no puede superar " +
+            $"{UsuarioRestricciones.ApellidoMaximo} caracteres.");
+
+        if (!RolesSistema.EsRolValido(rolId))
+        {
+            throw new ValidacionException(
+                "Debe seleccionar un rol válido.",
+                nameof(rolId));
+        }
+
+        Usuario? usuarioEjecutor =
+            await _usuarioRepositorio.ObtenerPorIdAsync(
+                usuarioEjecutorId);
+
+        if (usuarioEjecutor is null)
+        {
+            throw new InvalidOperationException(
+                "El usuario que intenta realizar la operación no existe.");
+        }
+
+        if (!usuarioEjecutor.Activo)
+        {
+            throw new InvalidOperationException(
+                "El usuario que intenta realizar la operación está inactivo.");
+        }
+
+        if (usuarioEjecutor.RolId != RolesSistema.AdministradorId)
+        {
+            throw new InvalidOperationException(
+                "Solamente un administrador puede modificar usuarios.");
+        }
+
+        Usuario? usuario =
+            await _usuarioRepositorio.ObtenerPorIdAsync(
+                usuarioId);
+
+        if (usuario is null)
+        {
+            throw new InvalidOperationException(
+                "El usuario que desea modificar no existe.");
+        }
+
+        if (usuario.Id == usuarioEjecutor.Id
+            && rolId != RolesSistema.AdministradorId)
+        {
+            throw new InvalidOperationException(
+                "El administrador no puede quitarse a sí mismo " +
+                "el rol de Administrador.");
+        }
+
+        Rol? rol =
+            await _rolRepositorio.ObtenerPorIdAsync(
+                rolId);
+
+        if (rol is null)
+        {
+            throw new InvalidOperationException(
+                "El rol seleccionado no existe.");
+        }
+
+        if (!rol.Activo)
+        {
+            throw new InvalidOperationException(
+                "El rol seleccionado se encuentra inactivo.");
+        }
+
+        string nombreRolEsperado =
+            RolesSistema.ObtenerNombreEsperado(rolId)
+            ?? throw new InvalidOperationException(
+                "La configuración del rol no es válida.");
+
+        if (string.IsNullOrWhiteSpace(rol.Nombre)
+            || !string.Equals(
+                rol.Nombre,
+                nombreRolEsperado,
+                StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "La configuración del rol seleccionado no es válida.");
+        }
+
+        usuario.Nombre = nombre;
+        usuario.Apellido = apellido;
+        usuario.RolId = rolId;
+
+        await _usuarioRepositorio.ActualizarAsync(usuario);
     }
 
     /// <summary>
@@ -293,7 +438,8 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Valida que un identificador de usuario sea mayor que cero.
     /// </summary>
-    private static void ValidarId(int id)
+    private static void ValidarId(
+        int id)
     {
         if (id <= 0)
         {

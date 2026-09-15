@@ -17,7 +17,8 @@ public sealed class ClienteServicio
     /// Inicializa una nueva instancia de la clase <see cref="ClienteServicio"/> con el repositorio de clientes proporcionado.
     /// </summary>
     /// <param name="clienteRepositorio"></param>
-    public ClienteServicio(IClienteRepositorio clienteRepositorio)
+    public ClienteServicio(
+        IClienteRepositorio clienteRepositorio)
     {
         _clienteRepositorio = clienteRepositorio;
     }
@@ -45,7 +46,8 @@ public sealed class ClienteServicio
     /// </summary>
     /// <param name="id"></param>
     /// <returns>El cliente encontrado o null si no se encuentra.</returns>
-    public async Task<Cliente?> ObtenerPorIdAsync(int id)
+    public async Task<Cliente?> ObtenerPorIdAsync(
+        int id)
     {
         ValidarId(id);
 
@@ -64,7 +66,14 @@ public sealed class ClienteServicio
     /// <param name="direccion"></param>
     /// <returns>El cliente registrado.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task<Cliente> RegistrarAsync(string tipoDocumento, string documento, string nombre, string apellido, string? telefono, string? email, string? direccion)
+    public async Task<Cliente> RegistrarAsync(
+        string tipoDocumento, 
+        string documento, 
+        string nombre, 
+        string apellido, 
+        string? telefono, 
+        string? email, 
+        string? direccion)
     {
         tipoDocumento = NormalizarObligatorio(
             tipoDocumento,
@@ -119,8 +128,8 @@ public sealed class ClienteServicio
     /// <param name="documento"></param>
     /// <returns>El cliente encontrado o null si no se encuentra.</returns>
     public async Task<Cliente?> ObtenerPorDocumentoAsync(
-    string tipoDocumento,
-    string documento)
+        string tipoDocumento,
+        string documento)
     {
         tipoDocumento = NormalizarObligatorio(
             tipoDocumento,
@@ -150,7 +159,15 @@ public sealed class ClienteServicio
     /// <param name="direccion"></param>
     /// <returns>El cliente modificado.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task ModificarAsync(int idCliente, string tipoDocumento, string documento, string nombre, string apellido, string? telefono, string? email, string? direccion)
+    public async Task ModificarAsync(
+        int idCliente, 
+        string tipoDocumento, 
+        string documento, 
+        string nombre, 
+        string apellido, 
+        string? telefono, 
+        string? email, 
+        string? direccion)
     {
         ValidarId(idCliente);
 
@@ -204,7 +221,8 @@ public sealed class ClienteServicio
     /// <param name="idCliente"></param>
     /// <returns>El cliente dado de baja.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task DarDeBajaAsync(int idCliente)
+    public async Task DarDeBajaAsync(
+        int idCliente)
     {
         ValidarId(idCliente);
 
@@ -231,7 +249,8 @@ public sealed class ClienteServicio
     /// <param name="idCliente"></param>
     /// <returns>El cliente reactivado.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task ReactivarAsync(int idCliente)
+    public async Task ReactivarAsync(
+        int idCliente)
     {
         ValidarId(idCliente);
 
@@ -257,7 +276,8 @@ public sealed class ClienteServicio
     /// </summary>
     /// <param name="idCliente"></param>
     /// <exception cref="ArgumentException"></exception>
-    private static void ValidarId(int idCliente)
+    private static void ValidarId(
+        int idCliente)
     {
         if (idCliente <= 0)
         {
@@ -272,7 +292,8 @@ public sealed class ClienteServicio
     /// </summary>
     /// <param name="valor"></param>
     /// <returns>El valor normalizado o null si es nulo o vacío.</returns>
-    private static string? NormalizarOpcional(string? valor)
+    private static string? NormalizarOpcional(
+        string? valor)
     {
         return string.IsNullOrWhiteSpace(valor)
             ? null
@@ -288,9 +309,9 @@ public sealed class ClienteServicio
     /// <returns>El valor normalizado.</returns>
     /// <exception cref="ArgumentException"></exception>
     private static string NormalizarObligatorio(
-    string? valor,
-    string nombreParametro,
-    string mensaje)
+        string? valor,
+        string nombreParametro,
+        string mensaje)
     {
         if (string.IsNullOrWhiteSpace(valor))
         {

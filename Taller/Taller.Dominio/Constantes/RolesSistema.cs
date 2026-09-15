@@ -17,7 +17,8 @@ public static class RolesSistema
     /// Indica si el identificador corresponde a uno
     /// de los roles definidos por el sistema.
     /// </summary>
-    public static bool EsRolValido(int rolId)
+    public static bool EsRolValido(
+        int rolId)
     {
         return rolId == AdministradorId
             || rolId == AdministrativoId
@@ -27,7 +28,8 @@ public static class RolesSistema
     /// <summary>
     /// Obtiene el nombre esperado para un rol del sistema.
     /// </summary>
-    public static string? ObtenerNombreEsperado(int rolId)
+    public static string? ObtenerNombreEsperado(
+        int rolId)
     {
         return rolId switch
         {

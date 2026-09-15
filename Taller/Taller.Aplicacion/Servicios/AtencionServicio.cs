@@ -46,7 +46,8 @@ public sealed class AtencionServicio
     /// </summary>
     /// <param name="idAtencion">Identificador de la atención.</param>
     /// <returns>La atención encontrada o null si no existe.</returns>
-    public async Task<Atencion?> ObtenerPorIdAsync(int idAtencion)
+    public async Task<Atencion?> ObtenerPorIdAsync(
+        int idAtencion)
     {
         ValidarId(idAtencion, nameof(idAtencion));
 
@@ -56,7 +57,8 @@ public sealed class AtencionServicio
     /// <summary>
     /// Lista todas las atenciones asociadas a un cliente.
     /// </summary>
-    public async Task<List<Atencion>> ListarPorClienteAsync(int idCliente)
+    public async Task<List<Atencion>> ListarPorClienteAsync(
+        int idCliente)
     {
         ValidarId(idCliente, nameof(idCliente));
 
@@ -66,7 +68,8 @@ public sealed class AtencionServicio
     /// <summary>
     /// Lista todas las atenciones asociadas a un vehículo.
     /// </summary>
-    public async Task<List<Atencion>> ListarPorVehiculoAsync(int idVehiculo)
+    public async Task<List<Atencion>> ListarPorVehiculoAsync(
+        int idVehiculo)
     {
         ValidarId(idVehiculo, nameof(idVehiculo));
 
@@ -174,7 +177,8 @@ public sealed class AtencionServicio
     /// <summary>
     /// Cambia una atención abierta al estado EnProceso.
     /// </summary>
-    public async Task IniciarProcesoAsync(int idAtencion)
+    public async Task IniciarProcesoAsync(
+        int idAtencion)
     {
         ValidarId(idAtencion, nameof(idAtencion));
 
@@ -195,7 +199,8 @@ public sealed class AtencionServicio
     /// <summary>
     /// Cancela una atención que aún no se encuentra cerrada.
     /// </summary>
-    public async Task CancelarAsync(int idAtencion)
+    public async Task CancelarAsync(
+        int idAtencion)
     {
         ValidarId(idAtencion, nameof(idAtencion));
 
@@ -223,7 +228,8 @@ public sealed class AtencionServicio
     /// Cierra una atención y registra la fecha de cierre.
     /// El cierre representa también la entrega del vehículo.
     /// </summary>
-    public async Task CerrarAsync(int idAtencion)
+    public async Task CerrarAsync(
+        int idAtencion)
     {
         ValidarId(idAtencion, nameof(idAtencion));
 
@@ -292,7 +298,8 @@ public sealed class AtencionServicio
     /// <summary>
     /// Verifica que el cliente exista y se encuentre activo.
     /// </summary>
-    private async Task ValidarClienteAsync(int idCliente)
+    private async Task ValidarClienteAsync(
+        int idCliente)
     {
         var cliente =
             await _clienteRepositorio.ObtenerPorIdAsync(idCliente);
@@ -313,7 +320,8 @@ public sealed class AtencionServicio
     /// <summary>
     /// Verifica que el vehículo exista y se encuentre activo.
     /// </summary>
-    private async Task ValidarVehiculoAsync(int idVehiculo)
+    private async Task ValidarVehiculoAsync(
+        int idVehiculo)
     {
         var vehiculo =
             await _vehiculoRepositorio.ObtenerPorIdAsync(idVehiculo);

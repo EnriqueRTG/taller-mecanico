@@ -18,7 +18,9 @@ public sealed class VehiculoServicio
     /// </summary>
     /// <param name="vehiculoRepositorio"></param>
     /// <param name="modeloRepositorio"></param>
-    public VehiculoServicio(IVehiculoRepositorio vehiculoRepositorio, IModeloRepositorio modeloRepositorio)
+    public VehiculoServicio(
+        IVehiculoRepositorio vehiculoRepositorio, 
+        IModeloRepositorio modeloRepositorio)
     {
         _vehiculoRepositorio = vehiculoRepositorio;
         _modeloRepositorio = modeloRepositorio;
@@ -47,7 +49,8 @@ public sealed class VehiculoServicio
     /// </summary>
     /// <param name="idVehiculo"></param>
     /// <returns>El vehículo encontrado o null si no se encuentra.</returns>
-    public async Task<Vehiculo?> ObtenerPorIdAsync(int idVehiculo)
+    public async Task<Vehiculo?> ObtenerPorIdAsync(
+        int idVehiculo)
     {
         ValidarId(idVehiculo);
 
@@ -59,7 +62,8 @@ public sealed class VehiculoServicio
     /// </summary>
     /// <param name="dominio"></param>
     /// <returns>El vehículo encontrado o null si no se encuentra.</returns>
-    public async Task<Vehiculo?> ObtenerPorDominioAsync(string dominio)
+    public async Task<Vehiculo?> ObtenerPorDominioAsync(
+        string dominio)
     {
         dominio = NormalizarDominio(dominio);
 
@@ -75,7 +79,11 @@ public sealed class VehiculoServicio
     /// <param name="idModelo"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task<Vehiculo> RegistrarAsync(string dominio, int anio, string color, int idModelo)
+    public async Task<Vehiculo> RegistrarAsync(
+        string dominio, 
+        int anio, 
+        string color, 
+        int idModelo)
     {
         dominio = NormalizarDominio(dominio);
 
@@ -117,7 +125,12 @@ public sealed class VehiculoServicio
     /// <param name="idModelo"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task<Vehiculo> ModificarAsync(int idVehiculo, string dominio, int anio, string color, int idModelo)
+    public async Task<Vehiculo> ModificarAsync(
+        int idVehiculo, 
+        string dominio, 
+        int anio, 
+        string color, 
+        int idModelo)
     {
         ValidarId(idVehiculo);
 
@@ -159,7 +172,8 @@ public sealed class VehiculoServicio
     /// <param name="idVehiculo"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task DarDeBajaAsync(int idVehiculo)
+    public async Task DarDeBajaAsync(
+        int idVehiculo)
     {
         ValidarId(idVehiculo);
 
@@ -186,7 +200,8 @@ public sealed class VehiculoServicio
     /// <param name="idVehiculo"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task ReactivarAsync(int idVehiculo)
+    public async Task ReactivarAsync(
+        int idVehiculo)
     {
         ValidarId(idVehiculo);
 
@@ -212,7 +227,8 @@ public sealed class VehiculoServicio
     /// </summary>
     /// <param name="idVehiculo"></param>
     /// <exception cref="ArgumentException"></exception>
-    private static void ValidarId(int idVehiculo)
+    private static void ValidarId(
+        int idVehiculo)
     {
         if (idVehiculo <= 0)
         {
@@ -227,7 +243,8 @@ public sealed class VehiculoServicio
     /// </summary>
     /// <param name="idModelo"></param>
     /// <exception cref="ArgumentException"></exception>
-    private static void ValidarIdModelo(int idModelo)
+    private static void ValidarIdModelo(
+        int idModelo)
     {
         if (idModelo <= 0)
         {
@@ -243,7 +260,8 @@ public sealed class VehiculoServicio
     /// <param name="idModelo"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task ValidarModeloAsync(int idModelo)
+    private async Task ValidarModeloAsync(
+        int idModelo)
     {
         var modelo = await _modeloRepositorio.ObtenerPorIdAsync(idModelo);
 
@@ -268,7 +286,8 @@ public sealed class VehiculoServicio
     /// </summary>
     /// <param name="anio"></param>
     /// <exception cref="ArgumentException"></exception>
-    private static void ValidarAnio(int anio)
+    private static void ValidarAnio(
+        int anio)
     {
         int anioMaximo = DateTime.Now.Year + 1;
 
@@ -286,7 +305,8 @@ public sealed class VehiculoServicio
     /// <param name="dominio"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    private static string NormalizarDominio(string? dominio)
+    private static string NormalizarDominio(
+        string? dominio)
     {
         if (string.IsNullOrWhiteSpace(dominio))
         {
@@ -315,7 +335,8 @@ public sealed class VehiculoServicio
     /// <param name="color"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    private static string NormalizarColor(string? color)
+    private static string NormalizarColor(
+        string? color)
     {
         color = NormalizarObligatorio(
             color, 
@@ -340,7 +361,10 @@ public sealed class VehiculoServicio
     /// <param name="mensaje"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    private static string NormalizarObligatorio(string? valor, string nombreParametro, string mensaje)
+    private static string NormalizarObligatorio(
+        string? valor, 
+        string nombreParametro, 
+        string mensaje)
     {
         if (string.IsNullOrWhiteSpace(valor))
         {

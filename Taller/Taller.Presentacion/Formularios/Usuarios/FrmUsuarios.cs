@@ -20,6 +20,7 @@ public partial class FrmUsuarios : Form
 {
     private readonly UsuarioServicio _usuarioServicio;
     private readonly IServiceProvider _proveedorServicios;
+    private readonly SesionUsuario _sesionUsuario;
 
     private List<Usuario> _usuarios = [];
     private bool _cargando;
@@ -38,7 +39,8 @@ public partial class FrmUsuarios : Form
     /// </exception>
     public FrmUsuarios(
         UsuarioServicio usuarioServicio,
-        IServiceProvider proveedorServicios)
+        IServiceProvider proveedorServicios,
+        SesionUsuario sesionUsuario)
     {
         InitializeComponent();
 
@@ -51,6 +53,10 @@ public partial class FrmUsuarios : Form
             proveedorServicios
             ?? throw new ArgumentNullException(
                 nameof(proveedorServicios));
+
+        _sesionUsuario = sesionUsuario
+            ?? throw new ArgumentNullException(
+                nameof(sesionUsuario));
 
         dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
     }
@@ -357,13 +363,42 @@ public partial class FrmUsuarios : Form
     /// </summary>
     private void ActualizarEstadoAcciones()
     {
-        btnEditarUsuario.Enabled =
-            !_cargando
-            && ObtenerFilaSeleccionada() is not null;
+        UsuarioFila? fila =
+            ObtenerFilaSeleccionada();
 
-        btnGestionarCredenciales.Enabled =
-            !_cargando
-            && ObtenerFilaSeleccionada() is not null;
+        bool haySeleccion =
+            !_cargando && fila is not null;
+
+        btnEditarUsuario.Enabled = haySeleccion;
+        btnGestionarCredenciales.Enabled = haySeleccion;
+
+        int? ejecutorId =
+            _sesionUsuario.UsuarioActual?.Id;
+
+        bool esCuentaPropia =
+            fila is not null
+            && fila.Id == ejecutorId;
+
+        btnCambiarEstado.Enabled =
+            haySeleccion && !esCuentaPropia;
+
+        bool usuarioActivo =
+            fila?.Estado == "Activo";
+
+        btnCambiarEstado.Text =
+            usuarioActivo
+                ? "Deshabilitar usuario"
+                : "Habilitar usuario";
+
+        btnCambiarEstado.ForeColor =
+            usuarioActivo
+                ? Color.FromArgb(185, 28, 28)
+                : Color.FromArgb(30, 64, 175);
+
+        btnCambiarEstado.FlatAppearance.BorderColor =
+            usuarioActivo
+                ? Color.FromArgb(185, 28, 28)
+                : Color.FromArgb(30, 64, 175);
     }
 
     /// <summary>
@@ -457,4 +492,81 @@ public partial class FrmUsuarios : Form
         }
     }
 
+    private async void btnCambiarEstado_Click(
+        object? sender,
+        EventArgs e)
+    {
+        UsuarioFila? fila =
+            ObtenerFilaSeleccionada();
+
+        Usuario? ejecutor =
+            _sesionUsuario.UsuarioActual;
+
+        if (fila is null || ejecutor is null)
+        {
+            MessageBox.Show(
+                "Seleccione un usuario e inicie sesión nuevamente " +
+                "si la sesión ya no está disponible.",
+                "Operación no disponible",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        bool habilitar =
+            fila.Estado == "Inactivo";
+
+        string accion =
+            habilitar
+                ? "habilitar"
+                : "deshabilitar";
+
+        DialogResult confirmacion =
+            MessageBox.Show(
+                $"¿Desea {accion} la cuenta " +
+                $"\"{fila.NombreUsuario}\"?",
+                "Confirmar cambio de estado",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+
+        if (confirmacion != DialogResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            CambiarEstadoCarga(true);
+
+            await _usuarioServicio.CambiarEstadoAsync(
+                fila.Id,
+                habilitar,
+                ejecutor.Id);
+
+            await CargarUsuariosAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                "No se pudo cambiar el estado",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+        catch (Exception)
+        {
+            MessageBox.Show(
+                "No fue posible cambiar el estado del usuario. " +
+                "Inténtelo nuevamente.",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+        finally
+        {
+            CambiarEstadoCarga(false);
+        }
+    }
 }

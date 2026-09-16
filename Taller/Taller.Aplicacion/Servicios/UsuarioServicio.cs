@@ -429,6 +429,69 @@ public sealed class UsuarioServicio
     }
 
     /// <summary>
+    /// Cambia el estado de acceso de un usuario registrado.
+    /// </summary>
+    /// <remarks>
+    /// Solo un administrador activo puede realizar la operación.
+    /// El administrador no puede deshabilitar su propia cuenta.
+    /// </remarks>
+    public async Task CambiarEstadoAsync(
+        int usuarioId,
+        bool habilitar,
+        int usuarioEjecutorId)
+    {
+        ValidarId(usuarioId);
+        ValidarId(usuarioEjecutorId);
+
+        Usuario? ejecutor =
+            await _usuarioRepositorio.ObtenerPorIdAsync(
+                usuarioEjecutorId);
+
+        if (ejecutor is null || !ejecutor.Activo)
+        {
+            throw new InvalidOperationException(
+                "La cuenta del administrador que realiza " +
+                "la operación no está disponible.");
+        }
+
+        if (ejecutor.RolId != RolesSistema.AdministradorId)
+        {
+            throw new InvalidOperationException(
+                "Solamente un administrador puede cambiar " +
+                "el estado de los usuarios.");
+        }
+
+        Usuario? usuario =
+            await _usuarioRepositorio.ObtenerPorIdAsync(
+                usuarioId);
+
+        if (usuario is null)
+        {
+            throw new InvalidOperationException(
+                "El usuario seleccionado ya no existe.");
+        }
+
+        if (usuario.Id == ejecutor.Id && !habilitar)
+        {
+            throw new InvalidOperationException(
+                "El administrador no puede deshabilitar " +
+                "su propia cuenta.");
+        }
+
+        if (usuario.Activo == habilitar)
+        {
+            throw new InvalidOperationException(
+                habilitar
+                    ? "El usuario ya se encuentra habilitado."
+                    : "El usuario ya se encuentra deshabilitado.");
+        }
+
+        usuario.Activo = habilitar;
+
+        await _usuarioRepositorio.ActualizarAsync(usuario);
+    }
+
+    /// <summary>
     /// Registra un nuevo usuario después de validar sus datos,
     /// el rol seleccionado y la disponibilidad del nombre de acceso.
     /// </summary>

@@ -96,7 +96,11 @@ public sealed class AutenticacionServicio
                 .ObtenerPorNombreUsuarioAsync(
                     nombreUsuarioNormalizado);
 
-        if (!EsUsuarioHabilitado(usuario))
+        if (!EsUsuarioHabilitado(usuario)
+            || !string.Equals(
+            usuario!.NombreUsuario,
+             nombreUsuarioNormalizado,
+            StringComparison.Ordinal))
         {
             return null;
         }

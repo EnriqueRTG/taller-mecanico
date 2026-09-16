@@ -22,6 +22,7 @@ public partial class FrmUsuarios : Form
     private readonly IServiceProvider _proveedorServicios;
 
     private List<Usuario> _usuarios = [];
+    private bool _cargando;
 
     /// <summary>
     /// Inicializa una nueva instancia del formulario de usuarios.
@@ -50,6 +51,8 @@ public partial class FrmUsuarios : Form
             proveedorServicios
             ?? throw new ArgumentNullException(
                 nameof(proveedorServicios));
+
+        dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
     }
 
     /// <summary>
@@ -184,6 +187,8 @@ public partial class FrmUsuarios : Form
         dgvUsuarios.DataSource = filas;
         dgvUsuarios.ClearSelection();
 
+        ActualizarEstadoAcciones();
+
         lblCantidad.Text =
             filas.Count == 1
                 ? "1 usuario encontrado"
@@ -260,14 +265,17 @@ public partial class FrmUsuarios : Form
     /// Indica si existe una carga en curso.
     /// </param>
     private void CambiarEstadoCarga(
-        bool cargando)
+    bool cargando)
     {
+        _cargando = cargando;
+
         btnNuevoUsuario.Enabled = !cargando;
         btnActualizar.Enabled = !cargando;
         txtBuscar.Enabled = !cargando;
         cboEstado.Enabled = !cargando;
+        dgvUsuarios.Enabled = !cargando;
 
-        UseWaitCursor = cargando;
+        ActualizarEstadoAcciones();
     }
 
     /// <summary>
@@ -329,4 +337,124 @@ public partial class FrmUsuarios : Form
 
         public DateTime FechaAlta { get; init; }
     }
+
+    /// <summary>
+    /// Obtiene la fila seleccionada explícitamente por el usuario.
+    /// </summary>
+    private UsuarioFila? ObtenerFilaSeleccionada()
+    {
+        if (dgvUsuarios.SelectedRows.Count != 1)
+        {
+            return null;
+        }
+
+        return dgvUsuarios.SelectedRows[0].DataBoundItem
+            as UsuarioFila;
+    }
+
+    /// <summary>
+    /// Habilita las acciones que requieren un usuario seleccionado.
+    /// </summary>
+    private void ActualizarEstadoAcciones()
+    {
+        btnEditarUsuario.Enabled =
+            !_cargando
+            && ObtenerFilaSeleccionada() is not null;
+
+        btnGestionarCredenciales.Enabled =
+            !_cargando
+            && ObtenerFilaSeleccionada() is not null;
+    }
+
+    /// <summary>
+    /// Actualiza las acciones disponibles cuando cambia
+    /// la fila seleccionada.
+    /// </summary>
+    private void dgvUsuarios_SelectionChanged(
+        object? sender,
+        EventArgs e)
+    {
+        ActualizarEstadoAcciones();
+    }
+
+    /// <summary>
+    /// Abre el formulario para editar los datos del usuario
+    /// seleccionado y actualiza el listado después de guardar.
+    /// </summary>
+    private async void btnEditarUsuario_Click(
+    object? sender,
+    EventArgs e)
+    {
+        UsuarioFila? fila =
+            ObtenerFilaSeleccionada();
+
+        if (fila is null)
+        {
+            MessageBox.Show(
+                "Debe seleccionar un usuario.",
+                "Selección requerida",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        try
+        {
+            using FrmEditarUsuario formulario =
+                _proveedorServicios
+                    .GetRequiredService<FrmEditarUsuario>();
+
+            formulario.PrepararEdicion(fila.Id);
+
+            DialogResult resultado =
+                formulario.ShowDialog(this);
+
+            if (resultado == DialogResult.OK)
+            {
+                await CargarUsuariosAsync();
+            }
+        }
+        catch (Exception)
+        {
+            MessageBox.Show(
+                "No fue posible abrir el formulario " +
+                "de edición del usuario.",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+    }
+    private async void btnGestionarCredenciales_Click(
+        object? sender,
+        EventArgs e)
+    {
+        UsuarioFila? fila = ObtenerFilaSeleccionada();
+
+        if (fila is null)
+        {
+            MessageBox.Show(
+                "Debe seleccionar un usuario.",
+                "Selección requerida",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        using FrmGestionarCredenciales formulario =
+            _proveedorServicios
+                .GetRequiredService<FrmGestionarCredenciales>();
+
+        formulario.PrepararGestion(fila.Id);
+
+        DialogResult resultado =
+            formulario.ShowDialog(this);
+
+        if (resultado == DialogResult.OK)
+        {
+            await CargarUsuariosAsync();
+        }
+    }
+
 }

@@ -74,10 +74,10 @@
             btnGuardar.FlatStyle = FlatStyle.Flat;
             btnGuardar.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnGuardar.ForeColor = Color.White;
-            btnGuardar.Location = new Point(368, 14);
+            btnGuardar.Location = new Point(358, 14);
             btnGuardar.Margin = new Padding(8, 0, 0, 0);
             btnGuardar.Name = "btnGuardar";
-            btnGuardar.Size = new Size(120, 38);
+            btnGuardar.Size = new Size(130, 38);
             btnGuardar.TabIndex = 2;
             btnGuardar.Text = "Guardar usuario";
             btnGuardar.UseVisualStyleBackColor = false;
@@ -94,7 +94,7 @@
             btnCancelar.FlatStyle = FlatStyle.Flat;
             btnCancelar.Font = new Font("Segoe UI", 9.5F);
             btnCancelar.ForeColor = Color.FromArgb(51, 65, 85);
-            btnCancelar.Location = new Point(240, 14);
+            btnCancelar.Location = new Point(230, 14);
             btnCancelar.Margin = new Padding(8, 0, 0, 0);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(120, 38);
@@ -116,10 +116,11 @@
             // 
             // lblNombre
             // 
+            lblNombre.Anchor = AnchorStyles.Left;
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblNombre.ForeColor = Color.FromArgb(51, 65, 85);
-            lblNombre.Location = new Point(4, 3);
+            lblNombre.Location = new Point(4, 16);
             lblNombre.Margin = new Padding(4, 3, 8, 3);
             lblNombre.Name = "lblNombre";
             lblNombre.Size = new Size(56, 15);
@@ -129,10 +130,10 @@
             // 
             // txtNombre
             // 
+            txtNombre.Anchor = AnchorStyles.Left;
             txtNombre.BorderStyle = BorderStyle.FixedSingle;
-            txtNombre.Dock = DockStyle.Fill;
             txtNombre.Font = new Font("Segoe UI", 9.75F);
-            txtNombre.Location = new Point(150, 8);
+            txtNombre.Location = new Point(150, 11);
             txtNombre.Margin = new Padding(0, 8, 0, 8);
             txtNombre.MaxLength = 100;
             txtNombre.Name = "txtNombre";
@@ -142,10 +143,11 @@
             // 
             // lblApellido
             // 
+            lblApellido.Anchor = AnchorStyles.Left;
             lblApellido.AutoSize = true;
             lblApellido.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblApellido.ForeColor = Color.FromArgb(51, 65, 85);
-            lblApellido.Location = new Point(4, 51);
+            lblApellido.Location = new Point(4, 64);
             lblApellido.Margin = new Padding(4, 3, 8, 3);
             lblApellido.Name = "lblApellido";
             lblApellido.Size = new Size(55, 15);
@@ -155,10 +157,10 @@
             // 
             // txtApellido
             // 
+            txtApellido.Anchor = AnchorStyles.Left;
             txtApellido.BorderStyle = BorderStyle.FixedSingle;
-            txtApellido.Dock = DockStyle.Fill;
             txtApellido.Font = new Font("Segoe UI", 9.75F);
-            txtApellido.Location = new Point(150, 56);
+            txtApellido.Location = new Point(150, 59);
             txtApellido.Margin = new Padding(0, 8, 0, 8);
             txtApellido.MaxLength = 100;
             txtApellido.Name = "txtApellido";
@@ -168,10 +170,11 @@
             // 
             // lblNombreUsuario
             // 
+            lblNombreUsuario.Anchor = AnchorStyles.Left;
             lblNombreUsuario.AutoSize = true;
             lblNombreUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblNombreUsuario.ForeColor = Color.FromArgb(51, 65, 85);
-            lblNombreUsuario.Location = new Point(4, 99);
+            lblNombreUsuario.Location = new Point(4, 112);
             lblNombreUsuario.Margin = new Padding(4, 3, 8, 3);
             lblNombreUsuario.Name = "lblNombreUsuario";
             lblNombreUsuario.Size = new Size(99, 15);
@@ -181,10 +184,10 @@
             // 
             // txtNombreUsuario
             // 
+            txtNombreUsuario.Anchor = AnchorStyles.Left;
             txtNombreUsuario.BorderStyle = BorderStyle.FixedSingle;
-            txtNombreUsuario.Dock = DockStyle.Fill;
             txtNombreUsuario.Font = new Font("Segoe UI", 9.75F);
-            txtNombreUsuario.Location = new Point(150, 104);
+            txtNombreUsuario.Location = new Point(150, 107);
             txtNombreUsuario.Margin = new Padding(0, 8, 0, 8);
             txtNombreUsuario.MaxLength = 50;
             txtNombreUsuario.Name = "txtNombreUsuario";
@@ -194,10 +197,11 @@
             // 
             // lblPassword
             // 
+            lblPassword.Anchor = AnchorStyles.Left;
             lblPassword.AutoSize = true;
             lblPassword.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblPassword.ForeColor = Color.FromArgb(51, 65, 85);
-            lblPassword.Location = new Point(4, 147);
+            lblPassword.Location = new Point(4, 160);
             lblPassword.Margin = new Padding(4, 3, 8, 3);
             lblPassword.Name = "lblPassword";
             lblPassword.Size = new Size(72, 15);
@@ -207,10 +211,10 @@
             // 
             // txtPassword
             // 
+            txtPassword.Anchor = AnchorStyles.Left;
             txtPassword.BorderStyle = BorderStyle.FixedSingle;
-            txtPassword.Dock = DockStyle.Fill;
             txtPassword.Font = new Font("Segoe UI", 9.75F);
-            txtPassword.Location = new Point(150, 152);
+            txtPassword.Location = new Point(150, 155);
             txtPassword.Margin = new Padding(0, 8, 0, 8);
             txtPassword.MaxLength = 100;
             txtPassword.Name = "txtPassword";
@@ -221,10 +225,11 @@
             // 
             // lblConfirmarPassword
             // 
+            lblConfirmarPassword.Anchor = AnchorStyles.Left;
             lblConfirmarPassword.AutoSize = true;
             lblConfirmarPassword.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblConfirmarPassword.ForeColor = Color.FromArgb(51, 65, 85);
-            lblConfirmarPassword.Location = new Point(4, 195);
+            lblConfirmarPassword.Location = new Point(4, 208);
             lblConfirmarPassword.Margin = new Padding(4, 3, 8, 3);
             lblConfirmarPassword.Name = "lblConfirmarPassword";
             lblConfirmarPassword.Size = new Size(130, 15);
@@ -234,10 +239,10 @@
             // 
             // txtConfirmarPassword
             // 
+            txtConfirmarPassword.Anchor = AnchorStyles.Left;
             txtConfirmarPassword.BorderStyle = BorderStyle.FixedSingle;
-            txtConfirmarPassword.Dock = DockStyle.Fill;
             txtConfirmarPassword.Font = new Font("Segoe UI", 9.75F);
-            txtConfirmarPassword.Location = new Point(150, 200);
+            txtConfirmarPassword.Location = new Point(150, 203);
             txtConfirmarPassword.Margin = new Padding(0, 8, 0, 8);
             txtConfirmarPassword.MaxLength = 100;
             txtConfirmarPassword.Name = "txtConfirmarPassword";
@@ -263,10 +268,11 @@
             // 
             // lblRol
             // 
+            lblRol.Anchor = AnchorStyles.Left;
             lblRol.AutoSize = true;
             lblRol.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblRol.ForeColor = Color.FromArgb(51, 65, 85);
-            lblRol.Location = new Point(4, 281);
+            lblRol.Location = new Point(4, 295);
             lblRol.Margin = new Padding(4, 3, 8, 3);
             lblRol.Name = "lblRol";
             lblRol.Size = new Size(28, 15);
@@ -276,11 +282,11 @@
             // 
             // cmbRol
             // 
-            cmbRol.Dock = DockStyle.Fill;
+            cmbRol.Anchor = AnchorStyles.Left;
             cmbRol.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbRol.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cmbRol.FormattingEnabled = true;
-            cmbRol.Location = new Point(150, 286);
+            cmbRol.Location = new Point(150, 290);
             cmbRol.Margin = new Padding(0, 8, 0, 8);
             cmbRol.Name = "cmbRol";
             cmbRol.Size = new Size(334, 25);

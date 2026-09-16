@@ -51,17 +51,55 @@ public sealed class UsuarioRepositorio : IUsuarioRepositorio
     }
 
     /// <summary>
-    /// Actualiza un usuario existente y confirma los cambios
-    /// en la base de datos.
+    /// Actualiza los datos modificables de un usuario existente.
+    ///
+    /// La actualización se ejecuta directamente en la base de datos
+    /// y no depende del seguimiento de entidades del contexto.
     /// </summary>
     /// <param name="usuario">
-    /// Usuario cuyos datos deben actualizarse.
+    /// Usuario que contiene los valores que deben persistirse.
     /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Se produce cuando el usuario recibido es nulo.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Se produce cuando el usuario ya no existe.
+    /// </exception>
     public async Task ActualizarAsync(
         Usuario usuario)
     {
-        _contexto.Usuarios.Update(usuario);
-        await _contexto.SaveChangesAsync();
+        ArgumentNullException.ThrowIfNull(usuario);
+
+        int filasAfectadas =
+            await _contexto.Usuarios
+                .Where(registrado =>
+                    registrado.Id == usuario.Id)
+                .ExecuteUpdateAsync(actualizacion =>
+                    actualizacion
+                        .SetProperty(
+                            registrado => registrado.NombreUsuario,
+                            usuario.NombreUsuario)
+                        .SetProperty(
+                            registrado => registrado.PasswordHash,
+                            usuario.PasswordHash)
+                        .SetProperty(
+                            registrado => registrado.Nombre,
+                            usuario.Nombre)
+                        .SetProperty(
+                            registrado => registrado.Apellido,
+                            usuario.Apellido)
+                        .SetProperty(
+                            registrado => registrado.Activo,
+                            usuario.Activo)
+                        .SetProperty(
+                            registrado => registrado.RolId,
+                            usuario.RolId));
+
+        if (filasAfectadas == 0)
+        {
+            throw new InvalidOperationException(
+                "El usuario que desea actualizar ya no existe.");
+        }
     }
 
     /// <summary>

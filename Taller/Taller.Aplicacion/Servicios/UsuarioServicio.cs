@@ -268,6 +268,167 @@ public sealed class UsuarioServicio
     }
 
     /// <summary>
+    /// Actualiza las credenciales de acceso de un usuario.
+    /// </summary>
+    /// <param name="usuarioId">
+    /// Identificador del usuario cuyas credenciales serán modificadas.
+    /// </param>
+    /// <param name="nombreUsuario">
+    /// Nuevo nombre utilizado para iniciar sesión.
+    /// </param>
+    /// <param name="nuevaPassword">
+    /// Nueva contraseña. Si es nula o vacía, se conserva
+    /// la contraseña actual.
+    /// </param>
+    /// <param name="confirmarPassword">
+    /// Confirmación de la nueva contraseña.
+    /// </param>
+    /// <param name="usuarioEjecutorId">
+    /// Identificador del administrador que realiza la operación.
+    /// </param>
+    /// <remarks>
+    /// Solamente un administrador activo puede gestionar credenciales.
+    /// El administrador no puede modificar sus propias credenciales
+    /// desde la gestión general de usuarios.
+    /// </remarks>
+    public async Task ActualizarCredencialesAsync(
+        int usuarioId,
+        string? nombreUsuario,
+        string? nuevaPassword,
+        string? confirmarPassword,
+            int usuarioEjecutorId)
+    {
+        ValidarId(usuarioId);
+        ValidarId(usuarioEjecutorId);
+
+        string nombreUsuarioNormalizado =
+            NormalizarObligatorio(
+                nombreUsuario,
+                UsuarioRestricciones.NombreUsuarioMaximo,
+                nameof(nombreUsuario),
+                "El nombre de usuario es obligatorio.",
+                $"El nombre de usuario no puede superar " +
+                $"{UsuarioRestricciones.NombreUsuarioMaximo} caracteres.");
+
+        // Ambos campos vacíos significan conservar la contraseña.
+        // Una confirmación aislada siempre es un dato inconsistente.
+        if (string.IsNullOrEmpty(nuevaPassword)
+            && !string.IsNullOrEmpty(confirmarPassword))
+        {
+            throw new ValidacionException(
+                "Ingrese la nueva contraseña o deje ambos campos vacíos.",
+                nameof(nuevaPassword));
+        }
+
+        Usuario? usuarioEjecutor =
+            await _usuarioRepositorio.ObtenerPorIdAsync(
+                usuarioEjecutorId);
+
+        if (usuarioEjecutor is null)
+        {
+            throw new InvalidOperationException(
+                "El usuario que intenta realizar la operación no existe.");
+        }
+
+        if (!usuarioEjecutor.Activo)
+        {
+            throw new InvalidOperationException(
+                "El usuario que intenta realizar la operación está inactivo.");
+        }
+
+        if (usuarioEjecutor.RolId != RolesSistema.AdministradorId)
+        {
+            throw new InvalidOperationException(
+                "Solamente un administrador puede gestionar credenciales.");
+        }
+
+        Usuario? usuario =
+            await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
+
+        if (usuario is null)
+        {
+            throw new InvalidOperationException(
+                "El usuario cuyas credenciales desea modificar no existe.");
+        }
+
+        if (usuario.Id == usuarioEjecutor.Id)
+        {
+            throw new InvalidOperationException(
+                "El administrador no puede modificar sus propias " +
+                "credenciales desde la gestión de usuarios.");
+        }
+
+        bool cambiaNombreUsuario =
+            !string.Equals(
+                usuario.NombreUsuario,
+                nombreUsuarioNormalizado,
+                StringComparison.Ordinal);
+
+        bool cambiaPassword =
+            !string.IsNullOrEmpty(nuevaPassword);
+
+        if (!cambiaNombreUsuario && !cambiaPassword)
+        {
+            throw new ValidacionException(
+                "No se realizaron cambios en las credenciales.");
+        }
+
+        if (cambiaNombreUsuario)
+        {
+            bool solamenteCambiaMayusculas =
+                string.Equals(
+                    usuario.NombreUsuario,
+                    nombreUsuarioNormalizado,
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (!solamenteCambiaMayusculas)
+            {
+                bool nombreUsuarioExistente =
+                    await _usuarioRepositorio
+                        .ExisteNombreUsuarioAsync(
+                            nombreUsuarioNormalizado);
+
+                if (nombreUsuarioExistente)
+                {
+                    throw new InvalidOperationException(
+                        "El nombre de usuario ya se encuentra registrado.");
+                }
+            }
+
+            usuario.NombreUsuario = nombreUsuarioNormalizado;
+        }
+
+        if (cambiaPassword)
+        {
+            string passwordValidado =
+                ValidarPassword(nuevaPassword);
+
+            if (!string.Equals(
+                passwordValidado,
+                confirmarPassword,
+                StringComparison.Ordinal))
+            {
+                throw new ValidacionException(
+                    "Las contraseñas ingresadas no coinciden.",
+                    nameof(confirmarPassword));
+            }
+
+            string passwordHash =
+                _passwordHasher.Hash(passwordValidado);
+
+            if (string.IsNullOrWhiteSpace(passwordHash))
+            {
+                throw new InvalidOperationException(
+                    "No fue posible proteger la nueva contraseña.");
+            }
+
+            usuario.PasswordHash = passwordHash;
+        }
+
+        await _usuarioRepositorio.ActualizarAsync(usuario);
+    }
+
+    /// <summary>
     /// Registra un nuevo usuario después de validar sus datos,
     /// el rol seleccionado y la disponibilidad del nombre de acceso.
     /// </summary>
@@ -477,6 +638,8 @@ public sealed class UsuarioServicio
 
         return valorNormalizado;
     }
+
+
 }
 
 

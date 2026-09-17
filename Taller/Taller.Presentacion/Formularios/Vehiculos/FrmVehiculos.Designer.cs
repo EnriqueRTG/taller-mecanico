@@ -38,7 +38,15 @@
             tlpPrincipal = new TableLayoutPanel();
             pnlGrilla = new Panel();
             dgvUsuarios = new DataGridView();
+            colId = new DataGridViewTextBoxColumn();
+            dominio = new DataGridViewTextBoxColumn();
+            año = new DataGridViewTextBoxColumn();
+            color = new DataGridViewTextBoxColumn();
+            colEstado = new DataGridViewTextBoxColumn();
+            colFechaAlta = new DataGridViewTextBoxColumn();
+            modelo = new DataGridViewTextBoxColumn();
             pnlCabecera = new Panel();
+            label1 = new Label();
             btnNuevoUsuario = new Button();
             label2 = new Label();
             pnlFiltros = new Panel();
@@ -53,14 +61,6 @@
             btnEditarUsuario = new Button();
             btnGestionarCredenciales = new Button();
             btnCambiarEstado = new Button();
-            colId = new DataGridViewTextBoxColumn();
-            dominio = new DataGridViewTextBoxColumn();
-            año = new DataGridViewTextBoxColumn();
-            color = new DataGridViewTextBoxColumn();
-            colEstado = new DataGridViewTextBoxColumn();
-            colFechaAlta = new DataGridViewTextBoxColumn();
-            modelo = new DataGridViewTextBoxColumn();
-            label1 = new Label();
             tlpPrincipal.SuspendLayout();
             pnlGrilla.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvUsuarios).BeginInit();
@@ -75,7 +75,7 @@
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTitulo.Location = new Point(27, 29);
+            lblTitulo.Location = new Point(24, 22);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(307, 41);
             lblTitulo.TabIndex = 0;
@@ -86,7 +86,7 @@
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDescripcion.Location = new Point(30, 83);
+            lblDescripcion.Location = new Point(27, 76);
             lblDescripcion.Name = "lblDescripcion";
             lblDescripcion.Size = new Size(379, 23);
             lblDescripcion.TabIndex = 1;
@@ -101,8 +101,7 @@
             tlpPrincipal.Controls.Add(pnlFiltros, 0, 1);
             tlpPrincipal.Controls.Add(lblCantidad, 0, 4);
             tlpPrincipal.Controls.Add(pnlAccionesUsuario, 0, 2);
-            tlpPrincipal.Dock = DockStyle.Fill;
-            tlpPrincipal.Location = new Point(27, 27);
+            tlpPrincipal.Location = new Point(24, 22);
             tlpPrincipal.Margin = new Padding(0);
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.RowCount = 5;
@@ -111,7 +110,7 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 59F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
-            tlpPrincipal.Size = new Size(860, 546);
+            tlpPrincipal.Size = new Size(752, 410);
             tlpPrincipal.TabIndex = 2;
             // 
             // pnlGrilla
@@ -123,7 +122,7 @@
             pnlGrilla.Margin = new Padding(0);
             pnlGrilla.Name = "pnlGrilla";
             pnlGrilla.Padding = new Padding(1);
-            pnlGrilla.Size = new Size(860, 277);
+            pnlGrilla.Size = new Size(752, 141);
             pnlGrilla.TabIndex = 5;
             // 
             // dgvUsuarios
@@ -172,217 +171,8 @@
             dgvUsuarios.RowHeadersWidth = 51;
             dgvUsuarios.RowTemplate.Height = 38;
             dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvUsuarios.Size = new Size(858, 275);
+            dgvUsuarios.Size = new Size(750, 139);
             dgvUsuarios.TabIndex = 5;
-            // 
-            // pnlCabecera
-            // 
-            pnlCabecera.BackColor = Color.White;
-            pnlCabecera.Controls.Add(label1);
-            pnlCabecera.Controls.Add(btnNuevoUsuario);
-            pnlCabecera.Controls.Add(label2);
-            pnlCabecera.Dock = DockStyle.Fill;
-            pnlCabecera.Location = new Point(0, 0);
-            pnlCabecera.Margin = new Padding(0, 0, 0, 10);
-            pnlCabecera.Name = "pnlCabecera";
-            pnlCabecera.Padding = new Padding(20, 12, 20, 10);
-            pnlCabecera.Size = new Size(860, 74);
-            pnlCabecera.TabIndex = 0;
-            // 
-            // btnNuevoUsuario
-            // 
-            btnNuevoUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnNuevoUsuario.BackColor = Color.FromArgb(30, 64, 175);
-            btnNuevoUsuario.Cursor = Cursors.Hand;
-            btnNuevoUsuario.FlatAppearance.BorderSize = 0;
-            btnNuevoUsuario.FlatAppearance.MouseDownBackColor = Color.FromArgb(30, 58, 138);
-            btnNuevoUsuario.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
-            btnNuevoUsuario.FlatStyle = FlatStyle.Flat;
-            btnNuevoUsuario.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            btnNuevoUsuario.ForeColor = Color.White;
-            btnNuevoUsuario.Location = new Point(1219, 27);
-            btnNuevoUsuario.Name = "btnNuevoUsuario";
-            btnNuevoUsuario.Size = new Size(150, 40);
-            btnNuevoUsuario.TabIndex = 0;
-            btnNuevoUsuario.Text = "＋ Nuevo usuario";
-            btnNuevoUsuario.UseVisualStyleBackColor = false;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.FromArgb(15, 23, 42);
-            label2.Location = new Point(17, 5);
-            label2.Name = "label2";
-            label2.Size = new Size(281, 37);
-            label2.TabIndex = 0;
-            label2.Text = "Gestión de vehículos";
-            // 
-            // pnlFiltros
-            // 
-            pnlFiltros.BackColor = Color.White;
-            pnlFiltros.Controls.Add(btnActualizar);
-            pnlFiltros.Controls.Add(cboEstado);
-            pnlFiltros.Controls.Add(lblEstado);
-            pnlFiltros.Controls.Add(txtBuscar);
-            pnlFiltros.Controls.Add(lblBuscar);
-            pnlFiltros.Dock = DockStyle.Fill;
-            pnlFiltros.Location = new Point(0, 84);
-            pnlFiltros.Margin = new Padding(0, 0, 0, 10);
-            pnlFiltros.Name = "pnlFiltros";
-            pnlFiltros.Padding = new Padding(18, 10, 18, 10);
-            pnlFiltros.Size = new Size(860, 82);
-            pnlFiltros.TabIndex = 1;
-            // 
-            // btnActualizar
-            // 
-            btnActualizar.Cursor = Cursors.Hand;
-            btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
-            btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
-            btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
-            btnActualizar.FlatStyle = FlatStyle.Flat;
-            btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
-            btnActualizar.Location = new Point(485, 38);
-            btnActualizar.Name = "btnActualizar";
-            btnActualizar.Size = new Size(110, 32);
-            btnActualizar.TabIndex = 3;
-            btnActualizar.Text = "Actualizar";
-            btnActualizar.UseVisualStyleBackColor = true;
-            // 
-            // cboEstado
-            // 
-            cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            cboEstado.FormattingEnabled = true;
-            cboEstado.Location = new Point(320, 41);
-            cboEstado.Name = "cboEstado";
-            cboEstado.Size = new Size(145, 29);
-            cboEstado.TabIndex = 2;
-            // 
-            // lblEstado
-            // 
-            lblEstado.AutoSize = true;
-            lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
-            lblEstado.Location = new Point(338, 18);
-            lblEstado.Name = "lblEstado";
-            lblEstado.Size = new Size(56, 20);
-            lblEstado.TabIndex = 2;
-            lblEstado.Text = "Estado";
-            // 
-            // txtBuscar
-            // 
-            txtBuscar.BorderStyle = BorderStyle.FixedSingle;
-            txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtBuscar.Location = new Point(18, 42);
-            txtBuscar.Name = "txtBuscar";
-            txtBuscar.PlaceholderText = "Dominio";
-            txtBuscar.Size = new Size(280, 29);
-            txtBuscar.TabIndex = 1;
-            // 
-            // lblBuscar
-            // 
-            lblBuscar.AutoSize = true;
-            lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
-            lblBuscar.Location = new Point(21, 18);
-            lblBuscar.Name = "lblBuscar";
-            lblBuscar.Size = new Size(56, 20);
-            lblBuscar.TabIndex = 0;
-            lblBuscar.Text = "Buscar";
-            // 
-            // lblCantidad
-            // 
-            lblCantidad.AutoSize = true;
-            lblCantidad.Dock = DockStyle.Fill;
-            lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
-            lblCantidad.Location = new Point(4, 516);
-            lblCantidad.Margin = new Padding(4, 4, 0, 0);
-            lblCantidad.Name = "lblCantidad";
-            lblCantidad.Size = new Size(856, 30);
-            lblCantidad.TabIndex = 4;
-            lblCantidad.Text = "0 usuarios encontrados";
-            lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // pnlAccionesUsuario
-            // 
-            pnlAccionesUsuario.Controls.Add(flowLayoutPanel1);
-            pnlAccionesUsuario.Dock = DockStyle.Fill;
-            pnlAccionesUsuario.Location = new Point(0, 176);
-            pnlAccionesUsuario.Margin = new Padding(0, 0, 0, 10);
-            pnlAccionesUsuario.Name = "pnlAccionesUsuario";
-            pnlAccionesUsuario.Padding = new Padding(18, 7, 18, 7);
-            pnlAccionesUsuario.Size = new Size(860, 49);
-            pnlAccionesUsuario.TabIndex = 6;
-            // 
-            // flowLayoutPanel1
-            // 
-            flowLayoutPanel1.BackColor = Color.White;
-            flowLayoutPanel1.Controls.Add(btnEditarUsuario);
-            flowLayoutPanel1.Controls.Add(btnGestionarCredenciales);
-            flowLayoutPanel1.Controls.Add(btnCambiarEstado);
-            flowLayoutPanel1.Dock = DockStyle.Fill;
-            flowLayoutPanel1.Location = new Point(18, 7);
-            flowLayoutPanel1.Margin = new Padding(0);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(824, 35);
-            flowLayoutPanel1.TabIndex = 0;
-            flowLayoutPanel1.WrapContents = false;
-            // 
-            // btnEditarUsuario
-            // 
-            btnEditarUsuario.Cursor = Cursors.Hand;
-            btnEditarUsuario.Enabled = false;
-            btnEditarUsuario.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
-            btnEditarUsuario.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
-            btnEditarUsuario.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
-            btnEditarUsuario.FlatStyle = FlatStyle.Flat;
-            btnEditarUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnEditarUsuario.ForeColor = Color.FromArgb(30, 64, 175);
-            btnEditarUsuario.Location = new Point(0, 0);
-            btnEditarUsuario.Margin = new Padding(0, 0, 8, 0);
-            btnEditarUsuario.Name = "btnEditarUsuario";
-            btnEditarUsuario.Size = new Size(120, 34);
-            btnEditarUsuario.TabIndex = 0;
-            btnEditarUsuario.Text = "Editar datos";
-            btnEditarUsuario.UseVisualStyleBackColor = false;
-            // 
-            // btnGestionarCredenciales
-            // 
-            btnGestionarCredenciales.Cursor = Cursors.Hand;
-            btnGestionarCredenciales.Enabled = false;
-            btnGestionarCredenciales.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
-            btnGestionarCredenciales.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
-            btnGestionarCredenciales.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
-            btnGestionarCredenciales.FlatStyle = FlatStyle.Flat;
-            btnGestionarCredenciales.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnGestionarCredenciales.ForeColor = Color.FromArgb(30, 64, 175);
-            btnGestionarCredenciales.Location = new Point(128, 0);
-            btnGestionarCredenciales.Margin = new Padding(0, 0, 8, 0);
-            btnGestionarCredenciales.Name = "btnGestionarCredenciales";
-            btnGestionarCredenciales.Size = new Size(180, 34);
-            btnGestionarCredenciales.TabIndex = 1;
-            btnGestionarCredenciales.Text = "Gestionar credenciales";
-            btnGestionarCredenciales.UseVisualStyleBackColor = false;
-            // 
-            // btnCambiarEstado
-            // 
-            btnCambiarEstado.Cursor = Cursors.Hand;
-            btnCambiarEstado.Enabled = false;
-            btnCambiarEstado.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
-            btnCambiarEstado.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
-            btnCambiarEstado.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
-            btnCambiarEstado.FlatStyle = FlatStyle.Flat;
-            btnCambiarEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCambiarEstado.ForeColor = Color.FromArgb(185, 28, 28);
-            btnCambiarEstado.Location = new Point(316, 0);
-            btnCambiarEstado.Margin = new Padding(0, 0, 8, 0);
-            btnCambiarEstado.Name = "btnCambiarEstado";
-            btnCambiarEstado.Size = new Size(181, 34);
-            btnCambiarEstado.TabIndex = 2;
-            btnCambiarEstado.Text = "Deshabilitar vehiculo";
-            btnCambiarEstado.UseVisualStyleBackColor = false;
             // 
             // colId
             // 
@@ -451,6 +241,20 @@
             modelo.Name = "modelo";
             modelo.ReadOnly = true;
             // 
+            // pnlCabecera
+            // 
+            pnlCabecera.BackColor = Color.White;
+            pnlCabecera.Controls.Add(label1);
+            pnlCabecera.Controls.Add(btnNuevoUsuario);
+            pnlCabecera.Controls.Add(label2);
+            pnlCabecera.Dock = DockStyle.Fill;
+            pnlCabecera.Location = new Point(0, 0);
+            pnlCabecera.Margin = new Padding(0, 0, 0, 10);
+            pnlCabecera.Name = "pnlCabecera";
+            pnlCabecera.Padding = new Padding(20, 12, 20, 10);
+            pnlCabecera.Size = new Size(752, 74);
+            pnlCabecera.TabIndex = 0;
+            // 
             // label1
             // 
             label1.AutoSize = true;
@@ -462,20 +266,215 @@
             label1.TabIndex = 2;
             label1.Text = "Administre los vehículos y los accesos al sistema.";
             // 
+            // btnNuevoUsuario
+            // 
+            btnNuevoUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnNuevoUsuario.BackColor = Color.FromArgb(30, 64, 175);
+            btnNuevoUsuario.Cursor = Cursors.Hand;
+            btnNuevoUsuario.FlatAppearance.BorderSize = 0;
+            btnNuevoUsuario.FlatAppearance.MouseDownBackColor = Color.FromArgb(30, 58, 138);
+            btnNuevoUsuario.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            btnNuevoUsuario.FlatStyle = FlatStyle.Flat;
+            btnNuevoUsuario.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnNuevoUsuario.ForeColor = Color.White;
+            btnNuevoUsuario.Location = new Point(1111, 27);
+            btnNuevoUsuario.Name = "btnNuevoUsuario";
+            btnNuevoUsuario.Size = new Size(150, 40);
+            btnNuevoUsuario.TabIndex = 0;
+            btnNuevoUsuario.Text = "＋ Nuevo usuario";
+            btnNuevoUsuario.UseVisualStyleBackColor = false;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.ForeColor = Color.FromArgb(15, 23, 42);
+            label2.Location = new Point(17, 5);
+            label2.Name = "label2";
+            label2.Size = new Size(281, 37);
+            label2.TabIndex = 0;
+            label2.Text = "Gestión de vehículos";
+            // 
+            // pnlFiltros
+            // 
+            pnlFiltros.BackColor = Color.White;
+            pnlFiltros.Controls.Add(btnActualizar);
+            pnlFiltros.Controls.Add(cboEstado);
+            pnlFiltros.Controls.Add(lblEstado);
+            pnlFiltros.Controls.Add(txtBuscar);
+            pnlFiltros.Controls.Add(lblBuscar);
+            pnlFiltros.Dock = DockStyle.Fill;
+            pnlFiltros.Location = new Point(0, 84);
+            pnlFiltros.Margin = new Padding(0, 0, 0, 10);
+            pnlFiltros.Name = "pnlFiltros";
+            pnlFiltros.Padding = new Padding(18, 10, 18, 10);
+            pnlFiltros.Size = new Size(752, 82);
+            pnlFiltros.TabIndex = 1;
+            // 
+            // btnActualizar
+            // 
+            btnActualizar.Cursor = Cursors.Hand;
+            btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnActualizar.FlatStyle = FlatStyle.Flat;
+            btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
+            btnActualizar.Location = new Point(485, 38);
+            btnActualizar.Name = "btnActualizar";
+            btnActualizar.Size = new Size(110, 32);
+            btnActualizar.TabIndex = 3;
+            btnActualizar.Text = "Actualizar";
+            btnActualizar.UseVisualStyleBackColor = true;
+            // 
+            // cboEstado
+            // 
+            cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            cboEstado.FormattingEnabled = true;
+            cboEstado.Location = new Point(320, 41);
+            cboEstado.Name = "cboEstado";
+            cboEstado.Size = new Size(145, 29);
+            cboEstado.TabIndex = 2;
+            // 
+            // lblEstado
+            // 
+            lblEstado.AutoSize = true;
+            lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
+            lblEstado.Location = new Point(338, 18);
+            lblEstado.Name = "lblEstado";
+            lblEstado.Size = new Size(56, 20);
+            lblEstado.TabIndex = 2;
+            lblEstado.Text = "Estado";
+            // 
+            // txtBuscar
+            // 
+            txtBuscar.BorderStyle = BorderStyle.FixedSingle;
+            txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            txtBuscar.Location = new Point(18, 42);
+            txtBuscar.Name = "txtBuscar";
+            txtBuscar.PlaceholderText = "Dominio";
+            txtBuscar.Size = new Size(280, 29);
+            txtBuscar.TabIndex = 1;
+            // 
+            // lblBuscar
+            // 
+            lblBuscar.AutoSize = true;
+            lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
+            lblBuscar.Location = new Point(21, 18);
+            lblBuscar.Name = "lblBuscar";
+            lblBuscar.Size = new Size(56, 20);
+            lblBuscar.TabIndex = 0;
+            lblBuscar.Text = "Buscar";
+            // 
+            // lblCantidad
+            // 
+            lblCantidad.AutoSize = true;
+            lblCantidad.Dock = DockStyle.Fill;
+            lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
+            lblCantidad.Location = new Point(4, 380);
+            lblCantidad.Margin = new Padding(4, 4, 0, 0);
+            lblCantidad.Name = "lblCantidad";
+            lblCantidad.Size = new Size(748, 30);
+            lblCantidad.TabIndex = 4;
+            lblCantidad.Text = "0 usuarios encontrados";
+            lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // pnlAccionesUsuario
+            // 
+            pnlAccionesUsuario.Controls.Add(flowLayoutPanel1);
+            pnlAccionesUsuario.Dock = DockStyle.Fill;
+            pnlAccionesUsuario.Location = new Point(0, 176);
+            pnlAccionesUsuario.Margin = new Padding(0, 0, 0, 10);
+            pnlAccionesUsuario.Name = "pnlAccionesUsuario";
+            pnlAccionesUsuario.Padding = new Padding(18, 7, 18, 7);
+            pnlAccionesUsuario.Size = new Size(752, 49);
+            pnlAccionesUsuario.TabIndex = 6;
+            // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.BackColor = Color.White;
+            flowLayoutPanel1.Controls.Add(btnEditarUsuario);
+            flowLayoutPanel1.Controls.Add(btnGestionarCredenciales);
+            flowLayoutPanel1.Controls.Add(btnCambiarEstado);
+            flowLayoutPanel1.Dock = DockStyle.Fill;
+            flowLayoutPanel1.Location = new Point(18, 7);
+            flowLayoutPanel1.Margin = new Padding(0);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(716, 35);
+            flowLayoutPanel1.TabIndex = 0;
+            flowLayoutPanel1.WrapContents = false;
+            // 
+            // btnEditarUsuario
+            // 
+            btnEditarUsuario.Cursor = Cursors.Hand;
+            btnEditarUsuario.Enabled = false;
+            btnEditarUsuario.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnEditarUsuario.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnEditarUsuario.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnEditarUsuario.FlatStyle = FlatStyle.Flat;
+            btnEditarUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnEditarUsuario.ForeColor = Color.FromArgb(30, 64, 175);
+            btnEditarUsuario.Location = new Point(0, 0);
+            btnEditarUsuario.Margin = new Padding(0, 0, 8, 0);
+            btnEditarUsuario.Name = "btnEditarUsuario";
+            btnEditarUsuario.Size = new Size(120, 34);
+            btnEditarUsuario.TabIndex = 0;
+            btnEditarUsuario.Text = "Editar datos";
+            btnEditarUsuario.UseVisualStyleBackColor = false;
+            // 
+            // btnGestionarCredenciales
+            // 
+            btnGestionarCredenciales.Cursor = Cursors.Hand;
+            btnGestionarCredenciales.Enabled = false;
+            btnGestionarCredenciales.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnGestionarCredenciales.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnGestionarCredenciales.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnGestionarCredenciales.FlatStyle = FlatStyle.Flat;
+            btnGestionarCredenciales.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnGestionarCredenciales.ForeColor = Color.FromArgb(30, 64, 175);
+            btnGestionarCredenciales.Location = new Point(128, 0);
+            btnGestionarCredenciales.Margin = new Padding(0, 0, 8, 0);
+            btnGestionarCredenciales.Name = "btnGestionarCredenciales";
+            btnGestionarCredenciales.Size = new Size(180, 34);
+            btnGestionarCredenciales.TabIndex = 1;
+            btnGestionarCredenciales.Text = "Gestionar credenciales";
+            btnGestionarCredenciales.UseVisualStyleBackColor = false;
+            // 
+            // btnCambiarEstado
+            // 
+            btnCambiarEstado.Cursor = Cursors.Hand;
+            btnCambiarEstado.Enabled = false;
+            btnCambiarEstado.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnCambiarEstado.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnCambiarEstado.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnCambiarEstado.FlatStyle = FlatStyle.Flat;
+            btnCambiarEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCambiarEstado.ForeColor = Color.FromArgb(185, 28, 28);
+            btnCambiarEstado.Location = new Point(316, 0);
+            btnCambiarEstado.Margin = new Padding(0, 0, 8, 0);
+            btnCambiarEstado.Name = "btnCambiarEstado";
+            btnCambiarEstado.Size = new Size(181, 34);
+            btnCambiarEstado.TabIndex = 2;
+            btnCambiarEstado.Text = "Deshabilitar vehiculo";
+            btnCambiarEstado.UseVisualStyleBackColor = false;
+            // 
             // FrmVehiculos
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
-            ClientSize = new Size(914, 600);
+            ClientSize = new Size(800, 450);
             Controls.Add(tlpPrincipal);
             Controls.Add(lblDescripcion);
             Controls.Add(lblTitulo);
             FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(3, 4, 3, 4);
-            MinimumSize = new Size(800, 600);
+            MinimumSize = new Size(700, 450);
             Name = "FrmVehiculos";
-            Padding = new Padding(27, 27, 27, 27);
+            Padding = new Padding(24, 20, 24, 20);
             Text = "FrmVehiculos";
             tlpPrincipal.ResumeLayout(false);
             tlpPrincipal.PerformLayout();

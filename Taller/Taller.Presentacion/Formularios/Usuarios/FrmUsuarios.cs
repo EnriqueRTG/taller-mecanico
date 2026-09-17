@@ -457,4 +457,8 @@ public partial class FrmUsuarios : Form
         }
     }
 
+    private void tipo_reporte_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
 }

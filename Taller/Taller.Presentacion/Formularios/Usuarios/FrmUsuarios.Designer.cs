@@ -57,6 +57,7 @@
             flowLayoutPanel1 = new FlowLayoutPanel();
             btnEditarUsuario = new Button();
             btnGestionarCredenciales = new Button();
+            btnCambiarEstado = new Button();
             tlpPrincipal.SuspendLayout();
             pnlGrilla.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvUsuarios).BeginInit();
@@ -370,6 +371,7 @@
             flowLayoutPanel1.BackColor = Color.White;
             flowLayoutPanel1.Controls.Add(btnEditarUsuario);
             flowLayoutPanel1.Controls.Add(btnGestionarCredenciales);
+            flowLayoutPanel1.Controls.Add(btnCambiarEstado);
             flowLayoutPanel1.Dock = DockStyle.Fill;
             flowLayoutPanel1.Location = new Point(18, 7);
             flowLayoutPanel1.Margin = new Padding(0);
@@ -415,6 +417,25 @@
             btnGestionarCredenciales.Text = "Gestionar credenciales";
             btnGestionarCredenciales.UseVisualStyleBackColor = false;
             btnGestionarCredenciales.Click += btnGestionarCredenciales_Click;
+            // 
+            // btnCambiarEstado
+            // 
+            btnCambiarEstado.Cursor = Cursors.Hand;
+            btnCambiarEstado.Enabled = false;
+            btnCambiarEstado.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnCambiarEstado.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnCambiarEstado.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnCambiarEstado.FlatStyle = FlatStyle.Flat;
+            btnCambiarEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCambiarEstado.ForeColor = Color.FromArgb(185, 28, 28);
+            btnCambiarEstado.Location = new Point(316, 0);
+            btnCambiarEstado.Margin = new Padding(0, 0, 8, 0);
+            btnCambiarEstado.Name = "btnCambiarEstado";
+            btnCambiarEstado.Size = new Size(160, 34);
+            btnCambiarEstado.TabIndex = 2;
+            btnCambiarEstado.Text = "Deshabilitar usuario";
+            btnCambiarEstado.UseVisualStyleBackColor = false;
+            btnCambiarEstado.Click += btnCambiarEstado_Click;
             // 
             // FrmUsuarios
             // 
@@ -467,5 +488,6 @@
         private FlowLayoutPanel flowLayoutPanel1;
         private Button btnEditarUsuario;
         private Button btnGestionarCredenciales;
+        private Button btnCambiarEstado;
     }
 }

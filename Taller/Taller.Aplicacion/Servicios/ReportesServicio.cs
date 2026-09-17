@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Taller.Aplicacion.Abstracciones.Persistencia;
-using Taller.Application.Abstracciones.Persistencia;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Application.Servicios
@@ -10,7 +9,7 @@ namespace Taller.Application.Servicios
     public class ReporteServicio
     {
         private readonly IReporteRepositorio _reporteRepositorio;
-
+        /*
         public ReporteServicio(
             IReporteRepositorio reporteRepositorio)
         {
@@ -35,6 +34,6 @@ namespace Taller.Application.Servicios
                     estado,
                     fechaDesde,
                     fechaHasta);
-        }
+        }*/
     }
 }

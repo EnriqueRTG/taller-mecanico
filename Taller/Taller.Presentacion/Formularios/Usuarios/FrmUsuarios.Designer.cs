@@ -435,7 +435,7 @@
             btnCambiarEstado.TabIndex = 2;
             btnCambiarEstado.Text = "Deshabilitar usuario";
             btnCambiarEstado.UseVisualStyleBackColor = false;
-            btnCambiarEstado.Click += btnCambiarEstado_Click;
+            //btnCambiarEstado.Click += btnCambiarEstado_Click;
             // 
             // FrmUsuarios
             // 

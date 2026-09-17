@@ -492,6 +492,11 @@ public partial class FrmUsuarios : Form
         }
     }
 
+<<<<<<< HEAD
+    private void tipo_reporte_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+=======
     private async void btnCambiarEstado_Click(
         object? sender,
         EventArgs e)
@@ -568,5 +573,6 @@ public partial class FrmUsuarios : Form
         {
             CambiarEstadoCarga(false);
         }
+>>>>>>> main
     }
 }

@@ -28,52 +28,486 @@
         /// </summary>
         private void InitializeComponent()
         {
-            lblTitulo = new Label();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle10 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
+            tlpPrincipal = new TableLayoutPanel();
+            pnlGrilla = new Panel();
+            dgvUsuarios = new DataGridView();
+            pnlCabecera = new Panel();
+            btnNuevoUsuario = new Button();
             lblDescripcion = new Label();
+            lblTitulo = new Label();
+            pnlFiltros = new Panel();
+            btnActualizar = new Button();
+            cboEstado = new ComboBox();
+            lblEstado = new Label();
+            txtBuscar = new TextBox();
+            lblBuscar = new Label();
+            lblCantidad = new Label();
+            pnlAccionesUsuario = new Panel();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            btnEditarUsuario = new Button();
+            btnCambiarEstado = new Button();
+            colId = new DataGridViewTextBoxColumn();
+            dni = new DataGridViewTextBoxColumn();
+            tipo_documento = new DataGridViewTextBoxColumn();
+            colNombreCompleto = new DataGridViewTextBoxColumn();
+            telefono = new DataGridViewTextBoxColumn();
+            mail = new DataGridViewTextBoxColumn();
+            direccion = new DataGridViewTextBoxColumn();
+            colEstado = new DataGridViewTextBoxColumn();
+            colFechaAlta = new DataGridViewTextBoxColumn();
+            nuevo = new Button();
+            tlpPrincipal.SuspendLayout();
+            pnlGrilla.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvUsuarios).BeginInit();
+            pnlCabecera.SuspendLayout();
+            pnlFiltros.SuspendLayout();
+            pnlAccionesUsuario.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
-            // lblTitulo
+            // tlpPrincipal
             // 
-            lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTitulo.Location = new Point(24, 22);
-            lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(230, 32);
-            lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Gestión de clientes";
+            tlpPrincipal.ColumnCount = 1;
+            tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpPrincipal.Controls.Add(pnlGrilla, 0, 3);
+            tlpPrincipal.Controls.Add(pnlCabecera, 0, 0);
+            tlpPrincipal.Controls.Add(pnlFiltros, 0, 1);
+            tlpPrincipal.Controls.Add(lblCantidad, 0, 4);
+            tlpPrincipal.Controls.Add(pnlAccionesUsuario, 0, 2);
+            tlpPrincipal.Location = new Point(24, 20);
+            tlpPrincipal.Margin = new Padding(0);
+            tlpPrincipal.Name = "tlpPrincipal";
+            tlpPrincipal.RowCount = 5;
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 82F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 58F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+            tlpPrincipal.Size = new Size(752, 410);
+            tlpPrincipal.TabIndex = 1;
+            // 
+            // pnlGrilla
+            // 
+            pnlGrilla.BackColor = Color.White;
+            pnlGrilla.Controls.Add(dgvUsuarios);
+            pnlGrilla.Dock = DockStyle.Fill;
+            pnlGrilla.Location = new Point(0, 216);
+            pnlGrilla.Margin = new Padding(0);
+            pnlGrilla.Name = "pnlGrilla";
+            pnlGrilla.Padding = new Padding(1);
+            pnlGrilla.Size = new Size(752, 160);
+            pnlGrilla.TabIndex = 5;
+            // 
+            // dgvUsuarios
+            // 
+            dgvUsuarios.AllowUserToAddRows = false;
+            dgvUsuarios.AllowUserToDeleteRows = false;
+            dgvUsuarios.AllowUserToResizeColumns = false;
+            dataGridViewCellStyle6.BackColor = Color.FromArgb(248, 250, 252);
+            dataGridViewCellStyle6.ForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(219, 234, 254);
+            dataGridViewCellStyle6.SelectionForeColor = Color.FromArgb(30, 64, 175);
+            dgvUsuarios.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle6;
+            dgvUsuarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvUsuarios.BackgroundColor = Color.White;
+            dgvUsuarios.BorderStyle = BorderStyle.None;
+            dgvUsuarios.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = Color.FromArgb(241, 245, 249);
+            dataGridViewCellStyle7.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle7.ForeColor = Color.FromArgb(51, 65, 85);
+            dataGridViewCellStyle7.Padding = new Padding(6, 0, 6, 0);
+            dataGridViewCellStyle7.SelectionBackColor = Color.FromArgb(241, 245, 249);
+            dataGridViewCellStyle7.SelectionForeColor = Color.FromArgb(51, 65, 85);
+            dataGridViewCellStyle7.WrapMode = DataGridViewTriState.True;
+            dgvUsuarios.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dgvUsuarios.ColumnHeadersHeight = 42;
+            dgvUsuarios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvUsuarios.Columns.AddRange(new DataGridViewColumn[] { colId, dni, tipo_documento, colNombreCompleto, telefono, mail, direccion, colEstado, colFechaAlta });
+            dataGridViewCellStyle10.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = Color.White;
+            dataGridViewCellStyle10.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle10.ForeColor = Color.FromArgb(30, 41, 59);
+            dataGridViewCellStyle10.Padding = new Padding(6, 0, 6, 0);
+            dataGridViewCellStyle10.SelectionBackColor = Color.FromArgb(219, 234, 254);
+            dataGridViewCellStyle10.SelectionForeColor = Color.FromArgb(30, 64, 175);
+            dataGridViewCellStyle10.WrapMode = DataGridViewTriState.False;
+            dgvUsuarios.DefaultCellStyle = dataGridViewCellStyle10;
+            dgvUsuarios.Dock = DockStyle.Fill;
+            dgvUsuarios.EnableHeadersVisualStyles = false;
+            dgvUsuarios.GridColor = Color.FromArgb(226, 232, 240);
+            dgvUsuarios.Location = new Point(1, 1);
+            dgvUsuarios.MultiSelect = false;
+            dgvUsuarios.Name = "dgvUsuarios";
+            dgvUsuarios.ReadOnly = true;
+            dgvUsuarios.RowHeadersVisible = false;
+            dgvUsuarios.RowHeadersWidth = 51;
+            dgvUsuarios.RowTemplate.Height = 38;
+            dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvUsuarios.Size = new Size(750, 158);
+            dgvUsuarios.TabIndex = 5;
+            // 
+            // pnlCabecera
+            // 
+            pnlCabecera.BackColor = Color.White;
+            pnlCabecera.Controls.Add(nuevo);
+            pnlCabecera.Controls.Add(btnNuevoUsuario);
+            pnlCabecera.Controls.Add(lblDescripcion);
+            pnlCabecera.Controls.Add(lblTitulo);
+            pnlCabecera.Dock = DockStyle.Fill;
+            pnlCabecera.Location = new Point(0, 0);
+            pnlCabecera.Margin = new Padding(0, 0, 0, 10);
+            pnlCabecera.Name = "pnlCabecera";
+            pnlCabecera.Padding = new Padding(20, 12, 20, 10);
+            pnlCabecera.Size = new Size(752, 72);
+            pnlCabecera.TabIndex = 0;
+            // 
+            // btnNuevoUsuario
+            // 
+            btnNuevoUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnNuevoUsuario.BackColor = Color.FromArgb(30, 64, 175);
+            btnNuevoUsuario.Cursor = Cursors.Hand;
+            btnNuevoUsuario.FlatAppearance.BorderSize = 0;
+            btnNuevoUsuario.FlatAppearance.MouseDownBackColor = Color.FromArgb(30, 58, 138);
+            btnNuevoUsuario.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            btnNuevoUsuario.FlatStyle = FlatStyle.Flat;
+            btnNuevoUsuario.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnNuevoUsuario.ForeColor = Color.White;
+            btnNuevoUsuario.Location = new Point(1111, 27);
+            btnNuevoUsuario.Name = "btnNuevoUsuario";
+            btnNuevoUsuario.Size = new Size(150, 40);
+            btnNuevoUsuario.TabIndex = 0;
+            btnNuevoUsuario.Text = "＋ Nuevo usuario";
+            btnNuevoUsuario.UseVisualStyleBackColor = false;
             // 
             // lblDescripcion
             // 
             lblDescripcion.AutoSize = true;
-            lblDescripcion.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblDescripcion.Font = new Font("Segoe UI", 9.5F);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDescripcion.Location = new Point(26, 62);
+            lblDescripcion.Location = new Point(6, 44);
             lblDescripcion.Name = "lblDescripcion";
-            lblDescripcion.Size = new Size(302, 17);
+            lblDescripcion.Size = new Size(358, 21);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Consulta y administración de los clientes del taller.";
             // 
+            // lblTitulo
+            // 
+            lblTitulo.AutoSize = true;
+            lblTitulo.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTitulo.Location = new Point(6, 7);
+            lblTitulo.Name = "lblTitulo";
+            lblTitulo.Size = new Size(259, 37);
+            lblTitulo.TabIndex = 0;
+            lblTitulo.Text = "Gestión de clientes";
+            // 
+            // pnlFiltros
+            // 
+            pnlFiltros.BackColor = Color.White;
+            pnlFiltros.Controls.Add(btnActualizar);
+            pnlFiltros.Controls.Add(cboEstado);
+            pnlFiltros.Controls.Add(lblEstado);
+            pnlFiltros.Controls.Add(txtBuscar);
+            pnlFiltros.Controls.Add(lblBuscar);
+            pnlFiltros.Dock = DockStyle.Fill;
+            pnlFiltros.Location = new Point(0, 82);
+            pnlFiltros.Margin = new Padding(0, 0, 0, 10);
+            pnlFiltros.Name = "pnlFiltros";
+            pnlFiltros.Padding = new Padding(18, 10, 18, 10);
+            pnlFiltros.Size = new Size(752, 66);
+            pnlFiltros.TabIndex = 1;
+            // 
+            // btnActualizar
+            // 
+            btnActualizar.Cursor = Cursors.Hand;
+            btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnActualizar.FlatStyle = FlatStyle.Flat;
+            btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
+            btnActualizar.Location = new Point(480, 27);
+            btnActualizar.Name = "btnActualizar";
+            btnActualizar.Size = new Size(110, 32);
+            btnActualizar.TabIndex = 3;
+            btnActualizar.Text = "Actualizar";
+            btnActualizar.UseVisualStyleBackColor = true;
+            // 
+            // cboEstado
+            // 
+            cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            cboEstado.FormattingEnabled = true;
+            cboEstado.Location = new Point(319, 30);
+            cboEstado.Name = "cboEstado";
+            cboEstado.Size = new Size(145, 29);
+            cboEstado.TabIndex = 2;
+            // 
+            // lblEstado
+            // 
+            lblEstado.AutoSize = true;
+            lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
+            lblEstado.Location = new Point(319, 10);
+            lblEstado.Name = "lblEstado";
+            lblEstado.Size = new Size(56, 20);
+            lblEstado.TabIndex = 2;
+            lblEstado.Text = "Estado";
+            // 
+            // txtBuscar
+            // 
+            txtBuscar.BorderStyle = BorderStyle.FixedSingle;
+            txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            txtBuscar.Location = new Point(18, 30);
+            txtBuscar.Name = "txtBuscar";
+            txtBuscar.PlaceholderText = "Nombre, apellido o cliente";
+            txtBuscar.Size = new Size(280, 29);
+            txtBuscar.TabIndex = 1;
+            // 
+            // lblBuscar
+            // 
+            lblBuscar.AutoSize = true;
+            lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
+            lblBuscar.Location = new Point(21, 10);
+            lblBuscar.Name = "lblBuscar";
+            lblBuscar.Size = new Size(56, 20);
+            lblBuscar.TabIndex = 0;
+            lblBuscar.Text = "Buscar";
+            // 
+            // lblCantidad
+            // 
+            lblCantidad.AutoSize = true;
+            lblCantidad.Dock = DockStyle.Fill;
+            lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
+            lblCantidad.Location = new Point(4, 380);
+            lblCantidad.Margin = new Padding(4, 4, 0, 0);
+            lblCantidad.Name = "lblCantidad";
+            lblCantidad.Size = new Size(748, 30);
+            lblCantidad.TabIndex = 4;
+            lblCantidad.Text = "0 usuarios encontrados";
+            lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // pnlAccionesUsuario
+            // 
+            pnlAccionesUsuario.Controls.Add(flowLayoutPanel1);
+            pnlAccionesUsuario.Dock = DockStyle.Fill;
+            pnlAccionesUsuario.Location = new Point(0, 158);
+            pnlAccionesUsuario.Margin = new Padding(0, 0, 0, 10);
+            pnlAccionesUsuario.Name = "pnlAccionesUsuario";
+            pnlAccionesUsuario.Padding = new Padding(18, 7, 18, 7);
+            pnlAccionesUsuario.Size = new Size(752, 48);
+            pnlAccionesUsuario.TabIndex = 6;
+            // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.BackColor = Color.White;
+            flowLayoutPanel1.Controls.Add(btnEditarUsuario);
+            flowLayoutPanel1.Controls.Add(btnCambiarEstado);
+            flowLayoutPanel1.Dock = DockStyle.Fill;
+            flowLayoutPanel1.Location = new Point(18, 7);
+            flowLayoutPanel1.Margin = new Padding(0);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(716, 34);
+            flowLayoutPanel1.TabIndex = 0;
+            flowLayoutPanel1.WrapContents = false;
+            // 
+            // btnEditarUsuario
+            // 
+            btnEditarUsuario.Cursor = Cursors.Hand;
+            btnEditarUsuario.Enabled = false;
+            btnEditarUsuario.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnEditarUsuario.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnEditarUsuario.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnEditarUsuario.FlatStyle = FlatStyle.Flat;
+            btnEditarUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnEditarUsuario.ForeColor = Color.FromArgb(30, 64, 175);
+            btnEditarUsuario.Location = new Point(0, 0);
+            btnEditarUsuario.Margin = new Padding(0, 0, 8, 0);
+            btnEditarUsuario.Name = "btnEditarUsuario";
+            btnEditarUsuario.Size = new Size(120, 34);
+            btnEditarUsuario.TabIndex = 0;
+            btnEditarUsuario.Text = "Editar datos";
+            btnEditarUsuario.UseVisualStyleBackColor = false;
+            // 
+            // btnCambiarEstado
+            // 
+            btnCambiarEstado.Cursor = Cursors.Hand;
+            btnCambiarEstado.Enabled = false;
+            btnCambiarEstado.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnCambiarEstado.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnCambiarEstado.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnCambiarEstado.FlatStyle = FlatStyle.Flat;
+            btnCambiarEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCambiarEstado.ForeColor = Color.FromArgb(185, 28, 28);
+            btnCambiarEstado.Location = new Point(128, 0);
+            btnCambiarEstado.Margin = new Padding(0, 0, 8, 0);
+            btnCambiarEstado.Name = "btnCambiarEstado";
+            btnCambiarEstado.Size = new Size(160, 34);
+            btnCambiarEstado.TabIndex = 2;
+            btnCambiarEstado.Text = "Deshabilitar usuario";
+            btnCambiarEstado.UseVisualStyleBackColor = false;
+            // 
+            // colId
+            // 
+            colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            colId.DataPropertyName = "Id";
+            colId.HeaderText = "ID";
+            colId.MinimumWidth = 6;
+            colId.Name = "colId";
+            colId.ReadOnly = true;
+            colId.Width = 60;
+            // 
+            // dni
+            // 
+            dni.DataPropertyName = "dni";
+            dni.FillWeight = 110F;
+            dni.HeaderText = "Documento";
+            dni.MinimumWidth = 6;
+            dni.Name = "dni";
+            dni.ReadOnly = true;
+            // 
+            // tipo_documento
+            // 
+            tipo_documento.DataPropertyName = "tipo_documento";
+            tipo_documento.FillWeight = 110F;
+            tipo_documento.HeaderText = "Tipo documento";
+            tipo_documento.MinimumWidth = 6;
+            tipo_documento.Name = "tipo_documento";
+            tipo_documento.ReadOnly = true;
+            // 
+            // colNombreCompleto
+            // 
+            colNombreCompleto.DataPropertyName = "NombreCompleto";
+            colNombreCompleto.FillWeight = 170F;
+            colNombreCompleto.HeaderText = "Nombre completo";
+            colNombreCompleto.MinimumWidth = 6;
+            colNombreCompleto.Name = "colNombreCompleto";
+            colNombreCompleto.ReadOnly = true;
+            // 
+            // telefono
+            // 
+            telefono.HeaderText = "Teléfono";
+            telefono.MinimumWidth = 6;
+            telefono.Name = "telefono";
+            telefono.ReadOnly = true;
+            // 
+            // mail
+            // 
+            mail.HeaderText = "Email";
+            mail.MinimumWidth = 6;
+            mail.Name = "mail";
+            mail.ReadOnly = true;
+            // 
+            // direccion
+            // 
+            direccion.HeaderText = "Dirección";
+            direccion.MinimumWidth = 6;
+            direccion.Name = "direccion";
+            direccion.ReadOnly = true;
+            // 
+            // colEstado
+            // 
+            colEstado.DataPropertyName = "Estado";
+            dataGridViewCellStyle8.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            colEstado.DefaultCellStyle = dataGridViewCellStyle8;
+            colEstado.FillWeight = 75F;
+            colEstado.HeaderText = "Estado";
+            colEstado.MinimumWidth = 6;
+            colEstado.Name = "colEstado";
+            colEstado.ReadOnly = true;
+            // 
+            // colFechaAlta
+            // 
+            colFechaAlta.DataPropertyName = "FechaAlta";
+            dataGridViewCellStyle9.Format = "d";
+            dataGridViewCellStyle9.NullValue = null;
+            colFechaAlta.DefaultCellStyle = dataGridViewCellStyle9;
+            colFechaAlta.FillWeight = 95F;
+            colFechaAlta.HeaderText = "Fecha de alta";
+            colFechaAlta.MinimumWidth = 6;
+            colFechaAlta.Name = "colFechaAlta";
+            colFechaAlta.ReadOnly = true;
+            // 
+            // nuevo
+            // 
+            nuevo.Anchor = AnchorStyles.Right;
+            nuevo.BackColor = Color.FromArgb(30, 64, 175);
+            nuevo.Cursor = Cursors.Hand;
+            nuevo.FlatAppearance.BorderSize = 0;
+            nuevo.FlatAppearance.MouseDownBackColor = Color.FromArgb(30, 58, 138);
+            nuevo.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            nuevo.FlatStyle = FlatStyle.Flat;
+            nuevo.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            nuevo.ForeColor = Color.White;
+            nuevo.Location = new Point(579, 9);
+            nuevo.Name = "nuevo";
+            nuevo.Size = new Size(150, 40);
+            nuevo.TabIndex = 2;
+            nuevo.Text = "＋ Nuevo usuario";
+            nuevo.UseVisualStyleBackColor = false;
+            // 
             // FrmClientes
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
             ClientSize = new Size(800, 450);
-            Controls.Add(lblDescripcion);
-            Controls.Add(lblTitulo);
+            Controls.Add(tlpPrincipal);
             FormBorderStyle = FormBorderStyle.None;
-            MinimumSize = new Size(700, 450);
+            Margin = new Padding(3, 4, 3, 4);
+            MinimumSize = new Size(800, 450);
             Name = "FrmClientes";
-            Padding = new Padding(24, 20, 24, 20);
+            Padding = new Padding(27, 27, 27, 27);
             Text = "FrmClientes";
+            tlpPrincipal.ResumeLayout(false);
+            tlpPrincipal.PerformLayout();
+            pnlGrilla.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvUsuarios).EndInit();
+            pnlCabecera.ResumeLayout(false);
+            pnlCabecera.PerformLayout();
+            pnlFiltros.ResumeLayout(false);
+            pnlFiltros.PerformLayout();
+            pnlAccionesUsuario.ResumeLayout(false);
+            flowLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
-        private Label lblTitulo;
+        private TableLayoutPanel tlpPrincipal;
+        private Panel pnlGrilla;
+        private DataGridView dgvUsuarios;
+        private Panel pnlCabecera;
+        private Button btnNuevoUsuario;
         private Label lblDescripcion;
+        private Label lblTitulo;
+        private Panel pnlFiltros;
+        private Button btnActualizar;
+        private ComboBox cboEstado;
+        private Label lblEstado;
+        private TextBox txtBuscar;
+        private Label lblBuscar;
+        private Label lblCantidad;
+        private Panel pnlAccionesUsuario;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private Button btnEditarUsuario;
+        private Button btnCambiarEstado;
+        private DataGridViewTextBoxColumn colId;
+        private DataGridViewTextBoxColumn dni;
+        private DataGridViewTextBoxColumn tipo_documento;
+        private DataGridViewTextBoxColumn colNombreCompleto;
+        private DataGridViewTextBoxColumn telefono;
+        private DataGridViewTextBoxColumn mail;
+        private DataGridViewTextBoxColumn direccion;
+        private DataGridViewTextBoxColumn colEstado;
+        private DataGridViewTextBoxColumn colFechaAlta;
+        private Button nuevo;
     }
 }

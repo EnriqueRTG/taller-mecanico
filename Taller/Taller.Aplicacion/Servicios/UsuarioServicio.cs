@@ -3,8 +3,7 @@ using Taller.Aplicacion.Abstracciones.Seguridad;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Aplicacion.Excepciones;
-using Microsoft.Extensions.DependencyInjection;
-using Taller.Aplicacion.Servicios;
+
 
 
 namespace Taller.Aplicacion.Servicios;
@@ -263,11 +262,28 @@ public sealed class UsuarioServicio
                 "La configuración del rol seleccionado no es válida.");
         }
 
-        usuario.Nombre = nombre;
-        usuario.Apellido = apellido;
-        usuario.RolId = rolId;
+    bool modificaDatos =
+        !string.Equals(
+            usuario.Nombre,
+            nombre,
+            StringComparison.Ordinal)
+            || !string.Equals(
+            usuario.Apellido,
+            apellido,
+            StringComparison.Ordinal)
+            || usuario.RolId != rolId;
 
-        await _usuarioRepositorio.ActualizarAsync(usuario);
+        if (!modificaDatos)
+        {
+            throw new ValidacionException(
+                "No se realizaron cambios en los datos del usuario.");
+        }
+
+        await _usuarioRepositorio.ActualizarDatosAsync(
+            usuarioId,
+            nombre,
+            apellido,
+            rolId);
     }
 
     /// <summary>
@@ -397,9 +413,9 @@ public sealed class UsuarioServicio
                         "El nombre de usuario ya se encuentra registrado.");
                 }
             }
-
-            usuario.NombreUsuario = nombreUsuarioNormalizado;
         }
+
+        string? passwordHash = null;
 
         if (cambiaPassword)
         {
@@ -416,7 +432,7 @@ public sealed class UsuarioServicio
                     nameof(confirmarPassword));
             }
 
-            string passwordHash =
+            passwordHash =
                 _passwordHasher.Hash(passwordValidado);
 
             if (string.IsNullOrWhiteSpace(passwordHash))
@@ -424,11 +440,12 @@ public sealed class UsuarioServicio
                 throw new InvalidOperationException(
                     "No fue posible proteger la nueva contraseña.");
             }
-
-            usuario.PasswordHash = passwordHash;
         }
 
-        await _usuarioRepositorio.ActualizarAsync(usuario);
+        await _usuarioRepositorio.ActualizarCredencialesAsync(
+            usuarioId,
+            nombreUsuarioNormalizado,
+            passwordHash);
     }
 
     /// <summary>
@@ -489,9 +506,9 @@ public sealed class UsuarioServicio
                     : "El usuario ya se encuentra deshabilitado.");
         }
 
-        usuario.Activo = habilitar;
-
-        await _usuarioRepositorio.ActualizarAsync(usuario);
+        await _usuarioRepositorio.CambiarEstadoAsync(
+            usuarioId,
+            habilitar);
     }
 
     /// <summary>
@@ -704,8 +721,4 @@ public sealed class UsuarioServicio
 
         return valorNormalizado;
     }
-
-
 }
-
-

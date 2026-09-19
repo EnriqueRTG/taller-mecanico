@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Dominio.Entidades;
 
-namespace Taller.Application.Servicios
+namespace Taller.Aplicacion.Servicios
 {
     public class ReporteServicio
     {

@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Taller.Dominio.Entidades;
 
-namespace Taller.Aplicacion.Abstracciones.Persistencia
+namespace Taller.Aplicacion.Abstracciones.Persistencia;
+
+public interface IReporteRepositorio
 {
-    internal class IReporteRepositorio
-    {
-    }
+    Task<List<Usuario>> ObtenerUsuariosReporteAsync(
+            string busqueda,
+            string estado,
+            DateTime fechaDesde,
+            DateTime fechaHasta);
 }

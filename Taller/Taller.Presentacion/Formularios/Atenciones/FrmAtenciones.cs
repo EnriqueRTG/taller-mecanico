@@ -900,8 +900,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Registrar diagnóstico");
+            AbrirDetalleSeleccionado();
         }
 
         private void btnFinalizarTrabajo_Click(
@@ -921,14 +920,35 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
             if (fila is null)
             {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para consultar su detalle.",
+                    "Detalle de atención",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
                 return;
             }
 
-            MessageBox.Show(
-                $"Se abrirá el detalle de la atención N.º {fila.Numero}.",
-                "Detalle de atención",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            Usuario? usuario =
+                _sesionUsuario.UsuarioActual;
+
+            if (usuario is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "No existe una sesión de usuario válida.",
+                    "Detalle de atención",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            using var formulario =
+                new FrmDetalleAtencion(usuario.RolId);
+
+            formulario.ShowDialog(this);
         }
 
         private void MostrarFuncionEnDesarrollo(

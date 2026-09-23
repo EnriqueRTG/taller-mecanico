@@ -1,8 +1,7 @@
 namespace Taller.Presentacion.Formularios.Clientes;
 
 /// <summary>
-/// Simula la edición de los datos personales y de contacto
-/// del cliente seleccionado.
+/// Simula la edición de los datos del cliente seleccionado.
 /// </summary>
 public partial class FrmEditarCliente : Form
 {
@@ -46,14 +45,9 @@ public partial class FrmEditarCliente : Form
         ShowInTaskbar = false;
 
         lblDescripcion.Text =
-            "Modifique el nombre, apellido y los datos de contacto. " +
-            "La identificación del cliente no puede cambiarse.";
+            "Modifique los datos del cliente que considere necesarios.";
 
-        ConfigurarSoloLectura(txtId);
-        ConfigurarSoloLectura(txtNombreUsuario);
-        ConfigurarSoloLectura(txtFechaAlta);
-        ConfigurarSoloLectura(textBox3);
-        ConfigurarSoloLectura(textBox1);
+        ConfigurarCamposEditables();
 
         txtEstado.MaxLength = 100;
         textBox2.MaxLength = 100;
@@ -65,12 +59,30 @@ public partial class FrmEditarCliente : Form
         btnCancelar.Click += BtnCancelar_Click;
     }
 
-    private static void ConfigurarSoloLectura(TextBox control)
+    private void ConfigurarCamposEditables()
     {
-        control.ReadOnly = true;
-        control.TabStop = false;
-        control.BackColor = Color.FromArgb(241, 245, 249);
-        control.ForeColor = Color.FromArgb(71, 85, 105);
+        TextBox[] campos =
+        [
+            txtId,
+            txtNombreUsuario,
+            txtFechaAlta,
+            txtEstado,
+            textBox2,
+            txtApellido,
+            txtNombre,
+            textBox4,
+            textBox3,
+            textBox1
+        ];
+
+        foreach (TextBox campo in campos)
+        {
+            campo.ReadOnly = false;
+            campo.Enabled = true;
+            campo.TabStop = true;
+            campo.BackColor = SystemColors.Window;
+            campo.ForeColor = SystemColors.WindowText;
+        }
     }
 
     private bool ValidarDatosEditables()
@@ -109,8 +121,7 @@ public partial class FrmEditarCliente : Form
             return;
 
         MessageBox.Show(
-            "El nombre, apellido y los datos de contacto fueron " +
-            "guardados en la simulación.",
+            "Los datos del cliente fueron guardados en la simulación.",
             "Edición de cliente",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);

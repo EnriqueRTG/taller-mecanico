@@ -1,7 +1,7 @@
 namespace Taller.Presentacion.Formularios.Vehiculos;
 
 /// <summary>
-/// Simula la edición de los datos descriptivos del vehículo seleccionado.
+/// Simula la edición de los datos del vehículo seleccionado.
 /// </summary>
 public partial class editar_vehiculo : Form
 {
@@ -39,13 +39,9 @@ public partial class editar_vehiculo : Form
         ShowInTaskbar = false;
 
         lblDescripcion.Text =
-            "Modifique la marca, el modelo, el año y el color. " +
-            "El dominio no puede cambiarse.";
+            "Modifique los datos del vehículo que considere necesarios.";
 
-        ConfigurarSoloLectura(txtId);
-        ConfigurarSoloLectura(txtApellido);
-        ConfigurarSoloLectura(textBox3);
-        ConfigurarSoloLectura(textBox4);
+        ConfigurarCamposEditables();
 
         txtNombreUsuario.MaxLength = 80;
         txtFechaAlta.MaxLength = 100;
@@ -61,23 +57,40 @@ public partial class editar_vehiculo : Form
         btnCancelar.Click += BtnCancelar_Click;
     }
 
-    private static void ConfigurarSoloLectura(TextBox control)
+    private void ConfigurarCamposEditables()
     {
-        control.ReadOnly = true;
-        control.TabStop = false;
-        control.BackColor = Color.FromArgb(241, 245, 249);
-        control.ForeColor = Color.FromArgb(71, 85, 105);
+        TextBox[] campos =
+        [
+            txtId,
+            txtApellido,
+            txtNombreUsuario,
+            txtFechaAlta,
+            txtEstado,
+            textBox1,
+            textBox3,
+            textBox4
+        ];
+
+        foreach (TextBox campo in campos)
+        {
+            campo.ReadOnly = false;
+            campo.Enabled = true;
+            campo.TabStop = true;
+            campo.BackColor = SystemColors.Window;
+            campo.ForeColor = SystemColors.WindowText;
+        }
     }
 
     private bool ValidarDatosEditables()
     {
-        if (string.IsNullOrWhiteSpace(txtNombreUsuario.Text)
+        if (string.IsNullOrWhiteSpace(txtApellido.Text)
+            || string.IsNullOrWhiteSpace(txtNombreUsuario.Text)
             || string.IsNullOrWhiteSpace(txtFechaAlta.Text)
             || string.IsNullOrWhiteSpace(txtEstado.Text)
             || string.IsNullOrWhiteSpace(textBox1.Text))
         {
             MessageBox.Show(
-                "Complete la marca, el modelo, el año y el color.",
+                "Complete el dominio, la marca, el modelo, el año y el color.",
                 "Datos incompletos",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
@@ -106,8 +119,7 @@ public partial class editar_vehiculo : Form
             return;
 
         MessageBox.Show(
-            "La marca, el modelo, el año y el color fueron " +
-            "guardados en la simulación.",
+            "Los datos del vehículo fueron guardados en la simulación.",
             "Edición de vehículo",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);

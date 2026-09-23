@@ -1,7 +1,8 @@
 namespace Taller.Presentacion.Formularios.Clientes;
 
 /// <summary>
-/// Simula la edición de los datos del cliente seleccionado.
+/// Simula la edición de los datos personales y de contacto
+/// del cliente seleccionado.
 /// </summary>
 public partial class FrmEditarCliente : Form
 {
@@ -44,30 +45,72 @@ public partial class FrmEditarCliente : Form
         StartPosition = FormStartPosition.CenterParent;
         ShowInTaskbar = false;
 
-        txtId.ReadOnly = true;
-        textBox3.ReadOnly = true;
-        textBox1.ReadOnly = true;
+        lblDescripcion.Text =
+            "Modifique el nombre, apellido y los datos de contacto. " +
+            "La identificación del cliente no puede cambiarse.";
+
+        ConfigurarSoloLectura(txtId);
+        ConfigurarSoloLectura(txtNombreUsuario);
+        ConfigurarSoloLectura(txtFechaAlta);
+        ConfigurarSoloLectura(textBox3);
+        ConfigurarSoloLectura(textBox1);
+
+        txtEstado.MaxLength = 100;
+        textBox2.MaxLength = 100;
+        txtApellido.MaxLength = 30;
+        txtNombre.MaxLength = 150;
+        textBox4.MaxLength = 200;
 
         btnGuardar.Click += BtnGuardar_Click;
         btnCancelar.Click += BtnCancelar_Click;
     }
 
-    private void BtnGuardar_Click(object? sender, EventArgs e)
+    private static void ConfigurarSoloLectura(TextBox control)
     {
-        if (string.IsNullOrWhiteSpace(txtNombreUsuario.Text)
-            || string.IsNullOrWhiteSpace(txtEstado.Text)
+        control.ReadOnly = true;
+        control.TabStop = false;
+        control.BackColor = Color.FromArgb(241, 245, 249);
+        control.ForeColor = Color.FromArgb(71, 85, 105);
+    }
+
+    private bool ValidarDatosEditables()
+    {
+        if (string.IsNullOrWhiteSpace(txtEstado.Text)
             || string.IsNullOrWhiteSpace(textBox2.Text))
         {
             MessageBox.Show(
-                "Complete el documento, nombre y apellido.",
+                "Complete el nombre y el apellido.",
                 "Datos incompletos",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-            return;
+            return false;
         }
 
+        string email = txtNombre.Text.Trim();
+
+        if (!string.IsNullOrWhiteSpace(email)
+            && (!email.Contains('@') || email.StartsWith('@') || email.EndsWith('@')))
+        {
+            MessageBox.Show(
+                "Ingrese un correo electrónico válido o deje el campo vacío.",
+                "Correo inválido",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            txtNombre.Focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void BtnGuardar_Click(object? sender, EventArgs e)
+    {
+        if (!ValidarDatosEditables())
+            return;
+
         MessageBox.Show(
-            "Los cambios del cliente fueron guardados en la simulación.",
+            "El nombre, apellido y los datos de contacto fueron " +
+            "guardados en la simulación.",
             "Edición de cliente",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);

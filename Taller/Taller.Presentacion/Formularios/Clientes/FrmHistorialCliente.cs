@@ -10,6 +10,8 @@ public sealed class FrmHistorialCliente : Form
     private readonly DataGridView _dgvVehiculos = new();
     private readonly DataGridView _dgvAtenciones = new();
     private readonly Label _lblResumen = new();
+    private readonly TabControl _pestanas = new();
+    private readonly Button _btnVerDetalle = new();
 
     public FrmHistorialCliente(string nombreCliente, string documento)
     {
@@ -19,6 +21,7 @@ public sealed class FrmHistorialCliente : Form
         ConfigurarVentana();
         ConstruirInterfaz();
         CargarDatosSimulados();
+        ActualizarEstadoDetalle();
     }
 
     private void ConfigurarVentana()
@@ -40,6 +43,7 @@ public sealed class FrmHistorialCliente : Form
             ColumnCount = 1,
             RowCount = 4
         };
+
         principal.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
         principal.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
         principal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -62,26 +66,24 @@ public sealed class FrmHistorialCliente : Form
             Padding = new Padding(18, 10, 18, 8)
         };
 
-        var titulo = new Label
+        panel.Controls.Add(new Label
         {
             AutoSize = true,
             Font = new Font("Segoe UI", 16F, FontStyle.Bold),
             ForeColor = Color.FromArgb(15, 23, 42),
             Text = "Historial del cliente",
             Location = new Point(18, 10)
-        };
+        });
 
-        var descripcion = new Label
+        panel.Controls.Add(new Label
         {
             AutoSize = true,
             Font = new Font("Segoe UI", 9.5F),
             ForeColor = Color.FromArgb(100, 116, 139),
             Text = $"{_nombreCliente} · Documento: {_documento}",
             Location = new Point(20, 48)
-        };
+        });
 
-        panel.Controls.Add(titulo);
-        panel.Controls.Add(descripcion);
         return panel;
     }
 
@@ -106,7 +108,7 @@ public sealed class FrmHistorialCliente : Form
 
     private Control CrearPestanas()
     {
-        var pestañas = new TabControl { Dock = DockStyle.Fill };
+        _pestanas.Dock = DockStyle.Fill;
 
         var tabVehiculos = new TabPage("Vehículos asociados");
         var tabAtenciones = new TabPage("Atenciones e historial");
@@ -125,12 +127,26 @@ public sealed class FrmHistorialCliente : Form
         _dgvAtenciones.Columns.Add("Motivo", "Motivo");
         _dgvAtenciones.Columns.Add("Estado", "Estado");
 
+        _dgvVehiculos.SelectionChanged += (_, _) => ActualizarEstadoDetalle();
+        _dgvAtenciones.SelectionChanged += (_, _) => ActualizarEstadoDetalle();
+        _dgvVehiculos.CellDoubleClick += (_, e) =>
+        {
+            if (e.RowIndex >= 0)
+                AbrirDetalleSeleccionado();
+        };
+        _dgvAtenciones.CellDoubleClick += (_, e) =>
+        {
+            if (e.RowIndex >= 0)
+                AbrirDetalleSeleccionado();
+        };
+        _pestanas.SelectedIndexChanged += (_, _) => ActualizarEstadoDetalle();
+
         tabVehiculos.Controls.Add(_dgvVehiculos);
         tabAtenciones.Controls.Add(_dgvAtenciones);
-        pestañas.TabPages.Add(tabVehiculos);
-        pestañas.TabPages.Add(tabAtenciones);
+        _pestanas.TabPages.Add(tabVehiculos);
+        _pestanas.TabPages.Add(tabAtenciones);
 
-        return pestañas;
+        return _pestanas;
     }
 
     private static void ConfigurarGrilla(DataGridView grilla)
@@ -159,16 +175,24 @@ public sealed class FrmHistorialCliente : Form
         var cerrar = CrearBoton("Cerrar", 100);
         cerrar.Click += (_, _) => Close();
 
-        var detalle = CrearBoton("Ver detalle seleccionado", 185);
-        detalle.Click += (_, _) => MessageBox.Show(
-            "Aquí se abrirá el formulario de detalle correspondiente al registro seleccionado.",
-            "Navegación simulada",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        ConfigurarBotonDetalle();
+        _btnVerDetalle.Click += (_, _) => AbrirDetalleSeleccionado();
 
         panel.Controls.Add(cerrar);
-        panel.Controls.Add(detalle);
+        panel.Controls.Add(_btnVerDetalle);
         return panel;
+    }
+
+    private void ConfigurarBotonDetalle()
+    {
+        _btnVerDetalle.Text = "Ver detalle seleccionado";
+        _btnVerDetalle.Width = 185;
+        _btnVerDetalle.Height = 32;
+        _btnVerDetalle.Cursor = Cursors.Hand;
+        _btnVerDetalle.FlatStyle = FlatStyle.Flat;
+        _btnVerDetalle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        _btnVerDetalle.ForeColor = Color.FromArgb(30, 64, 175);
+        _btnVerDetalle.BackColor = Color.White;
     }
 
     private static Button CrearBoton(string texto, int ancho)
@@ -184,6 +208,80 @@ public sealed class FrmHistorialCliente : Form
             ForeColor = Color.FromArgb(30, 64, 175),
             BackColor = Color.White
         };
+    }
+
+    private void ActualizarEstadoDetalle()
+    {
+        DataGridView grillaActiva = _pestanas.SelectedIndex == 0
+            ? _dgvVehiculos
+            : _dgvAtenciones;
+
+        _btnVerDetalle.Enabled = grillaActiva.SelectedRows.Count == 1;
+    }
+
+    private void AbrirDetalleSeleccionado()
+    {
+        if (_pestanas.SelectedIndex == 0)
+            AbrirDetalleVehiculo();
+        else
+            AbrirDetalleAtencion();
+    }
+
+    private void AbrirDetalleVehiculo()
+    {
+        if (_dgvVehiculos.SelectedRows.Count != 1)
+            return;
+
+        DataGridViewRow fila = _dgvVehiculos.SelectedRows[0];
+
+        var datos = new List<KeyValuePair<string, string>>
+        {
+            new("Dominio", ValorCelda(fila, 0)),
+            new("Marca y modelo", ValorCelda(fila, 1)),
+            new("Año", ValorCelda(fila, 2)),
+            new("Estado", ValorCelda(fila, 3)),
+            new("Atenciones registradas", "2"),
+            new("Última atención", "18/09/2026")
+        };
+
+        using var formulario = new FrmDetalleHistorialCliente(
+            "Detalle del vehículo",
+            _nombreCliente,
+            datos);
+
+        formulario.ShowDialog(this);
+    }
+
+    private void AbrirDetalleAtencion()
+    {
+        if (_dgvAtenciones.SelectedRows.Count != 1)
+            return;
+
+        DataGridViewRow fila = _dgvAtenciones.SelectedRows[0];
+
+        var datos = new List<KeyValuePair<string, string>>
+        {
+            new("Número de atención", ValorCelda(fila, 0)),
+            new("Fecha", ValorCelda(fila, 1)),
+            new("Vehículo", ValorCelda(fila, 2)),
+            new("Motivo", ValorCelda(fila, 3)),
+            new("Estado", ValorCelda(fila, 4)),
+            new("Diagnóstico", "Revisión general y diagnóstico demostrativo"),
+            new("Presupuesto", "Presupuesto asociado disponible"),
+            new("Comprobante", "Comprobante pendiente de emisión")
+        };
+
+        using var formulario = new FrmDetalleHistorialCliente(
+            "Detalle de la atención",
+            _nombreCliente,
+            datos);
+
+        formulario.ShowDialog(this);
+    }
+
+    private static string ValorCelda(DataGridViewRow fila, int indice)
+    {
+        return fila.Cells[indice].Value?.ToString() ?? "Sin información";
     }
 
     private void CargarDatosSimulados()
@@ -204,5 +302,7 @@ public sealed class FrmHistorialCliente : Form
 
         _dgvVehiculos.ClearSelection();
         _dgvAtenciones.ClearSelection();
+        _dgvVehiculos.CurrentCell = null;
+        _dgvAtenciones.CurrentCell = null;
     }
 }

@@ -1,7 +1,7 @@
 namespace Taller.Presentacion.Formularios.Vehiculos;
 
 /// <summary>
-/// Simula la edición de los datos del vehículo seleccionado.
+/// Simula la edición de los datos descriptivos del vehículo seleccionado.
 /// </summary>
 public partial class editar_vehiculo : Form
 {
@@ -18,7 +18,6 @@ public partial class editar_vehiculo : Form
         string modelo,
         int anio,
         string color,
-        string propietario,
         bool activo,
         DateTime fechaAlta)
     {
@@ -30,7 +29,6 @@ public partial class editar_vehiculo : Form
         textBox4.Text = fechaAlta.ToString("dd/MM/yyyy");
         textBox3.Text = activo ? "Habilitado" : "Deshabilitado";
         txtApellido.Text = dominio;
-        textBox2.Text = propietario;
 
         Text = $"Editar vehículo - {dominio}";
     }
@@ -40,30 +38,76 @@ public partial class editar_vehiculo : Form
         StartPosition = FormStartPosition.CenterParent;
         ShowInTaskbar = false;
 
-        txtId.ReadOnly = true;
-        textBox3.ReadOnly = true;
-        textBox4.ReadOnly = true;
+        lblDescripcion.Text =
+            "Modifique la marca, el modelo, el año y el color. " +
+            "El dominio no puede cambiarse.";
+
+        ConfigurarSoloLectura(txtId);
+        ConfigurarSoloLectura(txtApellido);
+        ConfigurarSoloLectura(textBox3);
+        ConfigurarSoloLectura(textBox4);
+
+        txtNombreUsuario.MaxLength = 80;
+        txtFechaAlta.MaxLength = 100;
+        txtEstado.MaxLength = 4;
+        textBox1.MaxLength = 50;
+
+        // El propietario no forma parte de la edición del vehículo.
+        label2.Visible = false;
+        textBox2.Visible = false;
+        textBox2.TabStop = false;
 
         btnGuardar.Click += BtnGuardar_Click;
         btnCancelar.Click += BtnCancelar_Click;
     }
 
-    private void BtnGuardar_Click(object? sender, EventArgs e)
+    private static void ConfigurarSoloLectura(TextBox control)
     {
-        if (string.IsNullOrWhiteSpace(txtApellido.Text)
-            || string.IsNullOrWhiteSpace(txtNombreUsuario.Text)
-            || string.IsNullOrWhiteSpace(txtFechaAlta.Text))
+        control.ReadOnly = true;
+        control.TabStop = false;
+        control.BackColor = Color.FromArgb(241, 245, 249);
+        control.ForeColor = Color.FromArgb(71, 85, 105);
+    }
+
+    private bool ValidarDatosEditables()
+    {
+        if (string.IsNullOrWhiteSpace(txtNombreUsuario.Text)
+            || string.IsNullOrWhiteSpace(txtFechaAlta.Text)
+            || string.IsNullOrWhiteSpace(txtEstado.Text)
+            || string.IsNullOrWhiteSpace(textBox1.Text))
         {
             MessageBox.Show(
-                "Complete el dominio, la marca y el modelo.",
+                "Complete la marca, el modelo, el año y el color.",
                 "Datos incompletos",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-            return;
+            return false;
         }
 
+        if (!int.TryParse(txtEstado.Text, out int anio)
+            || anio < 1900
+            || anio > DateTime.Today.Year + 1)
+        {
+            MessageBox.Show(
+                $"Ingrese un año entre 1900 y {DateTime.Today.Year + 1}.",
+                "Año inválido",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            txtEstado.Focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void BtnGuardar_Click(object? sender, EventArgs e)
+    {
+        if (!ValidarDatosEditables())
+            return;
+
         MessageBox.Show(
-            "Los cambios del vehículo fueron guardados en la simulación.",
+            "La marca, el modelo, el año y el color fueron " +
+            "guardados en la simulación.",
             "Edición de vehículo",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);

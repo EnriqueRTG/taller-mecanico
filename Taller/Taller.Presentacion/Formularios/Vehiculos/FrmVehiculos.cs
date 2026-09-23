@@ -170,7 +170,6 @@ public partial class FrmVehiculos : Form
             marcaModelo.ElementAtOrDefault(1) ?? vehiculo.Modelo,
             vehiculo.Anio,
             vehiculo.Color,
-            vehiculo.Propietario,
             vehiculo.Activo,
             vehiculo.FechaAlta);
 

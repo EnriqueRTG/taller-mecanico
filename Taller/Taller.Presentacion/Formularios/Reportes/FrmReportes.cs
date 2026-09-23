@@ -26,6 +26,7 @@ public partial class FrmReportes : Form
         ConfigurarFormulario();
         ConectarEventosAdicionales();
         CargarTiposSegunRol();
+        CargarReporteInicial();
         ActualizarEstadoAcciones();
     }
 
@@ -194,6 +195,18 @@ public partial class FrmReportes : Form
         int indice = cboEstado.Items.IndexOf(seleccionado);
         cboEstado.SelectedIndex = indice >= 0 ? indice : 0;
         _configurando = false;
+    }
+
+    private void CargarReporteInicial()
+    {
+        if (tipo_reporte.SelectedItem is null)
+            return;
+
+        _resultados.Clear();
+        _resultados.AddRange(
+            CrearResultadosSimulados(tipo_reporte.SelectedItem.ToString()!));
+
+        AplicarFiltros();
     }
 
     private bool ValidarFechas()

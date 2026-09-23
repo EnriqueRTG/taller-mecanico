@@ -228,22 +228,16 @@ public partial class FrmPresupuestos : Form
         PresupuestoDemostrativo? presupuesto = ObtenerSeleccionado();
         if (presupuesto is null) return;
 
-        string total = presupuesto.Total > 0
-            ? FormatearImporte(presupuesto.Total)
-            : "Aún no calculado";
+        using var formulario = new FrmDetallePresupuesto(
+            presupuesto.Numero,
+            presupuesto.Atencion,
+            presupuesto.Fecha,
+            presupuesto.Cliente,
+            presupuesto.Vehiculo,
+            presupuesto.Total,
+            presupuesto.Estado);
 
-        MessageBox.Show(
-            $"Presupuesto P-{presupuesto.Numero:000000}\n\n" +
-            $"Atención: A-{presupuesto.Atencion:000000}\n" +
-            $"Fecha: {presupuesto.Fecha:dd/MM/yyyy}\n" +
-            $"Cliente: {presupuesto.Cliente}\n" +
-            $"Vehículo: {presupuesto.Vehiculo}\n" +
-            $"Total: {total}\n" +
-            $"Estado: {presupuesto.Estado}\n\n" +
-            "Esta consulta utiliza información demostrativa.",
-            "Detalle del presupuesto",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        formulario.ShowDialog(this);
     }
 
     private void BtnRegistrarDecision_Click(object? sender, EventArgs e)
@@ -258,7 +252,9 @@ public partial class FrmPresupuestos : Form
             return;
         }
 
-        presupuesto.Estado = Aprobado;
+        presupuesto.Estado = formulario.Decision == "Aceptado"
+            ? Aprobado
+            : Rechazado;
         AplicarFiltros();
     }
 

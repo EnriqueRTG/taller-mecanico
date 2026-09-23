@@ -132,6 +132,7 @@
             btnNuevaAtencion.TabIndex = 0;
             btnNuevaAtencion.Text = "＋ Nueva atención";
             btnNuevaAtencion.UseVisualStyleBackColor = true;
+            btnNuevaAtencion.Click += BtnNuevaAtencion_Click;
             // 
             // lblDescripcion
             // 
@@ -218,6 +219,7 @@
             txtBuscar.PlaceholderText = "N.º, dominio, cliente o documento";
             txtBuscar.Size = new Size(233, 25);
             txtBuscar.TabIndex = 1;
+            txtBuscar.TextChanged += TxtBuscar_TextChanged;
             // 
             // lblEstado
             // 
@@ -243,6 +245,7 @@
             cboEstado.Name = "cboEstado";
             cboEstado.Size = new Size(118, 25);
             cboEstado.TabIndex = 3;
+            cboEstado.SelectedIndexChanged += CboEstado_SelectedIndexChanged;
             // 
             // lblDesde
             // 
@@ -280,6 +283,7 @@
             dtpDesde.Name = "dtpDesde";
             dtpDesde.Size = new Size(118, 25);
             dtpDesde.TabIndex = 7;
+            dtpDesde.ValueChanged += FiltroFecha_ValueChanged;
             // 
             // dtpHasta
             // 
@@ -291,6 +295,7 @@
             dtpHasta.Name = "dtpHasta";
             dtpHasta.Size = new Size(118, 25);
             dtpHasta.TabIndex = 8;
+            dtpHasta.ValueChanged += FiltroFecha_ValueChanged;
             // 
             // btnActualizar
             // 
@@ -304,6 +309,7 @@
             btnActualizar.TabIndex = 9;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
+            btnActualizar.Click += BtnActualizar_Click;
             // 
             // lblEspacioActualizar
             // 
@@ -479,6 +485,7 @@
             btnVerDetalle.TabIndex = 0;
             btnVerDetalle.Text = "Ver detalle";
             btnVerDetalle.UseVisualStyleBackColor = true;
+            btnVerDetalle.Click += BtnVerDetalle_Click;
             // 
             // btnEditar
             // 
@@ -491,6 +498,7 @@
             btnEditar.TabIndex = 1;
             btnEditar.Text = "Editar datos";
             btnEditar.UseVisualStyleBackColor = true;
+            btnEditar.Click += BtnEditar_Click;
             // 
             // btnIniciarProceso
             // 
@@ -503,6 +511,7 @@
             btnIniciarProceso.TabIndex = 2;
             btnIniciarProceso.Text = "Iniciar proceso";
             btnIniciarProceso.UseVisualStyleBackColor = true;
+            btnIniciarProceso.Click += BtnIniciarProceso_Click;
             // 
             // btnCancelarAtencion
             // 
@@ -515,6 +524,7 @@
             btnCancelarAtencion.TabIndex = 3;
             btnCancelarAtencion.Text = "Cancelar";
             btnCancelarAtencion.UseVisualStyleBackColor = true;
+            btnCancelarAtencion.Click += BtnCancelarAtencion_Click;
             // 
             // btnRegistrarEntrega
             // 
@@ -527,6 +537,7 @@
             btnRegistrarEntrega.TabIndex = 4;
             btnRegistrarEntrega.Text = "Registrar entrega";
             btnRegistrarEntrega.UseVisualStyleBackColor = true;
+            btnRegistrarEntrega.Click += BtnRegistrarEntrega_Click;
             // 
             // btnVerHistorial
             // 
@@ -539,6 +550,7 @@
             btnVerHistorial.TabIndex = 5;
             btnVerHistorial.Text = "Ver historial";
             btnVerHistorial.UseVisualStyleBackColor = true;
+            btnVerHistorial.Click += BtnVerHistorial_Click;
             // 
             // btnRegistrarDiagnostico
             // 
@@ -551,6 +563,7 @@
             btnRegistrarDiagnostico.TabIndex = 6;
             btnRegistrarDiagnostico.Text = "Registrar diagnóstico";
             btnRegistrarDiagnostico.UseVisualStyleBackColor = true;
+            btnRegistrarDiagnostico.Click += BtnRegistrarDiagnostico_Click;
             // 
             // btnFinalizarTrabajo
             // 
@@ -563,6 +576,7 @@
             btnFinalizarTrabajo.TabIndex = 7;
             btnFinalizarTrabajo.Text = "Finalizar trabajo";
             btnFinalizarTrabajo.UseVisualStyleBackColor = true;
+            btnFinalizarTrabajo.Click += BtnFinalizarTrabajo_Click;
             // 
             // lblCantidad
             // 
@@ -622,6 +636,7 @@
             Name = "FrmAtenciones";
             Padding = new Padding(24, 20, 24, 20);
             Text = "FrmAtenciones";
+            Load += FrmAtenciones_Load;
             tlpPrincipal.ResumeLayout(false);
             pnlCabecera.ResumeLayout(false);
             pnlCabecera.PerformLayout();

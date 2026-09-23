@@ -42,9 +42,12 @@ public static class DependencyInjection
 
         services.AddTransient<FrmClientes>();
         services.AddTransient<FrmAltaCliente>();
+        services.AddTransient<FrmEditarCliente>();
 
         services.AddTransient<FrmVehiculos>();
         services.AddTransient<FrmAltaVehiculo>();
+        services.AddTransient<editar_vehiculo>();
+        services.AddTransient<FrmHistorialVehiculo>();
 
         services.AddTransient<FrmDiagnosticos>();
 

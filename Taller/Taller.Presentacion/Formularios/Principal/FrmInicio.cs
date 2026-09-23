@@ -18,6 +18,10 @@ public partial class FrmInicio : Form
     {
         InitializeComponent();
 
+        Font = new Font("Segoe UI", 9F);
+        AutoScaleMode = AutoScaleMode.Dpi;
+        MinimumSize = new Size(760, 540);
+
         _sesionUsuario = sesionUsuario
             ?? throw new ArgumentNullException(nameof(sesionUsuario));
     }
@@ -226,8 +230,8 @@ public partial class FrmInicio : Form
             RowCount = 1
         };
 
-        tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 300));
-        tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
+        tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
 
         tabla.Controls.Add(CrearCalendario(), 0, 0);
         tabla.Controls.Add(CrearActividadReciente(), 1, 0);
@@ -237,29 +241,88 @@ public partial class FrmInicio : Form
 
     private Control CrearCalendario()
     {
-        var panel = CrearPanelSeccion("Calendario");
+        var tabla = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = Color.White,
+            Margin = new Padding(0, 0, 10, 0),
+            Padding = new Padding(12),
+            ColumnCount = 1,
+            RowCount = 2
+        };
+
+        tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        tabla.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        tabla.Controls.Add(new Label
+        {
+            AutoSize = true,
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = Color.FromArgb(15, 23, 42),
+            Text = "Calendario",
+            Margin = new Padding(6, 4, 0, 0)
+        }, 0, 0);
+
+        var contenedor = new Panel
+        {
+            Dock = DockStyle.Fill,
+            AutoScroll = true
+        };
 
         var calendario = new MonthCalendar
         {
             MaxSelectionCount = 1,
             ShowToday = true,
             ShowTodayCircle = true,
-            Anchor = AnchorStyles.None,
-            Location = new Point(28, 58)
+            Font = new Font("Segoe UI", 9F)
         };
 
-        panel.Controls.Add(calendario);
-        return panel;
+        contenedor.Controls.Add(calendario);
+        contenedor.Resize += (_, _) =>
+        {
+            calendario.Left = Math.Max(
+                0,
+                (contenedor.ClientSize.Width - calendario.Width) / 2);
+            calendario.Top = Math.Max(
+                0,
+                (contenedor.ClientSize.Height - calendario.Height) / 2);
+        };
+
+        tabla.Controls.Add(contenedor, 0, 1);
+        return tabla;
     }
 
     private Control CrearActividadReciente()
     {
-        var panel = CrearPanelSeccion("Actividad reciente según el rol");
+        var tabla = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = Color.White,
+            Margin = new Padding(0),
+            Padding = new Padding(12),
+            ColumnCount = 1,
+            RowCount = 2
+        };
+
+        tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        tabla.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        tabla.Controls.Add(new Label
+        {
+            AutoSize = true,
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = Color.FromArgb(15, 23, 42),
+            Text = "Actividad reciente según el rol",
+            Margin = new Padding(6, 4, 0, 0)
+        }, 0, 0);
 
         var grilla = new DataGridView
         {
+            Dock = DockStyle.Fill,
+            Margin = new Padding(6, 0, 6, 6),
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
+            AllowUserToResizeRows = false,
             ReadOnly = true,
             MultiSelect = false,
             RowHeadersVisible = false,
@@ -267,15 +330,24 @@ public partial class FrmInicio : Form
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
             BackgroundColor = Color.White,
             BorderStyle = BorderStyle.None,
-            Location = new Point(18, 52),
-            Anchor = AnchorStyles.Top | AnchorStyles.Bottom
-                | AnchorStyles.Left | AnchorStyles.Right,
-            Size = new Size(600, 280)
+            Font = new Font("Segoe UI", 9F),
+            ColumnHeadersHeight = 34,
+            ColumnHeadersHeightSizeMode =
+                DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+            RowTemplate = { Height = 32 }
         };
+
+        grilla.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+        grilla.DefaultCellStyle.Padding = new Padding(4, 0, 4, 0);
+        grilla.ColumnHeadersDefaultCellStyle.Font =
+            new Font("Segoe UI", 9F, FontStyle.Bold);
 
         grilla.Columns.Add("Fecha", "Fecha");
         grilla.Columns.Add("Modulo", "Módulo");
         grilla.Columns.Add("Descripcion", "Descripción");
+        grilla.Columns[0].FillWeight = 65;
+        grilla.Columns[1].FillWeight = 80;
+        grilla.Columns[2].FillWeight = 190;
 
         foreach (Actividad actividad in ObtenerActividad(ObtenerRolNormalizado()))
         {
@@ -288,14 +360,8 @@ public partial class FrmInicio : Form
         grilla.ClearSelection();
         grilla.CurrentCell = null;
 
-        panel.Controls.Add(grilla);
-        panel.Resize += (_, _) =>
-        {
-            grilla.Width = Math.Max(300, panel.ClientSize.Width - 36);
-            grilla.Height = Math.Max(160, panel.ClientSize.Height - 70);
-        };
-
-        return panel;
+        tabla.Controls.Add(grilla, 0, 1);
+        return tabla;
     }
 
     private static Panel CrearPanelSeccion(string titulo)

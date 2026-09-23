@@ -30,6 +30,9 @@ public partial class FrmPresupuestos : Form
     private void FrmPresupuestos_Load(object? sender, EventArgs e)
     {
         _inicializando = true;
+        btnGenerar.Visible = false;
+        lblDescripcion.Text =
+            "Consulta y decisión de presupuestos elaborados desde una atención diagnosticada.";
         AplicarEstilos();
         ConfigurarFiltros();
         CargarDatosDemostrativos();

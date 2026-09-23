@@ -54,17 +54,25 @@ public partial class FrmRespaldoRestauracion : Form
 
     private void BtnExaminarCarpeta_Click(object? sender, EventArgs e)
     {
-        using var dialogo = new FolderBrowserDialog
+        using var dialogo = new SaveFileDialog
         {
-            Description = "Seleccione la carpeta de destino del respaldo",
-            UseDescriptionForTitle = true,
-            SelectedPath = Directory.Exists(txtCarpeta.Text) ? txtCarpeta.Text : string.Empty
+            Title = "Guardar copia de seguridad",
+            Filter = "Copia de seguridad de SQL Server (*.bak)|*.bak",
+            DefaultExt = "bak",
+            AddExtension = true,
+            OverwritePrompt = true,
+            InitialDirectory = Directory.Exists(txtCarpeta.Text)
+                ? txtCarpeta.Text
+                : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            FileName = AsegurarExtensionBak(txtNombreArchivo.Text.Trim())
         };
 
-        if (dialogo.ShowDialog(this) == DialogResult.OK)
+        if (dialogo.ShowDialog(ObtenerVentanaPropietaria()) == DialogResult.OK)
         {
-            txtCarpeta.Text = dialogo.SelectedPath;
-            lblEstado.Text = "Carpeta de destino seleccionada.";
+            txtCarpeta.Text = Path.GetDirectoryName(dialogo.FileName)
+                ?? string.Empty;
+            txtNombreArchivo.Text = Path.GetFileName(dialogo.FileName);
+            lblEstado.Text = "Ubicación y nombre del respaldo seleccionados.";
         }
     }
 
@@ -128,7 +136,7 @@ public partial class FrmRespaldoRestauracion : Form
             Multiselect = false
         };
 
-        if (dialogo.ShowDialog(this) != DialogResult.OK) return;
+        if (dialogo.ShowDialog(ObtenerVentanaPropietaria()) != DialogResult.OK) return;
 
         txtArchivoRestaurar.Text = dialogo.FileName;
         FileInfo archivo = new(dialogo.FileName);
@@ -205,6 +213,11 @@ public partial class FrmRespaldoRestauracion : Form
     {
         MessageBox.Show(this, mensaje, "Datos incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         control.Focus();
+    }
+
+    private IWin32Window ObtenerVentanaPropietaria()
+    {
+        return Form.ActiveForm ?? this;
     }
 
     private void AplicarEstilos()

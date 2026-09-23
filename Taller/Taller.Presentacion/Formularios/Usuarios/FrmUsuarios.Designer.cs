@@ -250,7 +250,7 @@
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
             lblDescripcion.Location = new Point(22, 44);
             lblDescripcion.Name = "lblDescripcion";
-            lblDescripcion.Size = new Size(335, 21);
+            lblDescripcion.Size = new Size(284, 17);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Administre las cuentas y los accesos al sistema.";
             // 
@@ -261,7 +261,7 @@
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
             lblTitulo.Location = new Point(20, 10);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(268, 37);
+            lblTitulo.Size = new Size(206, 30);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión de usuarios";
             // 
@@ -305,7 +305,7 @@
             cboEstado.FormattingEnabled = true;
             cboEstado.Location = new Point(320, 28);
             cboEstado.Name = "cboEstado";
-            cboEstado.Size = new Size(145, 29);
+            cboEstado.Size = new Size(145, 25);
             cboEstado.TabIndex = 2;
             cboEstado.SelectedIndexChanged += cboEstado_SelectedIndexChanged;
             // 
@@ -316,7 +316,7 @@
             lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
             lblEstado.Location = new Point(320, 8);
             lblEstado.Name = "lblEstado";
-            lblEstado.Size = new Size(56, 20);
+            lblEstado.Size = new Size(43, 15);
             lblEstado.TabIndex = 2;
             lblEstado.Text = "Estado";
             // 
@@ -327,7 +327,7 @@
             txtBuscar.Location = new Point(18, 29);
             txtBuscar.Name = "txtBuscar";
             txtBuscar.PlaceholderText = "Nombre, apellido o usuario";
-            txtBuscar.Size = new Size(280, 29);
+            txtBuscar.Size = new Size(280, 25);
             txtBuscar.TabIndex = 1;
             txtBuscar.TextChanged += txtBuscar_TextChanged;
             // 
@@ -338,7 +338,7 @@
             lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
             lblBuscar.Location = new Point(18, 8);
             lblBuscar.Name = "lblBuscar";
-            lblBuscar.Size = new Size(56, 20);
+            lblBuscar.Size = new Size(44, 15);
             lblBuscar.TabIndex = 0;
             lblBuscar.Text = "Buscar";
             // 
@@ -435,11 +435,11 @@
             btnCambiarEstado.TabIndex = 2;
             btnCambiarEstado.Text = "Deshabilitar usuario";
             btnCambiarEstado.UseVisualStyleBackColor = false;
-            //btnCambiarEstado.Click += btnCambiarEstado_Click;
+            btnCambiarEstado.Click += btnCambiarEstado_Click;
             // 
             // FrmUsuarios
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
             ClientSize = new Size(800, 450);

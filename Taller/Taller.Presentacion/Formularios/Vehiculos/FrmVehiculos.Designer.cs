@@ -75,9 +75,9 @@
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTitulo.Location = new Point(24, 22);
+            lblTitulo.Location = new Point(21, 16);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(307, 41);
+            lblTitulo.Size = new Size(250, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión de vehículos";
             // 
@@ -86,9 +86,9 @@
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDescripcion.Location = new Point(27, 76);
+            lblDescripcion.Location = new Point(24, 57);
             lblDescripcion.Name = "lblDescripcion";
-            lblDescripcion.Size = new Size(379, 23);
+            lblDescripcion.Size = new Size(291, 17);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Consulta de vehículos y antecedentes asociados.";
             // 
@@ -101,16 +101,17 @@
             tlpPrincipal.Controls.Add(pnlFiltros, 0, 1);
             tlpPrincipal.Controls.Add(lblCantidad, 0, 4);
             tlpPrincipal.Controls.Add(pnlAccionesUsuario, 0, 2);
-            tlpPrincipal.Location = new Point(24, 22);
+            tlpPrincipal.Dock = DockStyle.Fill;
+            tlpPrincipal.Location = new Point(21, 15);
             tlpPrincipal.Margin = new Padding(0);
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.RowCount = 5;
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 84F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 92F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 59F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 63F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 69F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
-            tlpPrincipal.Size = new Size(752, 410);
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tlpPrincipal.Size = new Size(658, 308);
             tlpPrincipal.TabIndex = 2;
             // 
             // pnlGrilla
@@ -118,11 +119,11 @@
             pnlGrilla.BackColor = Color.White;
             pnlGrilla.Controls.Add(dgvUsuarios);
             pnlGrilla.Dock = DockStyle.Fill;
-            pnlGrilla.Location = new Point(0, 235);
+            pnlGrilla.Location = new Point(0, 176);
             pnlGrilla.Margin = new Padding(0);
             pnlGrilla.Name = "pnlGrilla";
             pnlGrilla.Padding = new Padding(1);
-            pnlGrilla.Size = new Size(752, 141);
+            pnlGrilla.Size = new Size(658, 106);
             pnlGrilla.TabIndex = 5;
             // 
             // dgvUsuarios
@@ -164,6 +165,7 @@
             dgvUsuarios.EnableHeadersVisualStyles = false;
             dgvUsuarios.GridColor = Color.FromArgb(226, 232, 240);
             dgvUsuarios.Location = new Point(1, 1);
+            dgvUsuarios.Margin = new Padding(3, 2, 3, 2);
             dgvUsuarios.MultiSelect = false;
             dgvUsuarios.Name = "dgvUsuarios";
             dgvUsuarios.ReadOnly = true;
@@ -171,7 +173,7 @@
             dgvUsuarios.RowHeadersWidth = 51;
             dgvUsuarios.RowTemplate.Height = 38;
             dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvUsuarios.Size = new Size(750, 139);
+            dgvUsuarios.Size = new Size(656, 104);
             dgvUsuarios.TabIndex = 5;
             // 
             // colId
@@ -249,10 +251,10 @@
             pnlCabecera.Controls.Add(label2);
             pnlCabecera.Dock = DockStyle.Fill;
             pnlCabecera.Location = new Point(0, 0);
-            pnlCabecera.Margin = new Padding(0, 0, 0, 10);
+            pnlCabecera.Margin = new Padding(0, 0, 0, 8);
             pnlCabecera.Name = "pnlCabecera";
-            pnlCabecera.Padding = new Padding(20, 12, 20, 10);
-            pnlCabecera.Size = new Size(752, 74);
+            pnlCabecera.Padding = new Padding(18, 9, 18, 8);
+            pnlCabecera.Size = new Size(658, 55);
             pnlCabecera.TabIndex = 0;
             // 
             // label1
@@ -260,9 +262,9 @@
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9.5F);
             label1.ForeColor = Color.FromArgb(100, 116, 139);
-            label1.Location = new Point(23, 42);
+            label1.Location = new Point(20, 32);
             label1.Name = "label1";
-            label1.Size = new Size(348, 21);
+            label1.Size = new Size(294, 17);
             label1.TabIndex = 2;
             label1.Text = "Administre los vehículos y los accesos al sistema.";
             // 
@@ -277,11 +279,12 @@
             btnNuevoUsuario.FlatStyle = FlatStyle.Flat;
             btnNuevoUsuario.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnNuevoUsuario.ForeColor = Color.White;
-            btnNuevoUsuario.Location = new Point(1111, 27);
+            btnNuevoUsuario.Location = new Point(438, 11);
+            btnNuevoUsuario.Margin = new Padding(3, 2, 3, 2);
             btnNuevoUsuario.Name = "btnNuevoUsuario";
-            btnNuevoUsuario.Size = new Size(150, 40);
+            btnNuevoUsuario.Size = new Size(189, 30);
             btnNuevoUsuario.TabIndex = 0;
-            btnNuevoUsuario.Text = "＋ Nuevo usuario";
+            btnNuevoUsuario.Text = "＋ Nuevo vehiculo";
             btnNuevoUsuario.UseVisualStyleBackColor = false;
             // 
             // label2
@@ -289,9 +292,9 @@
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label2.ForeColor = Color.FromArgb(15, 23, 42);
-            label2.Location = new Point(17, 5);
+            label2.Location = new Point(15, 4);
             label2.Name = "label2";
-            label2.Size = new Size(281, 37);
+            label2.Size = new Size(216, 30);
             label2.TabIndex = 0;
             label2.Text = "Gestión de vehículos";
             // 
@@ -304,11 +307,11 @@
             pnlFiltros.Controls.Add(txtBuscar);
             pnlFiltros.Controls.Add(lblBuscar);
             pnlFiltros.Dock = DockStyle.Fill;
-            pnlFiltros.Location = new Point(0, 84);
-            pnlFiltros.Margin = new Padding(0, 0, 0, 10);
+            pnlFiltros.Location = new Point(0, 63);
+            pnlFiltros.Margin = new Padding(0, 0, 0, 8);
             pnlFiltros.Name = "pnlFiltros";
-            pnlFiltros.Padding = new Padding(18, 10, 18, 10);
-            pnlFiltros.Size = new Size(752, 82);
+            pnlFiltros.Padding = new Padding(16, 8, 16, 8);
+            pnlFiltros.Size = new Size(658, 61);
             pnlFiltros.TabIndex = 1;
             // 
             // btnActualizar
@@ -320,9 +323,10 @@
             btnActualizar.FlatStyle = FlatStyle.Flat;
             btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
-            btnActualizar.Location = new Point(485, 38);
+            btnActualizar.Location = new Point(424, 28);
+            btnActualizar.Margin = new Padding(3, 2, 3, 2);
             btnActualizar.Name = "btnActualizar";
-            btnActualizar.Size = new Size(110, 32);
+            btnActualizar.Size = new Size(96, 24);
             btnActualizar.TabIndex = 3;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
@@ -332,9 +336,10 @@
             cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cboEstado.FormattingEnabled = true;
-            cboEstado.Location = new Point(320, 41);
+            cboEstado.Location = new Point(280, 31);
+            cboEstado.Margin = new Padding(3, 2, 3, 2);
             cboEstado.Name = "cboEstado";
-            cboEstado.Size = new Size(145, 29);
+            cboEstado.Size = new Size(127, 25);
             cboEstado.TabIndex = 2;
             // 
             // lblEstado
@@ -342,9 +347,9 @@
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
-            lblEstado.Location = new Point(338, 18);
+            lblEstado.Location = new Point(296, 14);
             lblEstado.Name = "lblEstado";
-            lblEstado.Size = new Size(56, 20);
+            lblEstado.Size = new Size(43, 15);
             lblEstado.TabIndex = 2;
             lblEstado.Text = "Estado";
             // 
@@ -352,10 +357,11 @@
             // 
             txtBuscar.BorderStyle = BorderStyle.FixedSingle;
             txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtBuscar.Location = new Point(18, 42);
+            txtBuscar.Location = new Point(16, 32);
+            txtBuscar.Margin = new Padding(3, 2, 3, 2);
             txtBuscar.Name = "txtBuscar";
             txtBuscar.PlaceholderText = "Dominio";
-            txtBuscar.Size = new Size(280, 29);
+            txtBuscar.Size = new Size(245, 25);
             txtBuscar.TabIndex = 1;
             // 
             // lblBuscar
@@ -363,9 +369,9 @@
             lblBuscar.AutoSize = true;
             lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
-            lblBuscar.Location = new Point(21, 18);
+            lblBuscar.Location = new Point(18, 14);
             lblBuscar.Name = "lblBuscar";
-            lblBuscar.Size = new Size(56, 20);
+            lblBuscar.Size = new Size(44, 15);
             lblBuscar.TabIndex = 0;
             lblBuscar.Text = "Buscar";
             // 
@@ -374,10 +380,10 @@
             lblCantidad.AutoSize = true;
             lblCantidad.Dock = DockStyle.Fill;
             lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
-            lblCantidad.Location = new Point(4, 380);
-            lblCantidad.Margin = new Padding(4, 4, 0, 0);
+            lblCantidad.Location = new Point(4, 285);
+            lblCantidad.Margin = new Padding(4, 3, 0, 0);
             lblCantidad.Name = "lblCantidad";
-            lblCantidad.Size = new Size(748, 30);
+            lblCantidad.Size = new Size(654, 23);
             lblCantidad.TabIndex = 4;
             lblCantidad.Text = "0 usuarios encontrados";
             lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
@@ -386,11 +392,11 @@
             // 
             pnlAccionesUsuario.Controls.Add(flowLayoutPanel1);
             pnlAccionesUsuario.Dock = DockStyle.Fill;
-            pnlAccionesUsuario.Location = new Point(0, 176);
-            pnlAccionesUsuario.Margin = new Padding(0, 0, 0, 10);
+            pnlAccionesUsuario.Location = new Point(0, 132);
+            pnlAccionesUsuario.Margin = new Padding(0, 0, 0, 8);
             pnlAccionesUsuario.Name = "pnlAccionesUsuario";
-            pnlAccionesUsuario.Padding = new Padding(18, 7, 18, 7);
-            pnlAccionesUsuario.Size = new Size(752, 49);
+            pnlAccionesUsuario.Padding = new Padding(16, 5, 16, 5);
+            pnlAccionesUsuario.Size = new Size(658, 36);
             pnlAccionesUsuario.TabIndex = 6;
             // 
             // flowLayoutPanel1
@@ -400,10 +406,10 @@
             flowLayoutPanel1.Controls.Add(btnGestionarCredenciales);
             flowLayoutPanel1.Controls.Add(btnCambiarEstado);
             flowLayoutPanel1.Dock = DockStyle.Fill;
-            flowLayoutPanel1.Location = new Point(18, 7);
+            flowLayoutPanel1.Location = new Point(16, 5);
             flowLayoutPanel1.Margin = new Padding(0);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(716, 35);
+            flowLayoutPanel1.Size = new Size(626, 26);
             flowLayoutPanel1.TabIndex = 0;
             flowLayoutPanel1.WrapContents = false;
             // 
@@ -418,9 +424,9 @@
             btnEditarUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnEditarUsuario.ForeColor = Color.FromArgb(30, 64, 175);
             btnEditarUsuario.Location = new Point(0, 0);
-            btnEditarUsuario.Margin = new Padding(0, 0, 8, 0);
+            btnEditarUsuario.Margin = new Padding(0, 0, 7, 0);
             btnEditarUsuario.Name = "btnEditarUsuario";
-            btnEditarUsuario.Size = new Size(120, 34);
+            btnEditarUsuario.Size = new Size(105, 26);
             btnEditarUsuario.TabIndex = 0;
             btnEditarUsuario.Text = "Editar datos";
             btnEditarUsuario.UseVisualStyleBackColor = false;
@@ -435,10 +441,10 @@
             btnGestionarCredenciales.FlatStyle = FlatStyle.Flat;
             btnGestionarCredenciales.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnGestionarCredenciales.ForeColor = Color.FromArgb(30, 64, 175);
-            btnGestionarCredenciales.Location = new Point(128, 0);
-            btnGestionarCredenciales.Margin = new Padding(0, 0, 8, 0);
+            btnGestionarCredenciales.Location = new Point(112, 0);
+            btnGestionarCredenciales.Margin = new Padding(0, 0, 7, 0);
             btnGestionarCredenciales.Name = "btnGestionarCredenciales";
-            btnGestionarCredenciales.Size = new Size(180, 34);
+            btnGestionarCredenciales.Size = new Size(158, 26);
             btnGestionarCredenciales.TabIndex = 1;
             btnGestionarCredenciales.Text = "Gestionar credenciales";
             btnGestionarCredenciales.UseVisualStyleBackColor = false;
@@ -453,28 +459,27 @@
             btnCambiarEstado.FlatStyle = FlatStyle.Flat;
             btnCambiarEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnCambiarEstado.ForeColor = Color.FromArgb(185, 28, 28);
-            btnCambiarEstado.Location = new Point(316, 0);
-            btnCambiarEstado.Margin = new Padding(0, 0, 8, 0);
+            btnCambiarEstado.Location = new Point(277, 0);
+            btnCambiarEstado.Margin = new Padding(0, 0, 7, 0);
             btnCambiarEstado.Name = "btnCambiarEstado";
-            btnCambiarEstado.Size = new Size(181, 34);
+            btnCambiarEstado.Size = new Size(158, 26);
             btnCambiarEstado.TabIndex = 2;
             btnCambiarEstado.Text = "Deshabilitar vehiculo";
             btnCambiarEstado.UseVisualStyleBackColor = false;
             // 
             // FrmVehiculos
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(700, 338);
             Controls.Add(tlpPrincipal);
             Controls.Add(lblDescripcion);
             Controls.Add(lblTitulo);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
-            MinimumSize = new Size(700, 450);
+            MinimumSize = new Size(612, 338);
             Name = "FrmVehiculos";
-            Padding = new Padding(24, 20, 24, 20);
+            Padding = new Padding(21, 15, 21, 15);
             Text = "FrmVehiculos";
             tlpPrincipal.ResumeLayout(false);
             tlpPrincipal.PerformLayout();

@@ -12,7 +12,7 @@ namespace Taller.Presentacion;
 internal static class Program
 {
     [STAThread]
-    private static async Task Main(string[] args)
+    private static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
 
@@ -45,7 +45,14 @@ internal static class Program
             scope.ServiceProvider
                 .GetRequiredService<InicializadorDatos>();
 
-        await inicializador.InicializarAsync();
+        // La inicialización debe completarse sobre el mismo hilo STA
+        // que luego ejecutará el bucle principal de Windows Forms.
+        // Un Main async puede continuar en un hilo MTA después del await
+        // y provocar errores al abrir OpenFileDialog o SaveFileDialog.
+        inicializador
+            .InicializarAsync()
+            .GetAwaiter()
+            .GetResult();
 
         var aplicacionContexto =
             scope.ServiceProvider

@@ -355,7 +355,7 @@ public partial class FrmInicio : Form
 
     private string ObtenerRolNormalizado()
     {
-        return _sesionUsuario.UsuarioActual?.Rol?.Nombre?
+        return _sesionUsuario.UsuarioActual?.Rol?.Nombre
             .Trim()
             .ToLowerInvariant()
             ?? "administrador";

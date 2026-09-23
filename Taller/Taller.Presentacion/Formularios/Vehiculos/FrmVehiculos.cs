@@ -160,7 +160,20 @@ public partial class FrmVehiculos : Form
         using editar_vehiculo formulario =
             _proveedorServicios.GetRequiredService<editar_vehiculo>();
 
-        formulario.Text = $"Editar vehículo - {vehiculo.Dominio}";
+        string[] marcaModelo = vehiculo.Modelo.Split(
+            ' ', 2, StringSplitOptions.RemoveEmptyEntries);
+
+        formulario.PrepararEdicion(
+            vehiculo.Id,
+            vehiculo.Dominio,
+            marcaModelo.ElementAtOrDefault(0) ?? vehiculo.Modelo,
+            marcaModelo.ElementAtOrDefault(1) ?? vehiculo.Modelo,
+            vehiculo.Anio,
+            vehiculo.Color,
+            vehiculo.Propietario,
+            vehiculo.Activo,
+            vehiculo.FechaAlta);
+
         formulario.ShowDialog(this);
     }
 

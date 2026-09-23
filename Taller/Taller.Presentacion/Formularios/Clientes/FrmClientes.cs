@@ -182,7 +182,17 @@ public partial class FrmClientes : Form
         using FrmEditarCliente formulario =
             _proveedorServicios.GetRequiredService<FrmEditarCliente>();
 
-        formulario.Text = $"Editar cliente - {cliente.NombreCompleto}";
+        formulario.PrepararEdicion(
+            cliente.Id,
+            cliente.TipoDocumento,
+            cliente.Documento,
+            cliente.NombreCompleto,
+            cliente.Telefono,
+            cliente.Email,
+            cliente.Direccion,
+            cliente.Activo,
+            cliente.FechaAlta);
+
         formulario.ShowDialog(this);
     }
 

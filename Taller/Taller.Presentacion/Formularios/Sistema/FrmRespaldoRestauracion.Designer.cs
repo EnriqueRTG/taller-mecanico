@@ -87,7 +87,7 @@ partial class FrmRespaldoRestauracion
         lblAyudaRespaldo.Dock = DockStyle.Fill; lblAyudaRespaldo.Font = new Font("Segoe UI", 8.75F); lblAyudaRespaldo.ForeColor = Color.FromArgb(100, 116, 139);
         lblAyudaRespaldo.Text = "Se generará un archivo .bak. Esta pantalla simula la operación y no modifica SQL Server.";
         pnlAccionRespaldo.Controls.Add(btnCrearRespaldo); pnlAccionRespaldo.Dock = DockStyle.Fill;
-        btnCrearRespaldo.Anchor = AnchorStyles.Top | AnchorStyles.Right; btnCrearRespaldo.Location = new Point(558, 4); btnCrearRespaldo.Size = new Size(170, 36);
+        btnCrearRespaldo.Dock = DockStyle.Right; btnCrearRespaldo.Margin = new Padding(0, 4, 0, 4); btnCrearRespaldo.Size = new Size(170, 46);
         btnCrearRespaldo.Text = "Crear respaldo"; btnCrearRespaldo.Click += BtnCrearRespaldo_Click;
         // tabla restauración
         tlpRestauracion.ColumnCount = 2; tlpRestauracion.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 180F)); tlpRestauracion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -105,8 +105,8 @@ partial class FrmRespaldoRestauracion
         lblAdvertencia.Dock = DockStyle.Fill; lblAdvertencia.Font = new Font("Segoe UI", 9F); lblAdvertencia.ForeColor = Color.FromArgb(153, 27, 27); lblAdvertencia.Padding = new Padding(12, 0, 12, 0);
         lblAdvertencia.Text = "Advertencia: restaurar una copia reemplazaría la información actual. Debe confirmarse expresamente la operación."; lblAdvertencia.TextAlign = ContentAlignment.MiddleLeft;
         pnlAccionRestauracion.Controls.Add(btnValidarArchivo); pnlAccionRestauracion.Controls.Add(btnRestaurar); pnlAccionRestauracion.Dock = DockStyle.Fill;
-        btnValidarArchivo.Anchor = AnchorStyles.Top | AnchorStyles.Right; btnValidarArchivo.Location = new Point(408, 4); btnValidarArchivo.Size = new Size(145, 36); btnValidarArchivo.Text = "Validar archivo"; btnValidarArchivo.Click += BtnValidarArchivo_Click;
-        btnRestaurar.Anchor = AnchorStyles.Top | AnchorStyles.Right; btnRestaurar.Location = new Point(563, 4); btnRestaurar.Size = new Size(165, 36); btnRestaurar.Text = "Restaurar respaldo"; btnRestaurar.Click += BtnRestaurar_Click;
+        btnValidarArchivo.Dock = DockStyle.Right; btnValidarArchivo.Margin = new Padding(0, 4, 8, 4); btnValidarArchivo.Size = new Size(145, 46); btnValidarArchivo.Text = "Validar archivo"; btnValidarArchivo.Click += BtnValidarArchivo_Click;
+        btnRestaurar.Dock = DockStyle.Right; btnRestaurar.Margin = new Padding(0, 4, 0, 4); btnRestaurar.Size = new Size(165, 46); btnRestaurar.Text = "Restaurar respaldo"; btnRestaurar.Click += BtnRestaurar_Click;
         // historial
         pnlHistorial.BackColor = Color.White; pnlHistorial.Controls.Add(dgvHistorial); pnlHistorial.Controls.Add(lblHistorial); pnlHistorial.Dock = DockStyle.Fill; pnlHistorial.Margin = new Padding(0, 0, 0, 10); pnlHistorial.Padding = new Padding(14, 42, 14, 14);
         lblHistorial.AutoSize = true; lblHistorial.Font = new Font("Segoe UI", 10F, FontStyle.Bold); lblHistorial.Location = new Point(14, 12); lblHistorial.Text = "Historial reciente";

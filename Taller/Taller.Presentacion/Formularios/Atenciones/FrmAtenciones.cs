@@ -4,6 +4,8 @@ using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 using Taller.Presentacion.Estilos;
 using Taller.Presentacion.Seguridad;
+using Taller.Presentacion.Formularios.Vehiculos;
+using Taller.Presentacion.Formularios.Diagnosticos;
 
 namespace Taller.Presentacion.Formularios.Atenciones
 {
@@ -150,61 +152,17 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
         private void ConfigurarEventos()
         {
-            Load += FrmAtenciones_Load;
-
-            btnNuevaAtencion.Click +=
-                btnNuevaAtencion_Click;
-
-            btnActualizar.Click +=
-                btnActualizar_Click;
-
-            txtBuscar.TextChanged +=
-                txtBuscar_TextChanged;
-
-            cboEstado.SelectedIndexChanged +=
-                cboEstado_SelectedIndexChanged;
-
-            dtpDesde.ValueChanged +=
-                filtroFecha_ValueChanged;
-
-            dtpHasta.ValueChanged +=
-                filtroFecha_ValueChanged;
-
             dgvAtenciones.SelectionChanged +=
-                dgvAtenciones_SelectionChanged;
+                DgvAtenciones_SelectionChanged;
 
             dgvAtenciones.CellDoubleClick +=
-                dgvAtenciones_CellDoubleClick;
+                DgvAtenciones_CellDoubleClick;
 
             dgvAtenciones.CellFormatting +=
-                dgvAtenciones_CellFormatting;
+                DgvAtenciones_CellFormatting;
 
             dgvAtenciones.CellToolTipTextNeeded +=
-                dgvAtenciones_CellToolTipTextNeeded;
-
-            btnVerDetalle.Click +=
-                btnVerDetalle_Click;
-
-            btnEditar.Click +=
-                btnEditar_Click;
-
-            btnIniciarProceso.Click +=
-                btnIniciarProceso_Click;
-
-            btnCancelarAtencion.Click +=
-                btnCancelarAtencion_Click;
-
-            btnRegistrarEntrega.Click +=
-                btnRegistrarEntrega_Click;
-
-            btnVerHistorial.Click +=
-                btnVerHistorial_Click;
-
-            btnRegistrarDiagnostico.Click +=
-                btnRegistrarDiagnostico_Click;
-
-            btnFinalizarTrabajo.Click +=
-                btnFinalizarTrabajo_Click;
+                DgvAtenciones_CellToolTipTextNeeded;
         }
 
         private void ConfigurarFiltros()
@@ -632,41 +590,35 @@ namespace Taller.Presentacion.Formularios.Atenciones
                     usuario.RolId,
                     PermisoAplicacion.ConsultarAtencionesAsignadas);
 
-            bool estaActiva =
-                fila.EstadoValor == EstadoAtencion.Abierta
-                ||
-                fila.EstadoValor == EstadoAtencion.EnProceso;
-
+            // Durante la primera entrega las acciones se habilitan
+            // al seleccionar una atención para demostrar el circuito
+            // completo de navegación.
+            //
+            // Las restricciones por estado y etapa se incorporarán
+            // junto con la lógica de negocio definitiva.
             btnVerDetalle.Enabled =
-                puedeGestionar
-                || puedeConsultarComoTecnico;
+                puedeGestionar || puedeConsultarComoTecnico;
 
             btnEditar.Enabled =
-                puedeGestionar
-                && estaActiva;
+                puedeGestionar;
 
             btnIniciarProceso.Enabled =
-                puedeGestionar
-                && fila.EstadoValor == EstadoAtencion.Abierta;
+                puedeGestionar;
 
             btnCancelarAtencion.Enabled =
-                puedeGestionar
-                && estaActiva;
+                puedeGestionar;
 
             btnRegistrarEntrega.Enabled =
-                puedeGestionar
-                && fila.Etapa == "Preparada para entrega";
+                puedeGestionar;
 
             btnVerHistorial.Enabled =
                 puedeConsultarComoTecnico;
 
             btnRegistrarDiagnostico.Enabled =
-                puedeConsultarComoTecnico
-                && fila.Etapa == "Pendiente de diagnóstico";
+                puedeConsultarComoTecnico;
 
             btnFinalizarTrabajo.Enabled =
-                puedeConsultarComoTecnico
-                && fila.Etapa == "Trabajo autorizado";
+                puedeConsultarComoTecnico;
         }
 
         private void DeshabilitarAcciones()
@@ -684,42 +636,42 @@ namespace Taller.Presentacion.Formularios.Atenciones
         #endregion
 
         #region Eventos de filtros y grilla
-        private void txtBuscar_TextChanged(
+        private void TxtBuscar_TextChanged(
             object? sender,
             EventArgs e)
         {
             AplicarFiltros();
         }
 
-        private void cboEstado_SelectedIndexChanged(
+        private void CboEstado_SelectedIndexChanged(
             object? sender,
             EventArgs e)
         {
             AplicarFiltros();
         }
 
-        private void filtroFecha_ValueChanged(
+        private void FiltroFecha_ValueChanged(
             object? sender,
             EventArgs e)
         {
             AplicarFiltros();
         }
 
-        private async void btnActualizar_Click(
+        private async void BtnActualizar_Click(
             object? sender,
             EventArgs e)
         {
             await CargarAtencionesAsync();
         }
 
-        private void dgvAtenciones_SelectionChanged(
+        private void DgvAtenciones_SelectionChanged(
             object? sender,
             EventArgs e)
         {
             ActualizarAccionesSeleccion();
         }
 
-        private void dgvAtenciones_CellDoubleClick(
+        private void DgvAtenciones_CellDoubleClick(
             object? sender,
             DataGridViewCellEventArgs e)
         {
@@ -731,7 +683,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             AbrirDetalleSeleccionado();
         }
 
-        private void dgvAtenciones_CellFormatting(
+        private void DgvAtenciones_CellFormatting(
             object? sender,
             DataGridViewCellFormattingEventArgs e)
         {
@@ -780,7 +732,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         }
 
 
-        private void dgvAtenciones_CellToolTipTextNeeded(
+        private void DgvAtenciones_CellToolTipTextNeeded(
             object? sender,
             DataGridViewCellToolTipTextNeededEventArgs e)
         {
@@ -812,7 +764,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         #endregion
 
         #region Eventos de acciones administrativas
-        private async void btnNuevaAtencion_Click(
+        private async void BtnNuevaAtencion_Click(
             object? sender,
             EventArgs e)
         {
@@ -847,68 +799,173 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
         }
 
-        private void btnEditar_Click(
+        private void BtnEditar_Click(
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Editar atención");
+            AbrirEdicionSeleccionada();
         }
 
-        private void btnIniciarProceso_Click(
+        private void BtnIniciarProceso_Click(
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Iniciar proceso");
+            ConfirmarInicioProceso();
         }
 
-        private void btnCancelarAtencion_Click(
+        private void BtnCancelarAtencion_Click(
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Cancelar atención");
+            ConfirmarCancelacionAtencion();
         }
 
-        private void btnRegistrarEntrega_Click(
+        /// <summary>
+        /// Abre el formulario de entrega para la atención seleccionada.
+        /// </summary>
+        private void BtnRegistrarEntrega_Click(
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Registrar entrega");
+            AtencionFila? fila = ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para registrar la entrega.",
+                    "Atención no seleccionada",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            var usuario = _sesionUsuario.UsuarioActual;
+
+            if (usuario is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "No se pudo identificar al usuario actual.",
+                    "Sesión no disponible",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            bool puedeGestionar =
+                _autorizacionNavegacion.TienePermiso(
+                    usuario.RolId,
+                    PermisoAplicacion.GestionarAtenciones);
+
+            if (!puedeGestionar)
+            {
+                MessageBox.Show(
+                    this,
+                    "No posee permisos para registrar la entrega.",
+                    "Acceso restringido",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            using FrmRegistrarEntrega formulario =
+                new();
+
+            formulario.ShowDialog(this);
         }
         #endregion
 
         #region Eventos de consulta y acciones técnicas
-        private void btnVerDetalle_Click(
+        private void BtnVerDetalle_Click(
             object? sender,
             EventArgs e)
         {
             AbrirDetalleSeleccionado();
         }
 
-        private void btnVerHistorial_Click(
+        private void BtnVerHistorial_Click(
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Historial del vehículo");
+            AbrirHistorialSeleccionado();
         }
 
-        private void btnRegistrarDiagnostico_Click(
+        private void BtnRegistrarDiagnostico_Click(
             object? sender,
             EventArgs e)
         {
-            AbrirDetalleSeleccionado();
+            AbrirRegistroDiagnosticoSeleccionado();
         }
 
-        private void btnFinalizarTrabajo_Click(
+        /// <summary>
+        /// Abre el formulario de finalización del trabajo técnico
+        /// para la atención seleccionada.
+        /// </summary>
+        private void BtnFinalizarTrabajo_Click(
             object? sender,
             EventArgs e)
         {
-            MostrarFuncionEnDesarrollo(
-                "Finalizar trabajo");
+            AtencionFila? fila =
+                ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para finalizar el trabajo.",
+                    "Atención no seleccionada",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            var usuario =
+                _sesionUsuario.UsuarioActual;
+
+            if (usuario is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "No se pudo identificar al usuario actual.",
+                    "Sesión no disponible",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            bool puedeFinalizarTrabajo =
+                _autorizacionNavegacion.TienePermiso(
+                    usuario.RolId,
+                    PermisoAplicacion.ConsultarAtencionesAsignadas);
+
+            if (!puedeFinalizarTrabajo)
+            {
+                MessageBox.Show(
+                    this,
+                    "No posee permisos para finalizar trabajos técnicos.",
+                    "Acceso restringido",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            using FrmFinalizarTrabajo formulario =
+                new();
+
+            if (formulario.ShowDialog(this) !=
+                DialogResult.OK)
+            {
+                return;
+            }
+
+            ActualizarAccionesSeleccion();
         }
         #endregion
 
@@ -951,6 +1008,116 @@ namespace Taller.Presentacion.Formularios.Atenciones
             formulario.ShowDialog(this);
         }
 
+        /// <summary>
+        /// Abre directamente el formulario demostrativo de registro
+        /// de diagnóstico para la atención seleccionada.
+        /// </summary>
+        private void AbrirRegistroDiagnosticoSeleccionado()
+        {
+            AtencionFila? fila =
+                ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para registrar el diagnóstico.",
+                    "Registrar diagnóstico",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            Usuario? usuario =
+                _sesionUsuario.UsuarioActual;
+
+            if (usuario is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "No existe una sesión de usuario válida.",
+                    "Registrar diagnóstico",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            bool puedeRegistrar =
+                _autorizacionNavegacion.TienePermiso(
+                    usuario.RolId,
+                    PermisoAplicacion.GestionarDiagnosticos);
+
+            if (!puedeRegistrar)
+            {
+                MessageBox.Show(
+                    this,
+                    "Solamente el personal técnico puede registrar diagnósticos.",
+                    "Acceso restringido",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            using var formulario =
+                new FrmRegistrarDiagnostico();
+
+            DialogResult resultado =
+                formulario.ShowDialog(this);
+
+            if (resultado != DialogResult.OK)
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                this,
+                "El diagnóstico se registró de manera simulada.\n\n" +
+                "La persistencia y actualización definitiva de la atención " +
+                "se incorporarán en una entrega posterior.",
+                "Diagnóstico registrado",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Abre de manera modal la pantalla demostrativa de edición
+        /// para la atención seleccionada.
+        /// </summary>
+        private void AbrirEdicionSeleccionada()
+        {
+            AtencionFila? fila =
+                ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para editar sus datos.",
+                    "Editar atención",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            using var formulario =
+                new FrmEditarAtencion();
+
+            DialogResult resultado =
+                formulario.ShowDialog(this);
+
+            if (resultado != DialogResult.OK)
+            {
+                return;
+            }
+
+            // En esta entrega no se modifica la base de datos.
+            // El formulario únicamente demuestra el flujo de edición.
+        }
+
         private void MostrarFuncionEnDesarrollo(
             string nombreFuncion)
         {
@@ -961,6 +1128,124 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 nombreFuncion,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Solicita confirmación para simular el inicio del proceso
+        /// de la atención seleccionada.
+        /// </summary>
+        private void ConfirmarInicioProceso()
+        {
+            AtencionFila? fila =
+                ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para iniciar su proceso.",
+                    "Iniciar proceso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            DialogResult respuesta =
+                MessageBox.Show(
+                    this,
+                    $"¿Desea iniciar el proceso de la atención N.º {fila.Numero}?\n\n" +
+                    "En la implementación definitiva, la atención avanzará " +
+                    "a la etapa de evaluación técnica.",
+                    "Iniciar proceso",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+
+            if (respuesta != DialogResult.Yes)
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                this,
+                "El inicio del proceso fue simulado correctamente.\n\n" +
+                "La atención quedaría disponible para la evaluación técnica.",
+                "Proceso iniciado",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Solicita confirmación para simular la cancelación lógica
+        /// de la atención seleccionada.
+        /// </summary>
+        private void ConfirmarCancelacionAtencion()
+        {
+            AtencionFila? fila =
+                ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para cancelarla.",
+                    "Cancelar atención",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            DialogResult respuesta =
+                MessageBox.Show(
+                    this,
+                    $"¿Confirma la cancelación de la atención N.º {fila.Numero}?\n\n" +
+                    "La cancelación definitiva será lógica: la atención " +
+                    "permanecerá registrada en el historial del sistema.",
+                    "Cancelar atención",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+
+            if (respuesta != DialogResult.Yes)
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                this,
+                "La cancelación de la atención fue simulada correctamente.",
+                "Atención cancelada",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Abre el historial demostrativo del vehículo correspondiente
+        /// a la atención seleccionada.
+        /// </summary>
+        private void AbrirHistorialSeleccionado()
+        {
+            AtencionFila? fila =
+                ObtenerFilaSeleccionada();
+
+            if (fila is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Seleccioná una atención para consultar el historial del vehículo.",
+                    "Historial del vehículo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            using var formulario =
+                new FrmHistorialVehiculo();
+
+            formulario.ShowDialog(this);
         }
         #endregion
     }

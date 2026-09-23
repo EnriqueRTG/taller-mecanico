@@ -1,5 +1,8 @@
 ﻿using Taller.Dominio.Constantes;
 using Taller.Presentacion.Formularios.Diagnosticos;
+using Taller.Presentacion.Formularios.Vehiculos;
+using Taller.Presentacion.Formularios.Presupuestos;
+using Taller.Presentacion.Formularios.Comprobantes;
 
 namespace Taller.Presentacion.Formularios.Atenciones;
 
@@ -25,6 +28,14 @@ public partial class FrmDetalleAtencion : Form
     /// Indica si durante la sesión actual se registró un diagnóstico simulado.
     /// </summary>
     private bool _diagnosticoRegistrado;
+
+    /// <summary>
+    /// Indica si durante la sesión actual se registró
+    /// una decisión sobre el presupuesto simulado.
+    /// </summary>
+    private bool _decisionPresupuestoRegistrada;
+
+    private bool _presupuestoGenerado;
     #endregion
 
     #region Inicialización
@@ -156,14 +167,50 @@ public partial class FrmDetalleAtencion : Form
     }
 
     /// <summary>
-    /// Configura el presupuesto simulado sin conceptos ni importes registrados.
+    /// Configura el presupuesto demostrativo y su estado inicial.
     /// </summary>
     private void CargarPresupuestoSimulado()
     {
+        _decisionPresupuestoRegistrada = false;
+
         dgvDetallePresupuesto.Rows.Clear();
 
-        lblTotalPresupuesto.Text = "Total estimado: $ 0,00";
-        btnRegistrarDecision.Enabled = false;
+        dgvDetallePresupuesto.Rows.Add(
+            "Revisión del sistema de encendido",
+            "Servicio",
+            "1",
+            "$ 25.000,00",
+            "$ 25.000,00");
+
+        dgvDetallePresupuesto.Rows.Add(
+            "Juego de bujías",
+            "Repuesto",
+            "1",
+            "$ 18.500,00",
+            "$ 18.500,00");
+
+        lblEstadoPresupuestoValor.Text =
+            "Emitido";
+
+        lblEstadoPresupuestoValor.ForeColor =
+            Color.FromArgb(30, 64, 175);
+
+        lblFechaPresupuestoValor.Text =
+            DateTime.Today.AddDays(-2)
+                .ToString("dd/MM/yyyy");
+
+        lblDecisionValor.Text =
+            "Sin registrar";
+
+        lblDecisionValor.ForeColor =
+            Color.FromArgb(51, 65, 85);
+
+        lblVigenciaValor.Text =
+            DateTime.Today.AddDays(13)
+                .ToString("dd/MM/yyyy");
+
+        lblTotalPresupuesto.Text =
+            "Total estimado: $ 43.500,00";
 
         dgvDetallePresupuesto.ClearSelection();
     }
@@ -180,6 +227,77 @@ public partial class FrmDetalleAtencion : Form
 
         dgvPagos.ClearSelection();
     }
+
+    /// <summary>
+    /// Refleja visualmente el presupuesto generado en el
+    /// detalle de la atención.
+    /// </summary>
+    private void AplicarPresupuestoGenerado(
+        FrmGenerarPresupuesto formulario)
+    {
+        _presupuestoGenerado = true;
+
+        dgvDetallePresupuesto.Rows.Clear();
+
+        foreach (
+            FrmGenerarPresupuesto.ConceptoPresupuestoResultado
+            concepto in formulario.Conceptos)
+        {
+            dgvDetallePresupuesto.Rows.Add(
+                concepto.Nombre,
+                concepto.Categoria,
+                concepto.Cantidad,
+                FormatearImporte(
+                    concepto.PrecioUnitario),
+                FormatearImporte(
+                    concepto.Subtotal));
+        }
+
+        lblEstadoPresupuestoValor.Text =
+            "Emitido";
+
+        lblFechaPresupuestoValor.Text =
+            formulario.FechaEmision.ToString(
+                "dd/MM/yyyy HH:mm");
+
+        lblDecisionValor.Text =
+            "Pendiente";
+
+        lblVigenciaValor.Text =
+            $"{formulario.VigenciaDias} días";
+
+        lblTotalPresupuesto.Text =
+            $"Total estimado: " +
+            $"{FormatearImporte(
+                formulario.TotalPresupuesto)}";
+
+        lblEtapaPresupuesto.Text =
+            "PRESUPUESTO GENERADO";
+
+        pnlEtapaPresupuesto.BackColor =
+            Color.FromArgb(219, 234, 254);
+
+        btnAbrirPresupuesto.Enabled = false;
+
+        dgvSeguimiento.Rows.Add(
+            formulario.FechaEmision.ToString(
+                "dd/MM/yyyy HH:mm"),
+            "Presupuesto",
+            "Se generó el presupuesto técnico de la atención.",
+            "Técnico actual");
+
+        dgvDetallePresupuesto.ClearSelection();
+        dgvSeguimiento.ClearSelection();
+    }
+    private static string FormatearImporte(
+    decimal importe)
+    {
+        return importe.ToString(
+            "C2",
+            System.Globalization.CultureInfo
+                .GetCultureInfo("es-AR"));
+    }
+
     #endregion
 
     #region Configuración por rol
@@ -214,20 +332,27 @@ public partial class FrmDetalleAtencion : Form
         lblInformacionRol.Text =
             "Consulte el avance y gestione los datos administrativos de la atención.";
 
+        // Acción administrativa general del detalle.
         btnAccionPrincipal.Visible = true;
         btnAccionPrincipal.Enabled = true;
         btnAccionPrincipal.Text = "Editar datos";
 
+        // El historial se consulta desde la pestaña Diagnóstico.
+        btnVerHistorial.Visible = false;
+        btnVerHistorialDesdeDiagnostico.Visible = true;
+
+        // El diagnóstico corresponde al Técnico.
         btnRegistrarDiagnostico.Visible = false;
 
-        btnVerHistorialDesdeDiagnostico.Visible = true;
-        btnVerHistorial.Visible = true;
-
+        // El presupuesto técnico corresponde al Técnico.
         btnAbrirPresupuesto.Visible = false;
 
+        // Decisión administrativa del presupuesto.
         btnRegistrarDecision.Visible = true;
-        btnRegistrarDecision.Enabled = false;
+        btnRegistrarDecision.Enabled =
+            !_decisionPresupuestoRegistrada;
 
+        // Operaciones administrativas posteriores.
         btnGestionarComprobante.Visible = true;
         btnGestionarComprobante.Enabled = true;
 
@@ -244,19 +369,24 @@ public partial class FrmDetalleAtencion : Form
         lblInformacionRol.Text =
             "Consulte los antecedentes y acceda al diagnóstico y trabajo técnico.";
 
-        btnAccionPrincipal.Visible = true;
-        btnAccionPrincipal.Enabled = true;
-        btnAccionPrincipal.Text = "Registrar diagnóstico";
+        // El pie del detalle conserva solamente la acción Cerrar.
+        // Las operaciones técnicas se encuentran en sus pestañas.
+        btnAccionPrincipal.Visible = false;
+        btnVerHistorial.Visible = false;
 
+        // Acciones específicas de la pestaña Diagnóstico.
         btnRegistrarDiagnostico.Visible = true;
-        btnRegistrarDiagnostico.Enabled = true;
+        btnRegistrarDiagnostico.Enabled =
+            !_diagnosticoRegistrado;
 
         btnVerHistorialDesdeDiagnostico.Visible = true;
-        btnVerHistorial.Visible = true;
 
+        // Acción específica de la pestaña Presupuesto.
         btnAbrirPresupuesto.Visible = true;
-        btnAbrirPresupuesto.Enabled = true;
+        btnAbrirPresupuesto.Enabled =
+            !_presupuestoGenerado;
 
+        // Acciones exclusivas del Administrativo.
         btnRegistrarDecision.Visible = false;
         btnGestionarComprobante.Visible = false;
         btnRegistrarEntrega.Visible = false;
@@ -272,13 +402,14 @@ public partial class FrmDetalleAtencion : Form
             "Vista de consulta de la atención y sus etapas asociadas.";
 
         btnAccionPrincipal.Visible = false;
+        btnVerHistorial.Visible = false;
+
         btnRegistrarDiagnostico.Visible = false;
         btnAbrirPresupuesto.Visible = false;
         btnRegistrarDecision.Visible = false;
         btnGestionarComprobante.Visible = false;
         btnRegistrarEntrega.Visible = false;
 
-        btnVerHistorial.Visible = true;
         btnVerHistorialDesdeDiagnostico.Visible = true;
     }
     #endregion
@@ -320,7 +451,7 @@ public partial class FrmDetalleAtencion : Form
                 break;
 
             case RolesSistema.AdministrativoId:
-                MostrarPantallaPendiente("Editar datos de la atención");
+                AbrirEdicionAtencion();
                 break;
         }
     }
@@ -333,7 +464,7 @@ public partial class FrmDetalleAtencion : Form
         object? sender,
         EventArgs e)
     {
-        MostrarPantallaPendiente("Historial del vehículo");
+        AbrirHistorialVehiculo();
     }
 
     /// <summary>
@@ -353,13 +484,22 @@ public partial class FrmDetalleAtencion : Form
     }
 
     /// <summary>
-    /// Abre la pantalla de generación del presupuesto técnico.
+    /// Abre el formulario de generación del presupuesto técnico
+    /// para la atención mostrada.
     /// </summary>
     private void BtnAbrirPresupuesto_Click(
         object? sender,
         EventArgs e)
     {
-        MostrarPantallaPendiente("Generar presupuesto");
+        using FrmGenerarPresupuesto formulario =
+            new();
+
+        if (formulario.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        AplicarPresupuestoGenerado(formulario);
     }
 
     /// <summary>
@@ -370,28 +510,40 @@ public partial class FrmDetalleAtencion : Form
         object? sender,
         EventArgs e)
     {
-        MostrarPantallaPendiente(
-            "Registrar decisión del presupuesto");
+        AbrirDecisionPresupuesto();
     }
 
     /// <summary>
-    /// Abre la pantalla administrativa de comprobantes y pagos.
-    /// </summary>
-    private void BtnGestionarComprobante_Click(
-        object? sender,
-        EventArgs e)
-    {
-        MostrarPantallaPendiente("Comprobante y pagos");
-    }
-
-    /// <summary>
-    /// Abre la pantalla administrativa de registro de entrega.
+    /// Abre el formulario de registro de entrega para la
+    /// atención mostrada actualmente.
     /// </summary>
     private void BtnRegistrarEntrega_Click(
         object? sender,
         EventArgs e)
     {
-        MostrarPantallaPendiente("Registrar entrega");
+        using FrmRegistrarEntrega formulario =
+            new();
+
+        if (formulario.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        AplicarEntregaSimulada(formulario);
+    }
+
+    /// <summary>
+    /// Abre la pantalla de gestión del comprobante y sus pagos
+    /// correspondientes a la atención seleccionada.
+    /// </summary>
+    private void BtnGestionarComprobante_Click(
+        object? sender,
+        EventArgs e)
+    {
+        using FrmComprobantePagos formulario =
+            new();
+
+        formulario.ShowDialog(this);
     }
     #endregion
 
@@ -459,6 +611,102 @@ public partial class FrmDetalleAtencion : Form
             "Navegación",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
+    }
+
+    /// <summary>
+    /// Abre de manera modal el formulario demostrativo
+    /// de edición administrativa de la atención.
+    /// </summary>
+    private void AbrirEdicionAtencion()
+    {
+        if (_rolId != RolesSistema.AdministrativoId)
+        {
+            MessageBox.Show(
+                this,
+                "Solamente el personal administrativo puede editar los datos de la atención.",
+                "Acceso restringido",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        using var formulario =
+            new FrmEditarAtencion();
+
+        DialogResult resultado =
+            formulario.ShowDialog(this);
+
+        if (resultado != DialogResult.OK)
+        {
+            return;
+        }
+
+        // En esta entrega la modificación es solamente visual.
+        // La actualización del detalle se incorporará junto con
+        // la lógica de negocio definitiva.
+    }
+
+    /// <summary>
+    /// Abre de manera modal la pantalla demostrativa
+    /// del historial de atenciones del vehículo.
+    /// </summary>
+    private void AbrirHistorialVehiculo()
+    {
+        using var formulario =
+            new FrmHistorialVehiculo();
+
+        formulario.ShowDialog(this);
+    }
+
+    /// <summary>
+    /// Verifica el rol y abre de manera modal el formulario
+    /// demostrativo de decisión del presupuesto.
+    /// </summary>
+    private void AbrirDecisionPresupuesto()
+    {
+        if (_rolId != RolesSistema.AdministrativoId)
+        {
+            MessageBox.Show(
+                this,
+                "Solamente el personal administrativo puede registrar " +
+                "la decisión del cliente.",
+                "Acceso restringido",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        if (_decisionPresupuestoRegistrada)
+        {
+            MessageBox.Show(
+                this,
+                "La decisión del presupuesto ya fue registrada " +
+                "durante esta sesión.",
+                "Decisión registrada",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            tabDetalle.SelectedTab =
+                tabPresupuesto;
+
+            return;
+        }
+
+        using var formulario =
+            new FrmDecisionPresupuesto();
+
+        DialogResult resultado =
+            formulario.ShowDialog(this);
+
+        if (resultado != DialogResult.OK)
+        {
+            return;
+        }
+
+        AplicarDecisionPresupuestoSimulada(
+            formulario);
     }
     #endregion
 
@@ -554,13 +802,111 @@ public partial class FrmDetalleAtencion : Form
         btnRegistrarDiagnostico.Enabled = false;
         btnRegistrarDiagnostico.Text = "Diagnóstico registrado";
 
-        if (_rolId == RolesSistema.TecnicoId)
-        {
-            btnAccionPrincipal.Enabled = false;
-            btnAccionPrincipal.Text = "Diagnóstico registrado";
+        AcceptButton = null;
+    }
 
-            AcceptButton = null;
+    /// <summary>
+    /// Aplica al detalle de atención la decisión simulada
+    /// registrada sobre el presupuesto.
+    /// </summary>
+    /// <param name="formulario">
+    /// Formulario que contiene la decisión ingresada.
+    /// </param>
+    private void AplicarDecisionPresupuestoSimulada(
+        FrmDecisionPresupuesto formulario)
+    {
+        _decisionPresupuestoRegistrada = true;
+
+        bool presupuestoAceptado =
+            formulario.Decision == "Aceptado";
+
+        Color colorEstado =
+            presupuestoAceptado
+                ? Color.FromArgb(22, 101, 52)
+                : Color.FromArgb(185, 28, 28);
+
+        lblDecisionValor.Text =
+            formulario.Decision;
+
+        lblDecisionValor.ForeColor =
+            colorEstado;
+
+        lblEstadoPresupuestoValor.Text =
+            presupuestoAceptado
+                ? "Aceptado"
+                : "Rechazado";
+
+        lblEstadoPresupuestoValor.ForeColor =
+            colorEstado;
+
+        ActualizarEtapaPresupuesto(
+            formulario.Decision,
+            colorEstado);
+
+        AgregarMovimientoDecisionPresupuesto(
+            formulario);
+
+        DeshabilitarRegistroDecision();
+
+        tabDetalle.SelectedTab =
+            tabPresupuesto;
+    }
+
+    /// <summary>
+    /// Actualiza visualmente la etapa de presupuesto según
+    /// la decisión demostrativa registrada.
+    /// </summary>
+    private void ActualizarEtapaPresupuesto(
+        string decision,
+        Color colorEstado)
+    {
+        pnlEtapaPresupuesto.BackColor =
+            colorEstado;
+
+        lblEtapaPresupuesto.Text =
+            $"✓ PRESUPUESTO\n{decision}";
+
+        lblEtapaPresupuesto.ForeColor =
+            Color.White;
+    }
+
+    /// <summary>
+    /// Agrega al seguimiento un movimiento demostrativo
+    /// asociado con la decisión del presupuesto.
+    /// </summary>
+    private void AgregarMovimientoDecisionPresupuesto(
+        FrmDecisionPresupuesto formulario)
+    {
+        string descripcion =
+            $"El cliente indicó que el presupuesto fue " +
+            $"{formulario.Decision.ToLowerInvariant()}.";
+
+        if (!string.IsNullOrWhiteSpace(
+            formulario.Observaciones))
+        {
+            descripcion +=
+                $" Observaciones: {formulario.Observaciones}";
         }
+
+        dgvSeguimiento.Rows.Add(
+            formulario.FechaDecision
+                .ToString("dd/MM/yyyy HH:mm"),
+            "Presupuesto",
+            descripcion,
+            "Administrativo Recepción");
+
+        dgvSeguimiento.ClearSelection();
+    }
+
+    /// <summary>
+    /// Evita registrar más de una decisión sobre el presupuesto
+    /// durante la misma sesión demostrativa.
+    /// </summary>
+    private void DeshabilitarRegistroDecision()
+    {
+        btnRegistrarDecision.Enabled = false;
+        btnRegistrarDecision.Text =
+            "Decisión registrada";
     }
     #endregion
 
@@ -653,4 +999,40 @@ public partial class FrmDetalleAtencion : Form
         grilla.RowTemplate.Height = 32;
     }
     #endregion
+
+    #region Datos Simulados
+    /// <summary>
+    /// Actualiza visualmente el detalle de la atención después
+    /// de confirmar una entrega simulada.
+    /// </summary>
+    private void AplicarEntregaSimulada(
+        FrmRegistrarEntrega formulario)
+    {
+        lblEstadoEntregaValor.Text =
+            "Entregada";
+
+        lblFechaEntregaValor.Text =
+            formulario.FechaEntrega.ToString(
+                "dd/MM/yyyy HH:mm");
+
+        lblEntregadoPorValor.Text =
+            formulario.RecibidoPor;
+
+        lblEstadoEntregaValor.ForeColor =
+            Color.FromArgb(22, 101, 52);
+
+        btnRegistrarEntrega.Enabled = false;
+
+        dgvSeguimiento.Rows.Add(
+            formulario.FechaEntrega.ToString(
+                "dd/MM/yyyy HH:mm"),
+            "Entrega",
+            $"El vehículo fue entregado a " +
+            $"{formulario.RecibidoPor}.",
+            "Administrativo actual");
+
+        dgvSeguimiento.ClearSelection();
+    }
+    #endregion
+    
 }

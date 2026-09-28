@@ -4,8 +4,6 @@ using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Aplicacion.Excepciones;
 
-
-
 namespace Taller.Aplicacion.Servicios;
 
 /// <summary>
@@ -21,19 +19,6 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Inicializa una nueva instancia del servicio de usuarios.
     /// </summary>
-    /// <param name="usuarioRepositorio">
-    /// Repositorio utilizado para consultar y almacenar usuarios.
-    /// </param>
-    /// <param name="rolRepositorio">
-    /// Repositorio utilizado para consultar los roles registrados.
-    /// </param>
-    /// <param name="passwordHasher">
-    /// Componente utilizado para generar hashes seguros
-    /// de las contraseñas.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Se produce cuando alguna dependencia requerida es nula.
-    /// </exception>
     public UsuarioServicio(
         IUsuarioRepositorio usuarioRepositorio,
         IRolRepositorio rolRepositorio,
@@ -67,10 +52,6 @@ public sealed class UsuarioServicio
     /// Obtiene los roles activos que pueden asignarse
     /// a los usuarios del sistema.
     /// </summary>
-    /// <returns>
-    /// Lista de roles cuya identificación, estado y nombre
-    /// coinciden con la configuración de la aplicación.
-    /// </returns>
     public async Task<List<Rol>> ListarRolesDisponiblesAsync()
     {
         List<Rol> rolesRegistrados =
@@ -86,14 +67,6 @@ public sealed class UsuarioServicio
     /// Comprueba que un rol coincida con uno de los roles
     /// habilitados por la aplicación.
     /// </summary>
-    /// <param name="rol">
-    /// Rol que debe comprobarse.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> cuando el rol está activo y su
-    /// identificador y nombre son válidos; de lo contrario,
-    /// <see langword="false"/>.
-    /// </returns>
     private static bool EsRolDisponible(
         Rol rol)
     {
@@ -128,36 +101,6 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Actualiza los datos personales y el rol de un usuario existente.
     /// </summary>
-    /// <param name="usuarioId">
-    /// Identificador del usuario que será modificado.
-    /// </param>
-    /// <param name="nombre">
-    /// Nuevo nombre del usuario.
-    /// </param>
-    /// <param name="apellido">
-    /// Nuevo apellido del usuario.
-    /// </param>
-    /// <param name="rolId">
-    /// Identificador del nuevo rol.
-    /// </param>
-    /// <param name="usuarioEjecutorId">
-    /// Identificador del administrador que realiza la operación.
-    /// </param>
-    /// <remarks>
-    /// Esta operación no modifica las credenciales, el estado,
-    /// la fecha de alta ni el identificador del usuario.
-    ///
-    /// Solamente un administrador activo puede realizarla.
-    /// Un administrador no puede quitarse a sí mismo el rol
-    /// de Administrador.
-    /// </remarks>
-    /// <exception cref="ValidacionException">
-    /// Se produce cuando alguno de los datos recibidos no es válido.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Se produce cuando el usuario o el rol no existen, están
-    /// inactivos o no cumplen las reglas de la aplicación.
-    /// </exception>
     public async Task ActualizarDatosAsync(
         int usuarioId,
         string? nombre,
@@ -173,16 +116,18 @@ public sealed class UsuarioServicio
             UsuarioRestricciones.NombreMaximo,
             nameof(nombre),
             "El nombre es obligatorio.",
-            $"El nombre no puede superar " +
-            $"{UsuarioRestricciones.NombreMaximo} caracteres.");
+            $"El nombre no puede superar {UsuarioRestricciones.NombreMaximo} caracteres.");
+
+        ValidarTextoSoloLetras(nombre, nameof(nombre), "El nombre solo debe contener letras.");
 
         apellido = NormalizarObligatorio(
             apellido,
             UsuarioRestricciones.ApellidoMaximo,
             nameof(apellido),
             "El apellido es obligatorio.",
-            $"El apellido no puede superar " +
-            $"{UsuarioRestricciones.ApellidoMaximo} caracteres.");
+            $"El apellido no puede superar {UsuarioRestricciones.ApellidoMaximo} caracteres.");
+
+        ValidarTextoSoloLetras(apellido, nameof(apellido), "El apellido solo debe contener letras.");
 
         if (!RolesSistema.EsRolValido(rolId))
         {
@@ -262,15 +207,15 @@ public sealed class UsuarioServicio
                 "La configuración del rol seleccionado no es válida.");
         }
 
-    bool modificaDatos =
-        !string.Equals(
-            usuario.Nombre,
-            nombre,
-            StringComparison.Ordinal)
+        bool modificaDatos =
+            !string.Equals(
+                usuario.Nombre,
+                nombre,
+                StringComparison.Ordinal)
             || !string.Equals(
-            usuario.Apellido,
-            apellido,
-            StringComparison.Ordinal)
+                usuario.Apellido,
+                apellido,
+                StringComparison.Ordinal)
             || usuario.RolId != rolId;
 
         if (!modificaDatos)
@@ -289,33 +234,12 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Actualiza las credenciales de acceso de un usuario.
     /// </summary>
-    /// <param name="usuarioId">
-    /// Identificador del usuario cuyas credenciales serán modificadas.
-    /// </param>
-    /// <param name="nombreUsuario">
-    /// Nuevo nombre utilizado para iniciar sesión.
-    /// </param>
-    /// <param name="nuevaPassword">
-    /// Nueva contraseña. Si es nula o vacía, se conserva
-    /// la contraseña actual.
-    /// </param>
-    /// <param name="confirmarPassword">
-    /// Confirmación de la nueva contraseña.
-    /// </param>
-    /// <param name="usuarioEjecutorId">
-    /// Identificador del administrador que realiza la operación.
-    /// </param>
-    /// <remarks>
-    /// Solamente un administrador activo puede gestionar credenciales.
-    /// El administrador no puede modificar sus propias credenciales
-    /// desde la gestión general de usuarios.
-    /// </remarks>
     public async Task ActualizarCredencialesAsync(
         int usuarioId,
         string? nombreUsuario,
         string? nuevaPassword,
         string? confirmarPassword,
-            int usuarioEjecutorId)
+        int usuarioEjecutorId)
     {
         ValidarId(usuarioId);
         ValidarId(usuarioEjecutorId);
@@ -329,8 +253,6 @@ public sealed class UsuarioServicio
                 $"El nombre de usuario no puede superar " +
                 $"{UsuarioRestricciones.NombreUsuarioMaximo} caracteres.");
 
-        // Ambos campos vacíos significan conservar la contraseña.
-        // Una confirmación aislada siempre es un dato inconsistente.
         if (string.IsNullOrEmpty(nuevaPassword)
             && !string.IsNullOrEmpty(confirmarPassword))
         {
@@ -451,10 +373,6 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Cambia el estado de acceso de un usuario registrado.
     /// </summary>
-    /// <remarks>
-    /// Solo un administrador activo puede realizar la operación.
-    /// El administrador no puede deshabilitar su propia cuenta.
-    /// </remarks>
     public async Task CambiarEstadoAsync(
         int usuarioId,
         bool habilitar,
@@ -515,35 +433,6 @@ public sealed class UsuarioServicio
     /// Registra un nuevo usuario después de validar sus datos,
     /// el rol seleccionado y la disponibilidad del nombre de acceso.
     /// </summary>
-    /// <param name="nombreUsuario">
-    /// Nombre que utilizará el usuario para iniciar sesión.
-    /// </param>
-    /// <param name="password">
-    /// Contraseña original que será validada y convertida
-    /// en un hash seguro.
-    /// </param>
-    /// <param name="nombre">
-    /// Nombre de la persona asociada a la cuenta.
-    /// </param>
-    /// <param name="apellido">
-    /// Apellido de la persona asociada a la cuenta.
-    /// </param>
-    /// <param name="rolId">
-    /// Identificador del rol que se asignará al usuario.
-    /// </param>
-    /// <returns>
-    /// El usuario creado y almacenado correctamente.
-    /// </returns>
-    /// <exception cref="ValidacionException">
-    /// Se produce cuando algún dato obligatorio está vacío,
-    /// excede la longitud admitida, la contraseña no cumple
-    /// las restricciones o el identificador del rol no es válido.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Se produce cuando el rol no existe, se encuentra inactivo,
-    /// está incorrectamente configurado o el nombre de usuario
-    /// ya se encuentra registrado.
-    /// </exception>
     public async Task<Usuario> CrearAsync(
         string? nombreUsuario,
         string? password,
@@ -569,8 +458,9 @@ public sealed class UsuarioServicio
                 UsuarioRestricciones.NombreMaximo,
                 nameof(nombre),
                 "El nombre es obligatorio.",
-                $"El nombre no puede superar " +
-                $"{UsuarioRestricciones.NombreMaximo} caracteres.");
+                $"El nombre no puede superar {UsuarioRestricciones.NombreMaximo} caracteres.");
+
+        ValidarTextoSoloLetras(nombreNormalizado, nameof(nombre), "El nombre solo debe contener letras.");
 
         string apellidoNormalizado =
             NormalizarObligatorio(
@@ -578,8 +468,9 @@ public sealed class UsuarioServicio
                 UsuarioRestricciones.ApellidoMaximo,
                 nameof(apellido),
                 "El apellido es obligatorio.",
-                $"El apellido no puede superar " +
-                $"{UsuarioRestricciones.ApellidoMaximo} caracteres.");
+                $"El apellido no puede superar {UsuarioRestricciones.ApellidoMaximo} caracteres.");
+
+        ValidarTextoSoloLetras(apellidoNormalizado, nameof(apellido), "El apellido solo debe contener letras.");
 
         if (!RolesSistema.EsRolValido(rolId))
         {
@@ -720,5 +611,22 @@ public sealed class UsuarioServicio
         }
 
         return valorNormalizado;
+    }
+
+    /// <summary>
+    /// Comprueba que una cadena contenga únicamente letras y espacios.
+    /// </summary>
+    private static void ValidarTextoSoloLetras(
+        string valor,
+        string nombreParametro,
+        string mensajeError)
+    {
+        foreach (char c in valor)
+        {
+            if (!char.IsLetter(c) && c != ' ')
+            {
+                throw new ValidacionException(mensajeError, nombreParametro);
+            }
+        }
     }
 }

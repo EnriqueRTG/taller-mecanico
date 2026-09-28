@@ -156,13 +156,39 @@ public partial class FrmAltaUsuario : Form
     /// y se seleccionó un rol; de lo contrario,
     /// <see langword="false"/>.
     /// </returns>
-    private bool ValidarFormulario(
-        out int idRol)
+    private bool ValidarFormulario(out int idRol)
     {
         idRol = 0;
 
-        if (txtPassword.Text
-            != txtConfirmarPassword.Text)
+        // Validar Nombre
+        if (string.IsNullOrWhiteSpace(txtNombre.Text) || !EsTextoValido(txtNombre.Text))
+        {
+            MessageBox.Show(
+                "El campo Nombre es obligatorio y solo debe contener letras.",
+                "Datos inválidos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            txtNombre.SelectAll();
+            txtNombre.Focus();
+            return false;
+        }
+
+        // Validar Apellido
+        if (string.IsNullOrWhiteSpace(txtApellido.Text) || !EsTextoValido(txtApellido.Text))
+        {
+            MessageBox.Show(
+                "El campo Apellido es obligatorio y solo debe contener letras.",
+                "Datos inválidos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            txtApellido.SelectAll();
+            txtApellido.Focus();
+            return false;
+        }
+
+        if (txtPassword.Text != txtConfirmarPassword.Text)
         {
             MessageBox.Show(
                 "Las contraseñas no coinciden.",
@@ -190,6 +216,21 @@ public partial class FrmAltaUsuario : Form
         }
 
         idRol = rolSeleccionado;
+        return true;
+    }
+
+    /// <summary>
+    /// Comprueba que una cadena contenga únicamente letras y espacios.
+    /// </summary>
+    private bool EsTextoValido(string valor)
+    {
+        foreach (char c in valor)
+        {
+            if (!char.IsLetter(c) && c != ' ')
+            {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -344,5 +385,23 @@ public partial class FrmAltaUsuario : Form
                 : "Guardar usuario";
 
         UseWaitCursor = guardando;
+    }
+
+    /// <summary>
+    /// Permite únicamente el ingreso de letras, espacios y caracteres acentuados.
+    /// </summary>
+    private void SoloLetras_KeyPress(object? sender, KeyPressEventArgs e)
+    {
+        // Permitir tecla de retroceso (Backspace) y teclas de control
+        if (char.IsControl(e.KeyChar))
+        {
+            return;
+        }
+
+        // Verificar si es letra, espacio o caracteres acentuados comunes en español
+        if (!char.IsLetter(e.KeyChar) && e.KeyChar != ' ' && !char.IsWhiteSpace(e.KeyChar))
+        {
+            e.Handled = true; // Cancela la tecla presionada
+        }
     }
 }

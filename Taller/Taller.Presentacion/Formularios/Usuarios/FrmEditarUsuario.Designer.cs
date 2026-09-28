@@ -379,6 +379,7 @@
             txtNombre.PlaceholderText = "Nombre";
             txtNombre.Size = new Size(381, 29);
             txtNombre.TabIndex = 0;
+            txtNombre.KeyPress += SoloLetras_KeyPress;
             // 
             // txtApellido
             // 
@@ -394,6 +395,7 @@
             txtApellido.PlaceholderText = "Apellido";
             txtApellido.Size = new Size(381, 29);
             txtApellido.TabIndex = 1;
+            txtApellido.KeyPress += SoloLetras_KeyPress;
             // 
             // cmbRol
             // 

@@ -10,7 +10,7 @@ namespace Taller.Presentacion.Formularios.Usuarios;
 /// de un usuario registrado.
 /// </summary>
 /// <remarks>
-/// El identificador, la fecha de alta, el estado y las
+/// El identificador, la fecha alta, el estado y las
 /// credenciales del usuario se muestran únicamente como
 /// información y no pueden modificarse desde este formulario.
 /// </remarks>
@@ -24,16 +24,6 @@ public partial class FrmEditarUsuario : Form
     /// <summary>
     /// Inicializa una nueva instancia del formulario.
     /// </summary>
-    /// <param name="usuarioServicio">
-    /// Servicio utilizado para consultar y actualizar usuarios.
-    /// </param>
-    /// <param name="sesionUsuario">
-    /// Sesión utilizada para identificar al administrador
-    /// que realiza la operación.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Se produce cuando alguna dependencia requerida es nula.
-    /// </exception>
     public FrmEditarUsuario(
         UsuarioServicio usuarioServicio,
         SesionUsuario sesionUsuario)
@@ -58,12 +48,6 @@ public partial class FrmEditarUsuario : Form
     /// Establece el usuario que será editado.
     /// Debe invocarse antes de mostrar el formulario.
     /// </summary>
-    /// <param name="usuarioId">
-    /// Identificador del usuario seleccionado.
-    /// </param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Se produce cuando el identificador no es válido.
-    /// </exception>
     public void PrepararEdicion(
         int usuarioId)
     {
@@ -121,6 +105,10 @@ public partial class FrmEditarUsuario : Form
 
         cmbRol.DropDownStyle =
             ComboBoxStyle.DropDownList;
+
+        // Suscribir el evento KeyPress para bloquear números/símbolos
+        txtNombre.KeyPress += SoloLetras_KeyPress;
+        txtApellido.KeyPress += SoloLetras_KeyPress;
 
         AcceptButton = btnGuardar;
         CancelButton = btnCancelar;
@@ -196,15 +184,9 @@ public partial class FrmEditarUsuario : Form
         object? sender,
         EventArgs e)
     {
-        if (cmbRol.SelectedValue is not int rolId)
+        // LLAMAR A LA VALIDACIÓN DEL FORMULARIO AQUÍ
+        if (!ValidarFormulario(out int rolId))
         {
-            MessageBox.Show(
-                "Debe seleccionar un rol.",
-                "Datos incompletos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
-            cmbRol.Focus();
             return;
         }
 
@@ -349,4 +331,85 @@ public partial class FrmEditarUsuario : Form
         btnGuardar.Text = textoBoton;
     }
 
+    /// <summary>
+    /// Permite únicamente el ingreso de letras, espacios y caracteres acentuados.
+    /// </summary>
+    private void SoloLetras_KeyPress(object? sender, KeyPressEventArgs e)
+    {
+        // Permitir tecla de retroceso (Backspace) y teclas de control
+        if (char.IsControl(e.KeyChar))
+        {
+            return;
+        }
+
+        // Verificar si es letra, espacio o caracteres acentuados comunes en español
+        if (!char.IsLetter(e.KeyChar) && e.KeyChar != ' ' && !char.IsWhiteSpace(e.KeyChar))
+        {
+            e.Handled = true; // Cancela la tecla presionada
+        }
+    }
+
+    private bool ValidarFormulario(out int idRol)
+    {
+        idRol = 0;
+
+        // Validar Nombre
+        if (string.IsNullOrWhiteSpace(txtNombre.Text) || !EsTextoValido(txtNombre.Text))
+        {
+            MessageBox.Show(
+                "El campo Nombre es obligatorio y solo debe contener letras.",
+                "Datos inválidos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            txtNombre.SelectAll();
+            txtNombre.Focus();
+            return false;
+        }
+
+        // Validar Apellido
+        if (string.IsNullOrWhiteSpace(txtApellido.Text) || !EsTextoValido(txtApellido.Text))
+        {
+            MessageBox.Show(
+                "El campo Apellido es obligatorio y solo debe contener letras.",
+                "Datos inválidos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            txtApellido.SelectAll();
+            txtApellido.Focus();
+            return false;
+        }
+
+        if (cmbRol.SelectedValue is not int rolSeleccionado)
+        {
+            MessageBox.Show(
+                "Debe seleccionar un rol.",
+                "Datos incompletos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            cmbRol.Focus();
+
+            return false;
+        }
+
+        idRol = rolSeleccionado;
+        return true;
+    }
+
+    /// <summary>
+    /// Comprueba que una cadena contenga únicamente letras y espacios.
+    /// </summary>
+    private bool EsTextoValido(string valor)
+    {
+        foreach (char c in valor)
+        {
+            if (!char.IsLetter(c) && c != ' ')
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 }

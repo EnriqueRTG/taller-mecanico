@@ -157,8 +157,8 @@ public partial class FrmVehiculos : Form
         if (vehiculo is null)
             return;
 
-        using editar_vehiculo formulario =
-            _proveedorServicios.GetRequiredService<editar_vehiculo>();
+        using FrmEditarVehiculo formulario =
+            _proveedorServicios.GetRequiredService<FrmEditarVehiculo>();
 
         string[] marcaModelo = vehiculo.Modelo.Split(
             ' ', 2, StringSplitOptions.RemoveEmptyEntries);

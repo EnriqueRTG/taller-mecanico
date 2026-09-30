@@ -1,6 +1,6 @@
 ﻿namespace Taller.Presentacion.Formularios.Backup
 {
-    partial class Backup
+    partial class FrmBackup
     {
         /// <summary>
         /// Required designer variable.

@@ -3,9 +3,9 @@ namespace Taller.Presentacion.Formularios.Vehiculos;
 /// <summary>
 /// Simula la edición de los datos del vehículo seleccionado.
 /// </summary>
-public partial class editar_vehiculo : Form
+public partial class FrmEditarVehiculo : Form
 {
-    public editar_vehiculo()
+    public FrmEditarVehiculo()
     {
         InitializeComponent();
         ConfigurarFormulario();

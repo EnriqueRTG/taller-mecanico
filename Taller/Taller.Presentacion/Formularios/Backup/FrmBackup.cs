@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace Taller.Presentacion.Formularios.Backup
 {
-    public partial class Backup : Form
+    public partial class FrmBackup : Form
     {
-        public Backup()
+        public FrmBackup()
         {
             InitializeComponent();
         }

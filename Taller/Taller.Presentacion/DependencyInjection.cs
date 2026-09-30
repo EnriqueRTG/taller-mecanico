@@ -46,7 +46,7 @@ public static class DependencyInjection
 
         services.AddTransient<FrmVehiculos>();
         services.AddTransient<FrmAltaVehiculo>();
-        services.AddTransient<editar_vehiculo>();
+        services.AddTransient<FrmEditarVehiculo>();
         services.AddTransient<FrmHistorialVehiculo>();
 
         services.AddTransient<FrmDiagnosticos>();

@@ -17,6 +17,16 @@ public sealed class Atencion
     public DateTime? FechaCierre { get; set; }
 
     /// <summary>
+    /// Identifica la versión del registro para detectar
+    /// modificaciones realizadas por otra operación.
+    /// </summary>
+    /// <remarks>
+    /// SQL Server genera y actualiza este valor automáticamente.
+    /// No debe asignarse manualmente.
+    /// </remarks>
+    public byte[] Version { get; set; } = [];
+
+    /// <summary>
     /// Representa el vehiculo asociado a esta atención.
     /// </summary>
     public Vehiculo Vehiculo { get; set; } = null!;

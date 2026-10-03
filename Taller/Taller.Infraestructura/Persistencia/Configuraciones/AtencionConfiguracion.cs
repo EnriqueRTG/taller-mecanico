@@ -5,14 +5,32 @@ using Taller.Dominio.Entidades;
 namespace Taller.Infraestructura.Persistencia.Configuraciones;
 
 /// <summary>
-/// Configura las propiedades y relaciones de la entidad Atención
-/// en la base de datos.
+/// Configura la persistencia, las relaciones y las restricciones
+/// de integridad de las atenciones.
 /// </summary>
 public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
 {
-    public void Configure(EntityTypeBuilder<Atencion> builder)
+    public void Configure(
+        EntityTypeBuilder<Atencion> builder)
     {
-        builder.ToTable("Atenciones");
+        builder.ToTable("Atenciones", tabla =>
+        {
+            // Impide guardar estados ajenos al ciclo definido.
+            tabla.HasCheckConstraint(
+                "CK_Atenciones_Estado",
+                """
+                [Estado] IN (
+                    N'Abierta',
+                    N'PendienteDiagnostico',
+                    N'EnEvaluacionTecnica',
+                    N'PendienteDecision',
+                    N'EnEjecucion',
+                    N'TrabajoFinalizado',
+                    N'Cerrada',
+                    N'Cancelada'
+                )
+                """);
+        });
 
         builder.HasKey(a => a.IdAtencion);
 
@@ -42,6 +60,19 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
 
         builder.Property(a => a.FechaCierre)
             .IsRequired(false);
+
+        // SQL Server genera una nueva versión en cada actualización.
+        // EF la utiliza para detectar modificaciones concurrentes.
+        builder.Property(a => a.Version)
+            .IsRowVersion();
+
+        // Permite varias atenciones históricas por vehículo,
+        // pero únicamente una que no esté cerrada ni cancelada.
+        builder.HasIndex(a => a.IdVehiculo)
+            .HasDatabaseName("UX_Atenciones_VehiculoActivo")
+            .IsUnique()
+            .HasFilter(
+                "[Estado] <> N'Cerrada' AND [Estado] <> N'Cancelada'");
 
         // Cliente 1:N Atenciones
         builder.HasOne(a => a.Cliente)

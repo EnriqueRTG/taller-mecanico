@@ -426,7 +426,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 EstadoAtencion.Abierta =>
                     "Abierta",
 
-                EstadoAtencion.EnProceso =>
+                EstadoAtencion.EnEjecucion =>
                     "En proceso",
 
                 EstadoAtencion.Cerrada =>
@@ -448,7 +448,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 EstadoAtencion.Abierta =>
                     "Ingreso registrado",
 
-                EstadoAtencion.EnProceso =>
+                EstadoAtencion.EnEjecucion =>
                     "Pendiente de diagnóstico",
 
                 EstadoAtencion.Cerrada =>
@@ -509,7 +509,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
                 case "En proceso":
                     consulta = consulta.Where(a =>
-                        a.EstadoValor == EstadoAtencion.EnProceso);
+                        a.EstadoValor == EstadoAtencion.EnEjecucion);
                     break;
 
                 case "Cerrada":
@@ -526,7 +526,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                     consulta = consulta.Where(a =>
                         a.EstadoValor == EstadoAtencion.Abierta
                         ||
-                        a.EstadoValor == EstadoAtencion.EnProceso);
+                        a.EstadoValor == EstadoAtencion.EnEjecucion);
                     break;
             }
 

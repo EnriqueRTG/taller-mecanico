@@ -124,7 +124,7 @@ public sealed class ClienteServicio
     /// <summary>
     /// Obtiene un cliente por su tipo y número de documento. Devuelve null si no se encuentra ningún cliente con esos datos.
     /// </summary>
-    /// <param name="tipoDocumento"></param>
+    /// <param name="tipoDocumento">Tipo de documento</param>
     /// <param name="documento"></param>
     /// <returns>El cliente encontrado o null si no se encuentra.</returns>
     public async Task<Cliente?> ObtenerPorDocumentoAsync(

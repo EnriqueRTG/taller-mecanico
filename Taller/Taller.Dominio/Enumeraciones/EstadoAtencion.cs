@@ -1,32 +1,61 @@
 ﻿namespace Taller.Dominio.Enumeraciones;
 
 /// <summary>
-/// Define los posibles estados de una atención durante
-/// su ciclo de vida dentro del taller.
+/// Define los estados del ciclo de atención de un vehículo,
+/// desde su registro hasta la entrega o cancelación.
 /// </summary>
+/// <remarks>
+/// Los cambios de estado se realizan mediante las operaciones
+/// autorizadas de los servicios de aplicación.
+/// Entity Framework Core persiste el nombre del estado como texto.
+/// </remarks>
 public enum EstadoAtencion
 {
     /// <summary>
-    /// La atención fue registrada y se encuentra pendiente
-    /// de iniciar los procesos posteriores.
+    /// La atención fue registrada y permanece pendiente
+    /// de que Recepción envíe el vehículo a diagnóstico.
     /// </summary>
     Abierta = 1,
 
     /// <summary>
-    /// La atención se encuentra avanzando por alguno de los
-    /// procesos asociados, como diagnóstico, presupuesto
-    /// o ejecución del trabajo.
+    /// Recepción confirmó el ingreso del vehículo al circuito
+    /// técnico y se encuentra pendiente de iniciar el diagnóstico.
     /// </summary>
-    EnProceso = 2,
+    PendienteDiagnostico = 2,
 
     /// <summary>
-    /// La atención finalizó y el vehículo fue entregado al cliente.
+    /// El técnico está elaborando el diagnóstico o preparando
+    /// presupuestos a partir del diagnóstico confirmado.
     /// </summary>
-    Cerrada = 3,
+    EnEvaluacionTecnica = 3,
 
     /// <summary>
-    /// La atención fue cancelada antes de completar
-    /// normalmente su ciclo de trabajo.
+    /// Existe al menos un presupuesto presentado y se espera
+    /// que Recepción registre la decisión comunicada por el cliente.
     /// </summary>
-    Cancelada = 4
+    PendienteDecision = 4,
+
+    /// <summary>
+    /// Existe un presupuesto aceptado y los trabajos autorizados
+    /// se encuentran pendientes de finalización técnica.
+    /// </summary>
+    EnEjecucion = 5,
+
+    /// <summary>
+    /// El técnico confirmó la finalización de los trabajos.
+    /// Recepción puede gestionar el comprobante, los pagos y la entrega.
+    /// </summary>
+    TrabajoFinalizado = 6,
+
+    /// <summary>
+    /// El vehículo fue entregado con los trabajos finalizados,
+    /// el comprobante emitido y el saldo pendiente igual a cero.
+    /// </summary>
+    Cerrada = 7,
+
+    /// <summary>
+    /// La atención terminó por desistimiento antes de la aceptación
+    /// de un presupuesto, conservando los antecedentes registrados.
+    /// </summary>
+    Cancelada = 8
 }

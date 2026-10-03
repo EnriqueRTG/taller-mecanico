@@ -15,6 +15,7 @@ public sealed class AtencionServicio
     private readonly IClienteRepositorio _clienteRepositorio;
     private readonly IVehiculoRepositorio _vehiculoRepositorio;
     private readonly IUsuarioRepositorio _usuarioRepositorio;
+    private readonly SesionUsuario _sesionUsuario; //
 
     /// <summary>
     /// Inicializa el servicio con los repositorios necesarios
@@ -24,12 +25,14 @@ public sealed class AtencionServicio
         IAtencionRepositorio atencionRepositorio,
         IClienteRepositorio clienteRepositorio,
         IVehiculoRepositorio vehiculoRepositorio,
-        IUsuarioRepositorio usuarioRepositorio)
+        IUsuarioRepositorio usuarioRepositorio,
+        SesionUsuario sesionUsuario)
     {
         _atencionRepositorio = atencionRepositorio;
         _clienteRepositorio = clienteRepositorio;
         _vehiculoRepositorio = vehiculoRepositorio;
         _usuarioRepositorio = usuarioRepositorio;
+        _sesionUsuario = sesionUsuario; //
     }
 
     /// <summary>
@@ -191,7 +194,7 @@ public sealed class AtencionServicio
                 "Solo una atención abierta puede pasar a estado EnProceso.");
         }
 
-        atencion.Estado = EstadoAtencion.EnProceso;
+        atencion.Estado = EstadoAtencion.EnEjecucion;
 
         await _atencionRepositorio.ActualizarAsync(atencion);
     }
@@ -248,7 +251,7 @@ public sealed class AtencionServicio
                 "Una atención cancelada no puede ser cerrada.");
         }
 
-        if (atencion.Estado != EstadoAtencion.EnProceso)
+        if (atencion.Estado != EstadoAtencion.EnEjecucion)
         {
             throw new InvalidOperationException(
                 "Solo una atención en proceso puede ser cerrada.");

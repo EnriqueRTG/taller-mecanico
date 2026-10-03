@@ -1,16 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Infraestructura.Persistencia.Repositorios;
 
 /// <summary>
-/// Implementa las operaciones de persistencia necesarias
-/// para trabajar con atenciones mediante Entity Framework Core.
+/// Implementa las consultas y operaciones de persistencia de atenciones.
 /// </summary>
+/// <remarks>
+/// Las consultas devuelven entidades sin seguimiento.
+/// Las actualizaciones utilizan la versión recibida para detectar
+/// modificaciones concurrentes.
+/// </remarks>
 public sealed class AtencionRepositorio : IAtencionRepositorio
 {
+    private const string IndiceVehiculoActivo = "UX_Atenciones_VehiculoActivo";
+
     // Contexto de Entity Framework Core utilizado para acceder
     // y realizar operaciones sobre la base de datos.
     private readonly TallerDbContext _contexto;
@@ -22,24 +31,11 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// <param name="contexto">
     /// Contexto de Entity Framework Core utilizado para acceder a la base de datos.
     /// </param>
-    public AtencionRepositorio(TallerDbContext contexto)
+    public AtencionRepositorio(TallerDbContext 
+        contexto)
     {
-        _contexto = contexto;
-    }
-
-    /// <summary>
-    /// Actualiza los datos de una atención existente.
-    /// </summary>
-    /// <param name="atencion">
-    /// Atención cuyos datos se desean actualizar.
-    /// </param>
-    /// <returns>
-    /// Una tarea que representa la operación asincrónica.
-    /// </returns>
-    public async Task ActualizarAsync(Atencion atencion)
-    {
-        _contexto.Atenciones.Update(atencion);
-        await _contexto.SaveChangesAsync();
+        _contexto = contexto
+            ?? throw new ArgumentNullException(nameof(contexto));
     }
 
     /// <summary>
@@ -51,57 +47,106 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// <returns>
     /// Una tarea que representa la operación asincrónica.
     /// </returns>
-    public async Task AgregarAsync(Atencion atencion)
+    public async Task AgregarAsync(
+        Atencion atencion)
     {
-        await _contexto.Atenciones.AddAsync(atencion);
-        await _contexto.SaveChangesAsync();
+        //Es una comprobación del contrato del método, no una validación de negocio.
+        ArgumentNullException.ThrowIfNull(atencion);
+
+        var entrada = _contexto.Entry(atencion);
+        entrada.State = EntityState.Added;
+
+        await GuardarAsync(entrada);
     }
 
     /// <summary>
-    /// Verifica si existe una atención activa asociada
-    /// al vehículo indicado.
+    /// Actualiza los datos editables y el estado de una atención,
+    /// conservando la fecha de apertura y el usuario de recepción.
     /// </summary>
-    /// <param name="idVehiculo">
-    /// Identificador del vehículo.
+    /// <param name="atencion">
+    /// Atención cuyos datos se desean actualizar.
     /// </param>
     /// <returns>
-    /// true si existe una atención abierta o en proceso para el vehículo;
-    /// en caso contrario, false.
+    /// Una tarea que representa la operación asincrónica.
+    /// </returns>
+    /// <remarks>
+    /// La propiedad Version debe contener la versión utilizada
+    /// para validar y preparar esta operación.
+    /// </remarks>
+    public async Task ActualizarAsync(
+        Atencion atencion)
+    {
+        // Es una comprobación del contrato del método, no una validación de negocio.
+        ArgumentNullException.ThrowIfNull(atencion);
+
+        if (atencion.IdAtencion <= 0)
+        {
+            throw new ArgumentException(
+                "La atención debe tener un identificador válido.",
+                nameof(atencion));
+        }
+
+        if (atencion.Version is null || atencion.Version.Length != 8)
+        {
+            throw new ArgumentException(
+                "La atención debe tener una versión válida para actualizarse.",
+                nameof(atencion));
+        }
+
+        // Cambiar el estado de esta entrada no adjunta el grafo
+        // de Cliente, Vehiculo y UsuarioRecepcion
+        var entrada = _contexto.Entry(atencion);
+        entrada.State = EntityState.Unchanged;
+
+        entrada.Property(a => a.Version).OriginalValue = atencion.Version.ToArray();
+
+        entrada.Property(a => a.IdCliente).IsModified = true;
+        entrada.Property(a => a.IdVehiculo).IsModified = true;
+        entrada.Property(a => a.MotivoConsulta).IsModified = true;
+        entrada.Property(a => a.Estado).IsModified = true;
+        entrada.Property(a => a.FechaCierre).IsModified = true;
+
+        await GuardarAsync(entrada);
+    }
+
+    /// <summary>
+    /// Comprueba si el vehículo tiene una atención
+    /// que no está cerrada ni cancelada.
+    /// </summary>
+    /// <param name="idVehiculo">Identificador del vehículo.</param>
+    /// <returns>
+    /// <see langword="true"/> si existe una atención activa;
+    /// en caso contrario, <see langword="false"/>.
     /// </returns>
     public async Task<bool> ExisteAtencionActivaParaVehiculoAsync(
         int idVehiculo)
     {
         return await _contexto.Atenciones.AnyAsync(a =>
             a.IdVehiculo == idVehiculo &&
-            (a.Estado == EstadoAtencion.Abierta ||
-            a.Estado == EstadoAtencion.EnProceso));
+            a.Estado != EstadoAtencion.Cerrada &&
+            a.Estado != EstadoAtencion.Cancelada);
     }
 
     /// <summary>
-    /// Lista todas las atenciones que se encuentran activas,
-    /// ordenadas desde la más reciente a la más antigua.
+    /// Lista las atenciones activas desde la más reciente.
     /// </summary>
     /// <returns>
-    /// Lista de atenciones activas.
+    /// Lista de atenciones activas, ordenadas desde la más reciente.
     /// </returns>
-    public async Task<List<Atencion>> ListarActivasAsync()
+    public Task<List<Atencion>> ListarActivasAsync()
     {
-        return await _contexto.Atenciones
-            .Include(a => a.Cliente)
-            .Include(a => a.Vehiculo)
-                .ThenInclude(v => v.Modelo)
-                    .ThenInclude(m => m.Marca)
-            .Include(a => a.UsuarioRecepcion)
+        return ConsultaConRelaciones()
             .Where(a =>
-                a.Estado == EstadoAtencion.Abierta ||
-                a.Estado == EstadoAtencion.EnProceso)
+                a.Estado != EstadoAtencion.Cerrada &&
+                a.Estado != EstadoAtencion.Cancelada)
             .OrderByDescending(a => a.FechaApertura)
+            .ThenByDescending(a => a.IdAtencion)
             .ToListAsync();
     }
 
     /// <summary>
-    /// Lista todas las atenciones asociadas a un cliente,
-    /// ordenadas desde la más reciente a la más antigua.
+    /// Lista el historial del cliente, incluyendo
+    /// atenciones cerradas y canceladas.
     /// </summary>
     /// <param name="idCliente">
     /// Identificador del cliente.
@@ -109,22 +154,19 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// <returns>
     /// Lista de atenciones asociadas al cliente indicado.
     /// </returns>
-    public async Task<List<Atencion>> ListarPorClienteAsync(int idCliente)
+    public Task<List<Atencion>> ListarPorClienteAsync(
+        int idCliente)
     {
-        return await _contexto.Atenciones
-            .Include(a => a.Cliente)
-            .Include(a => a.Vehiculo)
-                .ThenInclude(v => v.Modelo)
-                    .ThenInclude(m => m.Marca)
-            .Include(a => a.UsuarioRecepcion)
+        return ConsultaConRelaciones()
             .Where(a => a.IdCliente == idCliente)
             .OrderByDescending(a => a.FechaApertura)
+            .ThenByDescending(a => a.IdAtencion)
             .ToListAsync();
     }
 
     /// <summary>
-    /// Lista todas las atenciones asociadas a un vehículo,
-    /// ordenadas desde la más reciente a la más antigua.
+    /// Lista el historial del vehículo, incluyendo
+    /// atenciones cerradas y canceladas.
     /// </summary>
     /// <param name="idVehiculo">
     /// Identificador del vehículo.
@@ -132,23 +174,19 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// <returns>
     /// Lista de atenciones asociadas al vehículo indicado.
     /// </returns>
-    public async Task<List<Atencion>> ListarPorVehiculoAsync(int idVehiculo)
+    public Task<List<Atencion>> ListarPorVehiculoAsync(
+        int idVehiculo)
     {
-        return await _contexto.Atenciones
-            .Include(a => a.Cliente)
-            .Include(a => a.Vehiculo)
-                .ThenInclude(v => v.Modelo)
-                    .ThenInclude(m => m.Marca)
-            .Include(a => a.UsuarioRecepcion)
+        return ConsultaConRelaciones()
             .Where(a => a.IdVehiculo == idVehiculo)
             .OrderByDescending(a => a.FechaApertura)
+            .ThenByDescending(a => a.IdAtencion)
             .ToListAsync();
     }
 
     /// <summary>
-    /// Obtiene una atención mediante su identificador,
-    /// incluyendo los datos relacionados del cliente,
-    /// vehículo, modelo, marca y usuario de recepción.
+    /// Obtiene una atención con sus datos relacionados y su versión.
+    /// Devuelve null si no existe.
     /// </summary>
     /// <param name="idAtencion">
     /// Identificador de la atención.
@@ -156,14 +194,71 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// <returns>
     /// La atención encontrada o null si no existe.
     /// </returns>
-    public async Task<Atencion?> ObtenerPorIdAsync(int idAtencion)
+    public Task<Atencion?> ObtenerPorIdAsync(
+        int idAtencion)
     {
-        return await _contexto.Atenciones
+        return ConsultaConRelaciones()
+            .FirstOrDefaultAsync(a => a.IdAtencion == idAtencion);
+    }
+
+    /// <summary>
+    /// Construye la consulta común sin seguimiento
+    /// para consultar atenciones y sus relaciones.
+    /// </summary>
+    private IQueryable<Atencion> ConsultaConRelaciones()
+    {
+        return _contexto.Atenciones
+            .AsNoTracking()
             .Include(a => a.Cliente)
             .Include(a => a.Vehiculo)
                 .ThenInclude(v => v.Modelo)
                     .ThenInclude(m => m.Marca)
-            .Include(a => a.UsuarioRecepcion)
-            .FirstOrDefaultAsync(a => a.IdAtencion == idAtencion);
+            .Include(a => a.UsuarioRecepcion);
     }
+
+    /// <summary>
+    /// Persiste los cambios y traduce los conflictos conocidos.
+    /// </summary>
+    private async Task GuardarAsync(
+       EntityEntry<Atencion> entrada)
+    {
+        try
+        {
+            await _contexto.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConflictoConcurrenciaException(
+                "La atención fue modificada o eliminada por otra operación. Actualice la información antes de continuar.",
+                ex);
+        }
+        catch (DbUpdateException ex)
+            when (EsDuplicadoDeVehiculoActivo(ex))
+        {
+            throw new ValidacionException(
+                "El vehículo ya tiene una atención activa. Actualizá el listado antes de continuar.",
+                nameof(Atencion.IdVehiculo)
+            );
+        }
+        finally
+        {
+            // Evita conservar la atencion o una operación fallida
+            // como cambio pendiente para un guardado posterior.
+            entrada.State = EntityState.Detached;
+        }
+    }
+
+    /// <summary>
+    /// Identifica exclusivamente la violación del índice
+    /// que limita las atenciones activas por vehículo.
+    /// </summary>
+    private static bool EsDuplicadoDeVehiculoActivo(DbUpdateException excepcion)
+    {
+       return excepcion.InnerException is SqlException sqlEx &&
+            sqlEx.Errors.Cast<SqlError>().Any(error =>
+                (error.Number == 2601 || error.Number == 2627) &&
+                error.Message.Contains(
+                    IndiceVehiculoActivo, StringComparison.OrdinalIgnoreCase));
+    }
+
 }

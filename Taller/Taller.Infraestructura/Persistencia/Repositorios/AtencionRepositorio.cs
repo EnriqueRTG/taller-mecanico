@@ -60,6 +60,175 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     }
 
     /// <summary>
+    /// Persiste conjuntamente el cambio de la atención,
+    /// el cargo inicial autorizado y su historial.
+    /// </summary>
+    public async Task EnviarADiagnosticoAsync(
+        Atencion atencion,
+        Presupuesto presupuesto,
+        HistorialAtencion historial)
+    {
+        ArgumentNullException.ThrowIfNull(atencion);
+        ArgumentNullException.ThrowIfNull(presupuesto);
+        ArgumentNullException.ThrowIfNull(historial);
+
+        if (atencion.Estado != EstadoAtencion.PendienteDiagnostico ||
+            atencion.IdTecnicoEnActividad is not null ||
+            atencion.ActividadTecnica is not null)
+        {
+            throw new ArgumentException(
+                "La atención debe quedar pendiente de diagnóstico y sin reserva.",
+                nameof(atencion));
+        }
+
+        if (presupuesto.IdPresupuesto != 0 ||
+            presupuesto.Tipo != TipoPresupuesto.Diagnostico ||
+            presupuesto.Estado != EstadoPresupuesto.Aceptado ||
+            presupuesto.IdAtencion != atencion.IdAtencion ||
+            presupuesto.IdDiagnostico is not null)
+        {
+            throw new ArgumentException(
+                "El presupuesto debe ser nuevo, de diagnóstico, aceptado y pertenecer a la atención.",
+                nameof(presupuesto));
+        }
+
+        if (presupuesto.Detalles.Count != 1)
+        {
+            throw new ArgumentException(
+                "El presupuesto inicial debe contener un único detalle.",
+                nameof(presupuesto));
+        }
+
+        var detalle = presupuesto.Detalles.Single();
+
+        if (detalle.IdPresupuestoDetalle != 0 ||
+            detalle.IdPresupuesto != 0 ||
+            detalle.IdPresupuestoCambio is not null)
+        {
+            throw new ArgumentException(
+                "El detalle del cargo inicial debe ser nuevo y sin presupuesto de cambio.",
+                nameof(presupuesto));
+        }
+
+        var entradaPresupuesto = _contexto.Entry(presupuesto);
+        var entradaDetalle = _contexto.Entry(detalle);
+
+        try
+        {
+            // Esta navegación permite a EF completar la FK del detalle
+            // cuando SQL Server genere el identificador del presupuesto.
+            detalle.Presupuesto = presupuesto;
+
+            entradaPresupuesto.State = EntityState.Added;
+            entradaDetalle.State = EntityState.Added;
+
+            // Este método realiza un único SaveChangesAsync:
+            // incluye atención, historial, presupuesto y detalle.
+            await ActualizarConHistorialAsync(atencion, historial);
+        }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is SqlException sqlEx &&
+                  sqlEx.Errors.Cast<SqlError>().Any(error =>
+                      (error.Number == 2601 || error.Number == 2627) &&
+                      error.Message.Contains(
+                          "UX_Presupuestos_DiagnosticoPorAtencion",
+                          StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new ValidacionException(
+                "La atención ya tiene registrado el cargo inicial de diagnóstico.",
+                nameof(Presupuesto.IdAtencion));
+        }
+        finally
+        {
+            entradaDetalle.State = EntityState.Detached;
+            entradaPresupuesto.State = EntityState.Detached;
+        }
+    }
+
+    /// <summary>
+    /// Actualiza la atención, incluida su reserva técnica,
+    /// y agrega un evento al historial.
+    /// </summary>
+    /// <remarks>
+    /// Un único SaveChangesAsync guarda ambos cambios en una transacción.
+    /// Si existe un conflicto de concurrencia, ninguno se confirma.
+    /// </remarks>
+    public async Task ActualizarConHistorialAsync(
+        Atencion atencion,
+        HistorialAtencion historial)
+    {
+        ArgumentNullException.ThrowIfNull(atencion);
+        ArgumentNullException.ThrowIfNull(historial);
+
+        if (atencion.IdAtencion <= 0)
+        {
+            throw new ArgumentException(
+                "La atención debe tener un identificador válido.",
+                nameof(atencion));
+        }
+
+        if (atencion.Version is null || atencion.Version.Length != 8)
+        {
+            throw new ArgumentException(
+                "La atención debe tener una versión válida.",
+                nameof(atencion));
+        }
+
+        if (historial.IdHistorialAtencion != 0)
+        {
+            throw new ArgumentException(
+                "El evento del historial debe ser nuevo.",
+                nameof(historial));
+        }
+
+        if (historial.IdAtencion != atencion.IdAtencion)
+        {
+            throw new ArgumentException(
+                "El evento debe corresponder a la atención actualizada.",
+                nameof(historial));
+        }
+
+        if (historial.EstadoNuevo != atencion.Estado)
+        {
+            throw new ArgumentException(
+                "El estado del evento debe coincidir con el de la atención.",
+                nameof(historial));
+        }
+
+        var entradaAtencion = _contexto.Entry(atencion);
+        entradaAtencion.State = EntityState.Unchanged;
+
+        entradaAtencion.Property(a => a.Version).OriginalValue =
+            atencion.Version.ToArray();
+
+        entradaAtencion.Property(a => a.IdCliente).IsModified = true;
+        entradaAtencion.Property(a => a.IdVehiculo).IsModified = true;
+        entradaAtencion.Property(a => a.MotivoConsulta).IsModified = true;
+        entradaAtencion.Property(a => a.Estado).IsModified = true;
+        entradaAtencion.Property(a => a.FechaCierre).IsModified = true;
+
+        entradaAtencion.Property(a => a.IdTecnicoEnActividad)
+            .IsModified = true;
+
+        entradaAtencion.Property(a => a.ActividadTecnica)
+            .IsModified = true;
+
+        var entradaHistorial = _contexto.Entry(historial);
+        entradaHistorial.State = EntityState.Added;
+
+        try
+        {
+            await GuardarAsync(entradaAtencion);
+        }
+        finally
+        {
+            // Impide que un evento fallido quede pendiente
+            // y se inserte accidentalmente en otra operación.
+            entradaHistorial.State = EntityState.Detached;
+        }
+    }
+
+    /// <summary>
     /// Actualiza los datos editables y el estado de una atención,
     /// conservando la fecha de apertura y el usuario de recepción.
     /// </summary>
@@ -213,7 +382,8 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
             .Include(a => a.Vehiculo)
                 .ThenInclude(v => v.Modelo)
                     .ThenInclude(m => m.Marca)
-            .Include(a => a.UsuarioRecepcion);
+            .Include(a => a.UsuarioRecepcion)
+            .Include(a => a.TecnicoEnActividad);
     }
 
     /// <summary>
@@ -260,5 +430,6 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
                 error.Message.Contains(
                     IndiceVehiculoActivo, StringComparison.OrdinalIgnoreCase));
     }
+
 
 }

@@ -148,6 +148,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnVerHistorial.Width = 110;
             btnRegistrarDiagnostico.Width = 150;
             btnFinalizarTrabajo.Width = 130;
+
+            btnIniciarProceso.Text = "Enviar a diagnóstico";
+            btnIniciarProceso.Width = 160;
         }
 
         private void ConfigurarEventos()
@@ -167,21 +170,21 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
         private void ConfigurarFiltros()
         {
+            cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstado.Items.Clear();
-
             cboEstado.Items.Add("Activas");
-            cboEstado.Items.Add("Todas");
-            cboEstado.Items.Add("Abierta");
-            cboEstado.Items.Add("En proceso");
-            cboEstado.Items.Add("Cerrada");
-            cboEstado.Items.Add("Cancelada");
 
-            dtpDesde.Value =
-                DateTime.Today.AddMonths(-1);
+            foreach (var estado in Enum.GetValues<EstadoAtencion>())
+            {
+                if (estado != EstadoAtencion.Cerrada &&
+                    estado != EstadoAtencion.Cancelada)
+                {
+                    cboEstado.Items.Add(ObtenerNombreEstado(estado));
+                }
+            }
 
-            dtpHasta.Value =
-                DateTime.Today;
-
+            dtpDesde.Value = DateTime.Today.AddMonths(-1);
+            dtpHasta.Value = DateTime.Today;
             cboEstado.SelectedIndex = 0;
         }
 
@@ -423,20 +426,17 @@ namespace Taller.Presentacion.Formularios.Atenciones
         {
             return estado switch
             {
-                EstadoAtencion.Abierta =>
-                    "Abierta",
-
-                EstadoAtencion.EnEjecucion =>
-                    "En proceso",
-
-                EstadoAtencion.Cerrada =>
-                    "Cerrada",
-
-                EstadoAtencion.Cancelada =>
-                    "Cancelada",
-
-                _ =>
-                    "Desconocido"
+                EstadoAtencion.Abierta => "Abierta",
+                EstadoAtencion.PendienteDiagnostico => "Pendiente de diagnóstico",
+                EstadoAtencion.EnEvaluacionTecnica => "En evaluación técnica",
+                EstadoAtencion.PendienteDecision => "Pendiente de decisión",
+                EstadoAtencion.EnEjecucion => "En ejecución",
+                EstadoAtencion.Pausada => "Pausada",
+                EstadoAtencion.TrabajoFinalizado => "Trabajo finalizado",
+                EstadoAtencion.PendienteLiquidacion => "Pendiente de liquidación",
+                EstadoAtencion.Cerrada => "Cerrada",
+                EstadoAtencion.Cancelada => "Cancelada",
+                _ => "Estado desconocido"
             };
         }
 
@@ -448,17 +448,34 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 EstadoAtencion.Abierta =>
                     "Ingreso registrado",
 
+                EstadoAtencion.PendienteDiagnostico =>
+                    "Espera que un técnico tome el diagnóstico",
+
+                EstadoAtencion.EnEvaluacionTecnica =>
+                    "Evaluación técnica y preparación de propuesta",
+
+                EstadoAtencion.PendienteDecision =>
+                    "Espera la decisión del cliente",
+
                 EstadoAtencion.EnEjecucion =>
-                    "Pendiente de diagnóstico",
+                    "Ejecución de trabajos autorizados",
+
+                EstadoAtencion.Pausada =>
+                    "Resolución de un hallazgo adicional",
+
+                EstadoAtencion.TrabajoFinalizado =>
+                    "Reparación terminada; resta liquidar y entregar",
+
+                EstadoAtencion.PendienteLiquidacion =>
+                    "Actividad técnica terminada; resta liquidar y entregar",
 
                 EstadoAtencion.Cerrada =>
-                    "Vehículo entregado",
+                    "Vehículo entregado y liquidación completada",
 
                 EstadoAtencion.Cancelada =>
                     "Atención cancelada",
 
-                _ =>
-                    "Sin determinar"
+                _ => "Sin determinar"
             };
         }
         #endregion
@@ -496,38 +513,17 @@ namespace Taller.Presentacion.Formularios.Atenciones
                         StringComparison.OrdinalIgnoreCase));
             }
 
-            string estado =
-                cboEstado.SelectedItem?.ToString()
-                ?? "Activas";
+            string estadoSeleccionado =
+                cboEstado.SelectedItem?.ToString() ?? "Activas";
 
-            switch (estado)
+            consulta = consulta.Where(a =>
+                a.EstadoValor != EstadoAtencion.Cerrada &&
+                a.EstadoValor != EstadoAtencion.Cancelada);
+
+            if (estadoSeleccionado != "Activas")
             {
-                case "Abierta":
-                    consulta = consulta.Where(a =>
-                        a.EstadoValor == EstadoAtencion.Abierta);
-                    break;
-
-                case "En proceso":
-                    consulta = consulta.Where(a =>
-                        a.EstadoValor == EstadoAtencion.EnEjecucion);
-                    break;
-
-                case "Cerrada":
-                    consulta = consulta.Where(a =>
-                        a.EstadoValor == EstadoAtencion.Cerrada);
-                    break;
-
-                case "Cancelada":
-                    consulta = consulta.Where(a =>
-                        a.EstadoValor == EstadoAtencion.Cancelada);
-                    break;
-
-                case "Activas":
-                    consulta = consulta.Where(a =>
-                        a.EstadoValor == EstadoAtencion.Abierta
-                        ||
-                        a.EstadoValor == EstadoAtencion.EnEjecucion);
-                    break;
+                consulta = consulta.Where(a =>
+                    ObtenerNombreEstado(a.EstadoValor) == estadoSeleccionado);
             }
 
             DateTime desde =
@@ -603,7 +599,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 puedeGestionar;
 
             btnIniciarProceso.Enabled =
-                puedeGestionar;
+                puedeGestionar &&
+                fila.EstadoValor == EstadoAtencion.Abierta;
 
             btnCancelarAtencion.Enabled =
                 puedeGestionar;

@@ -16,5 +16,22 @@ public interface IAtencionRepositorio
     Task<List<Atencion>> ListarPorVehiculoAsync(int idVehiculo);
     Task AgregarAsync(Atencion atencion);
     Task ActualizarAsync(Atencion atencion);
+
+    /// <summary>
+    /// Actualiza la atención y registra el evento correspondiente
+    /// en una misma operación de persistencia.
+    /// </summary>
+    Task ActualizarConHistorialAsync(
+        Atencion atencion,
+        HistorialAtencion historial);
     Task<bool> ExisteAtencionActivaParaVehiculoAsync(int idVehiculo);
+
+    /// <summary>
+    /// Guarda el envío a diagnóstico, el presupuesto inicial
+    /// con su detalle y el evento del historial conjuntamente.
+    /// </summary>
+    Task EnviarADiagnosticoAsync(
+        Atencion atencion,
+        Presupuesto presupuesto,
+        HistorialAtencion historial);
 }

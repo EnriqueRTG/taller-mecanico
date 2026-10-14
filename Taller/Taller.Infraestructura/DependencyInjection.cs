@@ -67,6 +67,9 @@ public static class DependencyInjection
 
         services.AddScoped<IRolRepositorio, RolRepositorio>();
 
+        services.AddScoped<ICategoriaRepositorio, CategoriaRepositorio>();
+
+        services.AddScoped<IConceptoRepositorio, ConceptoRepositorio>();
 
 
         // Registra el servicio responsable de crear los datos

@@ -41,6 +41,24 @@ public sealed class TallerDbContext : DbContext
     // Conjunto de atenciones administrados por Entity Framework Core.
     public DbSet<Atencion> Atenciones => Set<Atencion>();
 
+    // Conjunto de diagnósticos administrados por Entity Framework Core.
+    public DbSet<Diagnostico> Diagnosticos => Set<Diagnostico>();
+
+    // Conjunto de historial de atenciones administrados por Entity Framework Core.
+    public DbSet<HistorialAtencion> HistorialAtenciones => Set<HistorialAtencion>();
+
+    // Conjunto de categorías administrados por Entity Framework Core.
+    public DbSet<Categoria> Categorias => Set<Categoria>();
+
+    // Conjunto de conceptos administrados por Entity Framework Core.
+    public DbSet<Concepto> Conceptos => Set<Concepto>();
+
+    public DbSet<Presupuesto> Presupuestos =>
+    Set<Presupuesto>();
+
+    public DbSet<PresupuestoDetalle> PresupuestoDetalles =>
+        Set<PresupuestoDetalle>();
+
     /// <summary>
     /// Configura el modelo de datos que utilizará Entity Framework Core.
     /// Este método se ejecuta cuando EF Core construye el modelo.

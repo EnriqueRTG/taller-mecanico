@@ -64,6 +64,17 @@ public sealed class ConceptoConfiguracion : IEntityTypeConfiguration<Concepto>
         builder.HasIndex(c => c.IdCategoria)
             .HasDatabaseName("IX_Conceptos_IdCategoria");
 
+        // Evita repetir un concepto del mismo tipo dentro de una categoría.
+        // Incluye los conceptos inactivos para conservar su identidad.
+        builder.HasIndex(c => new
+        {
+            c.IdCategoria,
+            c.Tipo,
+            c.Nombre
+        })
+            .HasDatabaseName("UX_Conceptos_Categoria_Tipo_Nombre")
+            .IsUnique();
+
         builder.HasOne(c => c.Categoria)
             .WithMany(cat => cat.Conceptos)
             .HasForeignKey(c => c.IdCategoria)

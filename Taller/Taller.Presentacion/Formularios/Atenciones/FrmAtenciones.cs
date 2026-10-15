@@ -1000,7 +1000,10 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
 
             using var formulario =
-                new FrmDetalleAtencion(usuario.RolId);
+                new FrmDetalleAtencion(
+                        fila.IdAtencion,
+                        _atencionServicio,
+                        _sesionUsuario);
 
             formulario.ShowDialog(this);
         }

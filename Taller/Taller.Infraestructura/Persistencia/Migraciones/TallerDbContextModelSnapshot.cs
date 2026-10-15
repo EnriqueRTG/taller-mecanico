@@ -216,6 +216,10 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasIndex("IdCategoria")
                         .HasDatabaseName("IX_Conceptos_IdCategoria");
 
+                    b.HasIndex("IdCategoria", "Tipo", "Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Conceptos_Categoria_Tipo_Nombre");
+
                     b.ToTable("Conceptos", null, t =>
                         {
                             t.HasCheckConstraint("CK_Conceptos_Nombre", "LEN(LTRIM(RTRIM(Nombre))) > 0");

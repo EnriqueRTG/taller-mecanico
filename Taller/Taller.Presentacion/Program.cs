@@ -6,6 +6,7 @@ using Taller.Infraestructura;
 using Taller.Infraestructura.Persistencia.Inicializacion;
 using Taller.Presentacion.Formularios.Autenticacion;
 using Taller.Presentacion.Formularios.Principal;
+using Taller.Aplicacion.Configuracion;
 
 namespace Taller.Presentacion;
 
@@ -27,6 +28,23 @@ internal static class Program
                 "appsettings.Local.json",
                 optional: true,
                 reloadOnChange: true);
+
+        // Obtiene el concepto definido para el ingreso a diagnóstico.
+        var idConceptoIngreso = builder.Configuration
+            .GetValue<int?>("IngresoDiagnostico:IdConcepto");
+
+        if (idConceptoIngreso is null || idConceptoIngreso.Value <= 0)
+        {
+            throw new InvalidOperationException(
+                "Debe configurar IngresoDiagnostico:IdConcepto " +
+                "con un identificador de concepto válido.");
+        }
+
+        builder.Services.AddSingleton(
+            new IngresoDiagnosticoOpciones
+            {
+                IdConcepto = idConceptoIngreso.Value
+            });
 
         // Registra los servicios de la capa de Aplicación.
         builder.Services.AddAplicacion();

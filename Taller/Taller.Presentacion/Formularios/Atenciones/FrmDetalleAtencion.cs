@@ -3,6 +3,9 @@ using Taller.Presentacion.Formularios.Diagnosticos;
 using Taller.Presentacion.Formularios.Vehiculos;
 using Taller.Presentacion.Formularios.Presupuestos;
 using Taller.Presentacion.Formularios.Comprobantes;
+using Taller.Aplicacion.Servicios;
+using Taller.Dominio.Entidades;
+using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Presentacion.Formularios.Atenciones;
 
@@ -36,43 +39,109 @@ public partial class FrmDetalleAtencion : Form
     private bool _decisionPresupuestoRegistrada;
 
     private bool _presupuestoGenerado;
+
+    private readonly int _idAtencion;
+
+    private readonly AtencionServicio _atencionServicio;
+    
+    private Atencion? _atencionActual;
+    
+    private bool _cargandoServiciosIngreso;
     #endregion
 
     #region Inicialización
     /// <summary>
-    /// Inicializa una nueva instancia del detalle de atención para
-    /// el rol especificado.
+    /// Inicializa el detalle de la atención seleccionada.
     /// </summary>
-    /// <param name="rolId">
-    /// Identificador del rol del usuario que accede al formulario.
-    /// </param>
     public FrmDetalleAtencion(
-        int rolId)
+        int idAtencion,
+        AtencionServicio atencionServicio,
+        SesionUsuario sesionUsuario)
     {
+        ArgumentNullException.ThrowIfNull(atencionServicio);
+        ArgumentNullException.ThrowIfNull(sesionUsuario);
+
+        if (idAtencion <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(idAtencion));
+        }
+
+        var usuario = sesionUsuario.UsuarioActual
+            ?? throw new InvalidOperationException(
+                "No existe una sesión de usuario válida.");
+
         InitializeComponent();
 
-        _rolId = rolId;
+        _idAtencion = idAtencion;
+        _atencionServicio = atencionServicio;
+        _rolId = usuario.RolId;
     }
 
-    /// <summary>
-    /// Inicializa la configuración, los estilos, los datos simulados
-    /// y los permisos visuales del formulario.
-    /// </summary>
-    /// <param name="sender">
-    /// Instancia que originó el evento.
-    /// </param>
-    /// <param name="e">
-    /// Datos asociados al evento de carga.
-    /// </param>
-    private void FrmDetalleAtencion_Load(
+    private async void FrmDetalleAtencion_Load(
         object? sender,
         EventArgs e)
     {
         ConfigurarFormulario();
         AplicarEstilos();
-        CargarDatosSimulados();
-        ConfigurarVistaSegunRol();
-        ConfigurarBotonPredeterminado();
+
+        // No mostrar registros demostrativos como si fueran reales.
+        dgvSeguimiento.Rows.Clear();
+        dgvDetallePresupuesto.Rows.Clear();
+        dgvPagos.Rows.Clear();
+
+        tabDetalle.SelectedTab = tabInformacion;
+
+        // Estas operaciones todavía no están conectadas en el detalle.
+        btnAccionPrincipal.Visible = false;
+        btnVerHistorial.Visible = false;
+        btnRegistrarDiagnostico.Visible = false;
+        btnVerHistorialDesdeDiagnostico.Visible = false;
+        btnAbrirPresupuesto.Visible = false;
+        btnRegistrarDecision.Visible = false;
+        btnGestionarComprobante.Visible = false;
+        btnRegistrarEntrega.Visible = false;
+        AcceptButton = null;
+
+        // Dejamos disponibles las pestañas que conectaremos primero.
+        // Las restantes conservan su diseño para próximos pasos.
+        tabDetalle.TabPages.Remove(tabSeguimiento);
+        tabDetalle.TabPages.Remove(tabDiagnostico);
+        tabDetalle.TabPages.Remove(tabPresupuesto);
+        tabDetalle.TabPages.Remove(tabEntrega);
+
+        grpIngresoDiagnostico.Visible =
+            _rolId == RolesSistema.AdministrativoId;
+
+        btnConfirmarIngreso.Enabled = false;
+        cboServicioIngreso.Enabled = false;
+        nudImporteIngreso.Enabled = false;
+        chkAutorizaIngreso.Enabled = false;
+
+        try
+        {
+            Cursor = Cursors.WaitCursor;
+            tabDetalle.Enabled = false;
+
+            await CargarAtencionAsync();
+
+            await CargarServiciosIngresoAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                $"No se pudo cargar la atención.\n\n{ex.Message}",
+                "Detalle de atención",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            Close();
+        }
+        finally
+        {
+            Cursor = Cursors.Default;
+            tabDetalle.Enabled = true;
+        }
     }
 
     /// <summary>
@@ -95,9 +164,244 @@ public partial class FrmDetalleAtencion : Form
             ? btnAccionPrincipal
             : null;
     }
+
+    /// <summary>
+    /// Consulta y muestra los datos reales de la atención.
+    /// </summary>
+    private async Task CargarAtencionAsync()
+    {
+        var atencion = await _atencionServicio.ObtenerPorIdAsync(
+            _idAtencion);
+
+        if (atencion is null)
+        {
+            throw new InvalidOperationException(
+                "La atención seleccionada ya no existe.");
+        }
+
+        _atencionActual = atencion;
+
+        string numero = atencion.IdAtencion.ToString("D6");
+        string fecha = atencion.FechaApertura.ToString(
+            "dd/MM/yyyy HH:mm");
+
+        string recepcion =
+            $"{atencion.UsuarioRecepcion.Nombre} " +
+            $"{atencion.UsuarioRecepcion.Apellido}";
+
+        lblTitulo.Text = $"Atención N.º {numero}";
+        lblEstado.Text =
+            $"Estado: {ObtenerNombreEstado(atencion.Estado)}";
+
+        lblEtapaActual.Text = atencion.IdTecnicoEnActividad is null
+            ? "Sin actividad técnica reservada"
+            : $"Técnico en actividad: " +
+              $"{atencion.TecnicoEnActividad?.Nombre} " +
+              $"{atencion.TecnicoEnActividad?.Apellido}";
+
+        lblNombreCliente.Text =
+            $"{atencion.Cliente.Apellido}, {atencion.Cliente.Nombre}";
+
+        lblDocumentoCliente.Text =
+            $"{atencion.Cliente.TipoDocumento} " +
+            $"{atencion.Cliente.Documento}";
+
+        var contactos = new[]
+        {
+        atencion.Cliente.Telefono,
+        atencion.Cliente.Email
+    };
+
+        lblContactoCliente.Text = string.Join(
+            " · ",
+            contactos.Where(c => !string.IsNullOrWhiteSpace(c)));
+
+        if (string.IsNullOrWhiteSpace(lblContactoCliente.Text))
+        {
+            lblContactoCliente.Text = "Sin contacto registrado";
+        }
+
+        lblDominioVehiculo.Text = atencion.Vehiculo.Dominio;
+
+        lblModeloVehiculo.Text =
+            $"{atencion.Vehiculo.Modelo.Marca.Nombre} " +
+            $"{atencion.Vehiculo.Modelo.Nombre}";
+
+        lblDatosVehiculo.Text =
+            $"Año {atencion.Vehiculo.Anio} · {atencion.Vehiculo.Color}";
+
+        lblFechaIngreso.Text = fecha;
+        lblUsuarioRecepcion.Text = recepcion;
+
+        lblTituloRecepcion.Text = "REGISTRO DE ATENCIÓN";
+        lblTipoIngreso.Text =
+            "La apertura no implica autorización de reparación.";
+
+        lblNumeroValor.Text = numero;
+        lblIngresoValor.Text = fecha;
+        lblRecepcionValor.Text = recepcion;
+
+        txtMotivoConsulta.Text = atencion.MotivoConsulta;
+        txtMotivoConsulta.ReadOnly = true;
+
+        lblInformacionRol.Text =
+            _rolId == RolesSistema.AdministrativoId
+                ? "Recepción: consulte los datos y confirme el ingreso autorizado."
+                : "Consulta de los datos de la atención.";
+
+        lblInformacionIngreso.Text =
+            atencion.Estado == EstadoAtencion.Abierta
+                ? "El cargo inicial se registra al confirmar el ingreso, " +
+                  "aunque posteriormente se rechace la reparación."
+                : "Esta atención ya no está en la etapa de confirmación de ingreso.";
+    }
+
+    /// <summary>
+    /// Carga los servicios disponibles para confirmar el ingreso.
+    /// </summary>
+    private async Task CargarServiciosIngresoAsync()
+    {
+        if (_rolId != RolesSistema.AdministrativoId ||
+            _atencionActual?.Estado != EstadoAtencion.Abierta)
+        {
+            ActualizarControlesIngreso();
+            return;
+        }
+
+        _cargandoServiciosIngreso = true;
+
+        try
+        {
+            var servicios =
+                await _atencionServicio.ListarServiciosParaIngresoAsync();
+
+            cboServicioIngreso.DisplayMember = nameof(Concepto.Nombre);
+            cboServicioIngreso.ValueMember = nameof(Concepto.IdConcepto);
+            cboServicioIngreso.DataSource = servicios;
+            cboServicioIngreso.SelectedIndex = -1;
+
+            nudImporteIngreso.Value = 0m;
+            chkAutorizaIngreso.Checked = false;
+
+            if (servicios.Count == 0)
+            {
+                lblInformacionIngreso.Text =
+                    "No hay servicios activos disponibles. Debe cargarse " +
+                    "el servicio inicial de ingreso e inspección.";
+            }
+        }
+        finally
+        {
+            _cargandoServiciosIngreso = false;
+            ActualizarControlesIngreso();
+        }
+    }
+
+    /// <summary>
+    /// Completa el importe de referencia al seleccionar un servicio.
+    /// </summary>
+    private void CboServicioIngreso_SelectedIndexChanged(
+        object? sender,
+        EventArgs e)
+    {
+        if (_cargandoServiciosIngreso)
+        {
+            return;
+        }
+
+        var concepto = cboServicioIngreso.SelectedItem as Concepto;
+
+        decimal importe = concepto?.PrecioReferencia ?? 0m;
+
+        nudImporteIngreso.Value = Math.Clamp(
+            importe,
+            nudImporteIngreso.Minimum,
+            nudImporteIngreso.Maximum);
+
+        chkAutorizaIngreso.Checked = false;
+
+        ActualizarControlesIngreso();
+    }
+
+    /// <summary>
+    /// Un cambio de importe exige confirmar nuevamente la autorización.
+    /// </summary>
+    private void NudImporteIngreso_ValueChanged(
+        object? sender,
+        EventArgs e)
+    {
+        if (_cargandoServiciosIngreso)
+        {
+            return;
+        }
+
+        chkAutorizaIngreso.Checked = false;
+        ActualizarControlesIngreso();
+    }
+
+    private void ChkAutorizaIngreso_CheckedChanged(
+        object? sender,
+        EventArgs e)
+    {
+        ActualizarControlesIngreso();
+    }
+
+    /// <summary>
+    /// Habilita los controles según los datos y la etapa actual.
+    /// </summary>
+    private void ActualizarControlesIngreso()
+    {
+        bool puedeIngresar =
+            !_cargandoServiciosIngreso &&
+            _rolId == RolesSistema.AdministrativoId &&
+            _atencionActual?.Estado == EstadoAtencion.Abierta &&
+            _atencionActual.IdTecnicoEnActividad is null &&
+            _atencionActual.ActividadTecnica is null;
+
+        bool hayServicios = cboServicioIngreso.Items.Count > 0;
+
+        bool servicioSeleccionado =
+            cboServicioIngreso.SelectedItem is Concepto;
+
+        bool importeValido = nudImporteIngreso.Value > 0m;
+
+        cboServicioIngreso.Enabled = puedeIngresar && hayServicios;
+
+        nudImporteIngreso.Enabled =
+            puedeIngresar && servicioSeleccionado;
+
+        chkAutorizaIngreso.Enabled =
+            puedeIngresar && servicioSeleccionado && importeValido;
+
+        btnConfirmarIngreso.Enabled =
+            puedeIngresar &&
+            servicioSeleccionado &&
+            importeValido &&
+            chkAutorizaIngreso.Checked;
+    }
+
+    private static string ObtenerNombreEstado(
+        EstadoAtencion estado)
+    {
+        return estado switch
+        {
+            EstadoAtencion.Abierta => "Abierta",
+            EstadoAtencion.PendienteDiagnostico => "Pendiente de diagnóstico",
+            EstadoAtencion.EnEvaluacionTecnica => "En evaluación técnica",
+            EstadoAtencion.PendienteDecision => "Pendiente de decisión",
+            EstadoAtencion.EnEjecucion => "En ejecución",
+            EstadoAtencion.Pausada => "Pausada",
+            EstadoAtencion.TrabajoFinalizado => "Trabajo finalizado",
+            EstadoAtencion.PendienteLiquidacion => "Pendiente de liquidación",
+            EstadoAtencion.Cerrada => "Cerrada",
+            EstadoAtencion.Cancelada => "Cancelada",
+            _ => "Estado desconocido"
+        };
+    }
     #endregion
 
     #region Datos simulados
+
     /// <summary>
     /// Carga el estado visual simulado de las diferentes etapas
     /// de la atención.
@@ -290,7 +594,7 @@ public partial class FrmDetalleAtencion : Form
         dgvSeguimiento.ClearSelection();
     }
     private static string FormatearImporte(
-    decimal importe)
+        decimal importe)
     {
         return importe.ToString(
             "C2",

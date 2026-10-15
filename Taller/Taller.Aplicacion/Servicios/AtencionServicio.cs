@@ -1,5 +1,7 @@
 ﻿
 using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Configuracion;
+using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
@@ -17,6 +19,7 @@ public sealed class AtencionServicio
     private readonly IVehiculoRepositorio _vehiculoRepositorio;
     private readonly IUsuarioRepositorio _usuarioRepositorio;
     private readonly IConceptoRepositorio _conceptoRepositorio;
+    private readonly IngresoDiagnosticoOpciones _ingresoDiagnosticoOpciones;
     private readonly SesionUsuario _sesionUsuario; //
     
 
@@ -30,6 +33,7 @@ public sealed class AtencionServicio
         IVehiculoRepositorio vehiculoRepositorio,
         IUsuarioRepositorio usuarioRepositorio,
         IConceptoRepositorio conceptoRepositorio,
+        IngresoDiagnosticoOpciones ingresoDiagnosticoOpciones,
         SesionUsuario sesionUsuario)
     {
         _atencionRepositorio = atencionRepositorio;
@@ -37,6 +41,9 @@ public sealed class AtencionServicio
         _vehiculoRepositorio = vehiculoRepositorio;
         _usuarioRepositorio = usuarioRepositorio;
         _conceptoRepositorio = conceptoRepositorio;
+        _ingresoDiagnosticoOpciones = ingresoDiagnosticoOpciones
+    ?? throw new ArgumentNullException(
+        nameof(ingresoDiagnosticoOpciones));
         _sesionUsuario = sesionUsuario; //
     }
 
@@ -85,14 +92,15 @@ public sealed class AtencionServicio
     }
 
     /// <summary>
-    /// Obtiene los servicios disponibles para que Recepción
-    /// seleccione el concepto del cargo inicial.
+    /// Devuelve únicamente el servicio configurado para el ingreso.
     /// </summary>
     public async Task<List<Concepto>> ListarServiciosParaIngresoAsync()
     {
         await ObtenerAdministrativoActualAsync();
 
-        return await _conceptoRepositorio.ListarServiciosActivosAsync();
+        var concepto = await ObtenerConceptoIngresoAsync();
+
+        return new List<Concepto> { concepto };
     }
 
     /// <summary>
@@ -143,8 +151,8 @@ public sealed class AtencionServicio
     }
 
     /// <summary>
-    /// Modifica los datos básicos de una atención existente.
-    /// No permite modificar directamente su estado ni sus fechas.
+    /// Modifica los datos de recepción antes de confirmar
+    /// el ingreso al circuito técnico.
     /// </summary>
     public async Task ModificarAsync(
         int idAtencion,
@@ -156,19 +164,23 @@ public sealed class AtencionServicio
         ValidarId(idCliente, nameof(idCliente));
         ValidarId(idVehiculo, nameof(idVehiculo));
 
-        var atencion =
-            await ObtenerAtencionRequeridaAsync(idAtencion);
+        var administrativo = await ObtenerAdministrativoActualAsync();
 
-        if (atencion.Estado == EstadoAtencion.Cerrada)
+        var atencion = await ObtenerAtencionRequeridaAsync(idAtencion);
+
+        if (atencion.Estado != EstadoAtencion.Abierta
+            || atencion.FechaCierre is not null)
         {
             throw new InvalidOperationException(
-                "No se puede modificar una atención cerrada.");
+                "Solo pueden modificarse los datos de una atención abierta, " +
+                "antes de confirmar su ingreso a diagnóstico.");
         }
 
-        if (atencion.Estado == EstadoAtencion.Cancelada)
+        if (atencion.IdTecnicoEnActividad is not null
+            || atencion.ActividadTecnica is not null)
         {
             throw new InvalidOperationException(
-                "No se puede modificar una atención cancelada.");
+                "No puede modificarse una atención con una actividad reservada.");
         }
 
         motivoConsulta = NormalizarMotivoConsulta(motivoConsulta);
@@ -176,21 +188,46 @@ public sealed class AtencionServicio
         await ValidarClienteAsync(idCliente);
         await ValidarVehiculoAsync(idVehiculo);
 
-        // Si se cambia el vehículo, se verifica que el nuevo
-        // no tenga otra atención activa.
-        if (atencion.IdVehiculo != idVehiculo &&
-            await _atencionRepositorio
+        if (atencion.IdVehiculo != idVehiculo
+            && await _atencionRepositorio
                 .ExisteAtencionActivaParaVehiculoAsync(idVehiculo))
         {
             throw new InvalidOperationException(
                 "El vehículo seleccionado ya posee una atención activa.");
         }
 
+        // No genera una actualización ni un evento si nada cambió.
+        if (atencion.IdCliente == idCliente
+            && atencion.IdVehiculo == idVehiculo
+            && atencion.MotivoConsulta == motivoConsulta)
+        {
+            return;
+        }
+
+        var observaciones =
+            $"Cliente: {atencion.IdCliente} → {idCliente}. " +
+            $"Vehículo: {atencion.IdVehiculo} → {idVehiculo}. " +
+            $"Motivo de consulta modificado: " +
+            $"{(atencion.MotivoConsulta != motivoConsulta ? "Sí" : "No")}.";
+
         atencion.IdCliente = idCliente;
         atencion.IdVehiculo = idVehiculo;
         atencion.MotivoConsulta = motivoConsulta;
 
-        await _atencionRepositorio.ActualizarAsync(atencion);
+        var historial = new HistorialAtencion
+        {
+            IdAtencion = atencion.IdAtencion,
+            IdUsuario = administrativo.Id,
+            Fecha = DateTime.Now,
+            Accion = "DatosRecepcionModificados",
+            EstadoAnterior = atencion.Estado,
+            EstadoNuevo = atencion.Estado,
+            Observaciones = observaciones
+        };
+
+        await _atencionRepositorio.ActualizarConHistorialAsync(
+            atencion,
+            historial);
     }
 
     /// <summary>
@@ -267,22 +304,14 @@ public sealed class AtencionServicio
                 "La atención tiene una actividad reservada.");
         }
 
-        var concepto = await _conceptoRepositorio.ObtenerPorIdAsync(
-            idConcepto);
-
-        if (concepto is null ||
-            !concepto.Activo ||
-            !concepto.Categoria.Activo)
+        if (idConcepto != _ingresoDiagnosticoOpciones.IdConcepto)
         {
-            throw new InvalidOperationException(
-                "El concepto seleccionado no existe o su concepto o categoría están inactivos.");
+            throw new ValidacionException(
+                "Debe utilizar el servicio configurado para el ingreso a diagnóstico.",
+                nameof(idConcepto));
         }
 
-        if (concepto.Tipo != TipoConcepto.Servicio)
-        {
-            throw new InvalidOperationException(
-                "El cargo inicial debe corresponder a un servicio.");
-        }
+        var concepto = await ObtenerConceptoIngresoAsync();
 
         var descripcion = concepto.Nombre.Trim();
 
@@ -736,5 +765,37 @@ public sealed class AtencionServicio
         }
 
         return usuario;
+    }
+
+    /// <summary>
+    /// Obtiene el servicio configurado para el ingreso
+    /// y comprueba que esté disponible para utilizarse.
+    /// </summary>
+    private async Task<Concepto> ObtenerConceptoIngresoAsync()
+    {
+        var concepto = await _conceptoRepositorio.ObtenerPorIdAsync(
+            _ingresoDiagnosticoOpciones.IdConcepto);
+
+        if (concepto is null)
+        {
+            throw new ValidacionException(
+                "El concepto configurado para el ingreso a diagnóstico no existe.");
+        }
+
+        if (!concepto.Activo
+            || concepto.Categoria is null
+            || !concepto.Categoria.Activo)
+        {
+            throw new ValidacionException(
+                "El concepto de ingreso o su categoría están inactivos.");
+        }
+
+        if (concepto.Tipo != TipoConcepto.Servicio)
+        {
+            throw new ValidacionException(
+                "El concepto configurado para el ingreso debe ser un servicio.");
+        }
+
+        return concepto;
     }
 }

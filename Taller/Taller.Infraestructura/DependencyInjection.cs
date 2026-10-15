@@ -40,7 +40,10 @@ public static class DependencyInjection
 
         // Configura Entity Framework Core para trabajar con SQL Server mediante TallerDbContext.
         services.AddDbContext<TallerDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        {
+            options.UseSqlServer(connectionString);
+            options.UsarSemillaCatalogo();
+        });
 
         // Registra el repositorio concreto utilizado para
         // las operaciones de persistencia de usuarios.

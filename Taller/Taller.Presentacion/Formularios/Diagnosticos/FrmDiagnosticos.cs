@@ -110,11 +110,22 @@ public partial class FrmDiagnosticos : Form
         }
     }
 
-    private void BtnVerAtencion_Click(object? sender, EventArgs e)
+    private void BtnVerAtencion_Click(
+    object? sender,
+    EventArgs e)
     {
-        if (Seleccionado() is null) return;
-        using var formulario = new FrmDetalleAtencion(RolesSistema.TecnicoId);
-        formulario.ShowDialog(this);
+        if (Seleccionado() is null)
+        {
+            return;
+        }
+
+        MessageBox.Show(
+            this,
+            "Este listado todavía utiliza datos demostrativos. " +
+            "Para consultar una atención real, acceda desde Atenciones.",
+            "Diagnósticos",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     private void DgvDiagnosticos_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)

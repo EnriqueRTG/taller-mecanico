@@ -309,7 +309,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasIndex("IdCategoria");
 
                     b.ToTable("Conceptos", (string)null);
-
+                    /*
                     b.HasData(
                         new
                         {
@@ -340,7 +340,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                             Nombre = "Repuestos",
                             PrecioReferencia = 22000.00m,
                             Tipo = 2
-                        });
+                        });*/
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>

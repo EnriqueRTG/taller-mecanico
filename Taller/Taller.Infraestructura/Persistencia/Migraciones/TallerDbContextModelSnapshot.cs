@@ -306,38 +306,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasIndex("IdCategoria");
 
                     b.ToTable("Conceptos", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            IdConcepto = 1,
-                            Activo = true,
-                            Descripcion = "Mano de obra, mantenimiento, diagnóstico y reparación de vehículos.",
-                            IdCategoria = 0,
-                            Nombre = "Servicio",
-                            PrecioReferencia = 15000.00m,
-                            Tipo = 3
-                        },
-                        new
-                        {
-                            IdConcepto = 2,
-                            Activo = true,
-                            Descripcion = "Insumos y materiales consumibles utilizados en el taller.",
-                            IdCategoria = 0,
-                            Nombre = "Consumible",
-                            PrecioReferencia = 5000.00m,
-                            Tipo = 1
-                        },
-                        new
-                        {
-                            IdConcepto = 3,
-                            Activo = true,
-                            Descripcion = "Piezas y componentes de reemplazo utilizados en la reparación de vehículos.",
-                            IdCategoria = 0,
-                            Nombre = "Repuestos",
-                            PrecioReferencia = 22000.00m,
-                            Tipo = 2
-                        });
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>

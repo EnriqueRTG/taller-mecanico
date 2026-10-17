@@ -394,11 +394,8 @@ namespace Taller.Presentacion.Formularios.Catalogo
 
         private TableLayoutPanel tlpPrincipal;
         private Panel pnlGrilla;
-        private DataGridView dgvConceptos;
-        private DataGridViewTextBoxColumn colId;
-        private DataGridViewTextBoxColumn dni;
+        private DataGridView dgvConceptos;             
         private DataGridViewTextBoxColumn tipo_documento;
-        private DataGridViewTextBoxColumn colNombreCompleto;
         private Panel pnlCabecera;
         private Label lblDescripcion;
         private Label lblTitulo;

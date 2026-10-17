@@ -67,7 +67,11 @@ public static class DependencyInjection
 
         services.AddScoped<IRolRepositorio, RolRepositorio>();
 
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de categorias.
+        services.AddScoped<ICategoriaRepositorio, CategoriaRepositorio>();
 
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de conceptos.
+        services.AddScoped<IConceptoRepositorio, ConceptoRepositorio>();
 
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.

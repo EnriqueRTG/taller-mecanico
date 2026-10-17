@@ -9,6 +9,7 @@ using Taller.Presentacion.Formularios.Reportes;
 using Taller.Presentacion.Formularios.Sistema;
 using Taller.Presentacion.Formularios.Usuarios;
 using Taller.Presentacion.Formularios.Vehiculos;
+using Taller.Presentacion.Formularios.Catalogo;
 using Taller.Presentacion.Seguridad;
 
 namespace Taller.Presentacion.Formularios.Principal;
@@ -312,7 +313,12 @@ public partial class FrmPrincipal : Form
         object sender,
         EventArgs e)
     {
-        AbrirFormularioAutorizado<FrmClientes>(
+        /*AbrirFormularioAutorizado<FrmClientes>(
+            "Clientes",
+            btnClientes,
+            "No tiene permisos para acceder a la gestión de clientes.",
+            PermisoAplicacion.GestionarClientes);*/
+        AbrirFormularioAutorizado<FrmCatalogo>(
             "Clientes",
             btnClientes,
             "No tiene permisos para acceder a la gestión de clientes.",

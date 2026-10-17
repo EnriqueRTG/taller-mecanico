@@ -2,9 +2,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Taller.Aplicacion;
+using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Servicios;
 using Taller.Infraestructura;
+using Taller.Infraestructura.Persistencia;
 using Taller.Infraestructura.Persistencia.Inicializacion;
 using Taller.Presentacion.Formularios.Autenticacion;
+using Taller.Presentacion.Formularios.Catalogo;
 using Taller.Presentacion.Formularios.Principal;
 
 namespace Taller.Presentacion;
@@ -15,25 +19,27 @@ internal static class Program
     private static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
-
+        ConceptoServicio conceptoServicio = null;
+        CategoriaServicio categoriaServicio = null;
+        
         var builder = Host.CreateApplicationBuilder(args);
 
         builder.Configuration
-            .AddJsonFile(
-                "appsettings.json",
-                optional: false,
-                reloadOnChange: true)
-            .AddJsonFile(
-                "appsettings.Local.json",
-                optional: true,
-                reloadOnChange: true);
+        .AddJsonFile(
+        "appsettings.json",
+        optional: false,
+        reloadOnChange: true)
+        .AddJsonFile(
+        "appsettings.Local.json",
+        optional: true,
+        reloadOnChange: true);
 
         // Registra los servicios de la capa de Aplicación.
         builder.Services.AddAplicacion();
 
         // Registra persistencia, repositorios y seguridad.
         builder.Services.AddInfraestructura(
-            builder.Configuration);
+        builder.Configuration);
 
         // Registra formularios y componentes de Presentación.
         builder.Services.AddPresentacion();
@@ -42,9 +48,9 @@ internal static class Program
         using var scope = host.Services.CreateScope();
 
         var inicializador =
-            scope.ServiceProvider
-                .GetRequiredService<InicializadorDatos>();
-
+        scope.ServiceProvider
+        .GetRequiredService<InicializadorDatos>();
+        
         // La inicialización debe completarse sobre el mismo hilo STA
         // que luego ejecutará el bucle principal de Windows Forms.
         // Un Main async puede continuar en un hilo MTA después del await
@@ -57,7 +63,7 @@ internal static class Program
         var aplicacionContexto =
             scope.ServiceProvider
                 .GetRequiredService<AplicacionContexto>();
-
+        
         Application.Run(aplicacionContexto);
     }
 }

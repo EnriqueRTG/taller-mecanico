@@ -62,4 +62,9 @@ public sealed class TallerDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(TallerDbContext).Assembly);
     }
+
+    // Conjunto de conceptos administrados por Entity Framework Core.
+    public DbSet<Concepto> Conceptos => Set<Concepto>();
+    // Conjunto de categorias administrados por Entity Framework Core.
+    public DbSet<Categoria> Categorias => Set<Categoria>();
 }

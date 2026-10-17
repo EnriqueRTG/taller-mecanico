@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
 using Taller.Presentacion.Formularios.Autenticacion;
+using Taller.Presentacion.Formularios.Catalogo;
 using Taller.Presentacion.Formularios.Principal;
 
 namespace Taller.Presentacion;
@@ -95,7 +96,8 @@ public sealed class AplicacionContexto : ApplicationContext
             return;
         }
 
-        MostrarFormularioPrincipal();
+        MostrarFormularioPrincipal();     
+
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Taller.Presentacion.Formularios.Atenciones;
 using Taller.Presentacion.Formularios.Autenticacion;
+using Taller.Presentacion.Formularios.Catalogo;
 using Taller.Presentacion.Formularios.Clientes;
 using Taller.Presentacion.Formularios.Comprobantes;
 using Taller.Presentacion.Formularios.Diagnosticos;
@@ -62,6 +63,7 @@ public static class DependencyInjection
         services.AddSingleton<AutorizacionNavegacion>();
 
         services.AddTransient<AplicacionContexto>();
+        services.AddTransient<FrmCatalogo>();
 
         return services;
     }

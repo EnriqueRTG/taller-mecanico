@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Taller.Infraestructura.Persistencia.Inicializacion;
 
 namespace Taller.Infraestructura.Persistencia;
 
@@ -89,6 +90,8 @@ public sealed class TallerDbContextFactory
         // Configura Entity Framework Core para utilizar SQL Server
         // y la cadena de conexión obtenida anteriormente.
         optionsBuilder.UseSqlServer(connectionString);
+
+        optionsBuilder.UsarSemillaCatalogo();
 
         // Crea y devuelve finalmente una instancia de TallerDbContext
         // utilizando las opciones ya configuradas.

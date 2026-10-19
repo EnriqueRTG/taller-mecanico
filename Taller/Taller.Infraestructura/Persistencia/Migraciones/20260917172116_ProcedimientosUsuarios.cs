@@ -234,7 +234,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                 """
             );
 
-           
         }
     }
 }

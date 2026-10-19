@@ -10,6 +10,7 @@ using Taller.Presentacion.Formularios.Sistema;
 using Taller.Presentacion.Formularios.Usuarios;
 using Taller.Presentacion.Formularios.Vehiculos;
 using Taller.Presentacion.Seguridad;
+using Taller.Presentacion.Navegacion;
 
 namespace Taller.Presentacion.Formularios.Principal;
 
@@ -48,7 +49,8 @@ public partial class FrmPrincipal : Form
     /// Configura el formulario utilizando los datos
     /// del usuario actualmente autenticado.
     /// </summary>
-    protected override void OnLoad(EventArgs e)
+    protected override void OnLoad(
+        EventArgs e)
     {
         base.OnLoad(e);
 
@@ -107,7 +109,8 @@ public partial class FrmPrincipal : Form
     /// Abre un formulario dentro del panel principal.
     /// </summary>
     private void AbrirFormulario<TFormulario>(
-        string titulo)
+        string titulo,
+        Action<TFormulario>? preparar = null)
         where TFormulario : Form
     {
         if (_formularioActivo?.GetType() == typeof(TFormulario))
@@ -123,6 +126,14 @@ public partial class FrmPrincipal : Form
 
         var formulario = _serviceProvider
             .GetRequiredService<TFormulario>();
+
+        if (formulario is FrmAtenciones atenciones)
+        {
+            atenciones.DiagnosticoSolicitado +=
+                Atenciones_DiagnosticoSolicitado;
+        }
+
+        preparar?.Invoke(formulario);
 
         formulario.TopLevel = false;
         formulario.FormBorderStyle = FormBorderStyle.None;
@@ -470,5 +481,56 @@ public partial class FrmPrincipal : Form
             "Segoe UI",
             9.5F,
             FontStyle.Bold);
+    }
+
+    private void Atenciones_DiagnosticoSolicitado(
+        object? sender,
+        DiagnosticoSolicitadoEventArgs e)
+    {
+        // Posponemos el cambio hasta que termine el evento del botón.
+        // Así no destruimos Atenciones mientras ejecuta su propio evento.
+        BeginInvoke(new Action(() =>
+        {
+            if (IsDisposed || Disposing)
+            {
+                return;
+            }
+
+            var usuario = _sesionUsuario.UsuarioActual;
+
+            if (usuario is null
+                || !TienePermiso(
+                    usuario.RolId,
+                    PermisoAplicacion.GestionarDiagnosticos))
+            {
+                MessageBox.Show(
+                    this,
+                    "No tiene permisos para registrar diagnósticos.",
+                    "Acceso restringido",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            try
+            {
+                AbrirFormulario<FrmDiagnosticos>(
+                    "Diagnósticos",
+                    formulario => formulario.PrepararAperturaDiagnostico(
+                        e.IdAtencion));
+
+                MarcarBotonActivo(btnDiagnosticos);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    this,
+                    ex.Message,
+                    "Abrir Diagnósticos",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }));
     }
 }

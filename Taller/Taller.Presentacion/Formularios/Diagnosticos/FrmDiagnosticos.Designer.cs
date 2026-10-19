@@ -14,7 +14,6 @@ partial class FrmDiagnosticos
     {
         tlpPrincipal = new TableLayoutPanel();
         pnlCabecera = new Panel();
-        btnRegistrar = new Button();
         lblResumen = new Label();
         lblDescripcion = new Label();
         lblTitulo = new Label();
@@ -40,7 +39,9 @@ partial class FrmDiagnosticos
         pnlPie = new Panel();
         flpAcciones = new FlowLayoutPanel();
         btnVerAtencion = new Button();
-        btnRegistrarSeleccionado = new Button();
+        btnVerDiagnostico = new Button();
+        btnRegistrar = new Button();
+        btnLiberarDiagnostico = new Button();
         btnActualizar = new Button();
         lblCantidad = new Label();
         pnlInformacion = new Panel();
@@ -55,7 +56,9 @@ partial class FrmDiagnosticos
         flpAcciones.SuspendLayout();
         pnlInformacion.SuspendLayout();
         SuspendLayout();
-        // principal
+        // 
+        // tlpPrincipal
+        // 
         tlpPrincipal.ColumnCount = 1;
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
         tlpPrincipal.Controls.Add(pnlCabecera, 0, 0);
@@ -64,47 +67,77 @@ partial class FrmDiagnosticos
         tlpPrincipal.Controls.Add(pnlPie, 0, 3);
         tlpPrincipal.Controls.Add(pnlInformacion, 0, 4);
         tlpPrincipal.Dock = DockStyle.Fill;
+        tlpPrincipal.Location = new Point(24, 20);
+        tlpPrincipal.Name = "tlpPrincipal";
         tlpPrincipal.RowCount = 5;
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 75F));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 85F));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 66F));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
-        // cabecera
+        tlpPrincipal.Size = new Size(952, 610);
+        tlpPrincipal.TabIndex = 0;
+        // 
+        // pnlCabecera
+        // 
         pnlCabecera.BackColor = Color.White;
-        pnlCabecera.Controls.Add(btnRegistrar);
         pnlCabecera.Controls.Add(lblResumen);
         pnlCabecera.Controls.Add(lblDescripcion);
         pnlCabecera.Controls.Add(lblTitulo);
         pnlCabecera.Dock = DockStyle.Fill;
+        pnlCabecera.Location = new Point(0, 0);
         pnlCabecera.Margin = new Padding(0, 0, 0, 10);
-        btnRegistrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnRegistrar.Location = new Point(754, 12);
-        btnRegistrar.Size = new Size(180, 40);
-        btnRegistrar.Text = "＋ Registrar diagnóstico";
-        btnRegistrar.Click += BtnRegistrar_Click;
+        pnlCabecera.Name = "pnlCabecera";
+        pnlCabecera.Size = new Size(952, 65);
+        pnlCabecera.TabIndex = 0;
+        // 
+        // lblResumen
+        // 
         lblResumen.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lblResumen.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         lblResumen.ForeColor = Color.FromArgb(71, 85, 105);
-        lblResumen.Location = new Point(510, 21);
+        lblResumen.Location = new Point(1262, 21);
+        lblResumen.Name = "lblResumen";
         lblResumen.Size = new Size(225, 22);
+        lblResumen.TabIndex = 1;
         lblResumen.TextAlign = ContentAlignment.MiddleRight;
+        // 
+        // lblDescripcion
+        // 
         lblDescripcion.AutoSize = true;
         lblDescripcion.Font = new Font("Segoe UI", 9.5F);
         lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
         lblDescripcion.Location = new Point(20, 43);
+        lblDescripcion.Name = "lblDescripcion";
+        lblDescripcion.Size = new Size(378, 17);
+        lblDescripcion.TabIndex = 2;
         lblDescripcion.Text = "Consulta y registro de diagnósticos asociados a las atenciones.";
+        // 
+        // lblTitulo
+        // 
         lblTitulo.AutoSize = true;
         lblTitulo.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
         lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
         lblTitulo.Location = new Point(18, 8);
+        lblTitulo.Name = "lblTitulo";
+        lblTitulo.Size = new Size(248, 30);
+        lblTitulo.TabIndex = 3;
         lblTitulo.Text = "Gestión de diagnósticos";
-        // filtros
+        // 
+        // pnlFiltros
+        // 
         pnlFiltros.BackColor = Color.White;
         pnlFiltros.Controls.Add(tlpFiltros);
         pnlFiltros.Dock = DockStyle.Fill;
+        pnlFiltros.Location = new Point(0, 75);
         pnlFiltros.Margin = new Padding(0, 0, 0, 10);
+        pnlFiltros.Name = "pnlFiltros";
         pnlFiltros.Padding = new Padding(14, 8, 14, 8);
+        pnlFiltros.Size = new Size(952, 75);
+        pnlFiltros.TabIndex = 1;
+        // 
+        // tlpFiltros
+        // 
         tlpFiltros.ColumnCount = 4;
         tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42F));
         tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
@@ -119,78 +152,260 @@ partial class FrmDiagnosticos
         tlpFiltros.Controls.Add(lblEspacio, 3, 0);
         tlpFiltros.Controls.Add(btnLimpiar, 3, 1);
         tlpFiltros.Dock = DockStyle.Fill;
+        tlpFiltros.Location = new Point(14, 8);
+        tlpFiltros.Name = "tlpFiltros";
         tlpFiltros.RowCount = 2;
         tlpFiltros.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
         tlpFiltros.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        ConfigurarEtiqueta(lblBuscar, "Buscar");
-        ConfigurarEtiqueta(lblEstado, "Estado");
-        ConfigurarEtiqueta(lblTecnico, "Técnico");
-        ConfigurarFiltro(txtBuscar);
+        tlpFiltros.Size = new Size(924, 59);
+        tlpFiltros.TabIndex = 0;
+        // 
+        // lblBuscar
+        // 
+        lblBuscar.Location = new Point(3, 0);
+        lblBuscar.Name = "lblBuscar";
+        lblBuscar.Size = new Size(100, 22);
+        lblBuscar.TabIndex = 0;
+        lblBuscar.Text = "Buscar";
+        // 
+        // txtBuscar
+        // 
+        txtBuscar.Dock = DockStyle.Fill;
+        txtBuscar.Location = new Point(3, 25);
+        txtBuscar.Name = "txtBuscar";
         txtBuscar.PlaceholderText = "Atención, dominio, cliente o motivo";
+        txtBuscar.Size = new Size(382, 23);
+        txtBuscar.TabIndex = 1;
         txtBuscar.TextChanged += Filtros_Changed;
-        ConfigurarFiltro(cboEstado);
-        ConfigurarFiltro(cboTecnico);
+        // 
+        // lblEstado
+        // 
+        lblEstado.Location = new Point(391, 0);
+        lblEstado.Name = "lblEstado";
+        lblEstado.Size = new Size(100, 22);
+        lblEstado.TabIndex = 2;
+        lblEstado.Text = "Estado";
+        // 
+        // cboEstado
+        // 
+        cboEstado.Dock = DockStyle.Fill;
         cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboTecnico.DropDownStyle = ComboBoxStyle.DropDownList;
+        cboEstado.Location = new Point(391, 25);
+        cboEstado.Name = "cboEstado";
+        cboEstado.Size = new Size(197, 23);
+        cboEstado.TabIndex = 3;
         cboEstado.SelectedIndexChanged += Filtros_Changed;
+        // 
+        // lblTecnico
+        // 
+        lblTecnico.Location = new Point(594, 0);
+        lblTecnico.Name = "lblTecnico";
+        lblTecnico.Size = new Size(100, 22);
+        lblTecnico.TabIndex = 4;
+        lblTecnico.Text = "Técnico asociado";
+        // 
+        // cboTecnico
+        // 
+        cboTecnico.Dock = DockStyle.Fill;
+        cboTecnico.DropDownStyle = ComboBoxStyle.DropDownList;
+        cboTecnico.Location = new Point(594, 25);
+        cboTecnico.Name = "cboTecnico";
+        cboTecnico.Size = new Size(215, 23);
+        cboTecnico.TabIndex = 5;
         cboTecnico.SelectedIndexChanged += Filtros_Changed;
+        // 
+        // lblEspacio
+        // 
+        lblEspacio.Location = new Point(815, 0);
+        lblEspacio.Name = "lblEspacio";
+        lblEspacio.Size = new Size(100, 22);
+        lblEspacio.TabIndex = 6;
+        // 
+        // btnLimpiar
+        // 
         btnLimpiar.Dock = DockStyle.Fill;
+        btnLimpiar.Location = new Point(817, 22);
         btnLimpiar.Margin = new Padding(5, 0, 5, 5);
+        btnLimpiar.Name = "btnLimpiar";
+        btnLimpiar.Size = new Size(102, 32);
+        btnLimpiar.TabIndex = 7;
         btnLimpiar.Text = "Limpiar";
         btnLimpiar.Click += BtnLimpiar_Click;
-        // grilla
+        // 
+        // pnlGrilla
+        // 
         pnlGrilla.BackColor = Color.White;
         pnlGrilla.Controls.Add(dgvDiagnosticos);
         pnlGrilla.Dock = DockStyle.Fill;
+        pnlGrilla.Location = new Point(0, 160);
         pnlGrilla.Margin = new Padding(0, 0, 0, 10);
+        pnlGrilla.Name = "pnlGrilla";
         pnlGrilla.Padding = new Padding(14);
-        dgvDiagnosticos.Columns.AddRange(colAtencion, colFecha, colCliente, colVehiculo, colMotivo, colTecnico, colEstado);
+        pnlGrilla.Size = new Size(952, 326);
+        pnlGrilla.TabIndex = 2;
+        // 
+        // dgvDiagnosticos
+        // 
+        dgvDiagnosticos.Columns.AddRange(new DataGridViewColumn[] { colAtencion, colFecha, colCliente, colVehiculo, colMotivo, colTecnico, colEstado });
         dgvDiagnosticos.Dock = DockStyle.Fill;
-        dgvDiagnosticos.SelectionChanged += DgvDiagnosticos_SelectionChanged;
+        dgvDiagnosticos.Location = new Point(14, 14);
+        dgvDiagnosticos.Name = "dgvDiagnosticos";
+        dgvDiagnosticos.Size = new Size(924, 298);
+        dgvDiagnosticos.TabIndex = 0;
         dgvDiagnosticos.CellDoubleClick += DgvDiagnosticos_CellDoubleClick;
-        ConfigurarColumna(colAtencion, "Atención", 90);
-        ConfigurarColumna(colFecha, "Ingreso", 90);
-        ConfigurarColumna(colCliente, "Cliente", 145);
-        ConfigurarColumna(colVehiculo, "Vehículo", 170);
-        ConfigurarColumna(colMotivo, "Motivo", 220);
-        ConfigurarColumna(colTecnico, "Técnico", 125);
-        ConfigurarColumna(colEstado, "Diagnóstico", 120);
+        dgvDiagnosticos.SelectionChanged += DgvDiagnosticos_SelectionChanged;
+        // 
+        // colAtencion
+        // 
+        colAtencion.HeaderText = "Atención";
+        colAtencion.Name = "colAtencion";
+        // 
+        // colFecha
+        // 
+        colFecha.HeaderText = "Fecha de referencia";
+        colFecha.Name = "colFecha";
+        // 
+        // colCliente
+        // 
+        colCliente.HeaderText = "Cliente";
+        colCliente.Name = "colCliente";
+        // 
+        // colVehiculo
+        // 
+        colVehiculo.HeaderText = "Vehículo";
+        colVehiculo.Name = "colVehiculo";
+        // 
+        // colMotivo
+        // 
         colMotivo.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        // pie
+        colMotivo.HeaderText = "Motivo";
+        colMotivo.Name = "colMotivo";
+        // 
+        // colTecnico
+        // 
+        colTecnico.HeaderText = "Técnico";
+        colTecnico.Name = "colTecnico";
+        // 
+        // colEstado
+        // 
+        colEstado.HeaderText = "Diagnóstico";
+        colEstado.Name = "colEstado";
+        // 
+        // pnlPie
+        // 
         pnlPie.BackColor = Color.White;
         pnlPie.Controls.Add(flpAcciones);
         pnlPie.Controls.Add(lblCantidad);
         pnlPie.Dock = DockStyle.Fill;
+        pnlPie.Location = new Point(0, 496);
         pnlPie.Margin = new Padding(0, 0, 0, 10);
+        pnlPie.Name = "pnlPie";
         pnlPie.Padding = new Padding(12, 8, 12, 8);
+        pnlPie.Size = new Size(952, 56);
+        pnlPie.TabIndex = 3;
+        // 
+        // flpAcciones
+        // 
         flpAcciones.Controls.Add(btnVerAtencion);
-        flpAcciones.Controls.Add(btnRegistrarSeleccionado);
+        flpAcciones.Controls.Add(btnVerDiagnostico);
+        flpAcciones.Controls.Add(btnRegistrar);
+        flpAcciones.Controls.Add(btnLiberarDiagnostico);
         flpAcciones.Controls.Add(btnActualizar);
-        flpAcciones.Dock = DockStyle.Left;
-        flpAcciones.Size = new Size(520, 40);
-        ConfigurarBoton(btnVerAtencion, "Ver atención", 120);
-        ConfigurarBoton(btnRegistrarSeleccionado, "Registrar diagnóstico", 160);
-        ConfigurarBoton(btnActualizar, "Actualizar", 105);
+        flpAcciones.Dock = DockStyle.Fill;
+        flpAcciones.Location = new Point(12, 8);
+        flpAcciones.Name = "flpAcciones";
+        flpAcciones.Size = new Size(928, 40);
+        flpAcciones.TabIndex = 0;
+        flpAcciones.WrapContents = false;
+        // 
+        // btnVerAtencion
+        // 
+        btnVerAtencion.Location = new Point(4, 4);
+        btnVerAtencion.Margin = new Padding(4);
+        btnVerAtencion.Name = "btnVerAtencion";
+        btnVerAtencion.Size = new Size(160, 34);
+        btnVerAtencion.TabIndex = 0;
+        btnVerAtencion.Text = "Ver atención";
         btnVerAtencion.Click += BtnVerAtencion_Click;
-        btnRegistrarSeleccionado.Click += BtnRegistrar_Click;
+        // 
+        // btnVerDiagnostico
+        // 
+        btnVerDiagnostico.Enabled = false;
+        btnVerDiagnostico.Location = new Point(172, 4);
+        btnVerDiagnostico.Margin = new Padding(4);
+        btnVerDiagnostico.Name = "btnVerDiagnostico";
+        btnVerDiagnostico.Size = new Size(150, 34);
+        btnVerDiagnostico.TabIndex = 3;
+        btnVerDiagnostico.Text = "Ver diagnóstico";
+        btnVerDiagnostico.UseVisualStyleBackColor = true;
+        btnVerDiagnostico.Click += BtnVerDiagnostico_Click;
+        // 
+        // btnRegistrar
+        // 
+        btnRegistrar.Location = new Point(330, 4);
+        btnRegistrar.Margin = new Padding(4);
+        btnRegistrar.Name = "btnRegistrar";
+        btnRegistrar.Size = new Size(170, 34);
+        btnRegistrar.TabIndex = 0;
+        btnRegistrar.Text = "Tomar diagnóstico";
+        btnRegistrar.Click += BtnRegistrar_Click;
+        // 
+        // btnLiberarDiagnostico
+        // 
+        btnLiberarDiagnostico.Location = new Point(508, 4);
+        btnLiberarDiagnostico.Margin = new Padding(4);
+        btnLiberarDiagnostico.Name = "btnLiberarDiagnostico";
+        btnLiberarDiagnostico.Size = new Size(170, 34);
+        btnLiberarDiagnostico.TabIndex = 1;
+        btnLiberarDiagnostico.Text = "Liberar diagnóstico";
+        btnLiberarDiagnostico.Click += BtnLiberar_Click;
+        // 
+        // btnActualizar
+        // 
+        btnActualizar.Location = new Point(686, 4);
+        btnActualizar.Margin = new Padding(4);
+        btnActualizar.Name = "btnActualizar";
+        btnActualizar.Size = new Size(110, 34);
+        btnActualizar.TabIndex = 2;
+        btnActualizar.Text = "Actualizar";
         btnActualizar.Click += BtnActualizar_Click;
+        // 
+        // lblCantidad
+        // 
         lblCantidad.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         lblCantidad.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         lblCantidad.ForeColor = Color.FromArgb(71, 85, 105);
-        lblCantidad.Location = new Point(742, 16);
+        lblCantidad.Location = new Point(1494, 16);
+        lblCantidad.Name = "lblCantidad";
         lblCantidad.Size = new Size(190, 24);
+        lblCantidad.TabIndex = 1;
         lblCantidad.TextAlign = ContentAlignment.MiddleRight;
-        // información
+        // 
+        // pnlInformacion
+        // 
         pnlInformacion.BackColor = Color.FromArgb(239, 246, 255);
         pnlInformacion.Controls.Add(lblInformacion);
         pnlInformacion.Dock = DockStyle.Fill;
+        pnlInformacion.Location = new Point(3, 565);
+        pnlInformacion.Name = "pnlInformacion";
+        pnlInformacion.Size = new Size(946, 42);
+        pnlInformacion.TabIndex = 4;
+        // 
+        // lblInformacion
+        // 
         lblInformacion.Dock = DockStyle.Fill;
         lblInformacion.Font = new Font("Segoe UI", 9F);
         lblInformacion.ForeColor = Color.FromArgb(30, 64, 175);
+        lblInformacion.Location = new Point(0, 0);
+        lblInformacion.Name = "lblInformacion";
         lblInformacion.Padding = new Padding(16, 0, 12, 0);
+        lblInformacion.Size = new Size(946, 42);
+        lblInformacion.TabIndex = 0;
         lblInformacion.Text = "El diagnóstico se registra desde una atención asignada al técnico.";
         lblInformacion.TextAlign = ContentAlignment.MiddleLeft;
-        // formulario
+        // 
+        // FrmDiagnosticos
+        // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(245, 247, 250);
@@ -198,6 +413,7 @@ partial class FrmDiagnosticos
         Controls.Add(tlpPrincipal);
         FormBorderStyle = FormBorderStyle.None;
         MinimumSize = new Size(760, 500);
+        Name = "FrmDiagnosticos";
         Padding = new Padding(24, 20, 24, 20);
         Text = "Gestión de diagnósticos";
         Load += FrmDiagnosticos_Load;
@@ -242,6 +458,14 @@ partial class FrmDiagnosticos
     private Button btnLimpiar;
     private Panel pnlGrilla;
     private DataGridView dgvDiagnosticos;
+    private Panel pnlPie;
+    private FlowLayoutPanel flpAcciones;
+    private Button btnVerAtencion;
+    private Button btnLiberarDiagnostico;
+    private Button btnActualizar;
+    private Label lblCantidad;
+    private Panel pnlInformacion;
+    private Label lblInformacion;
     private DataGridViewTextBoxColumn colAtencion;
     private DataGridViewTextBoxColumn colFecha;
     private DataGridViewTextBoxColumn colCliente;
@@ -249,12 +473,5 @@ partial class FrmDiagnosticos
     private DataGridViewTextBoxColumn colMotivo;
     private DataGridViewTextBoxColumn colTecnico;
     private DataGridViewTextBoxColumn colEstado;
-    private Panel pnlPie;
-    private FlowLayoutPanel flpAcciones;
-    private Button btnVerAtencion;
-    private Button btnRegistrarSeleccionado;
-    private Button btnActualizar;
-    private Label lblCantidad;
-    private Panel pnlInformacion;
-    private Label lblInformacion;
+    private Button btnVerDiagnostico;
 }

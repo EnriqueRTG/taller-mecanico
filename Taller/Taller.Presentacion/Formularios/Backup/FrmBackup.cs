@@ -19,5 +19,10 @@ namespace Taller.Presentacion.Formularios.Backup
         {
 
         }
+
+        private void Btn_generar_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

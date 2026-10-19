@@ -5,14 +5,62 @@ using Taller.Dominio.Entidades;
 namespace Taller.Infraestructura.Persistencia.Configuraciones;
 
 /// <summary>
-/// Configura las propiedades y relaciones de la entidad Atención
-/// en la base de datos.
+/// Configura la persistencia, las relaciones y las restricciones
+/// de integridad de las atenciones.
 /// </summary>
 public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
 {
-    public void Configure(EntityTypeBuilder<Atencion> builder)
+    public void Configure(
+        EntityTypeBuilder<Atencion> builder)
     {
-        builder.ToTable("Atenciones");
+        builder.ToTable("Atenciones", tabla =>
+        {
+            // Solo admite los estados definidos en el dominio.
+            tabla.HasCheckConstraint(
+                "CK_Atenciones_Estado",
+                """
+                [Estado] IN (
+                    N'Abierta',
+                    N'PendienteDiagnostico',
+                    N'EnEvaluacionTecnica',
+                    N'PendienteDecision',
+                    N'EnEjecucion',
+                    N'Pausada',
+                    N'TrabajoFinalizado',
+                    N'PendienteLiquidacion',
+                    N'Cerrada',
+                    N'Cancelada'
+                )
+                """);
+
+            // La actividad puede estar vacía, pero no tener
+            // un valor ajeno a la numeración.
+            tabla.HasCheckConstraint(
+                "CK_Atenciones_ActividadTecnica",
+                """
+                [ActividadTecnica] IS NULL 
+                OR [ActividadTecnica] IN (
+                    N'Diagnostico',
+                    N'Presupuesto',
+                    N'Ejecucion'
+                )
+                """);
+
+            // Una reserva siempre identifica técnico y actvidad
+            tabla.HasCheckConstraint(
+                "CK_Atenciones_ReservaTecnica",
+                """
+                (
+                    [IdTecnicoEnActividad] IS NULL
+                    AND [ActividadTecnica] IS NULL
+                )
+                OR
+                (
+                    [IdTecnicoEnActividad] IS NOT NULL
+                    AND [ActividadTecnica] IS NOT NULL
+                )
+                """);
+        });
 
         builder.HasKey(a => a.IdAtencion);
 
@@ -27,6 +75,14 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
 
         builder.Property(a => a.IdUsuarioRecepcion)
             .IsRequired();
+
+        builder.Property(a => a.IdTecnicoEnActividad)
+            .IsRequired(false);
+
+        builder.Property(a => a.ActividadTecnica)
+            .HasConversion<string>()
+            .IsRequired(false)
+            .HasMaxLength(20);
 
         builder.Property(a => a.FechaApertura) 
             .IsRequired();
@@ -43,6 +99,19 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
         builder.Property(a => a.FechaCierre)
             .IsRequired(false);
 
+        // SQL Server genera una nueva versión en cada actualización.
+        // EF la utiliza para detectar modificaciones concurrentes.
+        builder.Property(a => a.Version)
+            .IsRowVersion();
+
+        // Un vehículo puede tener varias atenciones históricas,
+        // pero solo una que no esté cerrada ni cancelada.
+        builder.HasIndex(a => a.IdVehiculo)
+            .HasDatabaseName("UX_Atenciones_VehiculoActivo")
+            .IsUnique()
+            .HasFilter(
+                "[Estado] <> N'Cerrada' AND [Estado] <> N'Cancelada'");
+
         // Cliente 1:N Atenciones
         builder.HasOne(a => a.Cliente)
             .WithMany(c => c.Atenciones)
@@ -55,10 +124,19 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
             .HasForeignKey(a => a.IdVehiculo)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Usuario que registró la apertura.
         // Usuario 1:N Atenciones
         builder.HasOne(a => a.UsuarioRecepcion)
             .WithMany(u => u.AtencionesRecepcionadas)
             .HasForeignKey(a => a.IdUsuarioRecepcion)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Usuario que tiene reservada la actividad actual.
+        // No requiere agregar otra colección en Usuario
+        builder.HasOne(a => a.TecnicoEnActividad)
+            .WithMany()
+            .HasForeignKey(a => a.IdTecnicoEnActividad)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

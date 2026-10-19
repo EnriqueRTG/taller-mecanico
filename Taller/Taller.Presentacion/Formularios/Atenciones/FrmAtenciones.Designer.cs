@@ -275,9 +275,11 @@
             // 
             // dtpDesde
             // 
+            dtpDesde.Checked = false;
+            dtpDesde.CustomFormat = "dd/MM/yyyy";
             dtpDesde.Dock = DockStyle.Fill;
             dtpDesde.Font = new Font("Segoe UI", 9.75F);
-            dtpDesde.Format = DateTimePickerFormat.Short;
+            dtpDesde.Format = DateTimePickerFormat.Custom;
             dtpDesde.Location = new Point(376, 22);
             dtpDesde.Margin = new Padding(5, 0, 5, 5);
             dtpDesde.Name = "dtpDesde";
@@ -287,9 +289,11 @@
             // 
             // dtpHasta
             // 
+            dtpHasta.Checked = false;
+            dtpHasta.CustomFormat = "dd/MM/yyyy";
             dtpHasta.Dock = DockStyle.Fill;
             dtpHasta.Font = new Font("Segoe UI", 9.75F);
-            dtpHasta.Format = DateTimePickerFormat.Short;
+            dtpHasta.Format = DateTimePickerFormat.Custom;
             dtpHasta.Location = new Point(504, 22);
             dtpHasta.Margin = new Padding(5, 0, 5, 5);
             dtpHasta.Name = "dtpHasta";
@@ -337,6 +341,7 @@
             // 
             dgvAtenciones.AllowUserToAddRows = false;
             dgvAtenciones.AllowUserToDeleteRows = false;
+            dgvAtenciones.AllowUserToResizeRows = false;
             dgvAtenciones.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvAtenciones.Columns.AddRange(new DataGridViewColumn[] { colId, colFechaApertura, colDominio, colVehiculo, colCliente, colMotivo, colEstado, colEtapa, colRecepcion });
             dgvAtenciones.Dock = DockStyle.Fill;
@@ -348,83 +353,106 @@
             dgvAtenciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvAtenciones.Size = new Size(750, 175);
             dgvAtenciones.TabIndex = 0;
+            dgvAtenciones.CellDoubleClick += DgvAtenciones_CellDoubleClickAsync;
+            dgvAtenciones.CellFormatting += DgvAtenciones_CellFormatting;
+            dgvAtenciones.CellToolTipTextNeeded += DgvAtenciones_CellToolTipTextNeeded;
+            dgvAtenciones.SelectionChanged += DgvAtenciones_SelectionChanged;
             // 
             // colId
             // 
+            colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colId.DataPropertyName = "Numero";
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle1.Format = "N2";
             dataGridViewCellStyle1.NullValue = null;
             colId.DefaultCellStyle = dataGridViewCellStyle1;
             colId.HeaderText = "N.º";
+            colId.MinimumWidth = 60;
             colId.Name = "colId";
             colId.ReadOnly = true;
-            colId.Width = 65;
+            colId.Width = 70;
             // 
             // colFechaApertura
             // 
+            colFechaApertura.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colFechaApertura.DataPropertyName = "FechaApertura";
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter;
             colFechaApertura.DefaultCellStyle = dataGridViewCellStyle2;
             colFechaApertura.HeaderText = "Ingreso";
+            colFechaApertura.MinimumWidth = 60;
             colFechaApertura.Name = "colFechaApertura";
             colFechaApertura.ReadOnly = true;
-            colFechaApertura.Width = 125;
+            colFechaApertura.Width = 140;
             // 
             // colDominio
             // 
+            colDominio.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colDominio.DataPropertyName = "Dominio";
             colDominio.HeaderText = "Dominio";
+            colDominio.MinimumWidth = 60;
             colDominio.Name = "colDominio";
             colDominio.ReadOnly = true;
+            colDominio.Width = 140;
             // 
             // colVehiculo
             // 
+            colVehiculo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colVehiculo.DataPropertyName = "Vehiculo";
             colVehiculo.HeaderText = "Vehículo";
+            colVehiculo.MinimumWidth = 60;
             colVehiculo.Name = "colVehiculo";
             colVehiculo.ReadOnly = true;
-            colVehiculo.Width = 135;
+            colVehiculo.Width = 140;
             // 
             // colCliente
             // 
+            colCliente.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colCliente.DataPropertyName = "Cliente";
             colCliente.HeaderText = "Cliente";
+            colCliente.MinimumWidth = 60;
             colCliente.Name = "colCliente";
             colCliente.ReadOnly = true;
-            colCliente.Width = 135;
+            colCliente.Width = 210;
             // 
             // colMotivo
             // 
-            colMotivo.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            colMotivo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colMotivo.DataPropertyName = "Motivo";
             colMotivo.HeaderText = "Motivo";
-            colMotivo.MinimumWidth = 220;
+            colMotivo.MinimumWidth = 60;
             colMotivo.Name = "colMotivo";
             colMotivo.ReadOnly = true;
+            colMotivo.Width = 630;
             // 
             // colEstado
             // 
+            colEstado.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colEstado.DataPropertyName = "Estado";
             colEstado.HeaderText = "Estado";
+            colEstado.MinimumWidth = 60;
             colEstado.Name = "colEstado";
             colEstado.ReadOnly = true;
+            colEstado.Width = 140;
             // 
             // colEtapa
             // 
+            colEtapa.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colEtapa.DataPropertyName = "Etapa";
             colEtapa.HeaderText = "Etapa actua";
+            colEtapa.MinimumWidth = 60;
             colEtapa.Name = "colEtapa";
             colEtapa.ReadOnly = true;
-            colEtapa.Width = 150;
+            colEtapa.Width = 140;
             // 
             // colRecepcion
             // 
+            colRecepcion.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colRecepcion.DataPropertyName = "Recepcion";
             colRecepcion.HeaderText = "Recepción";
+            colRecepcion.MinimumWidth = 60;
             colRecepcion.Name = "colRecepcion";
             colRecepcion.ReadOnly = true;
-            colRecepcion.Width = 130;
+            colRecepcion.Width = 210;
             // 
             // pnlPie
             // 
@@ -485,7 +513,7 @@
             btnVerDetalle.TabIndex = 0;
             btnVerDetalle.Text = "Ver detalle";
             btnVerDetalle.UseVisualStyleBackColor = true;
-            btnVerDetalle.Click += BtnVerDetalle_Click;
+            btnVerDetalle.Click += BtnVerDetalle_ClickAsync;
             // 
             // btnEditar
             // 
@@ -507,16 +535,16 @@
             btnIniciarProceso.Margin = new Padding(4, 0, 4, 0);
             btnIniciarProceso.MinimumSize = new Size(105, 34);
             btnIniciarProceso.Name = "btnIniciarProceso";
-            btnIniciarProceso.Size = new Size(105, 34);
+            btnIniciarProceso.Size = new Size(109, 34);
             btnIniciarProceso.TabIndex = 2;
-            btnIniciarProceso.Text = "Iniciar proceso";
+            btnIniciarProceso.Text = "Gestionar ingreso";
             btnIniciarProceso.UseVisualStyleBackColor = true;
-            btnIniciarProceso.Click += BtnIniciarProceso_Click;
+            btnIniciarProceso.Click += BtnIniciarProceso_ClickAsync;
             // 
             // btnCancelarAtencion
             // 
             btnCancelarAtencion.AutoSize = true;
-            btnCancelarAtencion.Location = new Point(343, 2);
+            btnCancelarAtencion.Location = new Point(347, 2);
             btnCancelarAtencion.Margin = new Padding(4, 0, 4, 0);
             btnCancelarAtencion.MinimumSize = new Size(105, 34);
             btnCancelarAtencion.Name = "btnCancelarAtencion";
@@ -529,7 +557,7 @@
             // btnRegistrarEntrega
             // 
             btnRegistrarEntrega.AutoSize = true;
-            btnRegistrarEntrega.Location = new Point(456, 2);
+            btnRegistrarEntrega.Location = new Point(460, 2);
             btnRegistrarEntrega.Margin = new Padding(4, 0, 4, 0);
             btnRegistrarEntrega.MinimumSize = new Size(105, 34);
             btnRegistrarEntrega.Name = "btnRegistrarEntrega";
@@ -542,7 +570,7 @@
             // btnVerHistorial
             // 
             btnVerHistorial.AutoSize = true;
-            btnVerHistorial.Location = new Point(570, 2);
+            btnVerHistorial.Location = new Point(574, 2);
             btnVerHistorial.Margin = new Padding(4, 0, 4, 0);
             btnVerHistorial.MinimumSize = new Size(105, 34);
             btnVerHistorial.Name = "btnVerHistorial";
@@ -555,20 +583,21 @@
             // btnRegistrarDiagnostico
             // 
             btnRegistrarDiagnostico.AutoSize = true;
-            btnRegistrarDiagnostico.Location = new Point(683, 2);
+            btnRegistrarDiagnostico.Enabled = false;
+            btnRegistrarDiagnostico.Location = new Point(687, 2);
             btnRegistrarDiagnostico.Margin = new Padding(4, 0, 4, 0);
             btnRegistrarDiagnostico.MinimumSize = new Size(145, 34);
             btnRegistrarDiagnostico.Name = "btnRegistrarDiagnostico";
             btnRegistrarDiagnostico.Size = new Size(145, 34);
             btnRegistrarDiagnostico.TabIndex = 6;
-            btnRegistrarDiagnostico.Text = "Registrar diagnóstico";
+            btnRegistrarDiagnostico.Text = "Tomar diagnóstico";
             btnRegistrarDiagnostico.UseVisualStyleBackColor = true;
             btnRegistrarDiagnostico.Click += BtnRegistrarDiagnostico_Click;
             // 
             // btnFinalizarTrabajo
             // 
             btnFinalizarTrabajo.AutoSize = true;
-            btnFinalizarTrabajo.Location = new Point(836, 2);
+            btnFinalizarTrabajo.Location = new Point(840, 2);
             btnFinalizarTrabajo.Margin = new Padding(4, 0, 4, 0);
             btnFinalizarTrabajo.MinimumSize = new Size(105, 34);
             btnFinalizarTrabajo.Name = "btnFinalizarTrabajo";

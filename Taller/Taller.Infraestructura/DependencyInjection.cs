@@ -40,7 +40,10 @@ public static class DependencyInjection
 
         // Configura Entity Framework Core para trabajar con SQL Server mediante TallerDbContext.
         services.AddDbContext<TallerDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        {
+            options.UseSqlServer(connectionString);
+            options.UsarSemillaCatalogo();
+        });
 
         // Registra el repositorio concreto utilizado para
         // las operaciones de persistencia de usuarios.
@@ -65,9 +68,20 @@ public static class DependencyInjection
         // Registrar el servicio concreto utilizado para las operaciones de persistencia de atenciones.
         services.AddScoped<IAtencionRepositorio, AtencionRepositorio>();
 
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de Roles.
         services.AddScoped<IRolRepositorio, RolRepositorio>();
 
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de categorías de conceptos.
+        services.AddScoped<ICategoriaRepositorio, CategoriaRepositorio>();
 
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de conceptos.
+        services.AddScoped<IConceptoRepositorio, ConceptoRepositorio>();
+
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de diagnósticos.
+        services.AddScoped<IDiagnosticoRepositorio, DiagnosticoRepositorio>();
+
+        // Registrar el servicio concreto utilizado para las operaciones de persistencia de unidad de trabajo.
+        services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.

@@ -1,5 +1,8 @@
 ﻿
 using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Configuracion;
+using Taller.Aplicacion.Excepciones;
+using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 
@@ -15,6 +18,9 @@ public sealed class AtencionServicio
     private readonly IClienteRepositorio _clienteRepositorio;
     private readonly IVehiculoRepositorio _vehiculoRepositorio;
     private readonly IUsuarioRepositorio _usuarioRepositorio;
+    private readonly IConceptoRepositorio _conceptoRepositorio;
+    private readonly IngresoDiagnosticoOpciones _ingresoDiagnosticoOpciones;
+    private readonly SesionUsuario _sesionUsuario;
 
     /// <summary>
     /// Inicializa el servicio con los repositorios necesarios
@@ -24,12 +30,20 @@ public sealed class AtencionServicio
         IAtencionRepositorio atencionRepositorio,
         IClienteRepositorio clienteRepositorio,
         IVehiculoRepositorio vehiculoRepositorio,
-        IUsuarioRepositorio usuarioRepositorio)
+        IUsuarioRepositorio usuarioRepositorio,
+        IConceptoRepositorio conceptoRepositorio,
+        IngresoDiagnosticoOpciones ingresoDiagnosticoOpciones,
+        SesionUsuario sesionUsuario)
     {
         _atencionRepositorio = atencionRepositorio;
         _clienteRepositorio = clienteRepositorio;
         _vehiculoRepositorio = vehiculoRepositorio;
         _usuarioRepositorio = usuarioRepositorio;
+        _conceptoRepositorio = conceptoRepositorio;
+        _ingresoDiagnosticoOpciones = ingresoDiagnosticoOpciones
+    ?? throw new ArgumentNullException(
+        nameof(ingresoDiagnosticoOpciones));
+        _sesionUsuario = sesionUsuario;
     }
 
     /// <summary>
@@ -39,6 +53,14 @@ public sealed class AtencionServicio
     public async Task<List<Atencion>> ListarActivasAsync()
     {
         return await _atencionRepositorio.ListarActivasAsync();
+    }
+
+    /// <summary>
+    /// Lista las atenciones para consulta operativa e histórica.
+    /// </summary>
+    public Task<List<Atencion>> ListarTodasAsync()
+    {
+        return _atencionRepositorio.ListarTodasAsync();
     }
 
     /// <summary>
@@ -74,6 +96,18 @@ public sealed class AtencionServicio
         ValidarId(idVehiculo, nameof(idVehiculo));
 
         return await _atencionRepositorio.ListarPorVehiculoAsync(idVehiculo);
+    }
+
+    /// <summary>
+    /// Devuelve únicamente el servicio configurado para el ingreso.
+    /// </summary>
+    public async Task<List<Concepto>> ListarServiciosParaIngresoAsync()
+    {
+        await ObtenerAdministrativoActualAsync();
+
+        var concepto = await ObtenerConceptoIngresoAsync();
+
+        return new List<Concepto> { concepto };
     }
 
     /// <summary>
@@ -124,8 +158,8 @@ public sealed class AtencionServicio
     }
 
     /// <summary>
-    /// Modifica los datos básicos de una atención existente.
-    /// No permite modificar directamente su estado ni sus fechas.
+    /// Modifica los datos de recepción antes de confirmar
+    /// el ingreso al circuito técnico.
     /// </summary>
     public async Task ModificarAsync(
         int idAtencion,
@@ -137,19 +171,23 @@ public sealed class AtencionServicio
         ValidarId(idCliente, nameof(idCliente));
         ValidarId(idVehiculo, nameof(idVehiculo));
 
-        var atencion =
-            await ObtenerAtencionRequeridaAsync(idAtencion);
+        var administrativo = await ObtenerAdministrativoActualAsync();
 
-        if (atencion.Estado == EstadoAtencion.Cerrada)
+        var atencion = await ObtenerAtencionRequeridaAsync(idAtencion);
+
+        if (atencion.Estado != EstadoAtencion.Abierta
+            || atencion.FechaCierre is not null)
         {
             throw new InvalidOperationException(
-                "No se puede modificar una atención cerrada.");
+                "Solo pueden modificarse los datos de una atención abierta, " +
+                "antes de confirmar su ingreso a diagnóstico.");
         }
 
-        if (atencion.Estado == EstadoAtencion.Cancelada)
+        if (atencion.IdTecnicoEnActividad is not null
+            || atencion.ActividadTecnica is not null)
         {
             throw new InvalidOperationException(
-                "No se puede modificar una atención cancelada.");
+                "No puede modificarse una atención con una actividad reservada.");
         }
 
         motivoConsulta = NormalizarMotivoConsulta(motivoConsulta);
@@ -157,21 +195,46 @@ public sealed class AtencionServicio
         await ValidarClienteAsync(idCliente);
         await ValidarVehiculoAsync(idVehiculo);
 
-        // Si se cambia el vehículo, se verifica que el nuevo
-        // no tenga otra atención activa.
-        if (atencion.IdVehiculo != idVehiculo &&
-            await _atencionRepositorio
+        if (atencion.IdVehiculo != idVehiculo
+            && await _atencionRepositorio
                 .ExisteAtencionActivaParaVehiculoAsync(idVehiculo))
         {
             throw new InvalidOperationException(
                 "El vehículo seleccionado ya posee una atención activa.");
         }
 
+        // No genera una actualización ni un evento si nada cambió.
+        if (atencion.IdCliente == idCliente
+            && atencion.IdVehiculo == idVehiculo
+            && atencion.MotivoConsulta == motivoConsulta)
+        {
+            return;
+        }
+
+        var observaciones =
+            $"Cliente: {atencion.IdCliente} → {idCliente}. " +
+            $"Vehículo: {atencion.IdVehiculo} → {idVehiculo}. " +
+            $"Motivo de consulta modificado: " +
+            $"{(atencion.MotivoConsulta != motivoConsulta ? "Sí" : "No")}.";
+
         atencion.IdCliente = idCliente;
         atencion.IdVehiculo = idVehiculo;
         atencion.MotivoConsulta = motivoConsulta;
 
-        await _atencionRepositorio.ActualizarAsync(atencion);
+        var historial = new HistorialAtencion
+        {
+            IdAtencion = atencion.IdAtencion,
+            IdUsuario = administrativo.Id,
+            Fecha = DateTime.Now,
+            Accion = "DatosRecepcionModificados",
+            EstadoAnterior = atencion.Estado,
+            EstadoNuevo = atencion.Estado,
+            Observaciones = observaciones
+        };
+
+        await _atencionRepositorio.ActualizarConHistorialAsync(
+            atencion,
+            historial);
     }
 
     /// <summary>
@@ -191,9 +254,243 @@ public sealed class AtencionServicio
                 "Solo una atención abierta puede pasar a estado EnProceso.");
         }
 
-        atencion.Estado = EstadoAtencion.EnProceso;
+        atencion.Estado = EstadoAtencion.EnEjecucion;
 
         await _atencionRepositorio.ActualizarAsync(atencion);
+    }
+
+    /// <summary>
+    /// Confirma el ingreso al circuito técnico y registra
+    /// el cargo inicial previamente autorizado por el cliente.
+    /// </summary>
+    /// <remarks>
+    /// El importe corresponde al servicio mínimo de ingreso
+    /// e inspección acordado, exigible desde este momento.
+    /// No significa que el informe técnico esté terminado.
+    /// </remarks>
+    public async Task EnviarADiagnosticoAsync(
+        int idAtencion,
+        int idConcepto,
+        decimal importe,
+        bool clienteAutoriza)
+    {
+        ValidarId(idAtencion, nameof(idAtencion));
+        ValidarId(idConcepto, nameof(idConcepto));
+
+        var administrativo = await ObtenerAdministrativoActualAsync();
+
+        if (!clienteAutoriza)
+        {
+            throw new InvalidOperationException(
+                "Debe registrar la autorización del cliente para el servicio inicial.");
+        }
+
+        if (importe <= 0 ||
+            importe > 9999999999999999.99m ||
+            decimal.Round(importe, 2) != importe)
+        {
+            throw new ArgumentException(
+                "El importe debe ser positivo, tener como máximo dos decimales y estar dentro del rango permitido.",
+                nameof(importe));
+        }
+
+        var atencion = await ObtenerAtencionRequeridaAsync(
+            idAtencion);
+
+        if (atencion.Estado != EstadoAtencion.Abierta ||
+            atencion.FechaCierre is not null)
+        {
+            throw new InvalidOperationException(
+                "Solo una atención abierta puede enviarse a diagnóstico.");
+        }
+
+        if (atencion.IdTecnicoEnActividad is not null ||
+            atencion.ActividadTecnica is not null)
+        {
+            throw new InvalidOperationException(
+                "La atención tiene una actividad reservada.");
+        }
+
+        if (idConcepto != _ingresoDiagnosticoOpciones.IdConcepto)
+        {
+            throw new ValidacionException(
+                "Debe utilizar el servicio configurado para el ingreso a diagnóstico.",
+                nameof(idConcepto));
+        }
+
+        var concepto = await ObtenerConceptoIngresoAsync();
+
+        var descripcion = concepto.Nombre.Trim();
+
+        if (string.IsNullOrWhiteSpace(descripcion) ||
+            descripcion.Length > 500)
+        {
+            throw new InvalidOperationException(
+                "El concepto no tiene una descripción válida para presupuestarlo.");
+        }
+
+        await ValidarClienteAsync(atencion.IdCliente);
+        await ValidarVehiculoAsync(atencion.IdVehiculo);
+
+        var fecha = DateTime.Now;
+        var estadoAnterior = atencion.Estado;
+
+        var presupuesto = new Presupuesto
+        {
+            Tipo = TipoPresupuesto.Diagnostico,
+            IdAtencion = atencion.IdAtencion,
+            IdDiagnostico = null,
+            IdUsuarioCreacion = administrativo.Id,
+            FechaCreacion = fecha,
+            Estado = EstadoPresupuesto.Aceptado,
+            FechaPresentacion = fecha,
+            IdUsuarioDecision = administrativo.Id,
+            FechaDecision = fecha,
+            Observaciones =
+                "El cliente autorizó el cargo inicial al confirmar el ingreso al circuito técnico."
+        };
+
+        presupuesto.Detalles.Add(new PresupuestoDetalle
+        {
+            IdConcepto = concepto.IdConcepto,
+            Descripcion = descripcion,
+            Cantidad = 1m,
+            PrecioUnitario = importe,
+
+            // Cargo inicial devengado al confirmar el ingreso.
+            // No representa la finalización del informe técnico.
+            EstadoEjecucion = EstadoEjecucionDetalle.Completado,
+            CantidadEjecutada = 1m,
+            ObservacionesEjecucion =
+                "Cargo inicial generado al confirmar el ingreso, conforme a la autorización del cliente."
+        });
+
+        atencion.Estado = EstadoAtencion.PendienteDiagnostico;
+
+        var historial = new HistorialAtencion
+        {
+            IdAtencion = atencion.IdAtencion,
+            IdUsuario = administrativo.Id,
+            Fecha = fecha,
+            Accion = "AtencionEnviadaADiagnostico",
+            EstadoAnterior = estadoAnterior,
+            EstadoNuevo = atencion.Estado,
+            Observaciones =
+                "Recepción confirmó el ingreso y registró la autorización del cargo inicial."
+        };
+
+        await _atencionRepositorio.EnviarADiagnosticoAsync(
+            atencion,
+            presupuesto,
+            historial);
+    }
+
+    /// <summary>
+    /// Reserva el diagnóstico inicial para el técnico autenticado
+    /// y cambia la atención a evaluación técnica.
+    /// </summary>
+    /// <remarks>
+    /// La reserva y el evento del historial se guardan juntos.
+    /// La versión de la atención permite detectar si otra operación
+    /// la modificó después de consultar su disponibilidad.
+    /// </remarks>
+    public async Task TomarDiagnosticoAsync(
+        int idAtencion)
+    {
+        ValidarId(idAtencion, nameof(idAtencion));
+
+        var tecnico = await ObtenerTecnicoActualAsync();
+
+        var atencion = await ObtenerAtencionRequeridaAsync(
+            idAtencion);
+
+        if (atencion.Estado != EstadoAtencion.PendienteDiagnostico)
+        {
+            throw new InvalidOperationException(
+                "Solo puede iniciar el diagnóstico de una atención pendiente de diagnóstico.");
+        }
+
+        if (atencion.IdTecnicoEnActividad is not null ||
+            atencion.ActividadTecnica is not null)
+        {
+            throw new InvalidOperationException(
+                "La atención ya tiene una actividad reservada. Actualice la información.");
+        }
+
+        var estadoAnterior = atencion.Estado;
+
+        atencion.IdTecnicoEnActividad = tecnico.Id;
+        atencion.ActividadTecnica = ActividadTecnica.Diagnostico;
+        atencion.Estado = EstadoAtencion.EnEvaluacionTecnica;
+
+        var historial = new HistorialAtencion
+        {
+            IdAtencion = atencion.IdAtencion,
+            IdUsuario = tecnico.Id,
+            Fecha = DateTime.Now,
+            Accion = "ActividadTomada",
+            EstadoAnterior = estadoAnterior,
+            EstadoNuevo = atencion.Estado,
+            Observaciones = "El técnico tomó el diagnóstico inicial."
+        };
+
+        await _atencionRepositorio.ActualizarConHistorialAsync(
+            atencion,
+            historial);
+    }
+
+    /// <summary>
+    /// Libera la reserva del diagnóstico inicial sin completarlo
+    /// y devuelve la atención a la espera de un técnico.
+    /// </summary>
+    /// <remarks>
+    /// Solo puede liberar la actividad el técnico que la tomó.
+    /// No elimina informes ni cancela el cargo inicial autorizado.
+    /// </remarks>
+    public async Task LiberarDiagnosticoAsync(
+        int idAtencion)
+    {
+        ValidarId(idAtencion, nameof(idAtencion));
+
+        var tecnico = await ObtenerTecnicoActualAsync();
+
+        var atencion = await ObtenerAtencionRequeridaAsync(
+            idAtencion);
+
+        if (atencion.Estado != EstadoAtencion.EnEvaluacionTecnica ||
+            atencion.ActividadTecnica != ActividadTecnica.Diagnostico)
+        {
+            throw new InvalidOperationException(
+                "La atención no tiene un diagnóstico inicial en actividad.");
+        }
+
+        if (atencion.IdTecnicoEnActividad != tecnico.Id)
+        {
+            throw new InvalidOperationException(
+                "Solo el técnico que tomó el diagnóstico puede liberar esta actividad.");
+        }
+
+        var estadoAnterior = atencion.Estado;
+
+        atencion.IdTecnicoEnActividad = null;
+        atencion.ActividadTecnica = null;
+        atencion.Estado = EstadoAtencion.PendienteDiagnostico;
+
+        var historial = new HistorialAtencion
+        {
+            IdAtencion = atencion.IdAtencion,
+            IdUsuario = tecnico.Id,
+            Fecha = DateTime.Now,
+            Accion = "ActividadLiberada",
+            EstadoAnterior = estadoAnterior,
+            EstadoNuevo = atencion.Estado,
+            Observaciones =
+                "El técnico liberó el diagnóstico inicial sin completar el informe."
+        };
+
+        await _atencionRepositorio.ActualizarConHistorialAsync(
+            atencion,
+            historial);
     }
 
     /// <summary>
@@ -248,7 +545,7 @@ public sealed class AtencionServicio
                 "Una atención cancelada no puede ser cerrada.");
         }
 
-        if (atencion.Estado != EstadoAtencion.EnProceso)
+        if (atencion.Estado != EstadoAtencion.EnEjecucion)
         {
             throw new InvalidOperationException(
                 "Solo una atención en proceso puede ser cerrada.");
@@ -411,5 +708,101 @@ public sealed class AtencionServicio
         }
 
         return motivoConsulta;
+    }
+
+    /// <summary>
+    /// Obtiene al técnico autenticado y verifica que continúe
+    /// activo y autorizado para realizar operaciones técnicas.
+    /// </summary>
+    private async Task<Usuario> ObtenerTecnicoActualAsync()
+    {
+        var usuarioSesion = _sesionUsuario.UsuarioActual;
+
+        if (usuarioSesion is null)
+        {
+            throw new InvalidOperationException(
+                "Debe iniciar sesión para realizar esta operación.");
+        }
+
+        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(
+            usuarioSesion.Id);
+
+        if (usuario is null || !usuario.Activo)
+        {
+            throw new InvalidOperationException(
+                "El usuario de la sesión no existe o está inactivo.");
+        }
+
+        if (usuario.RolId != RolesSistema.TecnicoId)
+        {
+            throw new InvalidOperationException(
+                "Solo un técnico puede tomar esta actividad.");
+        }
+
+        return usuario;
+    }
+
+    /// <summary>
+    /// Obtiene al usuario autenticado y verifica que sea
+    /// un administrativo activo.
+    /// </summary>
+    private async Task<Usuario> ObtenerAdministrativoActualAsync()
+    {
+        var usuarioSesion = _sesionUsuario.UsuarioActual;
+
+        if (usuarioSesion is null)
+        {
+            throw new InvalidOperationException(
+                "Debe iniciar sesión para realizar esta operación.");
+        }
+
+        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(
+            usuarioSesion.Id);
+
+        if (usuario is null || !usuario.Activo)
+        {
+            throw new InvalidOperationException(
+                "El usuario de la sesión no existe o está inactivo.");
+        }
+
+        if (usuario.RolId != RolesSistema.AdministrativoId)
+        {
+            throw new InvalidOperationException(
+                "Solo Recepción puede enviar el vehículo a diagnóstico.");
+        }
+
+        return usuario;
+    }
+
+    /// <summary>
+    /// Obtiene el servicio configurado para el ingreso
+    /// y comprueba que esté disponible para utilizarse.
+    /// </summary>
+    private async Task<Concepto> ObtenerConceptoIngresoAsync()
+    {
+        var concepto = await _conceptoRepositorio.ObtenerPorIdAsync(
+            _ingresoDiagnosticoOpciones.IdConcepto);
+
+        if (concepto is null)
+        {
+            throw new ValidacionException(
+                "El concepto configurado para el ingreso a diagnóstico no existe.");
+        }
+
+        if (!concepto.Activo
+            || concepto.Categoria is null
+            || !concepto.Categoria.Activo)
+        {
+            throw new ValidacionException(
+                "El concepto de ingreso o su categoría están inactivos.");
+        }
+
+        if (concepto.Tipo != TipoConcepto.Servicio)
+        {
+            throw new ValidacionException(
+                "El concepto configurado para el ingreso debe ser un servicio.");
+        }
+
+        return concepto;
     }
 }

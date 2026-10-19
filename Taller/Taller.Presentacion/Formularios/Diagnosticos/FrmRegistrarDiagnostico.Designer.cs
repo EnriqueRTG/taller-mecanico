@@ -53,8 +53,10 @@
             txtDescripcion = new TextBox();
             lblObservaciones = new Label();
             txtObservaciones = new TextBox();
-            lblResultado = new Label();
-            cboResultado = new ComboBox();
+            lblKilometraje = new Label();
+            lblTrabajoRecomendado = new Label();
+            txtTrabajoRecomendado = new TextBox();
+            txtKilometraje = new TextBox();
             flpAcciones = new FlowLayoutPanel();
             btnGuardar = new Button();
             btnCancelar = new Button();
@@ -315,18 +317,21 @@
             tlpDatosDiagnostico.Controls.Add(txtDescripcion, 1, 2);
             tlpDatosDiagnostico.Controls.Add(lblObservaciones, 0, 3);
             tlpDatosDiagnostico.Controls.Add(txtObservaciones, 1, 3);
-            tlpDatosDiagnostico.Controls.Add(lblResultado, 0, 4);
-            tlpDatosDiagnostico.Controls.Add(cboResultado, 1, 4);
+            tlpDatosDiagnostico.Controls.Add(lblKilometraje, 0, 4);
+            tlpDatosDiagnostico.Controls.Add(lblTrabajoRecomendado, 0, 5);
+            tlpDatosDiagnostico.Controls.Add(txtTrabajoRecomendado, 1, 5);
+            tlpDatosDiagnostico.Controls.Add(txtKilometraje, 1, 4);
             tlpDatosDiagnostico.Dock = DockStyle.Fill;
             tlpDatosDiagnostico.Location = new Point(12, 28);
             tlpDatosDiagnostico.Margin = new Padding(0);
             tlpDatosDiagnostico.Name = "tlpDatosDiagnostico";
-            tlpDatosDiagnostico.RowCount = 5;
+            tlpDatosDiagnostico.RowCount = 6;
             tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
             tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
-            tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 106F));
-            tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 106F));
+            tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
+            tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
             tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            tlpDatosDiagnostico.RowStyles.Add(new RowStyle(SizeType.Percent, 33.34F));
             tlpDatosDiagnostico.Size = new Size(744, 333);
             tlpDatosDiagnostico.TabIndex = 0;
             // 
@@ -391,9 +396,9 @@
             lblDescripcion.Margin = new Padding(0);
             lblDescripcion.Name = "lblDescripcion";
             lblDescripcion.Padding = new Padding(0, 8, 0, 0);
-            lblDescripcion.Size = new Size(155, 106);
+            lblDescripcion.Size = new Size(155, 68);
             lblDescripcion.TabIndex = 4;
-            lblDescripcion.Text = "Diagnóstico:";
+            lblDescripcion.Text = "Falla detectada:";
             // 
             // txtDescripcion
             // 
@@ -408,8 +413,8 @@
             txtDescripcion.Multiline = true;
             txtDescripcion.Name = "txtDescripcion";
             txtDescripcion.ScrollBars = ScrollBars.Vertical;
-            txtDescripcion.Size = new Size(581, 98);
-            txtDescripcion.TabIndex = 5;
+            txtDescripcion.Size = new Size(581, 60);
+            txtDescripcion.TabIndex = 1;
             txtDescripcion.TextChanged += CampoValidado_Cambio;
             // 
             // lblObservaciones
@@ -417,11 +422,11 @@
             lblObservaciones.Dock = DockStyle.Fill;
             lblObservaciones.Font = new Font("Segoe UI", 9F);
             lblObservaciones.ForeColor = Color.FromArgb(51, 65, 85);
-            lblObservaciones.Location = new Point(0, 190);
+            lblObservaciones.Location = new Point(0, 152);
             lblObservaciones.Margin = new Padding(0);
             lblObservaciones.Name = "lblObservaciones";
             lblObservaciones.Padding = new Padding(0, 8, 0, 0);
-            lblObservaciones.Size = new Size(155, 106);
+            lblObservaciones.Size = new Size(155, 68);
             lblObservaciones.TabIndex = 6;
             lblObservaciones.Text = "Observaciones:";
             // 
@@ -432,38 +437,61 @@
             txtObservaciones.Dock = DockStyle.Fill;
             txtObservaciones.Font = new Font("Segoe UI", 9F);
             txtObservaciones.ForeColor = Color.FromArgb(51, 65, 85);
-            txtObservaciones.Location = new Point(159, 194);
+            txtObservaciones.Location = new Point(159, 156);
             txtObservaciones.Margin = new Padding(4);
             txtObservaciones.MaxLength = 1000;
             txtObservaciones.Multiline = true;
             txtObservaciones.Name = "txtObservaciones";
             txtObservaciones.ScrollBars = ScrollBars.Vertical;
-            txtObservaciones.Size = new Size(581, 98);
-            txtObservaciones.TabIndex = 7;
+            txtObservaciones.Size = new Size(581, 60);
+            txtObservaciones.TabIndex = 3;
+            txtObservaciones.TextChanged += CampoValidado_Cambio;
             // 
-            // lblResultado
+            // lblKilometraje
             // 
-            lblResultado.Dock = DockStyle.Fill;
-            lblResultado.ForeColor = Color.FromArgb(51, 65, 85);
-            lblResultado.Location = new Point(0, 296);
-            lblResultado.Margin = new Padding(0);
-            lblResultado.Name = "lblResultado";
-            lblResultado.Size = new Size(155, 42);
-            lblResultado.TabIndex = 8;
-            lblResultado.Text = "Resultado:";
-            lblResultado.TextAlign = ContentAlignment.MiddleLeft;
+            lblKilometraje.Dock = DockStyle.Fill;
+            lblKilometraje.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblKilometraje.ForeColor = Color.FromArgb(51, 65, 85);
+            lblKilometraje.Location = new Point(0, 220);
+            lblKilometraje.Margin = new Padding(0);
+            lblKilometraje.Name = "lblKilometraje";
+            lblKilometraje.Size = new Size(155, 42);
+            lblKilometraje.TabIndex = 8;
+            lblKilometraje.Text = "Kilometraje (opcional):";
+            lblKilometraje.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // cboResultado
+            // lblTrabajoRecomendado
             // 
-            cboResultado.Dock = DockStyle.Top;
-            cboResultado.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboResultado.FormattingEnabled = true;
-            cboResultado.Location = new Point(159, 300);
-            cboResultado.Margin = new Padding(4);
-            cboResultado.Name = "cboResultado";
-            cboResultado.Size = new Size(581, 23);
-            cboResultado.TabIndex = 9;
-            cboResultado.SelectedIndexChanged += CampoValidado_Cambio;
+            lblTrabajoRecomendado.Dock = DockStyle.Fill;
+            lblTrabajoRecomendado.Location = new Point(3, 262);
+            lblTrabajoRecomendado.Name = "lblTrabajoRecomendado";
+            lblTrabajoRecomendado.Padding = new Padding(0, 8, 0, 0);
+            lblTrabajoRecomendado.Size = new Size(149, 71);
+            lblTrabajoRecomendado.TabIndex = 10;
+            lblTrabajoRecomendado.Text = "Trabajo recomendado:";
+            // 
+            // txtTrabajoRecomendado
+            // 
+            txtTrabajoRecomendado.Dock = DockStyle.Fill;
+            txtTrabajoRecomendado.Location = new Point(159, 266);
+            txtTrabajoRecomendado.Margin = new Padding(4);
+            txtTrabajoRecomendado.MaxLength = 1000;
+            txtTrabajoRecomendado.Multiline = true;
+            txtTrabajoRecomendado.Name = "txtTrabajoRecomendado";
+            txtTrabajoRecomendado.ScrollBars = ScrollBars.Vertical;
+            txtTrabajoRecomendado.Size = new Size(581, 63);
+            txtTrabajoRecomendado.TabIndex = 2;
+            txtTrabajoRecomendado.TextChanged += CampoValidado_Cambio;
+            // 
+            // txtKilometraje
+            // 
+            txtKilometraje.Dock = DockStyle.Fill;
+            txtKilometraje.Location = new Point(158, 223);
+            txtKilometraje.MaxLength = 10;
+            txtKilometraje.Name = "txtKilometraje";
+            txtKilometraje.Size = new Size(583, 23);
+            txtKilometraje.TabIndex = 0;
+            txtKilometraje.TextChanged += CampoValidado_Cambio;
             // 
             // flpAcciones
             // 
@@ -485,7 +513,7 @@
             btnGuardar.Margin = new Padding(8, 0, 0, 0);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(175, 38);
-            btnGuardar.TabIndex = 0;
+            btnGuardar.TabIndex = 4;
             btnGuardar.Text = "Guardar diagnóstico";
             btnGuardar.UseVisualStyleBackColor = false;
             btnGuardar.Click += BtnGuardar_Click;
@@ -496,8 +524,8 @@
             btnCancelar.Margin = new Padding(8, 0, 0, 0);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(110, 38);
-            btnCancelar.TabIndex = 1;
-            btnCancelar.Text = "Cancelar";
+            btnCancelar.TabIndex = 5;
+            btnCancelar.Text = "Cerrar";
             btnCancelar.UseVisualStyleBackColor = false;
             btnCancelar.Click += BtnCancelar_Click;
             // 
@@ -559,10 +587,12 @@
         private TextBox txtDescripcion;
         private Label lblObservaciones;
         private TextBox txtObservaciones;
-        private Label lblResultado;
-        private ComboBox cboResultado;
+        private Label lblKilometraje;
         private FlowLayoutPanel flpAcciones;
         private Button btnGuardar;
         private Button btnCancelar;
+        private Label lblTrabajoRecomendado;
+        private TextBox txtTrabajoRecomendado;
+        private TextBox txtKilometraje;
     }
 }

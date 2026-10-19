@@ -20,8 +20,7 @@ public sealed class AtencionServicio
     private readonly IUsuarioRepositorio _usuarioRepositorio;
     private readonly IConceptoRepositorio _conceptoRepositorio;
     private readonly IngresoDiagnosticoOpciones _ingresoDiagnosticoOpciones;
-    private readonly SesionUsuario _sesionUsuario; //
-    
+    private readonly SesionUsuario _sesionUsuario;
 
     /// <summary>
     /// Inicializa el servicio con los repositorios necesarios
@@ -44,7 +43,7 @@ public sealed class AtencionServicio
         _ingresoDiagnosticoOpciones = ingresoDiagnosticoOpciones
     ?? throw new ArgumentNullException(
         nameof(ingresoDiagnosticoOpciones));
-        _sesionUsuario = sesionUsuario; //
+        _sesionUsuario = sesionUsuario;
     }
 
     /// <summary>
@@ -54,6 +53,14 @@ public sealed class AtencionServicio
     public async Task<List<Atencion>> ListarActivasAsync()
     {
         return await _atencionRepositorio.ListarActivasAsync();
+    }
+
+    /// <summary>
+    /// Lista las atenciones para consulta operativa e histórica.
+    /// </summary>
+    public Task<List<Atencion>> ListarTodasAsync()
+    {
+        return _atencionRepositorio.ListarTodasAsync();
     }
 
     /// <summary>

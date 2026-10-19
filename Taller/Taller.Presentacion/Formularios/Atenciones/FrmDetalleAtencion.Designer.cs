@@ -885,6 +885,7 @@
             cboServicioIngreso.Name = "cboServicioIngreso";
             cboServicioIngreso.Size = new Size(598, 23);
             cboServicioIngreso.TabIndex = 2;
+            cboServicioIngreso.SelectedIndexChanged += CboServicioIngreso_SelectedIndexChanged;
             // 
             // nudImporteIngreso
             // 
@@ -897,6 +898,8 @@
             nudImporteIngreso.TabIndex = 3;
             nudImporteIngreso.TextAlign = HorizontalAlignment.Right;
             nudImporteIngreso.ThousandsSeparator = true;
+            nudImporteIngreso.ValueChanged += NudImporteIngreso_ValueChanged;
+            nudImporteIngreso.KeyPress += NudImporteIngreso_KeyPress;
             // 
             // chkAutorizaIngreso
             // 
@@ -908,6 +911,7 @@
             chkAutorizaIngreso.TabIndex = 5;
             chkAutorizaIngreso.Text = "El cliente fue informado y autorizó el servicio y su importe.";
             chkAutorizaIngreso.UseVisualStyleBackColor = true;
+            chkAutorizaIngreso.CheckedChanged += ChkAutorizaIngreso_CheckedChanged;
             // 
             // lblInformacionIngreso
             // 
@@ -921,14 +925,21 @@
             // 
             // btnConfirmarIngreso
             // 
+            btnConfirmarIngreso.BackColor = Color.FromArgb(30, 64, 175);
+            btnConfirmarIngreso.Cursor = Cursors.Hand;
             btnConfirmarIngreso.Dock = DockStyle.Fill;
             btnConfirmarIngreso.Enabled = false;
+            btnConfirmarIngreso.FlatAppearance.BorderSize = 0;
+            btnConfirmarIngreso.FlatStyle = FlatStyle.Flat;
+            btnConfirmarIngreso.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnConfirmarIngreso.ForeColor = Color.White;
             btnConfirmarIngreso.Location = new Point(767, 27);
             btnConfirmarIngreso.Name = "btnConfirmarIngreso";
             btnConfirmarIngreso.Size = new Size(214, 32);
             btnConfirmarIngreso.TabIndex = 4;
             btnConfirmarIngreso.Text = "Confirmar ingreso a diagnóstico";
-            btnConfirmarIngreso.UseVisualStyleBackColor = true;
+            btnConfirmarIngreso.UseVisualStyleBackColor = false;
+            btnConfirmarIngreso.Click += BtnConfirmarIngreso_Click;
             // 
             // tabSeguimiento
             // 
@@ -2297,6 +2308,7 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Detalle de atención";
+            FormClosing += FrmDetalleAtencion_FormClosing;
             Load += FrmDetalleAtencion_Load;
             tlpPrincipal.ResumeLayout(false);
             pnlEncabezado.ResumeLayout(false);

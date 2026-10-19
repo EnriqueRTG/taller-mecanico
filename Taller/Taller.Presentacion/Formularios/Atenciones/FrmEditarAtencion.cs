@@ -1,4 +1,7 @@
 ﻿using Taller.Presentacion.Estilos;
+using Taller.Aplicacion.Servicios;
+using Taller.Dominio.Entidades;
+using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Presentacion.Formularios.Atenciones;
 
@@ -16,11 +19,16 @@ public partial class FrmEditarAtencion : Form
 
     private const int LongitudMinimaMotivo = 10;
     private const int LongitudMaximaMotivo = 500;
-    private const int LongitudMaximaObservaciones = 1000;
 
     private bool _formularioInicializado;
     private bool _hayCambios;
     private bool _cambiosConfirmados;
+
+    private readonly int _idAtencion;
+    private readonly AtencionServicio _atencionServicio;
+
+    private Atencion? _atencionActual;
+    private bool _guardando;
 
     #endregion
 
@@ -32,19 +40,6 @@ public partial class FrmEditarAtencion : Form
     public string Motivo =>
         txtMotivo.Text.Trim();
 
-    /// <summary>
-    /// Obtiene las observaciones de recepción ingresadas.
-    /// </summary>
-    public string Observaciones =>
-        txtObservaciones.Text.Trim();
-
-    /// <summary>
-    /// Obtiene la prioridad seleccionada.
-    /// </summary>
-    public string Prioridad =>
-        cboPrioridad.SelectedItem?.ToString()
-        ?? string.Empty;
-
     #endregion
 
     #region Inicialización
@@ -52,25 +47,94 @@ public partial class FrmEditarAtencion : Form
     /// <summary>
     /// Inicializa una nueva instancia del formulario.
     /// </summary>
-    public FrmEditarAtencion()
+    public FrmEditarAtencion(
+        int idAtencion, 
+        AtencionServicio atencionServicio)
     {
+        ArgumentNullException.ThrowIfNull(atencionServicio);
+
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(idAtencion);
+
         InitializeComponent();
+
+        _idAtencion = idAtencion;
+        _atencionServicio = atencionServicio;
     }
 
     /// <summary>
     /// Configura el formulario y carga los datos demostrativos.
     /// </summary>
-    private void FrmEditarAtencion_Load(
+    private async void FrmEditarAtencion_Load(
         object? sender,
         EventArgs e)
     {
         ConfigurarFormulario();
         AplicarEstilos();
-        CargarPrioridades();
-        CargarDatosSimulados();
 
-        _hayCambios = false;
-        _formularioInicializado = true;
+        _formularioInicializado = false;
+        btnGuardar.Enabled = false;
+
+        try
+        {
+            Cursor = Cursors.WaitCursor;
+
+            var atencion = await _atencionServicio.ObtenerPorIdAsync(
+                _idAtencion);
+
+            if (atencion is null)
+            {
+                throw new InvalidOperationException(
+                    "La atención seleccionada ya no existe.");
+            }
+
+            if (atencion.Estado != EstadoAtencion.Abierta
+                || atencion.FechaCierre is not null
+                || atencion.IdTecnicoEnActividad is not null
+                || atencion.ActividadTecnica is not null)
+            {
+                throw new InvalidOperationException(
+                    "Solo pueden editarse atenciones abiertas, " +
+                    "antes de confirmar su ingreso a diagnóstico.");
+            }
+
+            _atencionActual = atencion;
+
+            lblNumeroAtencion.Text =
+                $"Atención N.º {atencion.IdAtencion:D6}";
+
+            lblClienteValor.Text =
+                $"{atencion.Cliente.Apellido}, {atencion.Cliente.Nombre}";
+
+            lblVehiculoValor.Text =
+                $"{atencion.Vehiculo.Modelo.Marca.Nombre} " +
+                $"{atencion.Vehiculo.Modelo.Nombre}";
+
+            lblDominioValor.Text = atencion.Vehiculo.Dominio;
+
+            lblFechaIngresoValor.Text =
+                atencion.FechaApertura.ToString("dd/MM/yyyy HH:mm");
+
+            txtMotivo.Text = atencion.MotivoConsulta;
+
+            _hayCambios = false;
+            _formularioInicializado = true;
+            btnGuardar.Enabled = true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                ex.Message,
+                "Editar atención",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            Close();
+        }
+        finally
+        {
+            Cursor = Cursors.Default;
+        }
     }
 
     /// <summary>
@@ -99,71 +163,6 @@ public partial class FrmEditarAtencion : Form
 
         txtMotivo.MaxLength =
             LongitudMaximaMotivo;
-
-        txtObservaciones.MaxLength =
-            LongitudMaximaObservaciones;
-
-        cboPrioridad.DropDownStyle =
-            ComboBoxStyle.DropDownList;
-    }
-
-    /// <summary>
-    /// Carga las prioridades disponibles para la simulación.
-    /// </summary>
-    private void CargarPrioridades()
-    {
-        cboPrioridad.BeginUpdate();
-
-        try
-        {
-            cboPrioridad.Items.Clear();
-
-            cboPrioridad.Items.AddRange(
-            [
-                "Baja",
-                "Normal",
-                "Alta",
-                "Urgente"
-            ]);
-        }
-        finally
-        {
-            cboPrioridad.EndUpdate();
-        }
-    }
-
-    #endregion
-
-    #region Datos simulados
-
-    /// <summary>
-    /// Carga información demostrativa de la atención seleccionada.
-    /// </summary>
-    private void CargarDatosSimulados()
-    {
-        lblNumeroAtencion.Text =
-            "Atención N.º 000001";
-
-        lblClienteValor.Text =
-            "Juan Pérez";
-
-        lblVehiculoValor.Text =
-            "Honda Fit";
-
-        lblDominioValor.Text =
-            "AB345CD";
-
-        lblFechaIngresoValor.Text =
-            "07/09/2026 16:07";
-
-        txtMotivo.Text =
-            "Dificultades para arrancar.";
-
-        txtObservaciones.Text =
-            "El inconveniente ocurre principalmente durante el primer arranque del día.";
-
-        cboPrioridad.SelectedItem =
-            "Normal";
     }
 
     #endregion
@@ -193,16 +192,64 @@ public partial class FrmEditarAtencion : Form
     /// <summary>
     /// Valida y confirma visualmente los cambios ingresados.
     /// </summary>
-    private void BtnGuardar_Click(
+    private async void BtnGuardar_Click(
         object? sender,
         EventArgs e)
     {
-        if (!ValidarFormulario())
+        if (_guardando
+            || _atencionActual is null
+            || !ValidarFormulario())
         {
             return;
         }
 
-        SimularModificacionExitosa();
+        try
+        {
+            _guardando = true;
+            btnGuardar.Enabled = false;
+            txtMotivo.Enabled = false;
+            Cursor = Cursors.WaitCursor;
+
+            await _atencionServicio.ModificarAsync(
+                _idAtencion,
+                _atencionActual.IdCliente,
+                _atencionActual.IdVehiculo,
+                txtMotivo.Text.Trim());
+
+            _cambiosConfirmados = true;
+            _hayCambios = false;
+
+            MessageBox.Show(
+                this,
+                "Los datos de la atención fueron guardados.",
+                "Editar atención",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            // Permite que FormClosing acepte el cierre.
+            _guardando = false;
+            DialogResult = DialogResult.OK;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                $"No se pudo guardar la modificación.\n\n{ex.Message}",
+                "Editar atención",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+        finally
+        {
+            _guardando = false;
+
+            if (!IsDisposed)
+            {
+                Cursor = Cursors.Default;
+                btnGuardar.Enabled = true;
+                txtMotivo.Enabled = true;
+            }
+        }
     }
 
     /// <summary>
@@ -223,6 +270,12 @@ public partial class FrmEditarAtencion : Form
         object? sender,
         FormClosingEventArgs e)
     {
+        if (_guardando)
+        {
+            e.Cancel = true;
+            return;
+        }
+
         if (_cambiosConfirmados || !_hayCambios)
         {
             NormalizarResultadoCancelacion();
@@ -259,10 +312,9 @@ public partial class FrmEditarAtencion : Form
     /// </summary>
     private bool ValidarFormulario()
     {
-        RestablecerIndicadoresValidacion();
+        txtMotivo.BackColor = Color.White;
 
-        string motivo =
-            txtMotivo.Text.Trim();
+        string motivo = txtMotivo.Text.Trim();
 
         if (string.IsNullOrWhiteSpace(motivo))
         {
@@ -273,21 +325,11 @@ public partial class FrmEditarAtencion : Form
             return false;
         }
 
-        if (motivo.Length < LongitudMinimaMotivo)
+        if (motivo.Length > LongitudMaximaMotivo)
         {
             MostrarAdvertencia(
-                $"El motivo debe contener al menos " +
-                $"{LongitudMinimaMotivo} caracteres.",
+                "El motivo no puede superar los 500 caracteres.",
                 txtMotivo);
-
-            return false;
-        }
-
-        if (cboPrioridad.SelectedIndex < 0)
-        {
-            MostrarAdvertencia(
-                "Seleccioná la prioridad de la atención.",
-                cboPrioridad);
 
             return false;
         }
@@ -301,7 +343,6 @@ public partial class FrmEditarAtencion : Form
     private void RestablecerIndicadoresValidacion()
     {
         txtMotivo.BackColor = Color.White;
-        cboPrioridad.BackColor = Color.White;
     }
 
     /// <summary>
@@ -327,30 +368,7 @@ public partial class FrmEditarAtencion : Form
     #endregion
 
     #region Simulación y cierre
-
-    /// <summary>
-    /// Simula la modificación exitosa y devuelve un resultado afirmativo.
-    /// </summary>
-    private void SimularModificacionExitosa()
-    {
-        txtMotivo.Text =
-            txtMotivo.Text.Trim();
-
-        txtObservaciones.Text =
-            txtObservaciones.Text.Trim();
-
-        MessageBox.Show(
-            this,
-            "Los datos de la atención fueron modificados correctamente.",
-            "Editar atención",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-
-        _cambiosConfirmados = true;
-        DialogResult = DialogResult.OK;
-    }
-
-    /// <summary>
+/// <summary>
     /// Devuelve Cancel cuando el formulario se cierra
     /// sin confirmar una modificación.
     /// </summary>

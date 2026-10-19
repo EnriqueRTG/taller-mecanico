@@ -27,6 +27,8 @@ public partial class FrmDetalleAtencion : Form
     /// </summary>
     private readonly int _rolId;
 
+    private bool _guardandoIngreso;
+
     /// <summary>
     /// Indica si durante la sesión actual se registró un diagnóstico simulado.
     /// </summary>
@@ -43,9 +45,9 @@ public partial class FrmDetalleAtencion : Form
     private readonly int _idAtencion;
 
     private readonly AtencionServicio _atencionServicio;
-    
+
     private Atencion? _atencionActual;
-    
+
     private bool _cargandoServiciosIngreso;
     #endregion
 
@@ -321,6 +323,14 @@ public partial class FrmDetalleAtencion : Form
         chkAutorizaIngreso.Checked = false;
 
         ActualizarControlesIngreso();
+
+        if (nudImporteIngreso.Enabled)
+        {
+            nudImporteIngreso.Focus();
+            nudImporteIngreso.Select(
+                0,
+                nudImporteIngreso.Text.Length);
+        }
     }
 
     /// <summary>
@@ -335,8 +345,17 @@ public partial class FrmDetalleAtencion : Form
             return;
         }
 
-        chkAutorizaIngreso.Checked = false;
         ActualizarControlesIngreso();
+    }
+
+    private void NudImporteIngreso_KeyPress(
+    object? sender,
+    KeyPressEventArgs e)
+    {
+        if (!char.IsControl(e.KeyChar) || e.KeyChar == '\b')
+        {
+            chkAutorizaIngreso.Checked = false;
+        }
     }
 
     private void ChkAutorizaIngreso_CheckedChanged(
@@ -352,6 +371,7 @@ public partial class FrmDetalleAtencion : Form
     private void ActualizarControlesIngreso()
     {
         bool puedeIngresar =
+            !_guardandoIngreso &&
             !_cargandoServiciosIngreso &&
             _rolId == RolesSistema.AdministrativoId &&
             _atencionActual?.Estado == EstadoAtencion.Abierta &&
@@ -371,7 +391,7 @@ public partial class FrmDetalleAtencion : Form
             puedeIngresar && servicioSeleccionado;
 
         chkAutorizaIngreso.Enabled =
-            puedeIngresar && servicioSeleccionado && importeValido;
+            puedeIngresar && servicioSeleccionado;
 
         btnConfirmarIngreso.Enabled =
             puedeIngresar &&
@@ -887,16 +907,13 @@ public partial class FrmDetalleAtencion : Form
             return;
         }
 
-        using var formulario = new FrmRegistrarDiagnostico();
+        MessageBox.Show(
+            this,
+            "El acceso al registro real de diagnóstico está pendiente de conexión.",
+            "Registrar diagnóstico",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
 
-        DialogResult resultado = formulario.ShowDialog(this);
-
-        if (resultado != DialogResult.OK)
-        {
-            return;
-        }
-
-        AplicarDiagnosticoSimulado(formulario);
     }
 
     /// <summary>
@@ -936,7 +953,9 @@ public partial class FrmDetalleAtencion : Form
         }
 
         using var formulario =
-            new FrmEditarAtencion();
+            new FrmEditarAtencion(
+                _idAtencion,
+                _atencionServicio);
 
         DialogResult resultado =
             formulario.ShowDialog(this);
@@ -1015,54 +1034,6 @@ public partial class FrmDetalleAtencion : Form
     #endregion
 
     #region Actualización visual
-    /// <summary>
-    /// Copia los datos del diagnóstico simulado al detalle de la atención
-    /// y actualiza el estado visual del proceso.
-    /// </summary>
-    /// <param name="formulario">
-    /// Formulario que contiene los datos del diagnóstico registrado.
-    /// </param>
-    private void AplicarDiagnosticoSimulado(
-        FrmRegistrarDiagnostico formulario)
-    {
-        _diagnosticoRegistrado = true;
-
-        lblEstadoDiagnosticoValor.Text = "Registrado";
-        lblEstadoDiagnosticoValor.ForeColor =
-            Color.FromArgb(22, 101, 52);
-
-        lblFechaDiagnosticoValor.Text =
-            formulario.FechaDiagnostico.ToString("dd/MM/yyyy HH:mm");
-
-        lblTecnicoDiagnosticoValor.Text =
-            formulario.Tecnico;
-
-        lblResultadoDiagnosticoValor.Text =
-            formulario.Resultado;
-
-        txtDescripcionDiagnostico.Text =
-            formulario.Descripcion;
-
-        txtDescripcionDiagnostico.ForeColor =
-            Color.FromArgb(51, 65, 85);
-
-        txtDescripcionDiagnostico.Font =
-            new Font("Segoe UI", 9F, FontStyle.Regular);
-
-        txtObservacionesDiagnostico.Text =
-            string.IsNullOrWhiteSpace(formulario.Observaciones)
-                ? "Sin observaciones técnicas."
-                : formulario.Observaciones;
-
-        txtObservacionesDiagnostico.ForeColor =
-            Color.FromArgb(51, 65, 85);
-
-        ActualizarEtapaDiagnostico();
-        AgregarMovimientoDiagnostico(formulario);
-        DeshabilitarRegistroDiagnostico();
-
-        tabDetalle.SelectedTab = tabDiagnostico;
-    }
 
     /// <summary>
     /// Marca visualmente la etapa de diagnóstico como completada.
@@ -1076,25 +1047,6 @@ public partial class FrmDetalleAtencion : Form
             "✓ DIAGNÓSTICO\nRegistrado";
 
         lblEtapaDiagnostico.ForeColor = Color.White;
-    }
-
-    /// <summary>
-    /// Agrega al seguimiento un movimiento correspondiente al diagnóstico
-    /// registrado durante la sesión.
-    /// </summary>
-    /// <param name="formulario">
-    /// Formulario que proporciona la fecha, el resultado y el técnico.
-    /// </param>
-    private void AgregarMovimientoDiagnostico(
-        FrmRegistrarDiagnostico formulario)
-    {
-        dgvSeguimiento.Rows.Add(
-            formulario.FechaDiagnostico.ToString("dd/MM/yyyy HH:mm"),
-            "Diagnóstico",
-            $"Diagnóstico registrado: {formulario.Resultado}.",
-            formulario.Tecnico);
-
-        dgvSeguimiento.ClearSelection();
     }
 
     /// <summary>
@@ -1338,5 +1290,125 @@ public partial class FrmDetalleAtencion : Form
         dgvSeguimiento.ClearSelection();
     }
     #endregion
-    
+
+    /// <summary>
+    /// Registra el ingreso autorizado y su cargo inicial.
+    /// </summary>
+    private async void BtnConfirmarIngreso_Click(
+        object? sender,
+        EventArgs e)
+    {
+        if (_guardandoIngreso)
+        {
+            return;
+        }
+
+        // Confirma las validaciones de los controles antes de leerlos.
+        if (!ValidateChildren())
+        {
+            return;
+        }
+
+        ActualizarControlesIngreso();
+
+        if (!btnConfirmarIngreso.Enabled)
+        {
+            MessageBox.Show(
+                this,
+                "Seleccione el servicio, indique un importe positivo " +
+                "y registre la autorización del cliente.",
+                "Confirmar ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        if (cboServicioIngreso.SelectedItem is not Concepto concepto)
+        {
+            return;
+        }
+
+        // Conserva los valores exactos que se enviarán al servicio.
+        int idConcepto = concepto.IdConcepto;
+        decimal importe = nudImporteIngreso.Value;
+        bool clienteAutoriza = chkAutorizaIngreso.Checked;
+
+        bool ingresoRegistrado = false;
+        bool cerrarDetalle = false;
+
+        try
+        {
+            _guardandoIngreso = true;
+            ActualizarControlesIngreso();
+            Cursor = Cursors.WaitCursor;
+
+            await _atencionServicio.EnviarADiagnosticoAsync(
+                _idAtencion,
+                idConcepto,
+                importe,
+                clienteAutoriza);
+
+            ingresoRegistrado = true;
+
+            await CargarAtencionAsync();
+
+            chkAutorizaIngreso.Checked = false;
+
+            MessageBox.Show(
+                this,
+                "El ingreso y el cargo inicial fueron registrados.\n\n" +
+                "La atención quedó pendiente de diagnóstico.",
+                "Ingreso confirmado",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            // Cierra el detalle para exigir una nueva consulta del estado.
+            // También contempla fallos de comunicación con resultado incierto.
+            cerrarDetalle = true;
+
+            string mensaje = ingresoRegistrado
+                ? "El ingreso fue registrado, pero no se pudo actualizar " +
+                  "la pantalla. Actualice el listado."
+                : "No se pudo completar la confirmación desde esta pantalla. " +
+                  "Actualice el listado y consulte el estado antes de reintentar.";
+
+            MessageBox.Show(
+                this,
+                $"{mensaje}\n\n{ex.Message}",
+                "Confirmar ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+        finally
+        {
+            _guardandoIngreso = false;
+            Cursor = Cursors.Default;
+
+            if (!IsDisposed)
+            {
+                ActualizarControlesIngreso();
+            }
+        }
+
+        if (cerrarDetalle)
+        {
+            Close();
+        }
+    }
+
+    /// <summary>
+    /// Evita cerrar el detalle mientras se confirma el ingreso.
+    /// </summary>
+    private void FrmDetalleAtencion_FormClosing(
+        object? sender,
+        FormClosingEventArgs e)
+    {
+        if (_guardandoIngreso)
+        {
+            e.Cancel = true;
+        }
+    }
 }

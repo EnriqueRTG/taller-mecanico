@@ -1,6 +1,4 @@
-﻿
-
-using Taller.Dominio.Entidades;
+﻿using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Abstracciones.Persistencia;
 
@@ -10,11 +8,16 @@ namespace Taller.Aplicacion.Abstracciones.Persistencia;
 /// </summary>
 public interface IAtencionRepositorio
 {
-    Task<Atencion?> ObtenerPorIdAsync(int idAtencion);
+    Task<Atencion?> ObtenerPorIdAsync(
+        int idAtencion);
     Task<List<Atencion>> ListarActivasAsync();
-    Task<List<Atencion>> ListarPorClienteAsync(int idCliente);
-    Task<List<Atencion>> ListarPorVehiculoAsync(int idVehiculo);
-    Task AgregarAsync(Atencion atencion);
+    Task<List<Atencion>> ListarTodasAsync();
+    Task<List<Atencion>> ListarPorClienteAsync(
+        int idCliente);
+    Task<List<Atencion>> ListarPorVehiculoAsync(
+        int idVehiculo);
+    Task AgregarAsync(
+        Atencion atencion);
     Task ActualizarAsync(Atencion atencion);
 
     /// <summary>
@@ -24,7 +27,17 @@ public interface IAtencionRepositorio
     Task ActualizarConHistorialAsync(
         Atencion atencion,
         HistorialAtencion historial);
-    Task<bool> ExisteAtencionActivaParaVehiculoAsync(int idVehiculo);
+
+    /// <summary>
+    /// Prepara la actualización de la reserva técnica y agrega
+    /// su evento al historial, sin confirmar los cambios.
+    /// </summary>
+    void PrepararCambioReservaConHistorial(
+        Atencion atencion,
+        HistorialAtencion historial);
+
+    Task<bool> ExisteAtencionActivaParaVehiculoAsync(
+        int idVehiculo);
 
     /// <summary>
     /// Guarda el envío a diagnóstico, el presupuesto inicial

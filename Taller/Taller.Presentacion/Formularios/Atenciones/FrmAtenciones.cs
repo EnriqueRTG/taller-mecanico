@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
+using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 using Taller.Presentacion.Estilos;
-using Taller.Presentacion.Seguridad;
-using Taller.Presentacion.Formularios.Vehiculos;
 using Taller.Presentacion.Formularios.Diagnosticos;
+using Taller.Presentacion.Formularios.Vehiculos;
+using Taller.Presentacion.Seguridad;
+using Taller.Presentacion.Navegacion;
 
 namespace Taller.Presentacion.Formularios.Atenciones
 {
@@ -18,6 +20,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private readonly AutorizacionNavegacion _autorizacionNavegacion;
         private List<AtencionFila> _atenciones = [];
         private bool _formularioNuevaAtencionAbierto;
+        private bool _tomandoDiagnostico;
         #endregion
 
         #region Constructor y modelo de presentación
@@ -36,12 +39,15 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
             ConfigurarEstilos();
             ConfigurarMargenesAcciones();
-            ConfigurarEventos();
         }
 
         private sealed class AtencionFila
         {
             public int IdAtencion { get; init; }
+
+            public int? IdTecnicoEnActividad { get; init; }
+
+            public ActividadTecnica? ActividadTecnica { get; init; }
 
             public string Numero =>
                 IdAtencion.ToString("D6");
@@ -77,6 +83,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
             public string Recepcion { get; init; } =
                 string.Empty;
         }
+
+        public event EventHandler<DiagnosticoSolicitadoEventArgs>? DiagnosticoSolicitado;
         #endregion
 
         #region Configuración del formulario
@@ -123,13 +131,13 @@ namespace Taller.Presentacion.Formularios.Atenciones
             Button[] botones =
             [
                 btnVerDetalle,
-        btnEditar,
-        btnIniciarProceso,
-        btnCancelarAtencion,
-        btnRegistrarEntrega,
-        btnVerHistorial,
-        btnRegistrarDiagnostico,
-        btnFinalizarTrabajo
+                btnEditar,
+                btnIniciarProceso,
+                btnCancelarAtencion,
+                btnRegistrarEntrega,
+                btnVerHistorial,
+                btnRegistrarDiagnostico,
+                btnFinalizarTrabajo
             ];
 
             foreach (Button boton in botones)
@@ -149,43 +157,45 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnRegistrarDiagnostico.Width = 150;
             btnFinalizarTrabajo.Width = 130;
 
-            btnIniciarProceso.Text = "Enviar a diagnóstico";
             btnIniciarProceso.Width = 160;
-        }
-
-        private void ConfigurarEventos()
-        {
-            dgvAtenciones.SelectionChanged +=
-                DgvAtenciones_SelectionChanged;
-
-            dgvAtenciones.CellDoubleClick +=
-                DgvAtenciones_CellDoubleClick;
-
-            dgvAtenciones.CellFormatting +=
-                DgvAtenciones_CellFormatting;
-
-            dgvAtenciones.CellToolTipTextNeeded +=
-                DgvAtenciones_CellToolTipTextNeeded;
         }
 
         private void ConfigurarFiltros()
         {
-            cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
+            bool esTecnico =
+                _sesionUsuario.UsuarioActual?.RolId == RolesSistema.TecnicoId;
+
             cboEstado.Items.Clear();
-            cboEstado.Items.Add("Activas");
+
+            cboEstado.Items.Add("Todas");
+            cboEstado.Items.Add("En curso");
+
+            if (!esTecnico)
+            {
+                cboEstado.Items.Add("Finalizadas");
+            }
 
             foreach (var estado in Enum.GetValues<EstadoAtencion>())
             {
-                if (estado != EstadoAtencion.Cerrada &&
-                    estado != EstadoAtencion.Cancelada)
+                if (esTecnico
+                    && (estado == EstadoAtencion.Cerrada
+                        || estado == EstadoAtencion.Cancelada))
                 {
-                    cboEstado.Items.Add(ObtenerNombreEstado(estado));
+                    continue;
                 }
+
+                cboEstado.Items.Add(ObtenerNombreEstado(estado));
             }
 
             dtpDesde.Value = DateTime.Today.AddMonths(-1);
             dtpHasta.Value = DateTime.Today;
-            cboEstado.SelectedIndex = 0;
+
+            dtpDesde.Checked = false;
+            dtpHasta.Checked = false;
+
+            cboEstado.SelectedItem = esTecnico
+                ? "En curso"
+                : "Todas";
         }
 
         private void ConfigurarInterfazSegunRol()
@@ -329,7 +339,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 EstablecerEstadoCarga(true);
 
                 List<Atencion> atenciones =
-                    await _atencionServicio.ListarActivasAsync();
+                    await _atencionServicio.ListarTodasAsync();
 
                 _atenciones = atenciones
                     .Select(MapearFila)
@@ -391,8 +401,10 @@ namespace Taller.Presentacion.Formularios.Atenciones
             return new AtencionFila
             {
                 IdAtencion = atencion.IdAtencion,
+                IdTecnicoEnActividad = atencion.IdTecnicoEnActividad,
                 Fecha = atencion.FechaApertura,
                 Dominio = atencion.Vehiculo.Dominio,
+                ActividadTecnica = atencion.ActividadTecnica,
 
                 Vehiculo =
                     $"{atencion.Vehiculo.Modelo.Marca.Nombre} " +
@@ -483,11 +495,18 @@ namespace Taller.Presentacion.Formularios.Atenciones
         #region Filtros y selección
         private void AplicarFiltros()
         {
-            IEnumerable<AtencionFila> consulta =
-                _atenciones;
+            IEnumerable<AtencionFila> consulta = _atenciones;
 
-            string texto =
-                txtBuscar.Text.Trim();
+            bool esTecnico = _sesionUsuario.UsuarioActual?.RolId == RolesSistema.TecnicoId;
+
+            if (esTecnico)
+            {
+                consulta = consulta.Where(a =>
+                    a.EstadoValor != EstadoAtencion.Cerrada
+                    && a.EstadoValor != EstadoAtencion.Cancelada);
+            }
+
+            string texto = txtBuscar.Text.Trim();
 
             if (!string.IsNullOrWhiteSpace(texto))
             {
@@ -514,33 +533,77 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
 
             string estadoSeleccionado =
-                cboEstado.SelectedItem?.ToString() ?? "Activas";
+                   cboEstado.SelectedItem?.ToString() ?? "Todas";
 
-            consulta = consulta.Where(a =>
-                a.EstadoValor != EstadoAtencion.Cerrada &&
-                a.EstadoValor != EstadoAtencion.Cancelada);
-
-            if (estadoSeleccionado != "Activas")
+            switch (estadoSeleccionado)
             {
-                consulta = consulta.Where(a =>
-                    ObtenerNombreEstado(a.EstadoValor) == estadoSeleccionado);
+                case "Todas":
+                    break;
+
+                case "En curso":
+                    consulta = consulta.Where(a =>
+                        a.EstadoValor != EstadoAtencion.Cerrada &&
+                        a.EstadoValor != EstadoAtencion.Cancelada);
+                    break;
+
+                case "Finalizadas":
+                    consulta = consulta.Where(a =>
+                        a.EstadoValor == EstadoAtencion.Cerrada ||
+                        a.EstadoValor == EstadoAtencion.Cancelada);
+                    break;
+
+                default:
+                    consulta = consulta.Where(a =>
+                        ObtenerNombreEstado(a.EstadoValor) == estadoSeleccionado);
+                    break;
             }
 
-            DateTime desde =
-                dtpDesde.Value.Date;
+            // Cada límite es opcional e independiente.
+            bool filtrarDesde = dtpDesde.Checked;
+            bool filtrarHasta = dtpHasta.Checked;
 
-            DateTime hasta =
-                dtpHasta.Value.Date.AddDays(1);
+            DateTime desde = dtpDesde.Value.Date;
+            DateTime hasta = dtpHasta.Value.Date;
 
-            consulta = consulta.Where(a =>
-                a.Fecha >= desde
-                &&
-                a.Fecha < hasta);
+            if (filtrarDesde && filtrarHasta && desde > hasta)
+            {
+                dgvAtenciones.DataSource = null;
 
-            List<AtencionFila> resultado =
-                consulta
-                    .OrderByDescending(a => a.Fecha)
-                    .ToList();
+                lblCantidad.Text =
+                    "Rango inválido: Desde debe ser anterior o igual a Hasta.";
+
+                DeshabilitarAcciones();
+                return;
+            }
+
+            if (filtrarDesde)
+            {
+                consulta = consulta.Where(a =>
+                    a.Fecha.Date >= desde);
+            }
+
+            if (filtrarHasta)
+            {
+                consulta = consulta.Where(a =>
+                    a.Fecha.Date <= hasta);
+            }
+
+            // Pendientes: grupo operativo y luego mayor antigüedad de apertura.
+            var enCurso = consulta
+                .Where(a => !EsAtencionFinalizada(a.EstadoValor))
+                .OrderBy(ObtenerGrupoOperativo)
+                .ThenBy(a => a.Fecha)
+                .ThenBy(a => a.IdAtencion);
+
+            // Historial: primero las aperturas más recientes.
+            var finalizadas = consulta
+                .Where(a => EsAtencionFinalizada(a.EstadoValor))
+                .OrderByDescending(a => a.Fecha)
+                .ThenByDescending(a => a.IdAtencion);
+
+            List<AtencionFila> resultado = enCurso
+                .Concat(finalizadas)
+                .ToList();
 
             dgvAtenciones.DataSource = null;
             dgvAtenciones.DataSource = resultado;
@@ -548,10 +611,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dgvAtenciones.ClearSelection();
             dgvAtenciones.CurrentCell = null;
 
-            lblCantidad.Text =
-                resultado.Count == 1
-                    ? "1 atención encontrada"
-                    : $"{resultado.Count} atenciones encontradas";
+            lblCantidad.Text = resultado.Count == 1
+                ? "1 atención encontrada"
+                : $"{resultado.Count} atenciones encontradas";
 
             DeshabilitarAcciones();
         }
@@ -596,7 +658,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 puedeGestionar || puedeConsultarComoTecnico;
 
             btnEditar.Enabled =
-                puedeGestionar;
+                puedeGestionar &&
+                fila.EstadoValor == EstadoAtencion.Abierta;
 
             btnIniciarProceso.Enabled =
                 puedeGestionar &&
@@ -611,8 +674,25 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnVerHistorial.Enabled =
                 puedeConsultarComoTecnico;
 
+            bool puedeTomarDiagnostico =
+                fila.EstadoValor == EstadoAtencion.PendienteDiagnostico
+                && fila.IdTecnicoEnActividad is null
+                && fila.ActividadTecnica is null;
+
+            bool puedeRegistrarDiagnostico =
+                fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica
+                && fila.IdTecnicoEnActividad == usuario.Id
+                && fila.ActividadTecnica == ActividadTecnica.Diagnostico;
+
+            btnRegistrarDiagnostico.Text =
+                puedeRegistrarDiagnostico
+                    ? "Registrar diagnóstico"
+                    : "Tomar diagnóstico";
+
             btnRegistrarDiagnostico.Enabled =
-                puedeConsultarComoTecnico;
+                !_tomandoDiagnostico
+                && puedeConsultarComoTecnico
+                && (puedeTomarDiagnostico || puedeRegistrarDiagnostico);
 
             btnFinalizarTrabajo.Enabled =
                 puedeConsultarComoTecnico;
@@ -666,18 +746,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             EventArgs e)
         {
             ActualizarAccionesSeleccion();
-        }
-
-        private void DgvAtenciones_CellDoubleClick(
-            object? sender,
-            DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0)
-            {
-                return;
-            }
-
-            AbrirDetalleSeleccionado();
         }
 
         private void DgvAtenciones_CellFormatting(
@@ -803,13 +871,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             AbrirEdicionSeleccionada();
         }
 
-        private void BtnIniciarProceso_Click(
-            object? sender,
-            EventArgs e)
-        {
-            ConfirmarInicioProceso();
-        }
-
         private void BtnCancelarAtencion_Click(
             object? sender,
             EventArgs e)
@@ -877,11 +938,11 @@ namespace Taller.Presentacion.Formularios.Atenciones
         #endregion
 
         #region Eventos de consulta y acciones técnicas
-        private void BtnVerDetalle_Click(
+        private async void BtnVerDetalle_ClickAsync(
             object? sender,
             EventArgs e)
         {
-            AbrirDetalleSeleccionado();
+            await AbrirDetalleSeleccionadoAsync();
         }
 
         private void BtnVerHistorial_Click(
@@ -895,7 +956,34 @@ namespace Taller.Presentacion.Formularios.Atenciones
             object? sender,
             EventArgs e)
         {
-            AbrirRegistroDiagnosticoSeleccionado();
+            var fila = ObtenerFilaSeleccionada();
+            var usuario = _sesionUsuario.UsuarioActual;
+
+            if (_tomandoDiagnostico
+                || fila is null
+                || usuario?.RolId != RolesSistema.TecnicoId)
+            {
+                return;
+            }
+
+            bool puedeTomar =
+                fila.EstadoValor == EstadoAtencion.PendienteDiagnostico
+                && fila.IdTecnicoEnActividad is null
+                && fila.ActividadTecnica is null;
+
+            bool puedeRetomar =
+                fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica
+                && fila.IdTecnicoEnActividad == usuario.Id
+                && fila.ActividadTecnica == ActividadTecnica.Diagnostico;
+
+            if (!puedeTomar && !puedeRetomar)
+            {
+                return;
+            }
+
+            DiagnosticoSolicitado?.Invoke(
+                this,
+                new DiagnosticoSolicitadoEventArgs(fila.IdAtencion));
         }
 
         /// <summary>
@@ -967,7 +1055,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         #endregion
 
         #region Navegación y mensajes auxiliares
-        private void AbrirDetalleSeleccionado()
+        private async Task AbrirDetalleSeleccionadoAsync()
         {
             AtencionFila? fila =
                 ObtenerFilaSeleccionada();
@@ -1006,6 +1094,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
                         _sesionUsuario);
 
             formulario.ShowDialog(this);
+
+            await CargarAtencionesAsync();
         }
 
         /// <summary>
@@ -1086,7 +1176,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         /// Abre de manera modal la pantalla demostrativa de edición
         /// para la atención seleccionada.
         /// </summary>
-        private void AbrirEdicionSeleccionada()
+        private async Task AbrirEdicionSeleccionada()
         {
             AtencionFila? fila =
                 ObtenerFilaSeleccionada();
@@ -1103,8 +1193,31 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 return;
             }
 
+            var atencion = await _atencionServicio.ObtenerPorIdAsync(
+                fila.IdAtencion);
+
+            if (atencion is null
+                || atencion.Estado != EstadoAtencion.Abierta
+                || atencion.FechaCierre is not null
+                || atencion.IdTecnicoEnActividad is not null
+                || atencion.ActividadTecnica is not null)
+            {
+                MessageBox.Show(
+                    this,
+                    "La atención ya no está disponible para editar sus datos. " +
+                    "Se actualizará el listado.",
+                    "Editar atención",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                await CargarAtencionesAsync();
+                return;
+            }
+
             using var formulario =
-                new FrmEditarAtencion();
+                new FrmEditarAtencion(
+                    fila.IdAtencion,
+                    _atencionServicio);
 
             DialogResult resultado =
                 formulario.ShowDialog(this);
@@ -1114,8 +1227,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 return;
             }
 
-            // En esta entrega no se modifica la base de datos.
-            // El formulario únicamente demuestra el flujo de edición.
+            await CargarAtencionesAsync();
         }
 
         private void MostrarFuncionEnDesarrollo(
@@ -1248,5 +1360,95 @@ namespace Taller.Presentacion.Formularios.Atenciones
             formulario.ShowDialog(this);
         }
         #endregion
+
+        private void DgvAtenciones_CellDoubleClickAsync(
+            object sender, 
+            DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private async void BtnIniciarProceso_ClickAsync(
+            object sender, 
+            EventArgs e)
+        {
+            await AbrirDetalleSeleccionadoAsync();
+        }
+
+        private static bool EsAtencionFinalizada(
+            EstadoAtencion estado)
+        {
+            return estado == EstadoAtencion.Cerrada
+                || estado == EstadoAtencion.Cancelada;
+        }
+
+        /// <summary>
+        /// Determina el grupo de presentación según el rol.
+        /// No concede permisos ni reemplaza validaciones del servicio.
+        /// </summary>
+        private int ObtenerGrupoOperativo(
+            AtencionFila fila)
+        {
+            if (EsAtencionFinalizada(fila.EstadoValor))
+            {
+                return 9;
+            }
+
+            var usuario = _sesionUsuario.UsuarioActual;
+
+            if (usuario is null)
+            {
+                return 8;
+            }
+
+            if (usuario.RolId == RolesSistema.AdministrativoId)
+            {
+                return fila.EstadoValor switch
+                {
+                    EstadoAtencion.PendienteDecision => 0,
+
+                    EstadoAtencion.TrabajoFinalizado
+                        or EstadoAtencion.PendienteLiquidacion => 1,
+
+                    EstadoAtencion.Abierta => 2,
+
+                    _ => 3
+                };
+            }
+
+            if (usuario.RolId == RolesSistema.TecnicoId)
+            {
+                // Primero, el trabajo que este técnico ya tomó.
+                if (fila.IdTecnicoEnActividad == usuario.Id)
+                {
+                    return 0;
+                }
+
+                // Luego, diagnósticos disponibles para tomar.
+                if (fila.EstadoValor == EstadoAtencion.PendienteDiagnostico
+                    && fila.IdTecnicoEnActividad is null)
+                {
+                    return 1;
+                }
+
+                // Etapas técnicas sin reserva.
+                // Su operación concreta seguirá validándose en los servicios.
+                if (fila.IdTecnicoEnActividad is null)
+                {
+                    return fila.EstadoValor switch
+                    {
+                        EstadoAtencion.EnEvaluacionTecnica => 2,
+                        EstadoAtencion.EnEjecucion => 3,
+                        EstadoAtencion.Pausada => 4,
+                        _ => 5
+                    };
+                }
+
+                // Actividades reservadas por otro técnico: seguimiento.
+                return 5;
+            }
+
+            return 8;
+        }
     }
 }

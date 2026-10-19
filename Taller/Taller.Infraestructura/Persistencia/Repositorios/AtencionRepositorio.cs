@@ -279,6 +279,68 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     }
 
     /// <summary>
+    /// Prepara el cambio de reserva y su historial.
+    /// El guardado corresponde a la unidad de trabajo.
+    /// </summary>
+    public void PrepararCambioReservaConHistorial(
+        Atencion atencion,
+        HistorialAtencion historial)
+    {
+        ArgumentNullException.ThrowIfNull(atencion);
+        ArgumentNullException.ThrowIfNull(historial);
+
+        if (atencion.IdAtencion <= 0)
+        {
+            throw new ArgumentException(
+                "La atención debe tener un identificador válido.",
+                nameof(atencion));
+        }
+
+        if (atencion.Version is null || atencion.Version.Length != 8)
+        {
+            throw new ArgumentException(
+                "La atención debe tener una versión válida.",
+                nameof(atencion));
+        }
+
+        if (historial.IdHistorialAtencion != 0
+            || historial.IdAtencion != atencion.IdAtencion
+            || historial.EstadoNuevo != atencion.Estado)
+        {
+            throw new ArgumentException(
+                "El evento debe ser nuevo y corresponder a la atención y su estado.",
+                nameof(historial));
+        }
+
+        if (atencion.IdTecnicoEnActividad.HasValue
+            != atencion.ActividadTecnica.HasValue)
+        {
+            throw new ArgumentException(
+                "La reserva debe identificar tanto al técnico como a la actividad, " +
+                "o dejar ambos valores vacíos.",
+                nameof(atencion));
+        }
+
+        var entrada = _contexto.Entry(atencion);
+
+        entrada.State = EntityState.Unchanged;
+
+        entrada.Property(a => a.Version).OriginalValue =
+            atencion.Version.ToArray();
+
+        entrada.Property(a => a.IdTecnicoEnActividad)
+            .IsModified = true;
+
+        entrada.Property(a => a.ActividadTecnica)
+            .IsModified = true;
+
+        entrada.Property(a => a.Estado)
+            .IsModified = true;
+
+        _contexto.Entry(historial).State = EntityState.Added;
+    }
+
+    /// <summary>
     /// Comprueba si el vehículo tiene una atención
     /// que no está cerrada ni cancelada.
     /// </summary>
@@ -308,6 +370,17 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
             .Where(a =>
                 a.Estado != EstadoAtencion.Cerrada &&
                 a.Estado != EstadoAtencion.Cancelada)
+            .OrderByDescending(a => a.FechaApertura)
+            .ThenByDescending(a => a.IdAtencion)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Lista las atenciones, incluyendo cerradas y canceladas.
+    /// </summary>
+    public Task<List<Atencion>> ListarTodasAsync()
+    {
+        return ConsultaConRelaciones()
             .OrderByDescending(a => a.FechaApertura)
             .ThenByDescending(a => a.IdAtencion)
             .ToListAsync();
@@ -422,7 +495,8 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// Identifica exclusivamente la violación del índice
     /// que limita las atenciones activas por vehículo.
     /// </summary>
-    private static bool EsDuplicadoDeVehiculoActivo(DbUpdateException excepcion)
+    private static bool EsDuplicadoDeVehiculoActivo(
+        DbUpdateException excepcion)
     {
        return excepcion.InnerException is SqlException sqlEx &&
             sqlEx.Errors.Cast<SqlError>().Any(error =>

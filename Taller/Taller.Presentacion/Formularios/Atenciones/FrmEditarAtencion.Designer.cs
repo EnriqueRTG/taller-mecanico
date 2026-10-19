@@ -47,10 +47,6 @@
             tlpDatosEditables = new TableLayoutPanel();
             lblMotivo = new Label();
             txtMotivo = new TextBox();
-            lblObservaciones = new Label();
-            txtObservaciones = new TextBox();
-            lblPrioridad = new Label();
-            cboPrioridad = new ComboBox();
             pnlAcciones = new Panel();
             flpAcciones = new FlowLayoutPanel();
             btnCancelar = new Button();
@@ -82,7 +78,7 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 145F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 65F));
-            tlpPrincipal.Size = new Size(804, 561);
+            tlpPrincipal.Size = new Size(804, 461);
             tlpPrincipal.TabIndex = 0;
             // 
             // pnlEncabezado
@@ -148,7 +144,7 @@
             lblNumeroAtencion.Name = "lblNumeroAtencion";
             lblNumeroAtencion.Size = new Size(214, 25);
             lblNumeroAtencion.TabIndex = 2;
-            lblNumeroAtencion.Text = "Atención N.º 000001";
+            lblNumeroAtencion.Text = "—";
             lblNumeroAtencion.TextAlign = ContentAlignment.MiddleRight;
             // 
             // grpAtencionSeleccionada
@@ -259,7 +255,7 @@
             lblClienteValor.Name = "lblClienteValor";
             lblClienteValor.Size = new Size(166, 44);
             lblClienteValor.TabIndex = 4;
-            lblClienteValor.Text = "Juan Pérez";
+            lblClienteValor.Text = "—";
             lblClienteValor.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblVehiculoValor
@@ -272,7 +268,7 @@
             lblVehiculoValor.Name = "lblVehiculoValor";
             lblVehiculoValor.Size = new Size(166, 44);
             lblVehiculoValor.TabIndex = 5;
-            lblVehiculoValor.Text = "Honda Fit";
+            lblVehiculoValor.Text = "—";
             lblVehiculoValor.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblDominioValor
@@ -285,7 +281,7 @@
             lblDominioValor.Name = "lblDominioValor";
             lblDominioValor.Size = new Size(166, 44);
             lblDominioValor.TabIndex = 6;
-            lblDominioValor.Text = "AB345CD";
+            lblDominioValor.Text = "—";
             lblDominioValor.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblFechaIngresoValor
@@ -298,7 +294,7 @@
             lblFechaIngresoValor.Name = "lblFechaIngresoValor";
             lblFechaIngresoValor.Size = new Size(166, 44);
             lblFechaIngresoValor.TabIndex = 7;
-            lblFechaIngresoValor.Text = "07/09/2026 16:07";
+            lblFechaIngresoValor.Text = "—";
             lblFechaIngresoValor.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // tlpDatosEditables
@@ -308,19 +304,15 @@
             tlpDatosEditables.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpDatosEditables.Controls.Add(lblMotivo, 0, 0);
             tlpDatosEditables.Controls.Add(txtMotivo, 1, 0);
-            tlpDatosEditables.Controls.Add(lblObservaciones, 0, 1);
-            tlpDatosEditables.Controls.Add(txtObservaciones, 1, 1);
-            tlpDatosEditables.Controls.Add(lblPrioridad, 0, 2);
-            tlpDatosEditables.Controls.Add(cboPrioridad, 1, 2);
             tlpDatosEditables.Dock = DockStyle.Fill;
             tlpDatosEditables.Location = new Point(21, 251);
             tlpDatosEditables.Name = "tlpDatosEditables";
             tlpDatosEditables.Padding = new Padding(8);
-            tlpDatosEditables.RowCount = 3;
-            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
-            tlpDatosEditables.Size = new Size(762, 224);
+            tlpDatosEditables.RowCount = 1;
+            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpDatosEditables.Size = new Size(762, 124);
             tlpDatosEditables.TabIndex = 2;
             // 
             // lblMotivo
@@ -330,7 +322,7 @@
             lblMotivo.Location = new Point(13, 16);
             lblMotivo.Margin = new Padding(5, 8, 12, 5);
             lblMotivo.Name = "lblMotivo";
-            lblMotivo.Size = new Size(133, 67);
+            lblMotivo.Size = new Size(133, 95);
             lblMotivo.TabIndex = 0;
             lblMotivo.Text = "Motivo de consulta:";
             lblMotivo.TextAlign = ContentAlignment.MiddleRight;
@@ -346,67 +338,16 @@
             txtMotivo.Multiline = true;
             txtMotivo.Name = "txtMotivo";
             txtMotivo.ScrollBars = ScrollBars.Vertical;
-            txtMotivo.Size = new Size(586, 70);
+            txtMotivo.Size = new Size(586, 98);
             txtMotivo.TabIndex = 0;
             txtMotivo.TextChanged += CampoEditable_Cambio;
-            // 
-            // lblObservaciones
-            // 
-            lblObservaciones.AutoSize = true;
-            lblObservaciones.Dock = DockStyle.Fill;
-            lblObservaciones.Location = new Point(13, 96);
-            lblObservaciones.Margin = new Padding(5, 8, 12, 5);
-            lblObservaciones.Name = "lblObservaciones";
-            lblObservaciones.Size = new Size(133, 67);
-            lblObservaciones.TabIndex = 2;
-            lblObservaciones.Text = "Observaciones:";
-            lblObservaciones.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // txtObservaciones
-            // 
-            txtObservaciones.BackColor = Color.White;
-            txtObservaciones.BorderStyle = BorderStyle.FixedSingle;
-            txtObservaciones.Dock = DockStyle.Fill;
-            txtObservaciones.ForeColor = Color.FromArgb(51, 65, 85);
-            txtObservaciones.Location = new Point(163, 93);
-            txtObservaciones.Margin = new Padding(5);
-            txtObservaciones.Multiline = true;
-            txtObservaciones.Name = "txtObservaciones";
-            txtObservaciones.ScrollBars = ScrollBars.Vertical;
-            txtObservaciones.Size = new Size(586, 70);
-            txtObservaciones.TabIndex = 1;
-            txtObservaciones.TextChanged += CampoEditable_Cambio;
-            // 
-            // lblPrioridad
-            // 
-            lblPrioridad.AutoSize = true;
-            lblPrioridad.Dock = DockStyle.Fill;
-            lblPrioridad.Location = new Point(13, 173);
-            lblPrioridad.Margin = new Padding(5, 5, 12, 5);
-            lblPrioridad.Name = "lblPrioridad";
-            lblPrioridad.Size = new Size(133, 38);
-            lblPrioridad.TabIndex = 4;
-            lblPrioridad.Text = "Prioridad:";
-            lblPrioridad.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // cboPrioridad
-            // 
-            cboPrioridad.Anchor = AnchorStyles.Left;
-            cboPrioridad.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboPrioridad.FormattingEnabled = true;
-            cboPrioridad.Location = new Point(163, 180);
-            cboPrioridad.Margin = new Padding(5);
-            cboPrioridad.Name = "cboPrioridad";
-            cboPrioridad.Size = new Size(220, 23);
-            cboPrioridad.TabIndex = 2;
-            cboPrioridad.SelectedIndexChanged += CampoEditable_Cambio;
             // 
             // pnlAcciones
             // 
             pnlAcciones.BackColor = Color.White;
             pnlAcciones.Controls.Add(flpAcciones);
             pnlAcciones.Dock = DockStyle.Fill;
-            pnlAcciones.Location = new Point(18, 478);
+            pnlAcciones.Location = new Point(18, 378);
             pnlAcciones.Margin = new Padding(0);
             pnlAcciones.Name = "pnlAcciones";
             pnlAcciones.Padding = new Padding(12);
@@ -453,7 +394,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
             CancelButton = btnCancelar;
-            ClientSize = new Size(804, 561);
+            ClientSize = new Size(804, 461);
             Controls.Add(tlpPrincipal);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -500,10 +441,6 @@
         private TableLayoutPanel tlpDatosEditables;
         private Label lblMotivo;
         private TextBox txtMotivo;
-        private Label lblObservaciones;
-        private TextBox txtObservaciones;
-        private Label lblPrioridad;
-        private ComboBox cboPrioridad;
         private Panel pnlAcciones;
         private FlowLayoutPanel flpAcciones;
         private Button btnCancelar;

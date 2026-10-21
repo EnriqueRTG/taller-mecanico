@@ -32,6 +32,15 @@
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+            dgvServiciosIngreso = new DataGridView();
+            colServicioIngreso = new DataGridViewTextBoxColumn();
+            colCantidadIngreso = new DataGridViewTextBoxColumn();
+            colPrecioUnitarioIngreso = new DataGridViewTextBoxColumn();
+            colSubtotalIngreso = new DataGridViewTextBoxColumn();
             tlpPrincipal = new TableLayoutPanel();
             pnlEncabezado = new Panel();
             tlpEncabezado = new TableLayoutPanel();
@@ -74,11 +83,16 @@
             grpIngresoDiagnostico = new GroupBox();
             tlpIngresoDiagnostico = new TableLayoutPanel();
             lblServicioIngreso = new Label();
-            lblImporteIngreso = new Label();
             cboServicioIngreso = new ComboBox();
+            lblCantidadIngreso = new Label();
+            lblImporteIngreso = new Label();
             nudImporteIngreso = new NumericUpDown();
-            chkAutorizaIngreso = new CheckBox();
+            nudCantidadIngreso = new NumericUpDown();
+            btnAgregarServicioIngreso = new Button();
             lblInformacionIngreso = new Label();
+            chkAutorizaIngreso = new CheckBox();
+            lblTotalServiciosIngreso = new Label();
+            btnQuitarServicioIngreso = new Button();
             btnConfirmarIngreso = new Button();
             tabSeguimiento = new TabPage();
             tlpSeguimiento = new TableLayoutPanel();
@@ -181,6 +195,7 @@
             btnAccionPrincipal = new Button();
             btnVerHistorial = new Button();
             btnCerrar = new Button();
+            ((System.ComponentModel.ISupportInitialize)dgvServiciosIngreso).BeginInit();
             tlpPrincipal.SuspendLayout();
             pnlEncabezado.SuspendLayout();
             tlpEncabezado.SuspendLayout();
@@ -200,6 +215,7 @@
             grpIngresoDiagnostico.SuspendLayout();
             tlpIngresoDiagnostico.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudImporteIngreso).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudCantidadIngreso).BeginInit();
             tabSeguimiento.SuspendLayout();
             tlpSeguimiento.SuspendLayout();
             grpEtapas.SuspendLayout();
@@ -241,6 +257,73 @@
             tlpAccionesGenerales.SuspendLayout();
             flpAccionesGenerales.SuspendLayout();
             SuspendLayout();
+            // 
+            // dgvServiciosIngreso
+            // 
+            dgvServiciosIngreso.AllowUserToAddRows = false;
+            dgvServiciosIngreso.AllowUserToResizeRows = false;
+            dgvServiciosIngreso.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dgvServiciosIngreso.BackgroundColor = Color.White;
+            dgvServiciosIngreso.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvServiciosIngreso.Columns.AddRange(new DataGridViewColumn[] { colServicioIngreso, colCantidadIngreso, colPrecioUnitarioIngreso, colSubtotalIngreso });
+            tlpIngresoDiagnostico.SetColumnSpan(dgvServiciosIngreso, 4);
+            dgvServiciosIngreso.Dock = DockStyle.Fill;
+            dgvServiciosIngreso.Location = new Point(3, 65);
+            dgvServiciosIngreso.MultiSelect = false;
+            dgvServiciosIngreso.Name = "dgvServiciosIngreso";
+            dgvServiciosIngreso.ReadOnly = true;
+            dgvServiciosIngreso.RowHeadersVisible = false;
+            dgvServiciosIngreso.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvServiciosIngreso.Size = new Size(961, 82);
+            dgvServiciosIngreso.TabIndex = 10;
+            dgvServiciosIngreso.SelectionChanged += DgvServiciosIngreso_SelectionChanged;
+            // 
+            // colServicioIngreso
+            // 
+            colServicioIngreso.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            colServicioIngreso.DataPropertyName = "Nombre";
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            colServicioIngreso.DefaultCellStyle = dataGridViewCellStyle1;
+            colServicioIngreso.HeaderText = "Servicio";
+            colServicioIngreso.MinimumWidth = 240;
+            colServicioIngreso.Name = "colServicioIngreso";
+            colServicioIngreso.ReadOnly = true;
+            // 
+            // colCantidadIngreso
+            // 
+            colCantidadIngreso.DataPropertyName = "Cantidad";
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle2.Format = "Format = 0.###";
+            colCantidadIngreso.DefaultCellStyle = dataGridViewCellStyle2;
+            colCantidadIngreso.HeaderText = "Cantidad";
+            colCantidadIngreso.MinimumWidth = 80;
+            colCantidadIngreso.Name = "colCantidadIngreso";
+            colCantidadIngreso.ReadOnly = true;
+            colCantidadIngreso.Width = 90;
+            // 
+            // colPrecioUnitarioIngreso
+            // 
+            colPrecioUnitarioIngreso.DataPropertyName = "PrecioUnitario";
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle3.Format = "Format = N2";
+            colPrecioUnitarioIngreso.DefaultCellStyle = dataGridViewCellStyle3;
+            colPrecioUnitarioIngreso.HeaderText = "Precio unitario";
+            colPrecioUnitarioIngreso.MinimumWidth = 110;
+            colPrecioUnitarioIngreso.Name = "colPrecioUnitarioIngreso";
+            colPrecioUnitarioIngreso.ReadOnly = true;
+            colPrecioUnitarioIngreso.Width = 140;
+            // 
+            // colSubtotalIngreso
+            // 
+            colSubtotalIngreso.DataPropertyName = "Subtotal";
+            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle4.Format = "Format = N2";
+            colSubtotalIngreso.DefaultCellStyle = dataGridViewCellStyle4;
+            colSubtotalIngreso.HeaderText = "Subtotal";
+            colSubtotalIngreso.MinimumWidth = 110;
+            colSubtotalIngreso.Name = "colSubtotalIngreso";
+            colSubtotalIngreso.ReadOnly = true;
+            colSubtotalIngreso.Width = 140;
             // 
             // tlpPrincipal
             // 
@@ -654,21 +737,23 @@
             // 
             // tlpInformacion
             // 
+            tlpInformacion.AutoSize = true;
+            tlpInformacion.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tlpInformacion.ColumnCount = 2;
             tlpInformacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62F));
             tlpInformacion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38F));
             tlpInformacion.Controls.Add(grpMotivo, 0, 0);
             tlpInformacion.Controls.Add(grpDatosAtencion, 1, 0);
             tlpInformacion.Controls.Add(grpIngresoDiagnostico, 0, 1);
-            tlpInformacion.Dock = DockStyle.Fill;
+            tlpInformacion.Dock = DockStyle.Top;
             tlpInformacion.Location = new Point(14, 14);
             tlpInformacion.Margin = new Padding(0);
             tlpInformacion.MinimumSize = new Size(0, 300);
             tlpInformacion.Name = "tlpInformacion";
             tlpInformacion.RowCount = 2;
-            tlpInformacion.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpInformacion.RowStyles.Add(new RowStyle(SizeType.Absolute, 190F));
-            tlpInformacion.Size = new Size(1008, 300);
+            tlpInformacion.RowStyles.Add(new RowStyle(SizeType.Absolute, 110F));
+            tlpInformacion.RowStyles.Add(new RowStyle(SizeType.Absolute, 380F));
+            tlpInformacion.Size = new Size(991, 490);
             tlpInformacion.TabIndex = 0;
             // 
             // grpMotivo
@@ -681,7 +766,7 @@
             grpMotivo.Margin = new Padding(0, 0, 6, 6);
             grpMotivo.Name = "grpMotivo";
             grpMotivo.Padding = new Padding(12);
-            grpMotivo.Size = new Size(618, 104);
+            grpMotivo.Size = new Size(608, 104);
             grpMotivo.TabIndex = 0;
             grpMotivo.TabStop = false;
             grpMotivo.Text = "Motivo de consulta";
@@ -699,7 +784,7 @@
             txtMotivoConsulta.Name = "txtMotivoConsulta";
             txtMotivoConsulta.ReadOnly = true;
             txtMotivoConsulta.ScrollBars = ScrollBars.Vertical;
-            txtMotivoConsulta.Size = new Size(594, 64);
+            txtMotivoConsulta.Size = new Size(584, 64);
             txtMotivoConsulta.TabIndex = 0;
             txtMotivoConsulta.TabStop = false;
             txtMotivoConsulta.Text = "El vehículo presenta dificultades para arrancar, incluso con la batería recientemente reemplazada.";
@@ -710,11 +795,11 @@
             grpDatosAtencion.Dock = DockStyle.Fill;
             grpDatosAtencion.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             grpDatosAtencion.ForeColor = Color.FromArgb(15, 23, 42);
-            grpDatosAtencion.Location = new Point(630, 0);
+            grpDatosAtencion.Location = new Point(620, 0);
             grpDatosAtencion.Margin = new Padding(6, 0, 0, 6);
             grpDatosAtencion.Name = "grpDatosAtencion";
             grpDatosAtencion.Padding = new Padding(12);
-            grpDatosAtencion.Size = new Size(378, 104);
+            grpDatosAtencion.Size = new Size(371, 104);
             grpDatosAtencion.TabIndex = 1;
             grpDatosAtencion.TabStop = false;
             grpDatosAtencion.Text = "Datos de la atención";
@@ -734,12 +819,12 @@
             tlpDatosAtencion.Location = new Point(12, 28);
             tlpDatosAtencion.Margin = new Padding(0);
             tlpDatosAtencion.Name = "tlpDatosAtencion";
-            tlpDatosAtencion.RowCount = 4;
-            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlpDatosAtencion.Size = new Size(354, 64);
+            tlpDatosAtencion.RowCount = 3;
+            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tlpDatosAtencion.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpDatosAtencion.Size = new Size(347, 64);
             tlpDatosAtencion.TabIndex = 0;
             // 
             // lblNumeroTitulo
@@ -749,7 +834,7 @@
             lblNumeroTitulo.Location = new Point(0, 0);
             lblNumeroTitulo.Margin = new Padding(0);
             lblNumeroTitulo.Name = "lblNumeroTitulo";
-            lblNumeroTitulo.Size = new Size(148, 16);
+            lblNumeroTitulo.Size = new Size(145, 21);
             lblNumeroTitulo.TabIndex = 0;
             lblNumeroTitulo.Text = "Número:";
             lblNumeroTitulo.TextAlign = ContentAlignment.MiddleLeft;
@@ -759,10 +844,10 @@
             lblNumeroValor.AutoEllipsis = true;
             lblNumeroValor.Dock = DockStyle.Fill;
             lblNumeroValor.ForeColor = Color.FromArgb(30, 41, 59);
-            lblNumeroValor.Location = new Point(148, 0);
+            lblNumeroValor.Location = new Point(145, 0);
             lblNumeroValor.Margin = new Padding(0);
             lblNumeroValor.Name = "lblNumeroValor";
-            lblNumeroValor.Size = new Size(206, 16);
+            lblNumeroValor.Size = new Size(202, 21);
             lblNumeroValor.TabIndex = 1;
             lblNumeroValor.Text = "000001";
             lblNumeroValor.TextAlign = ContentAlignment.MiddleLeft;
@@ -771,10 +856,10 @@
             // 
             lblIngresoTitulo.Dock = DockStyle.Fill;
             lblIngresoTitulo.ForeColor = Color.FromArgb(100, 116, 139);
-            lblIngresoTitulo.Location = new Point(0, 16);
+            lblIngresoTitulo.Location = new Point(0, 21);
             lblIngresoTitulo.Margin = new Padding(0);
             lblIngresoTitulo.Name = "lblIngresoTitulo";
-            lblIngresoTitulo.Size = new Size(148, 16);
+            lblIngresoTitulo.Size = new Size(145, 21);
             lblIngresoTitulo.TabIndex = 2;
             lblIngresoTitulo.Text = "Ingreso:";
             lblIngresoTitulo.TextAlign = ContentAlignment.MiddleLeft;
@@ -784,10 +869,10 @@
             lblIngresoValor.AutoEllipsis = true;
             lblIngresoValor.Dock = DockStyle.Fill;
             lblIngresoValor.ForeColor = Color.FromArgb(30, 41, 59);
-            lblIngresoValor.Location = new Point(148, 16);
+            lblIngresoValor.Location = new Point(145, 21);
             lblIngresoValor.Margin = new Padding(0);
             lblIngresoValor.Name = "lblIngresoValor";
-            lblIngresoValor.Size = new Size(206, 16);
+            lblIngresoValor.Size = new Size(202, 21);
             lblIngresoValor.TabIndex = 3;
             lblIngresoValor.Text = "07/09/2026 16:07";
             lblIngresoValor.TextAlign = ContentAlignment.MiddleLeft;
@@ -796,10 +881,10 @@
             // 
             lblRecepcionTitulo.Dock = DockStyle.Fill;
             lblRecepcionTitulo.ForeColor = Color.FromArgb(100, 116, 139);
-            lblRecepcionTitulo.Location = new Point(0, 32);
+            lblRecepcionTitulo.Location = new Point(0, 42);
             lblRecepcionTitulo.Margin = new Padding(0);
             lblRecepcionTitulo.Name = "lblRecepcionTitulo";
-            lblRecepcionTitulo.Size = new Size(148, 16);
+            lblRecepcionTitulo.Size = new Size(145, 22);
             lblRecepcionTitulo.TabIndex = 4;
             lblRecepcionTitulo.Text = "Recepción:";
             lblRecepcionTitulo.TextAlign = ContentAlignment.MiddleLeft;
@@ -809,10 +894,10 @@
             lblRecepcionValor.AutoEllipsis = true;
             lblRecepcionValor.Dock = DockStyle.Fill;
             lblRecepcionValor.ForeColor = Color.FromArgb(30, 41, 59);
-            lblRecepcionValor.Location = new Point(148, 32);
+            lblRecepcionValor.Location = new Point(145, 42);
             lblRecepcionValor.Margin = new Padding(0);
             lblRecepcionValor.Name = "lblRecepcionValor";
-            lblRecepcionValor.Size = new Size(206, 16);
+            lblRecepcionValor.Size = new Size(202, 22);
             lblRecepcionValor.TabIndex = 5;
             lblRecepcionValor.Text = "Administrativo Recepción";
             lblRecepcionValor.TextAlign = ContentAlignment.MiddleLeft;
@@ -826,34 +911,49 @@
             grpIngresoDiagnostico.Margin = new Padding(0, 6, 0, 0);
             grpIngresoDiagnostico.Name = "grpIngresoDiagnostico";
             grpIngresoDiagnostico.Padding = new Padding(12);
-            grpIngresoDiagnostico.Size = new Size(1008, 184);
+            grpIngresoDiagnostico.Size = new Size(991, 374);
             grpIngresoDiagnostico.TabIndex = 2;
             grpIngresoDiagnostico.TabStop = false;
-            grpIngresoDiagnostico.Text = "Ingreso a diagnóstico";
+            grpIngresoDiagnostico.Text = "Servicios iniciales autorizados";
             // 
             // tlpIngresoDiagnostico
             // 
-            tlpIngresoDiagnostico.ColumnCount = 3;
+            tlpIngresoDiagnostico.ColumnCount = 4;
             tlpIngresoDiagnostico.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tlpIngresoDiagnostico.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160F));
-            tlpIngresoDiagnostico.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
+            tlpIngresoDiagnostico.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
+            tlpIngresoDiagnostico.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
+            tlpIngresoDiagnostico.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             tlpIngresoDiagnostico.Controls.Add(lblServicioIngreso, 0, 0);
-            tlpIngresoDiagnostico.Controls.Add(lblImporteIngreso, 1, 0);
             tlpIngresoDiagnostico.Controls.Add(cboServicioIngreso, 0, 1);
-            tlpIngresoDiagnostico.Controls.Add(nudImporteIngreso, 1, 1);
-            tlpIngresoDiagnostico.Controls.Add(chkAutorizaIngreso, 0, 2);
-            tlpIngresoDiagnostico.Controls.Add(lblInformacionIngreso, 0, 3);
-            tlpIngresoDiagnostico.Controls.Add(btnConfirmarIngreso, 2, 1);
+            tlpIngresoDiagnostico.Controls.Add(lblCantidadIngreso, 1, 0);
+            tlpIngresoDiagnostico.Controls.Add(lblImporteIngreso, 2, 0);
+            tlpIngresoDiagnostico.Controls.Add(nudImporteIngreso, 2, 1);
+            tlpIngresoDiagnostico.Controls.Add(nudCantidadIngreso, 1, 1);
+            tlpIngresoDiagnostico.Controls.Add(btnAgregarServicioIngreso, 3, 1);
+            tlpIngresoDiagnostico.Controls.Add(dgvServiciosIngreso, 0, 2);
+            tlpIngresoDiagnostico.Controls.Add(lblInformacionIngreso, 0, 5);
+            tlpIngresoDiagnostico.Controls.Add(chkAutorizaIngreso, 0, 4);
+            tlpIngresoDiagnostico.Controls.Add(lblTotalServiciosIngreso, 0, 3);
+            tlpIngresoDiagnostico.Controls.Add(btnQuitarServicioIngreso, 3, 3);
+            tlpIngresoDiagnostico.Controls.Add(btnConfirmarIngreso, 3, 8);
             tlpIngresoDiagnostico.Dock = DockStyle.Fill;
             tlpIngresoDiagnostico.Location = new Point(12, 28);
             tlpIngresoDiagnostico.Margin = new Padding(0);
             tlpIngresoDiagnostico.Name = "tlpIngresoDiagnostico";
-            tlpIngresoDiagnostico.RowCount = 4;
+            tlpIngresoDiagnostico.RowCount = 6;
             tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
             tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 38F));
-            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
             tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpIngresoDiagnostico.Size = new Size(984, 144);
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpIngresoDiagnostico.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlpIngresoDiagnostico.Size = new Size(967, 334);
             tlpIngresoDiagnostico.TabIndex = 0;
             // 
             // lblServicioIngreso
@@ -861,20 +961,10 @@
             lblServicioIngreso.Dock = DockStyle.Fill;
             lblServicioIngreso.Location = new Point(3, 0);
             lblServicioIngreso.Name = "lblServicioIngreso";
-            lblServicioIngreso.Size = new Size(598, 24);
+            lblServicioIngreso.Size = new Size(561, 24);
             lblServicioIngreso.TabIndex = 0;
-            lblServicioIngreso.Text = "Servicio inicial";
+            lblServicioIngreso.Text = "Servicio";
             lblServicioIngreso.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblImporteIngreso
-            // 
-            lblImporteIngreso.Dock = DockStyle.Fill;
-            lblImporteIngreso.Location = new Point(607, 0);
-            lblImporteIngreso.Name = "lblImporteIngreso";
-            lblImporteIngreso.Size = new Size(154, 24);
-            lblImporteIngreso.TabIndex = 1;
-            lblImporteIngreso.Text = "Importe autorizado ($)";
-            lblImporteIngreso.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // cboServicioIngreso
             // 
@@ -883,45 +973,113 @@
             cboServicioIngreso.FormattingEnabled = true;
             cboServicioIngreso.Location = new Point(3, 27);
             cboServicioIngreso.Name = "cboServicioIngreso";
-            cboServicioIngreso.Size = new Size(598, 23);
+            cboServicioIngreso.Size = new Size(561, 23);
             cboServicioIngreso.TabIndex = 2;
             cboServicioIngreso.SelectedIndexChanged += CboServicioIngreso_SelectedIndexChanged;
+            // 
+            // lblCantidadIngreso
+            // 
+            lblCantidadIngreso.AutoSize = true;
+            lblCantidadIngreso.Dock = DockStyle.Fill;
+            lblCantidadIngreso.Location = new Point(570, 0);
+            lblCantidadIngreso.Name = "lblCantidadIngreso";
+            lblCantidadIngreso.Size = new Size(94, 24);
+            lblCantidadIngreso.TabIndex = 7;
+            lblCantidadIngreso.Text = "Cantidad";
+            lblCantidadIngreso.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // lblImporteIngreso
+            // 
+            lblImporteIngreso.Dock = DockStyle.Fill;
+            lblImporteIngreso.Location = new Point(670, 0);
+            lblImporteIngreso.Name = "lblImporteIngreso";
+            lblImporteIngreso.Size = new Size(144, 24);
+            lblImporteIngreso.TabIndex = 1;
+            lblImporteIngreso.Text = "Precio unitario ($)";
+            lblImporteIngreso.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // nudImporteIngreso
             // 
             nudImporteIngreso.DecimalPlaces = 2;
             nudImporteIngreso.Dock = DockStyle.Fill;
-            nudImporteIngreso.Location = new Point(607, 27);
+            nudImporteIngreso.Location = new Point(670, 27);
             nudImporteIngreso.Maximum = new decimal(new int[] { -1486618625, 232830643, 0, 131072 });
             nudImporteIngreso.Name = "nudImporteIngreso";
-            nudImporteIngreso.Size = new Size(154, 23);
+            nudImporteIngreso.Size = new Size(144, 23);
             nudImporteIngreso.TabIndex = 3;
             nudImporteIngreso.TextAlign = HorizontalAlignment.Right;
             nudImporteIngreso.ThousandsSeparator = true;
             nudImporteIngreso.ValueChanged += NudImporteIngreso_ValueChanged;
             nudImporteIngreso.KeyPress += NudImporteIngreso_KeyPress;
             // 
-            // chkAutorizaIngreso
+            // nudCantidadIngreso
             // 
-            tlpIngresoDiagnostico.SetColumnSpan(chkAutorizaIngreso, 3);
-            chkAutorizaIngreso.Dock = DockStyle.Fill;
-            chkAutorizaIngreso.Location = new Point(3, 65);
-            chkAutorizaIngreso.Name = "chkAutorizaIngreso";
-            chkAutorizaIngreso.Size = new Size(978, 38);
-            chkAutorizaIngreso.TabIndex = 5;
-            chkAutorizaIngreso.Text = "El cliente fue informado y autorizó el servicio y su importe.";
-            chkAutorizaIngreso.UseVisualStyleBackColor = true;
-            chkAutorizaIngreso.CheckedChanged += ChkAutorizaIngreso_CheckedChanged;
+            nudCantidadIngreso.DecimalPlaces = 3;
+            nudCantidadIngreso.Dock = DockStyle.Fill;
+            nudCantidadIngreso.Location = new Point(570, 27);
+            nudCantidadIngreso.Maximum = new decimal(new int[] { 999999, 0, 0, 0 });
+            nudCantidadIngreso.Minimum = new decimal(new int[] { 1, 0, 0, 196608 });
+            nudCantidadIngreso.Name = "nudCantidadIngreso";
+            nudCantidadIngreso.Size = new Size(94, 23);
+            nudCantidadIngreso.TabIndex = 8;
+            nudCantidadIngreso.TextAlign = HorizontalAlignment.Right;
+            nudCantidadIngreso.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            nudCantidadIngreso.ValueChanged += NudImporteIngreso_ValueChanged;
+            // 
+            // btnAgregarServicioIngreso
+            // 
+            btnAgregarServicioIngreso.Dock = DockStyle.Fill;
+            btnAgregarServicioIngreso.Location = new Point(820, 27);
+            btnAgregarServicioIngreso.Name = "btnAgregarServicioIngreso";
+            btnAgregarServicioIngreso.Size = new Size(144, 32);
+            btnAgregarServicioIngreso.TabIndex = 9;
+            btnAgregarServicioIngreso.Text = "Agregar servicio";
+            btnAgregarServicioIngreso.UseVisualStyleBackColor = true;
+            btnAgregarServicioIngreso.Click += BtnAgregarServicioIngreso_Click;
             // 
             // lblInformacionIngreso
             // 
             tlpIngresoDiagnostico.SetColumnSpan(lblInformacionIngreso, 3);
-            lblInformacionIngreso.Dock = DockStyle.Fill;
-            lblInformacionIngreso.Location = new Point(3, 106);
+            lblInformacionIngreso.Location = new Point(3, 314);
             lblInformacionIngreso.Name = "lblInformacionIngreso";
-            lblInformacionIngreso.Size = new Size(978, 38);
+            lblInformacionIngreso.Size = new Size(811, 20);
             lblInformacionIngreso.TabIndex = 6;
-            lblInformacionIngreso.Text = "El cargo inicial se registra al confirmar el ingreso, aunque posteriormente se rechace la reparación.";
+            lblInformacionIngreso.Text = "Agregue los servicios y revise el total antes de registrar la autorización.";
+            // 
+            // chkAutorizaIngreso
+            // 
+            tlpIngresoDiagnostico.SetColumnSpan(chkAutorizaIngreso, 4);
+            chkAutorizaIngreso.Dock = DockStyle.Fill;
+            chkAutorizaIngreso.Location = new Point(3, 193);
+            chkAutorizaIngreso.Name = "chkAutorizaIngreso";
+            tlpIngresoDiagnostico.SetRowSpan(chkAutorizaIngreso, 4);
+            chkAutorizaIngreso.Size = new Size(961, 118);
+            chkAutorizaIngreso.TabIndex = 5;
+            chkAutorizaIngreso.Text = "El cliente fue informado y autorizó los servicios e importes detallados.";
+            chkAutorizaIngreso.UseVisualStyleBackColor = true;
+            chkAutorizaIngreso.CheckedChanged += ChkAutorizaIngreso_CheckedChanged;
+            // 
+            // lblTotalServiciosIngreso
+            // 
+            lblTotalServiciosIngreso.AutoSize = true;
+            tlpIngresoDiagnostico.SetColumnSpan(lblTotalServiciosIngreso, 3);
+            lblTotalServiciosIngreso.Dock = DockStyle.Fill;
+            lblTotalServiciosIngreso.Location = new Point(3, 150);
+            lblTotalServiciosIngreso.Name = "lblTotalServiciosIngreso";
+            lblTotalServiciosIngreso.Size = new Size(811, 40);
+            lblTotalServiciosIngreso.TabIndex = 11;
+            lblTotalServiciosIngreso.Text = "Total autorizado: $ 0,00";
+            // 
+            // btnQuitarServicioIngreso
+            // 
+            btnQuitarServicioIngreso.Dock = DockStyle.Fill;
+            btnQuitarServicioIngreso.Location = new Point(820, 153);
+            btnQuitarServicioIngreso.Name = "btnQuitarServicioIngreso";
+            btnQuitarServicioIngreso.Size = new Size(144, 34);
+            btnQuitarServicioIngreso.TabIndex = 12;
+            btnQuitarServicioIngreso.Text = "Quitar seleccionado";
+            btnQuitarServicioIngreso.UseVisualStyleBackColor = true;
+            btnQuitarServicioIngreso.Click += BtnQuitarServicioIngreso_Click;
             // 
             // btnConfirmarIngreso
             // 
@@ -933,11 +1091,11 @@
             btnConfirmarIngreso.FlatStyle = FlatStyle.Flat;
             btnConfirmarIngreso.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnConfirmarIngreso.ForeColor = Color.White;
-            btnConfirmarIngreso.Location = new Point(767, 27);
+            btnConfirmarIngreso.Location = new Point(820, 317);
             btnConfirmarIngreso.Name = "btnConfirmarIngreso";
-            btnConfirmarIngreso.Size = new Size(214, 32);
+            btnConfirmarIngreso.Size = new Size(144, 14);
             btnConfirmarIngreso.TabIndex = 4;
-            btnConfirmarIngreso.Text = "Confirmar ingreso a diagnóstico";
+            btnConfirmarIngreso.Text = "Confirmar ingreso";
             btnConfirmarIngreso.UseVisualStyleBackColor = false;
             btnConfirmarIngreso.Click += BtnConfirmarIngreso_Click;
             // 
@@ -1685,8 +1843,8 @@
             // colCantidadPresupuesto
             // 
             colCantidadPresupuesto.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            colCantidadPresupuesto.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            colCantidadPresupuesto.DefaultCellStyle = dataGridViewCellStyle5;
             colCantidadPresupuesto.HeaderText = "Cantidad";
             colCantidadPresupuesto.Name = "colCantidadPresupuesto";
             colCantidadPresupuesto.ReadOnly = true;
@@ -1696,8 +1854,8 @@
             // colPrecioUnitarioPresupuesto
             // 
             colPrecioUnitarioPresupuesto.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colPrecioUnitarioPresupuesto.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colPrecioUnitarioPresupuesto.DefaultCellStyle = dataGridViewCellStyle6;
             colPrecioUnitarioPresupuesto.HeaderText = "Precio unitario";
             colPrecioUnitarioPresupuesto.Name = "colPrecioUnitarioPresupuesto";
             colPrecioUnitarioPresupuesto.ReadOnly = true;
@@ -1707,8 +1865,8 @@
             // colSubtotalPresupuesto
             // 
             colSubtotalPresupuesto.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colSubtotalPresupuesto.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colSubtotalPresupuesto.DefaultCellStyle = dataGridViewCellStyle7;
             colSubtotalPresupuesto.HeaderText = "Subtotal";
             colSubtotalPresupuesto.Name = "colSubtotalPresupuesto";
             colSubtotalPresupuesto.ReadOnly = true;
@@ -2121,8 +2279,8 @@
             // colImportePago
             // 
             colImportePago.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colImportePago.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle8.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colImportePago.DefaultCellStyle = dataGridViewCellStyle8;
             colImportePago.HeaderText = "Importe";
             colImportePago.Name = "colImportePago";
             colImportePago.ReadOnly = true;
@@ -2310,6 +2468,7 @@
             Text = "Detalle de atención";
             FormClosing += FrmDetalleAtencion_FormClosing;
             Load += FrmDetalleAtencion_Load;
+            ((System.ComponentModel.ISupportInitialize)dgvServiciosIngreso).EndInit();
             tlpPrincipal.ResumeLayout(false);
             pnlEncabezado.ResumeLayout(false);
             tlpEncabezado.ResumeLayout(false);
@@ -2322,6 +2481,7 @@
             tableLayoutPanel1.ResumeLayout(false);
             tabDetalle.ResumeLayout(false);
             tabInformacion.ResumeLayout(false);
+            tabInformacion.PerformLayout();
             tlpInformacion.ResumeLayout(false);
             grpMotivo.ResumeLayout(false);
             grpMotivo.PerformLayout();
@@ -2329,7 +2489,9 @@
             tlpDatosAtencion.ResumeLayout(false);
             grpIngresoDiagnostico.ResumeLayout(false);
             tlpIngresoDiagnostico.ResumeLayout(false);
+            tlpIngresoDiagnostico.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nudImporteIngreso).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudCantidadIngreso).EndInit();
             tabSeguimiento.ResumeLayout(false);
             tlpSeguimiento.ResumeLayout(false);
             grpEtapas.ResumeLayout(false);
@@ -2402,12 +2564,15 @@
         private Label lblFechaIngreso;
         private Label lblUsuarioRecepcion;
         private Label lblTipoIngreso;
+        private Panel pnlAcciones;
+        private TableLayoutPanel tlpAccionesGenerales;
+        private Label lblInformacionRol;
+        private FlowLayoutPanel flpAccionesGenerales;
+        private Button btnAccionPrincipal;
+        private Button btnVerHistorial;
+        private Button btnCerrar;
         private TabControl tabDetalle;
         private TabPage tabInformacion;
-        private TabPage tabSeguimiento;
-        private TabPage tabDiagnostico;
-        private TabPage tabPresupuesto;
-        private TabPage tabEntrega;
         private TableLayoutPanel tlpInformacion;
         private GroupBox grpMotivo;
         private TextBox txtMotivoConsulta;
@@ -2419,18 +2584,37 @@
         private Label lblIngresoValor;
         private Label lblRecepcionTitulo;
         private Label lblRecepcionValor;
+        private GroupBox grpIngresoDiagnostico;
+        private TableLayoutPanel tlpIngresoDiagnostico;
+        private Label lblServicioIngreso;
+        private ComboBox cboServicioIngreso;
+        private Label lblCantidadIngreso;
+        private Label lblImporteIngreso;
+        private NumericUpDown nudImporteIngreso;
+        private NumericUpDown nudCantidadIngreso;
+        private Button btnAgregarServicioIngreso;
+        private DataGridViewTextBoxColumn colServicioIngreso;
+        private DataGridViewTextBoxColumn colCantidadIngreso;
+        private DataGridViewTextBoxColumn colPrecioUnitarioIngreso;
+        private DataGridViewTextBoxColumn colSubtotalIngreso;
+        private Label lblInformacionIngreso;
+        private CheckBox chkAutorizaIngreso;
+        private Label lblTotalServiciosIngreso;
+        private Button btnQuitarServicioIngreso;
+        private Button btnConfirmarIngreso;
+        private TabPage tabSeguimiento;
         private TableLayoutPanel tlpSeguimiento;
         private GroupBox grpEtapas;
         private TableLayoutPanel tlpEtapas;
         private Panel pnlEtapaIngreso;
-        private Panel pnlEtapaDiagnostico;
-        private Panel pnlEtapaPresupuesto;
-        private Panel pnlEtapaTrabajo;
-        private Panel pnlEtapaEntrega;
         private Label lblEtapaIngreso;
+        private Panel pnlEtapaDiagnostico;
         private Label lblEtapaDiagnostico;
+        private Panel pnlEtapaPresupuesto;
         private Label lblEtapaPresupuesto;
+        private Panel pnlEtapaTrabajo;
         private Label lblEtapaTrabajo;
+        private Panel pnlEtapaEntrega;
         private Label lblEtapaEntrega;
         private GroupBox grpHistorialSeguimiento;
         private DataGridView dgvSeguimiento;
@@ -2438,6 +2622,7 @@
         private DataGridViewTextBoxColumn colEtapaMovimiento;
         private DataGridViewTextBoxColumn colDescripcionMovimiento;
         private DataGridViewTextBoxColumn colResponsableMovimiento;
+        private TabPage tabDiagnostico;
         private TableLayoutPanel tlpDiagnostico;
         private Panel pnlResumenDiagnostico;
         private TableLayoutPanel tlpResumenDiagnostico;
@@ -2456,6 +2641,7 @@
         private FlowLayoutPanel flpAccionesDiagnostico;
         private Button btnRegistrarDiagnostico;
         private Button btnVerHistorialDesdeDiagnostico;
+        private TabPage tabPresupuesto;
         private TableLayoutPanel tlpPresupuesto;
         private Panel pnlResumenPresupuesto;
         private TableLayoutPanel tlpResumenPresupuesto;
@@ -2479,6 +2665,7 @@
         private FlowLayoutPanel flpAccionesPresupuesto;
         private Button btnAbrirPresupuesto;
         private Button btnRegistrarDecision;
+        private TabPage tabEntrega;
         private TableLayoutPanel tlpEntrega;
         private TableLayoutPanel tlpResumenEntrega;
         private GroupBox grpComprobante;
@@ -2509,21 +2696,6 @@
         private FlowLayoutPanel flpAccionesEntrega;
         private Button btnRegistrarEntrega;
         private Button btnGestionarComprobante;
-        private Panel pnlAcciones;
-        private TableLayoutPanel tlpAccionesGenerales;
-        private Label lblInformacionRol;
-        private FlowLayoutPanel flpAccionesGenerales;
-        private Button btnAccionPrincipal;
-        private Button btnVerHistorial;
-        private Button btnCerrar;
-        private GroupBox grpIngresoDiagnostico;
-        private TableLayoutPanel tlpIngresoDiagnostico;
-        private Label lblServicioIngreso;
-        private Label lblImporteIngreso;
-        private ComboBox cboServicioIngreso;
-        private NumericUpDown nudImporteIngreso;
-        private Button btnConfirmarIngreso;
-        private CheckBox chkAutorizaIngreso;
-        private Label lblInformacionIngreso;
+        private DataGridView dgvServiciosIngreso;
     }
 }

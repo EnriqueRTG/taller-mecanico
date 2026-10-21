@@ -5,6 +5,7 @@ using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
+using Taller.Aplicacion.DTOs.Atenciones;
 
 namespace Taller.Aplicacion.Servicios;
 
@@ -108,6 +109,30 @@ public sealed class AtencionServicio
         var concepto = await ObtenerConceptoIngresoAsync();
 
         return new List<Concepto> { concepto };
+    }
+
+    /// <summary>
+    /// Lista los servicios disponibles para preparar
+    /// el ingreso autorizado por el cliente.
+    /// </summary>
+    public async Task<List<ServicioIngresoDto>>
+        ListarServiciosDisponiblesParaIngresoAsync()
+    {
+        await ObtenerAdministrativoActualAsync();
+
+        var conceptos = await _conceptoRepositorio
+            .ListarServiciosDisponiblesParaIngresoAsync();
+
+        return conceptos
+            .Select(concepto => new ServicioIngresoDto
+            {
+                IdConcepto = concepto.IdConcepto,
+                Nombre = concepto.Nombre,
+                Descripcion = concepto.Descripcion,
+                Categoria = concepto.Categoria.Nombre,
+                PrecioReferencia = concepto.PrecioReferencia
+            })
+            .ToList();
     }
 
     /// <summary>
@@ -377,6 +402,225 @@ public sealed class AtencionServicio
             EstadoNuevo = atencion.Estado,
             Observaciones =
                 "Recepción confirmó el ingreso y registró la autorización del cargo inicial."
+        };
+
+        await _atencionRepositorio.EnviarADiagnosticoAsync(
+            atencion,
+            presupuesto,
+            historial);
+    }
+
+    /// <summary>
+    /// Confirma el ingreso al circuito técnico con los servicios
+    /// iniciales autorizados por el cliente.
+    /// </summary>
+    /// <remarks>
+    /// La autorización no representa ejecución ni pago.
+    /// La atención, el presupuesto y el historial se guardan juntos.
+    /// </remarks>
+    public async Task ConfirmarIngresoAsync(
+        ConfirmarIngresoDto datos)
+    {
+        ArgumentNullException.ThrowIfNull(datos);
+
+        var administrativo = await ObtenerAdministrativoActualAsync();
+
+        if (datos.IdAtencion <= 0)
+        {
+            throw new ValidacionException(
+                "Debe seleccionar una atención válida.",
+                nameof(datos.IdAtencion));
+        }
+
+        if (!datos.ClienteAutoriza)
+        {
+            throw new ValidacionException(
+                "Debe registrar la autorización del cliente " +
+                "para los servicios e importes seleccionados.",
+                nameof(datos.ClienteAutoriza));
+        }
+
+        if (datos.Servicios is null || datos.Servicios.Count == 0)
+        {
+            throw new ValidacionException(
+                "Debe agregar al menos un servicio de ingreso.",
+                nameof(datos.Servicios));
+        }
+
+        // Conserva el conjunto recibido antes de consultar la base.
+        var servicios = datos.Servicios.ToArray();
+
+        if (servicios.Any(servicio => servicio is null))
+        {
+            throw new ValidacionException(
+                "La selección contiene un servicio inválido.",
+                nameof(datos.Servicios));
+        }
+
+        if (servicios.Any(servicio => servicio.IdConcepto <= 0))
+        {
+            throw new ValidacionException(
+                "Todos los servicios deben tener un identificador válido.",
+                nameof(datos.Servicios));
+        }
+
+        if (servicios
+            .GroupBy(servicio => servicio.IdConcepto)
+            .Any(grupo => grupo.Count() > 1))
+        {
+            throw new ValidacionException(
+                "No puede agregar el mismo servicio más de una vez. " +
+                "Modifique su cantidad si corresponde.",
+                nameof(datos.Servicios));
+        }
+
+        var atencion = await ObtenerAtencionRequeridaAsync(
+            datos.IdAtencion);
+
+        if (atencion.Estado != EstadoAtencion.Abierta
+            || atencion.FechaCierre is not null)
+        {
+            throw new ValidacionException(
+                "Solo una atención abierta puede confirmar su ingreso.");
+        }
+
+        if (atencion.IdTecnicoEnActividad is not null
+            || atencion.ActividadTecnica is not null)
+        {
+            throw new ValidacionException(
+                "La atención tiene una actividad técnica reservada.");
+        }
+
+        await ValidarClienteAsync(atencion.IdCliente);
+        await ValidarVehiculoAsync(atencion.IdVehiculo);
+
+        // Consulta nuevamente la disponibilidad.
+        // No confía únicamente en lo mostrado por el formulario.
+        var conceptosDisponibles = await _conceptoRepositorio
+            .ListarServiciosDisponiblesParaIngresoAsync();
+
+        var conceptosPorId = conceptosDisponibles.ToDictionary(
+            concepto => concepto.IdConcepto);
+
+        const decimal cantidadMaxima = 999999999999999.999m;
+        const decimal importeMaximo = 9999999999999999.99m;
+
+        var detalles = new List<PresupuestoDetalle>();
+        decimal total = 0m;
+
+        foreach (var servicio in servicios)
+        {
+            if (!conceptosPorId.TryGetValue(
+                    servicio.IdConcepto,
+                    out var concepto))
+            {
+                throw new ValidacionException(
+                    "Uno de los servicios seleccionados ya no está " +
+                    "disponible para ingreso. Actualice el catálogo.",
+                    nameof(datos.Servicios));
+            }
+
+            if (servicio.Cantidad <= 0m
+                || servicio.Cantidad > cantidadMaxima
+                || decimal.Round(servicio.Cantidad, 3) != servicio.Cantidad)
+            {
+                throw new ValidacionException(
+                    $"La cantidad de «{concepto.Nombre}» debe ser positiva, " +
+                    "tener como máximo tres decimales y estar " +
+                    "dentro del rango permitido.",
+                    nameof(datos.Servicios));
+            }
+
+            if (servicio.PrecioUnitario < 0m
+                || servicio.PrecioUnitario > importeMaximo
+                || decimal.Round(servicio.PrecioUnitario, 2)
+                    != servicio.PrecioUnitario)
+            {
+                throw new ValidacionException(
+                    $"El precio de «{concepto.Nombre}» no puede ser negativo " +
+                    "y debe tener como máximo dos decimales.",
+                    nameof(datos.Servicios));
+            }
+
+            // Comprueba el límite antes de multiplicar.
+            if (servicio.PrecioUnitario
+                > importeMaximo / servicio.Cantidad)
+            {
+                throw new ValidacionException(
+                    $"El subtotal de «{concepto.Nombre}» supera " +
+                    "el importe permitido.",
+                    nameof(datos.Servicios));
+            }
+
+            decimal subtotal = decimal.Round(
+                servicio.Cantidad * servicio.PrecioUnitario,
+                2,
+                MidpointRounding.AwayFromZero);
+
+            if (subtotal > importeMaximo - total)
+            {
+                throw new ValidacionException(
+                    "El total de los servicios supera el importe permitido.",
+                    nameof(datos.Servicios));
+            }
+
+            total += subtotal;
+
+            string descripcion = concepto.Nombre.Trim();
+
+            if (string.IsNullOrWhiteSpace(descripcion)
+                || descripcion.Length > 500)
+            {
+                throw new ValidacionException(
+                    "Uno de los servicios no tiene una descripción " +
+                    "válida para registrarse.",
+                    nameof(datos.Servicios));
+            }
+
+            detalles.Add(new PresupuestoDetalle
+            {
+                IdConcepto = concepto.IdConcepto,
+                Descripcion = descripcion,
+                Cantidad = servicio.Cantidad,
+                PrecioUnitario = servicio.PrecioUnitario,
+                EstadoEjecucion = EstadoEjecucionDetalle.NoIniciado,
+                CantidadEjecutada = 0m
+            });
+        }
+
+        var fecha = DateTime.Now;
+
+        var presupuesto = new Presupuesto
+        {
+            Tipo = TipoPresupuesto.Diagnostico,
+            IdAtencion = atencion.IdAtencion,
+            IdDiagnostico = null,
+            IdUsuarioCreacion = administrativo.Id,
+            FechaCreacion = fecha,
+            Estado = EstadoPresupuesto.Aceptado,
+            FechaPresentacion = fecha,
+            IdUsuarioDecision = administrativo.Id,
+            FechaDecision = fecha,
+            Observaciones =
+                "Recepción registró la autorización del cliente para " +
+                "los servicios iniciales y sus condiciones económicas.",
+            Detalles = detalles
+        };
+
+        var estadoAnterior = atencion.Estado;
+        atencion.Estado = EstadoAtencion.PendienteDiagnostico;
+
+        var historial = new HistorialAtencion
+        {
+            IdAtencion = atencion.IdAtencion,
+            IdUsuario = administrativo.Id,
+            Fecha = fecha,
+            Accion = "AtencionEnviadaADiagnostico",
+            EstadoAnterior = estadoAnterior,
+            EstadoNuevo = atencion.Estado,
+            Observaciones =
+                $"Se confirmó el ingreso con {detalles.Count} " +
+                "servicio(s) autorizado(s), pendientes de ejecución."
         };
 
         await _atencionRepositorio.EnviarADiagnosticoAsync(

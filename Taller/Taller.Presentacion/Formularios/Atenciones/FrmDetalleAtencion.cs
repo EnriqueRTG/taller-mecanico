@@ -6,6 +6,8 @@ using Taller.Presentacion.Formularios.Comprobantes;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
+using Taller.Aplicacion.DTOs.Atenciones;
+using Taller.Aplicacion.Excepciones;
 
 namespace Taller.Presentacion.Formularios.Atenciones;
 
@@ -46,6 +48,8 @@ public partial class FrmDetalleAtencion : Form
 
     private readonly AtencionServicio _atencionServicio;
 
+    private readonly List<ServicioIngresoFila> _serviciosIngreso = [];
+
     private Atencion? _atencionActual;
 
     private bool _cargandoServiciosIngreso;
@@ -77,6 +81,26 @@ public partial class FrmDetalleAtencion : Form
         _idAtencion = idAtencion;
         _atencionServicio = atencionServicio;
         _rolId = usuario.RolId;
+    }
+
+    /// <summary>
+    /// Representa un servicio preparado para mostrarse en la grilla.
+    /// No es una entidad persistida.
+    /// </summary>
+    private sealed class ServicioIngresoFila
+    {
+        public int IdConcepto { get; init; }
+
+        public string Nombre { get; init; } = string.Empty;
+
+        public decimal Cantidad { get; init; }
+
+        public decimal PrecioUnitario { get; init; }
+
+        public decimal Subtotal => decimal.Round(
+            Cantidad * PrecioUnitario,
+            2,
+            MidpointRounding.AwayFromZero);
     }
 
     private async void FrmDetalleAtencion_Load(
@@ -263,39 +287,48 @@ public partial class FrmDetalleAtencion : Form
     /// </summary>
     private async Task CargarServiciosIngresoAsync()
     {
-        if (_rolId != RolesSistema.AdministrativoId ||
-            _atencionActual?.Estado != EstadoAtencion.Abierta)
+        if (_rolId != RolesSistema.AdministrativoId
+            || _atencionActual?.Estado != EstadoAtencion.Abierta)
         {
             ActualizarControlesIngreso();
             return;
         }
 
         _cargandoServiciosIngreso = true;
+        ActualizarControlesIngreso();
 
         try
         {
-            var servicios =
-                await _atencionServicio.ListarServiciosParaIngresoAsync();
+            var servicios = await _atencionServicio
+                .ListarServiciosDisponiblesParaIngresoAsync();
 
-            cboServicioIngreso.DisplayMember = nameof(Concepto.Nombre);
-            cboServicioIngreso.ValueMember = nameof(Concepto.IdConcepto);
+            cboServicioIngreso.DisplayMember =
+                nameof(ServicioIngresoDto.Nombre);
+
+            cboServicioIngreso.ValueMember =
+                nameof(ServicioIngresoDto.IdConcepto);
+
             cboServicioIngreso.DataSource = servicios;
             cboServicioIngreso.SelectedIndex = -1;
 
+            nudCantidadIngreso.Value = 1m;
             nudImporteIngreso.Value = 0m;
             chkAutorizaIngreso.Checked = false;
 
-            if (servicios.Count == 0)
-            {
-                lblInformacionIngreso.Text =
-                    "No hay servicios activos disponibles. Debe cargarse " +
-                    "el servicio inicial de ingreso e inspección.";
-            }
+            lblInformacionIngreso.Text = servicios.Count == 0
+                ? "No hay servicios habilitados para ingreso."
+                : "Agregue los servicios y revise el total antes de autorizar.";
+
+            ActualizarGrillaServiciosIngreso();
         }
         finally
         {
             _cargandoServiciosIngreso = false;
-            ActualizarControlesIngreso();
+
+            if (!IsDisposed)
+            {
+                ActualizarControlesIngreso();
+            }
         }
     }
 
@@ -311,31 +344,36 @@ public partial class FrmDetalleAtencion : Form
             return;
         }
 
-        var concepto = cboServicioIngreso.SelectedItem as Concepto;
-
-        decimal importe = concepto?.PrecioReferencia ?? 0m;
-
-        nudImporteIngreso.Value = Math.Clamp(
-            importe,
-            nudImporteIngreso.Minimum,
-            nudImporteIngreso.Maximum);
-
         chkAutorizaIngreso.Checked = false;
+        nudCantidadIngreso.Value = 1m;
+
+        var servicio = cboServicioIngreso.SelectedItem as ServicioIngresoDto;
+
+        decimal? referencia = servicio?.PrecioReferencia;
+
+        bool referenciaUtilizable = referencia.HasValue
+            && referencia.Value >= nudImporteIngreso.Minimum
+            && referencia.Value <= nudImporteIngreso.Maximum;
+
+        nudImporteIngreso.Value = referenciaUtilizable
+            ? referencia!.Value
+            : 0m;
+
+        lblInformacionIngreso.Text = servicio is null
+            ? "Seleccione un servicio."
+            : referenciaUtilizable
+                ? "El precio sugerido puede modificarse antes de agregar."
+                : "Indique el precio unitario. El cero requiere confirmar que es sin cargo.";
 
         ActualizarControlesIngreso();
 
         if (nudImporteIngreso.Enabled)
         {
             nudImporteIngreso.Focus();
-            nudImporteIngreso.Select(
-                0,
-                nudImporteIngreso.Text.Length);
+            nudImporteIngreso.Select(0, nudImporteIngreso.Text.Length);
         }
     }
 
-    /// <summary>
-    /// Un cambio de importe exige confirmar nuevamente la autorización.
-    /// </summary>
     private void NudImporteIngreso_ValueChanged(
         object? sender,
         EventArgs e)
@@ -345,14 +383,16 @@ public partial class FrmDetalleAtencion : Form
             return;
         }
 
+        chkAutorizaIngreso.Checked = false;
         ActualizarControlesIngreso();
     }
 
     private void NudImporteIngreso_KeyPress(
-    object? sender,
-    KeyPressEventArgs e)
+        object? sender,
+        KeyPressEventArgs e)
     {
-        if (!char.IsControl(e.KeyChar) || e.KeyChar == '\b')
+        if (!_cargandoServiciosIngreso
+            && (!char.IsControl(e.KeyChar) || e.KeyChar == '\b'))
         {
             chkAutorizaIngreso.Checked = false;
         }
@@ -371,33 +411,46 @@ public partial class FrmDetalleAtencion : Form
     private void ActualizarControlesIngreso()
     {
         bool puedeIngresar =
-            !_guardandoIngreso &&
-            !_cargandoServiciosIngreso &&
-            _rolId == RolesSistema.AdministrativoId &&
-            _atencionActual?.Estado == EstadoAtencion.Abierta &&
-            _atencionActual.IdTecnicoEnActividad is null &&
-            _atencionActual.ActividadTecnica is null;
+            !_guardandoIngreso
+            && !_cargandoServiciosIngreso
+            && _rolId == RolesSistema.AdministrativoId
+            && _atencionActual is
+            {
+                Estado: EstadoAtencion.Abierta,
+                FechaCierre: null,
+                IdTecnicoEnActividad: null,
+                ActividadTecnica: null
+            };
 
-        bool hayServicios = cboServicioIngreso.Items.Count > 0;
+        bool seleccionado =
+            cboServicioIngreso.SelectedItem is ServicioIngresoDto;
 
-        bool servicioSeleccionado =
-            cboServicioIngreso.SelectedItem is Concepto;
+        bool hayRenglones = _serviciosIngreso.Count > 0;
 
-        bool importeValido = nudImporteIngreso.Value > 0m;
+        cboServicioIngreso.Enabled =
+            puedeIngresar && cboServicioIngreso.Items.Count > 0;
 
-        cboServicioIngreso.Enabled = puedeIngresar && hayServicios;
+        nudCantidadIngreso.Enabled = puedeIngresar && seleccionado;
+        nudImporteIngreso.Enabled = puedeIngresar && seleccionado;
 
-        nudImporteIngreso.Enabled =
-            puedeIngresar && servicioSeleccionado;
+        btnAgregarServicioIngreso.Enabled =
+            puedeIngresar && seleccionado;
 
-        chkAutorizaIngreso.Enabled =
-            puedeIngresar && servicioSeleccionado;
+        dgvServiciosIngreso.Enabled = puedeIngresar;
+
+        btnQuitarServicioIngreso.Enabled =
+            puedeIngresar
+            && dgvServiciosIngreso.CurrentRow?.DataBoundItem
+                is ServicioIngresoFila;
+
+        chkAutorizaIngreso.Enabled = puedeIngresar && hayRenglones;
 
         btnConfirmarIngreso.Enabled =
-            puedeIngresar &&
-            servicioSeleccionado &&
-            importeValido &&
-            chkAutorizaIngreso.Checked;
+            puedeIngresar
+            && hayRenglones
+            && chkAutorizaIngreso.Checked;
+
+        btnCerrar.Enabled = !_guardandoIngreso;
     }
 
     private static string ObtenerNombreEstado(
@@ -869,6 +922,260 @@ public partial class FrmDetalleAtencion : Form
 
         formulario.ShowDialog(this);
     }
+
+    private void BtnAgregarServicioIngreso_Click(
+       object? sender,
+       EventArgs e)
+    {
+        ActualizarControlesIngreso();
+
+        if (!btnAgregarServicioIngreso.Enabled || !ValidateChildren())
+        {
+            return;
+        }
+
+        if (cboServicioIngreso.SelectedItem is not ServicioIngresoDto servicio)
+        {
+            return;
+        }
+
+        if (_serviciosIngreso.Any(
+                fila => fila.IdConcepto == servicio.IdConcepto))
+        {
+            MessageBox.Show(
+                this,
+                "Ese servicio ya está agregado. Para cambiar sus condiciones, " +
+                "quítelo y agréguelo nuevamente.",
+                "Servicios de ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        decimal cantidad = nudCantidadIngreso.Value;
+        decimal precio = nudImporteIngreso.Value;
+
+        const decimal importeMaximo = 9999999999999999.99m;
+
+        if (cantidad <= 0m
+            || precio < 0m
+            || precio > importeMaximo / cantidad)
+        {
+            MessageBox.Show(
+                this,
+                "Revise la cantidad y el precio del servicio.",
+                "Servicios de ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        var filaNueva = new ServicioIngresoFila
+        {
+            IdConcepto = servicio.IdConcepto,
+            Nombre = servicio.Nombre,
+            Cantidad = cantidad,
+            PrecioUnitario = precio
+        };
+
+        decimal totalActual = _serviciosIngreso.Sum(fila => fila.Subtotal);
+
+        if (filaNueva.Subtotal > importeMaximo - totalActual)
+        {
+            MessageBox.Show(
+                this,
+                "El total supera el importe permitido.",
+                "Servicios de ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+
+            return;
+        }
+
+        if (precio == 0m)
+        {
+            var respuesta = MessageBox.Show(
+                this,
+                $"¿Confirma que «{servicio.Nombre}» se ofrece sin cargo?",
+                "Servicio sin cargo",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+
+            if (respuesta != DialogResult.Yes)
+            {
+                nudImporteIngreso.Focus();
+                return;
+            }
+        }
+
+        _serviciosIngreso.Add(filaNueva);
+
+        chkAutorizaIngreso.Checked = false;
+        cboServicioIngreso.SelectedIndex = -1;
+
+        ActualizarGrillaServiciosIngreso();
+
+        lblInformacionIngreso.Text =
+            "Servicio agregado. Revise los renglones y el total.";
+
+        cboServicioIngreso.Focus();
+    }
+
+    private void BtnQuitarServicioIngreso_Click(
+        object? sender,
+        EventArgs e)
+    {
+        ActualizarControlesIngreso();
+
+        if (!btnQuitarServicioIngreso.Enabled)
+        {
+            return;
+        }
+
+        if (dgvServiciosIngreso.CurrentRow?.DataBoundItem
+            is not ServicioIngresoFila fila)
+        {
+            return;
+        }
+
+        _serviciosIngreso.Remove(fila);
+        chkAutorizaIngreso.Checked = false;
+
+        ActualizarGrillaServiciosIngreso();
+    }
+
+    /// <summary>
+    /// Registra el ingreso autorizado y su cargo inicial.
+    /// </summary>
+    private async void BtnConfirmarIngreso_Click(
+        object? sender,
+        EventArgs e)
+    {
+        if (_guardandoIngreso)
+        {
+            return;
+        }
+
+        ActualizarControlesIngreso();
+
+        if (!btnConfirmarIngreso.Enabled)
+        {
+            return;
+        }
+
+        var datos = new ConfirmarIngresoDto
+        {
+            IdAtencion = _idAtencion,
+            ClienteAutoriza = chkAutorizaIngreso.Checked,
+            Servicios = _serviciosIngreso
+                .Select(fila => new ServicioIngresoSeleccionadoDto
+                {
+                    IdConcepto = fila.IdConcepto,
+                    Cantidad = fila.Cantidad,
+                    PrecioUnitario = fila.PrecioUnitario
+                })
+                .ToList()
+        };
+
+        bool ingresoRegistrado = false;
+        bool cerrarDetalle = false;
+
+        try
+        {
+            _guardandoIngreso = true;
+            ActualizarControlesIngreso();
+            Cursor = Cursors.WaitCursor;
+
+            await _atencionServicio.ConfirmarIngresoAsync(datos);
+
+            ingresoRegistrado = true;
+
+            await CargarAtencionAsync();
+
+            chkAutorizaIngreso.Checked = false;
+
+            lblInformacionIngreso.Text =
+                "Servicios autorizados, pendientes de ejecución.";
+
+            MessageBox.Show(
+                this,
+                "El ingreso y los servicios autorizados fueron registrados.\n\n" +
+                "La atención quedó pendiente de diagnóstico. " +
+                "Los servicios todavía no se consideran ejecutados ni pagados.",
+                "Ingreso confirmado",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (ValidacionException ex)
+        {
+            chkAutorizaIngreso.Checked = false;
+
+            MessageBox.Show(
+                this,
+                ex.Message,
+                "Revisar ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+        catch (Exception ex)
+        {
+            cerrarDetalle = true;
+
+            string mensaje = ingresoRegistrado
+                ? "El ingreso fue registrado, pero no se pudo actualizar " +
+                  "la pantalla. Actualice el listado."
+                : "No se pudo confirmar el resultado de la operación. " +
+                  "Actualice el listado y consulte el estado antes de reintentar.";
+
+            MessageBox.Show(
+                this,
+                $"{mensaje}\n\n{ex.Message}",
+                "Confirmar ingreso",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+        finally
+        {
+            _guardandoIngreso = false;
+            Cursor = Cursors.Default;
+
+            if (!IsDisposed)
+            {
+                ActualizarControlesIngreso();
+            }
+        }
+
+        if (cerrarDetalle)
+        {
+            Close();
+        }
+    }
+
+    private void DgvServiciosIngreso_SelectionChanged(
+        object? sender,
+        EventArgs e)
+    {
+        ActualizarControlesIngreso();
+    }
+
+    private void ActualizarGrillaServiciosIngreso()
+    {
+        dgvServiciosIngreso.DataSource = null;
+        dgvServiciosIngreso.DataSource = _serviciosIngreso.ToList();
+
+        dgvServiciosIngreso.ClearSelection();
+        dgvServiciosIngreso.CurrentCell = null;
+
+        decimal total = _serviciosIngreso.Sum(fila => fila.Subtotal);
+
+        lblTotalServiciosIngreso.Text =
+            $"Total autorizado: {total:N2}";
+
+        ActualizarControlesIngreso();
+    }
     #endregion
 
     #region Navegación
@@ -1291,113 +1598,7 @@ public partial class FrmDetalleAtencion : Form
     }
     #endregion
 
-    /// <summary>
-    /// Registra el ingreso autorizado y su cargo inicial.
-    /// </summary>
-    private async void BtnConfirmarIngreso_Click(
-        object? sender,
-        EventArgs e)
-    {
-        if (_guardandoIngreso)
-        {
-            return;
-        }
-
-        // Confirma las validaciones de los controles antes de leerlos.
-        if (!ValidateChildren())
-        {
-            return;
-        }
-
-        ActualizarControlesIngreso();
-
-        if (!btnConfirmarIngreso.Enabled)
-        {
-            MessageBox.Show(
-                this,
-                "Seleccione el servicio, indique un importe positivo " +
-                "y registre la autorización del cliente.",
-                "Confirmar ingreso",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
-            return;
-        }
-
-        if (cboServicioIngreso.SelectedItem is not Concepto concepto)
-        {
-            return;
-        }
-
-        // Conserva los valores exactos que se enviarán al servicio.
-        int idConcepto = concepto.IdConcepto;
-        decimal importe = nudImporteIngreso.Value;
-        bool clienteAutoriza = chkAutorizaIngreso.Checked;
-
-        bool ingresoRegistrado = false;
-        bool cerrarDetalle = false;
-
-        try
-        {
-            _guardandoIngreso = true;
-            ActualizarControlesIngreso();
-            Cursor = Cursors.WaitCursor;
-
-            await _atencionServicio.EnviarADiagnosticoAsync(
-                _idAtencion,
-                idConcepto,
-                importe,
-                clienteAutoriza);
-
-            ingresoRegistrado = true;
-
-            await CargarAtencionAsync();
-
-            chkAutorizaIngreso.Checked = false;
-
-            MessageBox.Show(
-                this,
-                "El ingreso y el cargo inicial fueron registrados.\n\n" +
-                "La atención quedó pendiente de diagnóstico.",
-                "Ingreso confirmado",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            // Cierra el detalle para exigir una nueva consulta del estado.
-            // También contempla fallos de comunicación con resultado incierto.
-            cerrarDetalle = true;
-
-            string mensaje = ingresoRegistrado
-                ? "El ingreso fue registrado, pero no se pudo actualizar " +
-                  "la pantalla. Actualice el listado."
-                : "No se pudo completar la confirmación desde esta pantalla. " +
-                  "Actualice el listado y consulte el estado antes de reintentar.";
-
-            MessageBox.Show(
-                this,
-                $"{mensaje}\n\n{ex.Message}",
-                "Confirmar ingreso",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
-        finally
-        {
-            _guardandoIngreso = false;
-            Cursor = Cursors.Default;
-
-            if (!IsDisposed)
-            {
-                ActualizarControlesIngreso();
-            }
-        }
-
-        if (cerrarDetalle)
-        {
-            Close();
-        }
-    }
+    
 
     /// <summary>
     /// Evita cerrar el detalle mientras se confirma el ingreso.
@@ -1411,4 +1612,6 @@ public partial class FrmDetalleAtencion : Form
             e.Cancel = true;
         }
     }
+
+   
 }

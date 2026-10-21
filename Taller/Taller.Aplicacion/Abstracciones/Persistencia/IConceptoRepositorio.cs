@@ -17,4 +17,10 @@ public interface IConceptoRepositorio
     /// Lista servicios activos pertenecientes a categorías activas.
     /// </summary>
     Task<List<Concepto>> ListarServiciosActivosAsync();
+
+    /// <summary>
+    /// Lista los servicios habilitados para ingreso que estén activos
+    /// y pertenezcan a categorías activas.
+    /// </summary>
+    Task<List<Concepto>> ListarServiciosDisponiblesParaIngresoAsync();
 }

@@ -194,6 +194,11 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("DisponibleParaIngreso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("IdCategoria")
                         .HasColumnType("int");
 
@@ -222,6 +227,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.ToTable("Conceptos", null, t =>
                         {
+                            t.HasCheckConstraint("CK_Conceptos_DisponibleParaIngreso", "[DisponibleParaIngreso] = 0\r\nOR [Tipo] = N'Servicio'");
+
                             t.HasCheckConstraint("CK_Conceptos_Nombre", "LEN(LTRIM(RTRIM(Nombre))) > 0");
 
                             t.HasCheckConstraint("CK_Conceptos_PrecioReferencia", "[PrecioReferencia] IS NULL OR \r\n[PrecioReferencia] >= 0");

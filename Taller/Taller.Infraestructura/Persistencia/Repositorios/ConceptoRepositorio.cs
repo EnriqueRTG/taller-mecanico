@@ -39,4 +39,24 @@ public sealed class ConceptoRepositorio : IConceptoRepositorio
             .ThenBy(c => c.IdConcepto)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// Obtiene las prestaciones que pueden ofrecerse
+    /// al confirmar el ingreso al circuito técnico.
+    /// </summary>
+    public Task<List<Concepto>> ListarServiciosDisponiblesParaIngresoAsync()
+    {
+        return _contexto.Conceptos
+            .AsNoTracking()
+            .Include(c => c.Categoria)
+            .Where(c =>
+                c.Activo
+                && c.Categoria.Activo
+                && c.Tipo == TipoConcepto.Servicio
+                && c.DisponibleParaIngreso)
+            .OrderBy(c => c.Nombre)
+            .ThenBy(c => c.IdConcepto)
+            .ToListAsync();
+    }
+
 }

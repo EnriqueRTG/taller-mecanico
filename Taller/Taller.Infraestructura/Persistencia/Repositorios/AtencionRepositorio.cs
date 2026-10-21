@@ -60,9 +60,13 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     }
 
     /// <summary>
-    /// Persiste conjuntamente el cambio de la atención,
-    /// el cargo inicial autorizado y su historial.
+    /// Guarda el ingreso de una atención junto con los servicios
+    /// iniciales autorizados y el evento del historial.
     /// </summary>
+    /// <remarks>
+    /// La atención, el presupuesto, sus detalles y el historial
+    /// se persisten mediante un único guardado.
+    /// </remarks>
     public async Task EnviarADiagnosticoAsync(
         Atencion atencion,
         Presupuesto presupuesto,
@@ -72,75 +76,92 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         ArgumentNullException.ThrowIfNull(presupuesto);
         ArgumentNullException.ThrowIfNull(historial);
 
-        if (atencion.Estado != EstadoAtencion.PendienteDiagnostico ||
-            atencion.IdTecnicoEnActividad is not null ||
-            atencion.ActividadTecnica is not null)
+        if (atencion.Estado != EstadoAtencion.PendienteDiagnostico
+            || atencion.IdTecnicoEnActividad is not null
+            || atencion.ActividadTecnica is not null)
         {
             throw new ArgumentException(
                 "La atención debe quedar pendiente de diagnóstico y sin reserva.",
                 nameof(atencion));
         }
 
-        if (presupuesto.IdPresupuesto != 0 ||
-            presupuesto.Tipo != TipoPresupuesto.Diagnostico ||
-            presupuesto.Estado != EstadoPresupuesto.Aceptado ||
-            presupuesto.IdAtencion != atencion.IdAtencion ||
-            presupuesto.IdDiagnostico is not null)
+        if (presupuesto.IdPresupuesto != 0
+            || presupuesto.Tipo != TipoPresupuesto.Diagnostico
+            || presupuesto.Estado != EstadoPresupuesto.Aceptado
+            || presupuesto.IdAtencion != atencion.IdAtencion
+            || presupuesto.IdDiagnostico is not null)
         {
             throw new ArgumentException(
-                "El presupuesto debe ser nuevo, de diagnóstico, aceptado y pertenecer a la atención.",
+                "El presupuesto debe ser nuevo, de diagnóstico, aceptado " +
+                "y pertenecer a la atención.",
                 nameof(presupuesto));
         }
 
-        if (presupuesto.Detalles.Count != 1)
+        var detalles = presupuesto.Detalles.ToList();
+
+        if (detalles.Count == 0)
         {
             throw new ArgumentException(
-                "El presupuesto inicial debe contener un único detalle.",
+                "El presupuesto inicial debe contener al menos un servicio.",
                 nameof(presupuesto));
         }
 
-        var detalle = presupuesto.Detalles.Single();
-
-        if (detalle.IdPresupuestoDetalle != 0 ||
-            detalle.IdPresupuesto != 0 ||
-            detalle.IdPresupuestoCambio is not null)
+        foreach (var detalle in detalles)
         {
-            throw new ArgumentException(
-                "El detalle del cargo inicial debe ser nuevo y sin presupuesto de cambio.",
-                nameof(presupuesto));
+            if (detalle.IdPresupuestoDetalle != 0
+                || detalle.IdPresupuesto != 0
+                || detalle.IdPresupuestoCambio is not null)
+            {
+                throw new ArgumentException(
+                    "Los detalles deben ser nuevos y no tener " +
+                    "un presupuesto de cambio.",
+                    nameof(presupuesto));
+            }
         }
 
         var entradaPresupuesto = _contexto.Entry(presupuesto);
-        var entradaDetalle = _contexto.Entry(detalle);
+
+        var entradasDetalles = detalles
+            .Select(detalle => _contexto.Entry(detalle))
+            .ToList();
 
         try
         {
-            // Esta navegación permite a EF completar la FK del detalle
-            // cuando SQL Server genere el identificador del presupuesto.
-            detalle.Presupuesto = presupuesto;
-
             entradaPresupuesto.State = EntityState.Added;
-            entradaDetalle.State = EntityState.Added;
 
-            // Este método realiza un único SaveChangesAsync:
-            // incluye atención, historial, presupuesto y detalle.
+            foreach (var entradaDetalle in entradasDetalles)
+            {
+                // EF completará la FK cuando se genere
+                // el identificador del presupuesto.
+                entradaDetalle.Entity.Presupuesto = presupuesto;
+                entradaDetalle.State = EntityState.Added;
+            }
+
+            // Este método efectúa un único SaveChangesAsync:
+            // atención, historial, presupuesto y todos sus detalles.
             await ActualizarConHistorialAsync(atencion, historial);
         }
         catch (DbUpdateException ex)
-            when (ex.InnerException is SqlException sqlEx &&
-                  sqlEx.Errors.Cast<SqlError>().Any(error =>
-                      (error.Number == 2601 || error.Number == 2627) &&
-                      error.Message.Contains(
-                          "UX_Presupuestos_DiagnosticoPorAtencion",
-                          StringComparison.OrdinalIgnoreCase)))
+            when (ex.InnerException is SqlException sqlEx
+                && sqlEx.Errors.Cast<SqlError>().Any(error =>
+                    (error.Number == 2601 || error.Number == 2627)
+                    && error.Message.Contains(
+                        "UX_Presupuestos_DiagnosticoPorAtencion",
+                        StringComparison.OrdinalIgnoreCase)))
         {
             throw new ValidacionException(
-                "La atención ya tiene registrado el cargo inicial de diagnóstico.",
+                "La atención ya tiene registrados sus servicios iniciales.",
                 nameof(Presupuesto.IdAtencion));
         }
         finally
         {
-            entradaDetalle.State = EntityState.Detached;
+            // Evita conservar inserciones pendientes después
+            // de una operación exitosa o fallida.
+            foreach (var entradaDetalle in entradasDetalles)
+            {
+                entradaDetalle.State = EntityState.Detached;
+            }
+
             entradaPresupuesto.State = EntityState.Detached;
         }
     }

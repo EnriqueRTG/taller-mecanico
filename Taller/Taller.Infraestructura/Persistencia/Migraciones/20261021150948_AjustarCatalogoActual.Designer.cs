@@ -12,8 +12,8 @@ using Taller.Infraestructura.Persistencia;
 namespace Taller.Infraestructura.Persistencia.Migraciones
 {
     [DbContext(typeof(TallerDbContext))]
-    [Migration("20261013210347_ActualizarBaseDatos")]
-    partial class ActualizarBaseDatos
+    [Migration("20261021150948_AjustarCatalogoActual")]
+    partial class AjustarCatalogoActual
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,6 +97,120 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .IsUnique();
 
                     b.ToTable("Categorias", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            IdCategoria = 1,
+                            Activo = true,
+                            Descripcion = "Servicios de mantenimiento preventivo y cambio de fluidos.",
+                            Nombre = "Mantenimiento preventivo"
+                        },
+                        new
+                        {
+                            IdCategoria = 2,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y sustitución de componentes mecánicos.",
+                            Nombre = "Reparación mecánica"
+                        },
+                        new
+                        {
+                            IdCategoria = 3,
+                            Activo = true,
+                            Descripcion = "Servicios de diagnóstico y reparación de sistemas electrónicos.",
+                            Nombre = "Diagnóstico electrónico"
+                        },
+                        new
+                        {
+                            IdCategoria = 4,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y mantenimiento del sistema de frenos.",
+                            Nombre = "Sistema de frenos"
+                        },
+                        new
+                        {
+                            IdCategoria = 5,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y mantenimiento de la suspensión.",
+                            Nombre = "Suspensión"
+                        },
+                        new
+                        {
+                            IdCategoria = 6,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y mantenimiento de la dirección.",
+                            Nombre = "Dirección"
+                        },
+                        new
+                        {
+                            IdCategoria = 7,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y mantenimiento de la transmisión.",
+                            Nombre = "Transmisión"
+                        },
+                        new
+                        {
+                            IdCategoria = 8,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y mantenimiento del embrague.",
+                            Nombre = "Embrague"
+                        },
+                        new
+                        {
+                            IdCategoria = 9,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación y mantenimiento del sistema de refrigeración.",
+                            Nombre = "Sistema de refrigeración"
+                        },
+                        new
+                        {
+                            IdCategoria = 10,
+                            Activo = true,
+                            Descripcion = "Servicios de diagnóstico computarizado del vehículo.",
+                            Nombre = "Diagnóstico computarizado"
+                        },
+                        new
+                        {
+                            IdCategoria = 11,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación del sistema de arranque y carga.",
+                            Nombre = "Sistema de arranque y carga"
+                        },
+                        new
+                        {
+                            IdCategoria = 12,
+                            Activo = true,
+                            Descripcion = "Servicios de revisión y reparación de baterías.",
+                            Nombre = "Baterías"
+                        },
+                        new
+                        {
+                            IdCategoria = 13,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación de luces y componentes eléctricos.",
+                            Nombre = "Electricidad e iluminación"
+                        },
+                        new
+                        {
+                            IdCategoria = 14,
+                            Activo = true,
+                            Descripcion = "Servicios de reparación del sistema de climatización.",
+                            Nombre = "Aire acondicionado"
+                        },
+                        new
+                        {
+                            IdCategoria = 15,
+                            Activo = true,
+                            Descripcion = "Servicios de revisión y reparación de la calefacción.",
+                            Nombre = "Calefacción"
+                        },
+                        new
+                        {
+                            IdCategoria = 16,
+                            Activo = true,
+                            Descripcion = "Servicios de inspección y evaluación general del vehículo.",
+                            Nombre = "Diagnóstico técnico inicial"
+                        });
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Cliente", b =>
@@ -162,13 +276,16 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdConcepto"));
 
                     b.Property<bool>("Activo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("DisponibleParaIngreso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<int>("IdCategoria")
                         .HasColumnType("int");
@@ -179,17 +296,33 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<decimal?>("PrecioReferencia")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Tipo")
-                        .HasMaxLength(30)
-                        .HasColumnType("int");
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("IdConcepto");
 
-                    b.HasIndex("IdCategoria");
+                    b.HasIndex("IdCategoria")
+                        .HasDatabaseName("IX_Conceptos_IdCategoria");
 
-                    b.ToTable("Conceptos", (string)null);
+                    b.HasIndex("IdCategoria", "Tipo", "Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Conceptos_Categoria_Tipo_Nombre");
+
+                    b.ToTable("Conceptos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Conceptos_DisponibleParaIngreso", "[DisponibleParaIngreso] = 0\r\nOR [Tipo] = N'Servicio'");
+
+                            t.HasCheckConstraint("CK_Conceptos_Nombre", "LEN(LTRIM(RTRIM(Nombre))) > 0");
+
+                            t.HasCheckConstraint("CK_Conceptos_PrecioReferencia", "[PrecioReferencia] IS NULL OR \r\n[PrecioReferencia] >= 0");
+
+                            t.HasCheckConstraint("CK_Conceptos_Tipo", "[Tipo] IN (\r\n    N'Servicio', \r\n    N'Repuesto', \r\n    N'Consumible')");
+                        });
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>
@@ -413,7 +546,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasOne("Taller.Dominio.Entidades.Categoria", "Categoria")
                         .WithMany("Conceptos")
                         .HasForeignKey("IdCategoria")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Categoria");

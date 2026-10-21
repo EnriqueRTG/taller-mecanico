@@ -41,7 +41,8 @@ public sealed class AutorizacionNavegacion
             PermisoAplicacion.ConsultarDiagnosticos,
             PermisoAplicacion.GestionarDecisionPresupuesto,
             PermisoAplicacion.GestionarComprobantesPagos,
-            PermisoAplicacion.ConsultarReportesOperativos
+            PermisoAplicacion.ConsultarReportesOperativos,            
+            PermisoAplicacion.ConsultarCatalogo,            
         ];
 
     private static readonly HashSet<PermisoAplicacion> PermisoTecnico =
@@ -51,6 +52,7 @@ public sealed class AutorizacionNavegacion
             PermisoAplicacion.GestionarPresupuestosTecnicos,
             PermisoAplicacion.RegistrarFinalizacionTecnica,
             PermisoAplicacion.ConsultarHistorialVehiculo,
-            PermisoAplicacion.ConsultarReportesTecnicos
+            PermisoAplicacion.ConsultarReportesTecnicos,
+            PermisoAplicacion.GestionarCatalogo,
         ];
 }

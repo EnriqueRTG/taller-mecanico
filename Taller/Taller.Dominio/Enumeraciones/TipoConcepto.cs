@@ -5,10 +5,16 @@
 /// </summary>
 public enum TipoConcepto
 {
-    /// <summary>
-    /// Define el tipo de concepto 
+    // <summary>
+    /// Trabajo o servicio brindado por el taller.
     /// </summary>
-    Consumible = 1,
-    Repuestos = 2,
-    Servicio = 3,    
+    Servicio = 1,
+    /// <summary>
+    /// Pieza destinada a instalarse o reemplazarse en un vehículo.
+    /// </summary>
+    Repuesto = 2,
+    /// <summary>
+    /// Material utilizado o consumido durante la intervención.
+    /// </summary>
+    Consumible = 3,
 }

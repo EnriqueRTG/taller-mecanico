@@ -13,6 +13,7 @@ public sealed class Concepto
     public string? Descripcion { get; set; } 
     public decimal? PrecioReferencia { get; set; }
     public bool Activo { get; set; } = true;
+    //public bool DisponibleParaIngreso { get; set; }
     public int IdCategoria { get; set; }
 
     /// <summary>

@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.AddSingleton<AutorizacionNavegacion>();
 
         services.AddTransient<AplicacionContexto>();
+
         services.AddTransient<FrmCatalogo>();
 
         return services;

@@ -30,6 +30,7 @@
         {
             pnlMenu = new Panel();
             pnlOpciones = new Panel();
+            btnCatalogo = new Button();
             btnRespaldo = new Button();
             btnReportes = new Button();
             btnComprobantes = new Button();
@@ -81,6 +82,7 @@
             pnlOpciones.Controls.Add(btnPresupuestos);
             pnlOpciones.Controls.Add(btnDiagnosticos);
             pnlOpciones.Controls.Add(btnAtenciones);
+            pnlOpciones.Controls.Add(btnCatalogo);
             pnlOpciones.Controls.Add(btnVehiculos);
             pnlOpciones.Controls.Add(btnClientes);
             pnlOpciones.Controls.Add(btnUsuarios);
@@ -90,6 +92,27 @@
             pnlOpciones.Name = "pnlOpciones";
             pnlOpciones.Size = new Size(230, 420);
             pnlOpciones.TabIndex = 4;
+            // 
+            // btnCatalogo
+            // 
+            btnCatalogo.Cursor = Cursors.Hand;
+            btnCatalogo.Dock = DockStyle.Top;
+            btnCatalogo.FlatAppearance.BorderSize = 0;
+            btnCatalogo.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 83, 151);
+            btnCatalogo.FlatAppearance.MouseOverBackColor = Color.FromArgb(35, 59, 92);
+            btnCatalogo.FlatStyle = FlatStyle.Flat;
+            btnCatalogo.Font = new Font("Segoe UI", 9.5F);
+            btnCatalogo.ForeColor = Color.FromArgb(220, 231, 245);
+            btnCatalogo.Location = new Point(0, 194);
+            btnCatalogo.Name = "btnCatalogo";
+            btnCatalogo.Padding = new Padding(20, 0, 0, 0);
+            btnCatalogo.Size = new Size(209, 48);
+            btnCatalogo.TabIndex = 16;
+            btnCatalogo.TabStop = false;
+            btnCatalogo.Text = "Catálogo";
+            btnCatalogo.TextAlign = ContentAlignment.MiddleLeft;
+            btnCatalogo.UseVisualStyleBackColor = false;
+            btnCatalogo.Click += btnCatalogo_Click;
             // 
             // btnRespaldo
             // 
@@ -101,10 +124,10 @@
             btnRespaldo.FlatStyle = FlatStyle.Flat;
             btnRespaldo.Font = new Font("Segoe UI", 9.5F);
             btnRespaldo.ForeColor = Color.FromArgb(220, 231, 245);
-            btnRespaldo.Location = new Point(0, 434);
+            btnRespaldo.Location = new Point(0, 482);
             btnRespaldo.Name = "btnRespaldo";
             btnRespaldo.Padding = new Padding(20, 0, 0, 0);
-            btnRespaldo.Size = new Size(213, 48);
+            btnRespaldo.Size = new Size(209, 48);
             btnRespaldo.TabIndex = 15;
             btnRespaldo.Text = "Respaldo y restauración";
             btnRespaldo.TextAlign = ContentAlignment.MiddleLeft;
@@ -121,10 +144,10 @@
             btnReportes.FlatStyle = FlatStyle.Flat;
             btnReportes.Font = new Font("Segoe UI", 9.5F);
             btnReportes.ForeColor = Color.FromArgb(220, 231, 245);
-            btnReportes.Location = new Point(0, 386);
+            btnReportes.Location = new Point(0, 434);
             btnReportes.Name = "btnReportes";
             btnReportes.Padding = new Padding(20, 0, 0, 0);
-            btnReportes.Size = new Size(213, 48);
+            btnReportes.Size = new Size(209, 48);
             btnReportes.TabIndex = 14;
             btnReportes.TabStop = false;
             btnReportes.Text = "Reportes";
@@ -141,10 +164,10 @@
             btnComprobantes.FlatStyle = FlatStyle.Flat;
             btnComprobantes.Font = new Font("Segoe UI", 9.5F);
             btnComprobantes.ForeColor = Color.FromArgb(220, 231, 245);
-            btnComprobantes.Location = new Point(0, 338);
+            btnComprobantes.Location = new Point(0, 386);
             btnComprobantes.Name = "btnComprobantes";
             btnComprobantes.Padding = new Padding(20, 0, 0, 0);
-            btnComprobantes.Size = new Size(213, 48);
+            btnComprobantes.Size = new Size(209, 48);
             btnComprobantes.TabIndex = 12;
             btnComprobantes.TabStop = false;
             btnComprobantes.Text = "Comprobantes y pagos";
@@ -162,10 +185,10 @@
             btnPresupuestos.FlatStyle = FlatStyle.Flat;
             btnPresupuestos.Font = new Font("Segoe UI", 9.5F);
             btnPresupuestos.ForeColor = Color.FromArgb(220, 231, 245);
-            btnPresupuestos.Location = new Point(0, 290);
+            btnPresupuestos.Location = new Point(0, 338);
             btnPresupuestos.Name = "btnPresupuestos";
             btnPresupuestos.Padding = new Padding(20, 0, 0, 0);
-            btnPresupuestos.Size = new Size(213, 48);
+            btnPresupuestos.Size = new Size(209, 48);
             btnPresupuestos.TabIndex = 10;
             btnPresupuestos.TabStop = false;
             btnPresupuestos.Text = "Presupuestos";
@@ -183,10 +206,10 @@
             btnDiagnosticos.FlatStyle = FlatStyle.Flat;
             btnDiagnosticos.Font = new Font("Segoe UI", 9.5F);
             btnDiagnosticos.ForeColor = Color.FromArgb(220, 231, 245);
-            btnDiagnosticos.Location = new Point(0, 242);
+            btnDiagnosticos.Location = new Point(0, 290);
             btnDiagnosticos.Name = "btnDiagnosticos";
             btnDiagnosticos.Padding = new Padding(20, 0, 0, 0);
-            btnDiagnosticos.Size = new Size(213, 48);
+            btnDiagnosticos.Size = new Size(209, 48);
             btnDiagnosticos.TabIndex = 9;
             btnDiagnosticos.TabStop = false;
             btnDiagnosticos.Text = "Diagnósticos";
@@ -204,10 +227,10 @@
             btnAtenciones.FlatStyle = FlatStyle.Flat;
             btnAtenciones.Font = new Font("Segoe UI", 9.5F);
             btnAtenciones.ForeColor = Color.FromArgb(220, 231, 245);
-            btnAtenciones.Location = new Point(0, 194);
+            btnAtenciones.Location = new Point(0, 242);
             btnAtenciones.Name = "btnAtenciones";
             btnAtenciones.Padding = new Padding(20, 0, 0, 0);
-            btnAtenciones.Size = new Size(213, 48);
+            btnAtenciones.Size = new Size(209, 48);
             btnAtenciones.TabIndex = 8;
             btnAtenciones.TabStop = false;
             btnAtenciones.Text = "Atenciones";
@@ -228,7 +251,7 @@
             btnVehiculos.Location = new Point(0, 146);
             btnVehiculos.Name = "btnVehiculos";
             btnVehiculos.Padding = new Padding(20, 0, 0, 0);
-            btnVehiculos.Size = new Size(213, 48);
+            btnVehiculos.Size = new Size(209, 48);
             btnVehiculos.TabIndex = 7;
             btnVehiculos.TabStop = false;
             btnVehiculos.Text = "Vehículos";
@@ -249,7 +272,7 @@
             btnClientes.Location = new Point(0, 98);
             btnClientes.Name = "btnClientes";
             btnClientes.Padding = new Padding(20, 0, 0, 0);
-            btnClientes.Size = new Size(213, 48);
+            btnClientes.Size = new Size(209, 48);
             btnClientes.TabIndex = 6;
             btnClientes.TabStop = false;
             btnClientes.Text = "Clientes";
@@ -270,7 +293,7 @@
             btnUsuarios.Location = new Point(0, 50);
             btnUsuarios.Name = "btnUsuarios";
             btnUsuarios.Padding = new Padding(20, 0, 0, 0);
-            btnUsuarios.Size = new Size(213, 48);
+            btnUsuarios.Size = new Size(209, 48);
             btnUsuarios.TabIndex = 5;
             btnUsuarios.TabStop = false;
             btnUsuarios.Text = "Usuarios";
@@ -292,7 +315,7 @@
             btnInicio.Location = new Point(0, 0);
             btnInicio.Name = "btnInicio";
             btnInicio.Padding = new Padding(20, 0, 0, 0);
-            btnInicio.Size = new Size(213, 50);
+            btnInicio.Size = new Size(209, 50);
             btnInicio.TabIndex = 4;
             btnInicio.TabStop = false;
             btnInicio.Text = "Inicio";
@@ -407,7 +430,7 @@
             lblRol.ForeColor = Color.DimGray;
             lblRol.Location = new Point(685, 35);
             lblRol.Name = "lblRol";
-            lblRol.Size = new Size(24, 15);
+            lblRol.Size = new Size(31, 20);
             lblRol.TabIndex = 2;
             lblRol.Text = "Rol";
             // 
@@ -418,7 +441,7 @@
             lblNombreUsuario.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblNombreUsuario.Location = new Point(685, 13);
             lblNombreUsuario.Name = "lblNombreUsuario";
-            lblNombreUsuario.Size = new Size(131, 17);
+            lblNombreUsuario.Size = new Size(169, 23);
             lblNombreUsuario.TabIndex = 1;
             lblNombreUsuario.Text = "Nombre del usuario";
             // 
@@ -428,7 +451,7 @@
             lblTituloSeccion.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTituloSeccion.Location = new Point(24, 13);
             lblTituloSeccion.Name = "lblTituloSeccion";
-            lblTituloSeccion.Size = new Size(61, 25);
+            lblTituloSeccion.Size = new Size(78, 32);
             lblTituloSeccion.TabIndex = 0;
             lblTituloSeccion.Text = "Inicio";
             // 
@@ -443,7 +466,7 @@
             // 
             // FrmPrincipal
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.WhiteSmoke;
             ClientSize = new Size(1084, 661);
@@ -491,5 +514,6 @@
         private Button btnRespaldo;
         private Button btnReportes;
         private Button btnComprobantes;
+        private Button btnCatalogo;
     }
 }

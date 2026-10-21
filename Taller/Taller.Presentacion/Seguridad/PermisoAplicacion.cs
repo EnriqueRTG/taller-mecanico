@@ -10,7 +10,7 @@ public enum PermisoAplicacion
     // Administrador
     GestionarUsuarios,
     ConsultarReportesGenerales,
-    GestionarRespaldo,
+    GestionarRespaldo,    
 
     // Administrativo
     GestionarClientes,
@@ -20,6 +20,7 @@ public enum PermisoAplicacion
     GestionarDecisionPresupuesto,
     GestionarComprobantesPagos,
     ConsultarReportesOperativos,
+    ConsultarCatalogo,
 
     // Técnico
     ConsultarAtencionesAsignadas,
@@ -27,5 +28,6 @@ public enum PermisoAplicacion
     GestionarPresupuestosTecnicos,
     RegistrarFinalizacionTecnica,
     ConsultarHistorialVehiculo,
-    ConsultarReportesTecnicos
+    ConsultarReportesTecnicos,
+    GestionarCatalogo,
 }

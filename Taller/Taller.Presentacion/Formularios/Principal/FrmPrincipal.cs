@@ -261,6 +261,14 @@ public partial class FrmPrincipal : Form
             TienePermiso(
                 rolId,
                 PermisoAplicacion.GestionarRespaldo);
+        btnCatalogo.Visible =
+            TienePermiso(
+                rolId,
+                PermisoAplicacion.GestionarCatalogo);
+        btnCatalogo.Visible =
+           TienePermiso(
+               rolId,
+               PermisoAplicacion.ConsultarCatalogo);
     }
 
     /// <summary>
@@ -288,6 +296,7 @@ public partial class FrmPrincipal : Form
         btnComprobantes.Visible = false;
         btnReportes.Visible = false;
         btnRespaldo.Visible = false;
+        btnCatalogo.Visible = false;
     }
 
     private void btnInicio_Click(
@@ -313,16 +322,11 @@ public partial class FrmPrincipal : Form
         object sender,
         EventArgs e)
     {
-        /*AbrirFormularioAutorizado<FrmClientes>(
+        AbrirFormularioAutorizado<FrmClientes>(
             "Clientes",
             btnClientes,
             "No tiene permisos para acceder a la gestión de clientes.",
-            PermisoAplicacion.GestionarClientes);*/
-        AbrirFormularioAutorizado<FrmCatalogo>(
-            "Clientes",
-            btnClientes,
-            "No tiene permisos para acceder a la gestión de clientes.",
-            PermisoAplicacion.GestionarClientes);
+            PermisoAplicacion.GestionarClientes);        
     }
 
     private void btnVehiculos_Click(
@@ -334,6 +338,15 @@ public partial class FrmPrincipal : Form
             btnVehiculos,
             "No tiene permisos para acceder a la gestión de vehículos.",
             PermisoAplicacion.GestionarVehiculos);
+    }
+    private void btnCatalogo_Click(object sender, EventArgs e)
+    {
+        AbrirFormularioAutorizado<FrmCatalogo>(
+            "Categorías y conceptos",
+            btnCatalogo,
+            "No tiene permisos para acceder al catálogo.",
+            PermisoAplicacion.GestionarCatalogo, 
+            PermisoAplicacion.ConsultarCatalogo);
     }
 
     private void btnAtenciones_Click(
@@ -406,6 +419,7 @@ public partial class FrmPrincipal : Form
             "No tiene permisos para acceder a respaldo y restauración.",
             PermisoAplicacion.GestionarRespaldo);
     }
+    
 
     private void btnCerrarSesion_Click(
         object sender,
@@ -476,5 +490,5 @@ public partial class FrmPrincipal : Form
             "Segoe UI",
             9.5F,
             FontStyle.Bold);
-    }
+    }    
 }

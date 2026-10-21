@@ -206,7 +206,7 @@ public sealed class InicializadorDatos
 
         await ObtenerOCrearConceptoAsync(
             idCategoria: 4,
-            tipo: TipoConcepto.Repuestos,
+            tipo: TipoConcepto.Repuesto,
             nombre: "Pastillas de freno",
             descripcion: "Repuestos utilizados en el sistema de frenos.",
             precioReferencia: 18000.00m
@@ -222,7 +222,7 @@ public sealed class InicializadorDatos
         
         await ObtenerOCrearConceptoAsync(
             idCategoria: 6,
-            tipo: TipoConcepto.Repuestos,
+            tipo: TipoConcepto.Repuesto,
             nombre: "Amortiguadores",
             descripcion: "Repuestos utilizados en el sistema de suspensión.",
             precioReferencia: 22000.00m
@@ -238,7 +238,7 @@ public sealed class InicializadorDatos
 
         await ObtenerOCrearConceptoAsync(
             idCategoria: 8,
-            tipo: TipoConcepto.Repuestos,
+            tipo: TipoConcepto.Repuesto,
             nombre: "Kit de embrague",
             descripcion: "Repuestos y componentes del sistema de embrague.",
             precioReferencia: 40000.00m
@@ -270,7 +270,7 @@ public sealed class InicializadorDatos
 
         await ObtenerOCrearConceptoAsync(
             idCategoria: 12,
-            tipo: TipoConcepto.Repuestos,
+            tipo: TipoConcepto.Repuesto,
             nombre: "Batería automotriz",
             descripcion: "Baterías utilizadas en vehículos.",
             precioReferencia: 86000.00m
@@ -278,7 +278,7 @@ public sealed class InicializadorDatos
 
         await ObtenerOCrearConceptoAsync(
             idCategoria: 13,
-            tipo: TipoConcepto.Repuestos,
+            tipo: TipoConcepto.Repuesto,
             nombre: "Lámparas y fusibles",
             descripcion: "Componentes eléctricos utilizados en vehículos.",
             precioReferencia: 9000.00m
@@ -347,6 +347,6 @@ public sealed class InicializadorDatos
         };
 
         await _contexto.Conceptos.AddAsync(concepto);
-        await _contexto.SaveChangesAsync();
+        //await _contexto.SaveChangesAsync();
     }
 }

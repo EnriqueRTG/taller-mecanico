@@ -79,9 +79,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<int?>("ConceptoIdConcepto")
-                        .HasColumnType("int");
-
                     b.Property<string>("Descripcion")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -92,8 +89,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("IdCategoria");
-
-                    b.HasIndex("ConceptoIdConcepto");
 
                     b.HasIndex("Nombre")
                         .IsUnique();
@@ -278,13 +273,16 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdConcepto"));
 
                     b.Property<bool>("Activo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("DisponibleParaIngreso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<int>("IdCategoria")
                         .HasColumnType("int");
@@ -295,17 +293,33 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<decimal?>("PrecioReferencia")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Tipo")
-                        .HasMaxLength(30)
-                        .HasColumnType("int");
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("IdConcepto");
 
-                    b.HasIndex("IdCategoria");
+                    b.HasIndex("IdCategoria")
+                        .HasDatabaseName("IX_Conceptos_IdCategoria");
 
-                    b.ToTable("Conceptos", (string)null);
+                    b.HasIndex("IdCategoria", "Tipo", "Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Conceptos_Categoria_Tipo_Nombre");
+
+                    b.ToTable("Conceptos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Conceptos_DisponibleParaIngreso", "[DisponibleParaIngreso] = 0\r\nOR [Tipo] = N'Servicio'");
+
+                            t.HasCheckConstraint("CK_Conceptos_Nombre", "LEN(LTRIM(RTRIM(Nombre))) > 0");
+
+                            t.HasCheckConstraint("CK_Conceptos_PrecioReferencia", "[PrecioReferencia] IS NULL OR \r\n[PrecioReferencia] >= 0");
+
+                            t.HasCheckConstraint("CK_Conceptos_Tipo", "[Tipo] IN (\r\n    N'Servicio', \r\n    N'Repuesto', \r\n    N'Consumible')");
+                        });
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>
@@ -524,19 +538,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Vehiculo");
                 });
 
-            modelBuilder.Entity("Taller.Dominio.Entidades.Categoria", b =>
-                {
-                    b.HasOne("Taller.Dominio.Entidades.Concepto", null)
-                        .WithMany("Categorias")
-                        .HasForeignKey("ConceptoIdConcepto");
-                });
-
             modelBuilder.Entity("Taller.Dominio.Entidades.Concepto", b =>
                 {
                     b.HasOne("Taller.Dominio.Entidades.Categoria", "Categoria")
                         .WithMany("Conceptos")
                         .HasForeignKey("IdCategoria")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Categoria");
@@ -583,11 +590,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
             modelBuilder.Entity("Taller.Dominio.Entidades.Cliente", b =>
                 {
                     b.Navigation("Atenciones");
-                });
-
-            modelBuilder.Entity("Taller.Dominio.Entidades.Concepto", b =>
-                {
-                    b.Navigation("Categorias");
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>

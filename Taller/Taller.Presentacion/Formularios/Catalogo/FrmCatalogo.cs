@@ -126,12 +126,11 @@ public partial class FrmCatalogo : Form
         dgvConceptos.AutoGenerateColumns = false;
         //dgvConceptos.DataSource = null;
         dgvConceptos.DataSource = conceptos;
-        /*
+        
         if (dgvConceptos.Columns["Categoria"] != null)
             dgvConceptos.Columns["Categoria"].Visible = false;
 
         if (dgvConceptos.Columns["AtencionesRecepcionadas"] != null)
-            dgvConceptos.Columns["AtencionesRecepcionadas"].Visible = false;*/
-    
+            dgvConceptos.Columns["AtencionesRecepcionadas"].Visible = false;    
     }
 }

@@ -13,6 +13,8 @@ public sealed class PresupuestoDetalle
     public int IdPresupuesto { get; set; }
 
     public int IdConcepto { get; set; }
+    /// <summary>Null sin decisión; false excluye el ítem sin borrarlo del presupuesto original.</summary>
+    public bool? AceptadoPorCliente { get; set; }
 
     /// <summary>
     /// Descripción del concepto al presupuestarlo.

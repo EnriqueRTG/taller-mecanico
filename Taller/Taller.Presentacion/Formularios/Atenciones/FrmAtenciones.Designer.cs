@@ -563,7 +563,7 @@
             btnRegistrarEntrega.Name = "btnRegistrarEntrega";
             btnRegistrarEntrega.Size = new Size(106, 34);
             btnRegistrarEntrega.TabIndex = 4;
-            btnRegistrarEntrega.Text = "Registrar entrega";
+            btnRegistrarEntrega.Text = "Liquidación y cobros";
             btnRegistrarEntrega.UseVisualStyleBackColor = true;
             btnRegistrarEntrega.Click += BtnRegistrarEntrega_Click;
             // 
@@ -603,7 +603,7 @@
             btnFinalizarTrabajo.Name = "btnFinalizarTrabajo";
             btnFinalizarTrabajo.Size = new Size(105, 34);
             btnFinalizarTrabajo.TabIndex = 7;
-            btnFinalizarTrabajo.Text = "Finalizar trabajo";
+            btnFinalizarTrabajo.Text = "Gestionar ejecución";
             btnFinalizarTrabajo.UseVisualStyleBackColor = true;
             btnFinalizarTrabajo.Click += BtnFinalizarTrabajo_Click;
             // 

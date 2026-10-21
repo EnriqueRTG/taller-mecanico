@@ -83,6 +83,7 @@ public static class DependencyInjection
         // Registrar el servicio concreto utilizado para las operaciones de persistencia de unidad de trabajo.
         services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
         services.AddScoped<IEvaluacionRepositorio, EvaluacionRepositorio>();
+        services.AddScoped<ICircuitoRepositorio, CircuitoRepositorio>();
 
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.

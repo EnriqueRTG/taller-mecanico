@@ -7,6 +7,7 @@ public sealed class EvaluacionAtencionDto
     public byte[] VersionAtencion { get; set; } = [];
     public string Cliente { get; set; } = string.Empty;
     public string Vehiculo { get; set; } = string.Empty;
+    public string? MotivoRevision { get; set; }
     public string Motivo { get; set; } = string.Empty;
     public TipoSolicitudAtencion TipoSolicitud { get; set; }
     public bool InformeHistorico { get; set; }

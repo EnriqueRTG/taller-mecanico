@@ -25,6 +25,8 @@ partial class FrmPresupuestos
         lblAyuda.Name = "lblAyuda";
         flpAcciones = new FlowLayoutPanel();
         flpAcciones.Name = "flpAcciones";
+        btnDecidir = new Button();
+        btnRevision = new Button();
         btnVer = new Button();
         btnVer.Name = "btnVer";
         btnPresentar = new Button();
@@ -47,7 +49,10 @@ partial class FrmPresupuestos
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
+        btnDecidir.Name="btnDecidir";btnDecidir.Text="Registrar decisión";btnDecidir.AutoSize=true;btnDecidir.Height=34;btnDecidir.Click+=Decidir;
+        btnRevision.Name="btnRevision";btnRevision.Text="Solicitar revisión";btnRevision.AutoSize=true;btnRevision.Height=34;btnRevision.Click+=Revision;
+        flpAcciones.Controls.Add(btnDecidir);flpAcciones.Controls.Add(btnRevision);
         Controls.Add(tlpPrincipal); Text = "Presupuestos";
         tlpPrincipal.Controls.Add(lblTitulo, 0, 0);
         lblTitulo.Dock = DockStyle.Fill;
@@ -65,6 +70,8 @@ partial class FrmPresupuestos
         flpAcciones.Dock = DockStyle.Fill;
         txtBuscar.PlaceholderText = "Buscar presupuesto, atención, cliente o dominio"; txtBuscar.TextChanged += Filtrar;
         cboEstado.DropDownStyle = ComboBoxStyle.DropDownList; cboEstado.Items.AddRange(new object[] { "Todos", "Por presentar", "Borradores", "Esperando decisión" }); cboEstado.SelectedIndexChanged += Filtrar;
+        dgvDatos.Columns.Add(new DataGridViewCheckBoxColumn{Name="colVigente",DataPropertyName="Vigente",HeaderText="Vigente",FillWeight=60,ReadOnly=true});
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn{Name="colAceptado",DataPropertyName="TotalAceptado",HeaderText="Aceptado",FillWeight=90,DefaultCellStyle=new DataGridViewCellStyle{Format="N2"}});
         dgvDatos.SelectionChanged += Seleccion;
         dgvDatos.AutoGenerateColumns = false;
         dgvDatos.AllowUserToAddRows = false;
@@ -84,7 +91,7 @@ partial class FrmPresupuestos
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colVehiculo", DataPropertyName = "Vehiculo", HeaderText = "Vehículo", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTipo", DataPropertyName = "TipoDescripcion", HeaderText = "Tipo", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colEstado", DataPropertyName = "EstadoDescripcion", HeaderText = "Estado", FillWeight = 150, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
-        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "Fecha", HeaderText = "Creación", FillWeight = 115, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" } });
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "Fecha", HeaderText = "Último movimiento", FillWeight = 115, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" } });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTotal", DataPropertyName = "Total", HeaderText = "Total", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         btnVer.Text = "Ver documento";
         btnVer.AutoSize = true;
@@ -117,6 +124,8 @@ partial class FrmPresupuestos
     private DataGridView dgvDatos = null!;
     private Label lblAyuda = null!;
     private FlowLayoutPanel flpAcciones = null!;
+    private Button btnDecidir = null!;
+    private Button btnRevision = null!;
     private Button btnVer = null!;
     private Button btnPresentar = null!;
     private Button btnActualizar = null!;

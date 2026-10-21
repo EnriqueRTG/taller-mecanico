@@ -81,7 +81,7 @@ public sealed class HistorialAtencionConfiguracion : IEntityTypeConfiguration<Hi
 
             builder.Property(h => h.Observaciones)
                 .IsRequired(false)
-                .HasMaxLength(1000);
+                .HasMaxLength(2000);
 
             builder.HasIndex(h => new
             {

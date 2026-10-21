@@ -1,298 +1,47 @@
-﻿using Taller.Presentacion.Estilos;
-
+﻿using System.ComponentModel;
+using Taller.Aplicacion.DTOs.Presupuestos;
+using Taller.Aplicacion.Servicios;
+using Taller.Dominio.Enumeraciones;
 namespace Taller.Presentacion.Formularios.Presupuestos;
-
-/// <summary>
-/// Representa el registro visual de la decisión comunicada
-/// por el cliente sobre un presupuesto.
-/// </summary>
-/// <remarks>
-/// Durante la primera entrega utiliza información demostrativa
-/// y no modifica datos persistidos.
-/// </remarks>
+/// <summary>Recepción registra el alcance comunicado por el cliente, conservando cada ítem original.</summary>
 public partial class FrmDecisionPresupuesto : Form
 {
-    #region Constantes y campos
-
-    private const int LongitudMaximaObservaciones = 1000;
-
-    private bool _formularioInicializado;
-    private bool _hayCambios;
-    private bool _decisionConfirmada;
-
-    #endregion
-
-    #region Propiedades públicas
-
-    /// <summary>
-    /// Obtiene la decisión seleccionada.
-    /// </summary>
-    public string Decision =>
-        cboDecision.SelectedItem?.ToString()
-        ?? string.Empty;
-
-    /// <summary>
-    /// Obtiene las observaciones ingresadas.
-    /// </summary>
-    public string Observaciones =>
-        txtObservaciones.Text.Trim();
-
-    /// <summary>
-    /// Obtiene la fecha y hora indicada para la decisión.
-    /// </summary>
-    public DateTime FechaDecision =>
-        dtpFechaDecision.Value;
-
-    #endregion
-
-    #region Inicialización
-
-    public FrmDecisionPresupuesto()
+    private readonly PresupuestoServicio? _servicio;
+    private readonly int _id;
+    private PresupuestoGestionDto? _datos;
+    private BindingList<DecisionItemDto> _items = [];
+    private bool _ocupado, _hayCambios;
+    public FrmDecisionPresupuesto() { InitializeComponent(); }
+    public FrmDecisionPresupuesto(int id, PresupuestoServicio servicio) : this() { _id = id; _servicio = servicio; }
+    private async void Cargar(object? s, EventArgs e)
     {
-        InitializeComponent();
-    }
-
-    private void FrmDecisionPresupuesto_Load(
-        object? sender,
-        EventArgs e)
-    {
-        ConfigurarFormulario();
-        AplicarEstilos();
-        CargarDecisiones();
-        CargarDatosSimulados();
-
-        _hayCambios = false;
-        _formularioInicializado = true;
-    }
-
-    private void FrmDecisionPresupuesto_Shown(
-        object? sender,
-        EventArgs e)
-    {
-        cboDecision.Focus();
-    }
-
-    private void ConfigurarFormulario()
-    {
-        Text = "Registrar decisión del presupuesto";
-        StartPosition = FormStartPosition.CenterParent;
-        ShowInTaskbar = false;
-
-        AcceptButton = btnRegistrar;
-        CancelButton = btnCancelar;
-
-        cboDecision.DropDownStyle =
-            ComboBoxStyle.DropDownList;
-
-        dtpFechaDecision.Format =
-            DateTimePickerFormat.Custom;
-
-        dtpFechaDecision.CustomFormat =
-            "dd/MM/yyyy HH:mm";
-
-        txtObservaciones.MaxLength =
-            LongitudMaximaObservaciones;
-    }
-
-    private void CargarDecisiones()
-    {
-        cboDecision.BeginUpdate();
-
+        _ocupado = true; tlpPrincipal.Enabled = false;
         try
         {
-            cboDecision.Items.Clear();
-
-            cboDecision.Items.AddRange(
-            [
-                "Aceptado",
-                "Rechazado"
-            ]);
-
-            cboDecision.SelectedIndex = -1;
+            _datos = await (_servicio ?? throw new InvalidOperationException("Seleccione una propuesta real.")).ObtenerAsync(_id);
+            if (!_datos.Vigente || _datos.Estado != EstadoPresupuesto.PendienteDecision) throw new InvalidOperationException("La propuesta no está esperando una decisión.");
+            lblResumen.Text = $"Presupuesto {_id:D6} · {_datos.Resumen}\nQuite la marca de los ítems que el cliente NO acepta. Nada se elimina del documento original.";
+            _items = new BindingList<DecisionItemDto>(_datos.Items); dgvItems.DataSource = _items; ActualizarTotal();
         }
-        finally
-        {
-            cboDecision.EndUpdate();
-        }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message); _ocupado = false; Close(); }
+        finally { _ocupado = false; tlpPrincipal.Enabled = true; }
     }
-
-    #endregion
-
-    #region Datos simulados
-
-    private void CargarDatosSimulados()
+    private void CommitCelda(object? s, EventArgs e) { if (dgvItems.IsCurrentCellDirty) dgvItems.CommitEdit(DataGridViewDataErrorContexts.Commit); }
+    private void Cambio(object? s, DataGridViewCellEventArgs e) { if (!_ocupado && e.RowIndex >= 0) _hayCambios = true; ActualizarTotal(); }
+    private void TextoCambiado(object? s, EventArgs e) { if (!_ocupado) _hayCambios = true; }
+    private void ActualizarTotal() => lblTotal.Text = $"Aceptados: {_items.Count(x => x.Aceptar)}/{_items.Count} · Total aceptado: {_items.Where(x => x.Aceptar).Sum(x => x.Subtotal):N2}. Sin marcas equivale a rechazo completo.";
+    private void RechazarTodo(object? s, EventArgs e) { dgvItems.EndEdit(); foreach (var i in _items) i.Aceptar = false; _items.ResetBindings(); ActualizarTotal(); }
+    private async void Guardar(object? s, EventArgs e)
     {
-        lblNumeroPresupuesto.Text =
-            "Presupuesto N.º 000001";
-
-        lblAtencionValor.Text =
-            "000001";
-
-        lblClienteValor.Text =
-            "Juan Pérez";
-
-        lblVehiculoValor.Text =
-            "Honda Fit · AB345CD";
-
-        lblTotalValor.Text =
-            "$ 43.500,00";
-
-        cboDecision.SelectedIndex = -1;
-        txtObservaciones.Clear();
-        dtpFechaDecision.Value = DateTime.Now;
+        if (_ocupado || _datos == null || _servicio == null) return; dgvItems.EndEdit();
+        if (MessageBox.Show(this, "¿Registrar esta decisión del cliente? El técnico revisará el alcance aceptado antes de ejecutar.", "Registrar decisión", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        _ocupado = true; tlpPrincipal.Enabled = false;
+        try { await _servicio.DecidirAsync(new DecisionPresupuestoDto { IdPresupuesto = _id, Version = _datos.Version, ItemsAceptados = _items.Where(x => x.Aceptar).Select(x => x.IdDetalle).ToList(), Observaciones = txtMotivo.Text }); DialogResult = DialogResult.OK; }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Decisión", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+        finally { _ocupado = false; tlpPrincipal.Enabled = true; }
+        if (DialogResult == DialogResult.OK) Close();
     }
-
-    #endregion
-
-    #region Eventos
-
-    private void CampoEditable_Cambio(
-        object? sender,
-        EventArgs e)
-    {
-        if (!_formularioInicializado)
-        {
-            return;
-        }
-
-        _hayCambios = true;
-
-        if (sender is Control control)
-        {
-            control.BackColor = Color.White;
-        }
-    }
-
-    private void BtnRegistrar_Click(
-        object? sender,
-        EventArgs e)
-    {
-        if (!ValidarFormulario())
-        {
-            return;
-        }
-
-        ConfirmarDecision();
-    }
-
-    private void BtnCancelar_Click(
-        object? sender,
-        EventArgs e)
-    {
-        Close();
-    }
-
-    private void FrmDecisionPresupuesto_FormClosing(
-        object? sender,
-        FormClosingEventArgs e)
-    {
-        if (_decisionConfirmada || !_hayCambios)
-        {
-            NormalizarResultadoCancelacion();
-            return;
-        }
-
-        DialogResult respuesta =
-            MessageBox.Show(
-                this,
-                "Hay una decisión ingresada que no fue registrada. " +
-                "¿Desea cerrar igualmente?",
-                "Registrar decisión",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-
-        if (respuesta == DialogResult.No)
-        {
-            e.Cancel = true;
-            DialogResult = DialogResult.None;
-            return;
-        }
-
-        NormalizarResultadoCancelacion();
-    }
-
-    #endregion
-
-    #region Validación y confirmación
-
-    private bool ValidarFormulario()
-    {
-        cboDecision.BackColor = Color.White;
-
-        if (cboDecision.SelectedIndex < 0)
-        {
-            cboDecision.BackColor =
-                Color.FromArgb(254, 242, 242);
-
-            MessageBox.Show(
-                this,
-                "Seleccioná la decisión comunicada por el cliente.",
-                "Datos incompletos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
-            cboDecision.Focus();
-            return false;
-        }
-
-        return true;
-    }
-
-    private void ConfirmarDecision()
-    {
-        DialogResult respuesta =
-            MessageBox.Show(
-                this,
-                $"¿Confirma que el presupuesto fue {Decision.ToLowerInvariant()}?",
-                "Confirmar decisión",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-
-        if (respuesta != DialogResult.Yes)
-        {
-            return;
-        }
-
-        txtObservaciones.Text =
-            txtObservaciones.Text.Trim();
-
-        MessageBox.Show(
-            this,
-            "La decisión del presupuesto fue registrada correctamente.",
-            "Decisión registrada",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-
-        _decisionConfirmada = true;
-        DialogResult = DialogResult.OK;
-    }
-
-    private void NormalizarResultadoCancelacion()
-    {
-        if (!_decisionConfirmada &&
-            DialogResult == DialogResult.None)
-        {
-            DialogResult = DialogResult.Cancel;
-        }
-    }
-
-    #endregion
-
-    #region Estilos
-
-    private void AplicarEstilos()
-    {
-        BackColor =
-            EstilosInterfaz.FondoAplicacion;
-
-        EstilosInterfaz.AplicarBotonPrimario(
-            btnRegistrar);
-
-        EstilosInterfaz.AplicarBotonSecundario(
-            btnCancelar);
-    }
-
-    #endregion
+    private void Cerrar(object? s, EventArgs e) => Close();
+    private void AlCerrar(object? s, FormClosingEventArgs e) { if (_ocupado) { e.Cancel = true; return; }
+        if (_hayCambios && DialogResult != DialogResult.OK && MessageBox.Show(this,"¿Descartar la decisión preparada sin guardarla?","Cerrar decisión",MessageBoxButtons.YesNo)!=DialogResult.Yes) e.Cancel=true; }
 }

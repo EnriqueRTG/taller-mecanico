@@ -25,6 +25,10 @@ public static class DependencyInjection
         services.AddScoped<CategoriaServicio>();
         services.AddScoped<DiagnosticoServicio>();
         services.AddScoped<EvaluacionServicio>();
+        services.AddScoped<Taller.Aplicacion.Seguridad.AutorizacionOperativa>();
+        services.AddScoped<PresupuestoServicio>();
+        services.AddScoped<EjecucionServicio>();
+        services.AddScoped<CobroServicio>();
 
         return services;
     }

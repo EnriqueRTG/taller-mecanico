@@ -186,6 +186,120 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.ToTable("Clientes", (string)null);
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.Comprobante", b =>
+                {
+                    b.Property<int>("IdComprobante")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdComprobante"));
+
+                    b.Property<string>("Cliente")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DocumentoCliente")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("Dominio")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaEmision")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdAtencion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdUsuarioEmision")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Moneda")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPagado")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdComprobante");
+
+                    b.HasIndex("IdAtencion")
+                        .IsUnique();
+
+                    b.HasIndex("IdUsuarioEmision");
+
+                    b.ToTable("Comprobantes", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Comprobantes_Importes", "[Total] >= 0 AND [TotalPagado] >= 0 AND [TotalPagado] <= [Total]");
+
+                            t.HasCheckConstraint("CK_Comprobantes_SinCargo", "[Total] > 0 OR LEN(LTRIM(RTRIM(COALESCE([Observaciones], N'')))) > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.ComprobanteDetalle", b =>
+                {
+                    b.Property<int>("IdComprobanteDetalle")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdComprobanteDetalle"));
+
+                    b.Property<decimal>("Cantidad")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("IdComprobante")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPresupuestoDetalle")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("IdComprobanteDetalle");
+
+                    b.HasIndex("IdComprobante");
+
+                    b.HasIndex("IdPresupuestoDetalle")
+                        .IsUnique();
+
+                    b.ToTable("ComprobanteDetalles", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ComprobanteDetalles_Importes", "[Cantidad] > 0 AND [PrecioUnitario] >= 0 AND [Subtotal] = ROUND([Cantidad] * [PrecioUnitario], 2)");
+                        });
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Concepto", b =>
                 {
                     b.Property<int>("IdConcepto")
@@ -399,8 +513,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("int");
 
                     b.Property<string>("Observaciones")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.HasKey("IdHistorialAtencion");
 
@@ -445,6 +559,70 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.ToTable("Marcas", (string)null);
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.MedioPago", b =>
+                {
+                    b.Property<int>("IdMedioPago")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMedioPago"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<bool>("RequiereReferencia")
+                        .HasColumnType("bit");
+
+                    b.HasKey("IdMedioPago");
+
+                    b.HasIndex("Nombre")
+                        .IsUnique();
+
+                    b.ToTable("MediosPago", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            IdMedioPago = 1,
+                            Activo = true,
+                            Nombre = "Efectivo",
+                            RequiereReferencia = false
+                        },
+                        new
+                        {
+                            IdMedioPago = 2,
+                            Activo = true,
+                            Nombre = "Transferencia",
+                            RequiereReferencia = true
+                        },
+                        new
+                        {
+                            IdMedioPago = 3,
+                            Activo = true,
+                            Nombre = "Tarjeta de débito",
+                            RequiereReferencia = true
+                        },
+                        new
+                        {
+                            IdMedioPago = 4,
+                            Activo = true,
+                            Nombre = "Tarjeta de crédito",
+                            RequiereReferencia = true
+                        },
+                        new
+                        {
+                            IdMedioPago = 5,
+                            Activo = true,
+                            Nombre = "Billetera virtual",
+                            RequiereReferencia = true
+                        });
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Modelo", b =>
                 {
                     b.Property<int>("IdModelo")
@@ -472,6 +650,114 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.ToTable("Modelos", (string)null);
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.Pago", b =>
+                {
+                    b.Property<int>("IdPago")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPago"));
+
+                    b.Property<bool>("Anulado")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaAnulacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdComprobante")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdOperacion")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("IdUsuarioAnulacion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdUsuarioRegistro")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Importe")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("MotivoAnulacion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<decimal>("SaldoPosterior")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UsuarioRegistroNombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("IdPago");
+
+                    b.HasIndex("IdComprobante");
+
+                    b.HasIndex("IdOperacion")
+                        .IsUnique();
+
+                    b.HasIndex("IdUsuarioAnulacion");
+
+                    b.HasIndex("IdUsuarioRegistro");
+
+                    b.ToTable("Pagos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Pagos_Anulacion", "([Anulado] = 0 AND [MotivoAnulacion] IS NULL AND [FechaAnulacion] IS NULL AND [IdUsuarioAnulacion] IS NULL) OR ([Anulado] = 1 AND LEN(LTRIM(RTRIM(COALESCE([MotivoAnulacion], N'')))) > 0 AND [FechaAnulacion] IS NOT NULL AND [IdUsuarioAnulacion] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_Pagos_Importe", "[Importe] > 0 AND [SaldoPosterior] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.PagoMedio", b =>
+                {
+                    b.Property<int>("IdPagoMedio")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPagoMedio"));
+
+                    b.Property<int>("IdMedioPago")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPago")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Importe")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NombreMedio")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Referencia")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("IdPagoMedio");
+
+                    b.HasIndex("IdMedioPago");
+
+                    b.HasIndex("IdPago", "Orden")
+                        .IsUnique();
+
+                    b.ToTable("PagoMedios", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PagoMedios_Importe", "[Importe] > 0 AND [Orden] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Presupuesto", b =>
                 {
                     b.Property<int>("IdPresupuesto")
@@ -479,6 +765,9 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPresupuesto"));
+
+                    b.Property<bool>("AlcanceValidado")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Estado")
                         .IsRequired()
@@ -500,13 +789,24 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<int?>("IdDiagnostico")
                         .HasColumnType("int");
 
+                    b.Property<int?>("IdPresupuestoAnterior")
+                        .HasColumnType("int");
+
                     b.Property<int>("IdUsuarioCreacion")
                         .HasColumnType("int");
 
                     b.Property<int?>("IdUsuarioDecision")
                         .HasColumnType("int");
 
+                    b.Property<string>("MotivoRevision")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("Observaciones")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ObservacionesDecision")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -521,6 +821,9 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<bool>("Vigente")
+                        .HasColumnType("bit");
+
                     b.HasKey("IdPresupuesto");
 
                     b.HasIndex("IdAtencion")
@@ -528,6 +831,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.HasIndex("IdDiagnostico")
                         .HasDatabaseName("IX_Presupuestos_IdDiagnostico");
+
+                    b.HasIndex("IdPresupuestoAnterior");
 
                     b.HasIndex("IdUsuarioCreacion");
 
@@ -537,7 +842,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.HasIndex(new[] { "IdAtencion" }, "UX_Presupuestos_BorradorPorAtencion")
                         .IsUnique()
-                        .HasFilter("[Tipo] = N'Reparacion' AND [Estado] = N'Borrador'");
+                        .HasFilter("[Tipo] = N'Reparacion' AND [Estado] = N'Borrador' AND [Vigente] = 1");
 
                     b.HasIndex(new[] { "IdAtencion" }, "UX_Presupuestos_DiagnosticoPorAtencion")
                         .IsUnique()
@@ -567,6 +872,9 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPresupuestoDetalle"));
+
+                    b.Property<bool?>("AceptadoPorCliente")
+                        .HasColumnType("bit");
 
                     b.Property<decimal>("Cantidad")
                         .HasPrecision(18, 3)
@@ -813,6 +1121,44 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Vehiculo");
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.Comprobante", b =>
+                {
+                    b.HasOne("Taller.Dominio.Entidades.Atencion", "Atencion")
+                        .WithMany()
+                        .HasForeignKey("IdAtencion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioEmision")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioEmision")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Atencion");
+
+                    b.Navigation("UsuarioEmision");
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.ComprobanteDetalle", b =>
+                {
+                    b.HasOne("Taller.Dominio.Entidades.Comprobante", "Comprobante")
+                        .WithMany("Detalles")
+                        .HasForeignKey("IdComprobante")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Taller.Dominio.Entidades.PresupuestoDetalle", "Origen")
+                        .WithMany()
+                        .HasForeignKey("IdPresupuestoDetalle")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Comprobante");
+
+                    b.Navigation("Origen");
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Concepto", b =>
                 {
                     b.HasOne("Taller.Dominio.Entidades.Categoria", "Categoria")
@@ -899,6 +1245,51 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Marca");
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.Pago", b =>
+                {
+                    b.HasOne("Taller.Dominio.Entidades.Comprobante", "Comprobante")
+                        .WithMany("Pagos")
+                        .HasForeignKey("IdComprobante")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioAnulacion")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioAnulacion")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioRegistro")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioRegistro")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Comprobante");
+
+                    b.Navigation("UsuarioAnulacion");
+
+                    b.Navigation("UsuarioRegistro");
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.PagoMedio", b =>
+                {
+                    b.HasOne("Taller.Dominio.Entidades.MedioPago", "MedioPago")
+                        .WithMany()
+                        .HasForeignKey("IdMedioPago")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Taller.Dominio.Entidades.Pago", "Pago")
+                        .WithMany("Medios")
+                        .HasForeignKey("IdPago")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MedioPago");
+
+                    b.Navigation("Pago");
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Presupuesto", b =>
                 {
                     b.HasOne("Taller.Dominio.Entidades.Atencion", "Atencion")
@@ -906,6 +1297,11 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasForeignKey("IdAtencion")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Taller.Dominio.Entidades.Presupuesto", "PresupuestoAnterior")
+                        .WithMany()
+                        .HasForeignKey("IdPresupuestoAnterior")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioCreacion")
                         .WithMany()
@@ -927,6 +1323,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Atencion");
 
                     b.Navigation("Diagnostico");
+
+                    b.Navigation("PresupuestoAnterior");
 
                     b.Navigation("UsuarioCreacion");
 
@@ -1007,6 +1405,13 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Atenciones");
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.Comprobante", b =>
+                {
+                    b.Navigation("Detalles");
+
+                    b.Navigation("Pagos");
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Marca", b =>
                 {
                     b.Navigation("Modelos");
@@ -1015,6 +1420,11 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
             modelBuilder.Entity("Taller.Dominio.Entidades.Modelo", b =>
                 {
                     b.Navigation("Vehiculos");
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.Pago", b =>
+                {
+                    b.Navigation("Medios");
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Presupuesto", b =>

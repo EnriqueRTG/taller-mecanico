@@ -10,6 +10,8 @@
 /// </remarks>
 public enum EstadoPresupuesto
 {
+    /// <summary>Propuesta en elaboración, todavía no disponible para presentar.</summary>
+    Borrador = 0,
     /// <summary>
     /// La propuesta está registrada y espera ser comunicada
     /// al cliente por Recepción.

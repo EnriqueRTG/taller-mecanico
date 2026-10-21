@@ -113,6 +113,11 @@ public partial class FrmPrincipal : Form
         Action<TFormulario>? preparar = null)
         where TFormulario : Form
     {
+        if (_formularioActivo is IFormularioConOperacion { OperacionEnCurso: true })
+        {
+            MessageBox.Show(this, "Espere a que termine la operación actual antes de cambiar de módulo.");
+            return;
+        }
         if (_formularioActivo?.GetType() == typeof(TFormulario))
         {
             return;
@@ -358,7 +363,7 @@ public partial class FrmPrincipal : Form
         EventArgs e)
     {
         AbrirFormularioAutorizado<FrmDiagnosticos>(
-            "Diagnósticos",
+            "Evaluaciones técnicas",
             btnDiagnosticos,
             "No tiene permisos para acceder a los diagnósticos.",
             PermisoAplicacion.ConsultarDiagnosticos,
@@ -416,6 +421,7 @@ public partial class FrmPrincipal : Form
         object sender,
         EventArgs e)
     {
+        if (_formularioActivo is IFormularioConOperacion { OperacionEnCurso: true }) return;
         var respuesta = MessageBox.Show(
             "¿Desea cerrar la sesión actual?",
             "Cerrar sesión",
@@ -434,6 +440,7 @@ public partial class FrmPrincipal : Form
         object sender,
         EventArgs e)
     {
+        if (_formularioActivo is IFormularioConOperacion { OperacionEnCurso: true }) return;
         var respuesta = MessageBox.Show(
             "¿Desea salir de la aplicación?",
             "Salir",
@@ -516,7 +523,7 @@ public partial class FrmPrincipal : Form
             try
             {
                 AbrirFormulario<FrmDiagnosticos>(
-                    "Diagnósticos",
+                    "Evaluaciones técnicas",
                     formulario => formulario.PrepararAperturaDiagnostico(
                         e.IdAtencion));
 
@@ -533,4 +540,13 @@ public partial class FrmPrincipal : Form
             }
         }));
     }
+    private void FrmPrincipal_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (_formularioActivo is IFormularioConOperacion { OperacionEnCurso: true })
+        {
+            e.Cancel = true;
+            MessageBox.Show(this, "Espere a que termine la operación en curso antes de cerrar.");
+        }
+    }
+
 }

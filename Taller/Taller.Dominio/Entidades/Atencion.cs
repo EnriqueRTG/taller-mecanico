@@ -25,6 +25,7 @@ public sealed class Atencion
     public ActividadTecnica? ActividadTecnica { get; set; }
 
     public DateTime FechaApertura { get; set; } = DateTime.Now;
+    public TipoSolicitudAtencion TipoSolicitud { get; set; } = TipoSolicitudAtencion.Problema;
     public string MotivoConsulta { get; set; } = null!;
     public EstadoAtencion Estado { get; set; } = EstadoAtencion.Abierta;
     public DateTime? FechaCierre { get; set; }
@@ -68,6 +69,9 @@ public sealed class Atencion
     /// <summary>
     /// Eventos registrados durante el ciclo de la atención.
     /// </summary>
+    /// <summary>Avance o cierre de la evaluación y propuesta técnica.</summary>
+    public EvaluacionAtencion? Evaluacion { get; set; }
+
     public ICollection<HistorialAtencion> Historial { get; set; }
         = new List<HistorialAtencion>();
 }

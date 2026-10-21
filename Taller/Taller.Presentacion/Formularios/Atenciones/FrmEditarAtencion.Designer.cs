@@ -47,6 +47,8 @@
             tlpDatosEditables = new TableLayoutPanel();
             lblMotivo = new Label();
             txtMotivo = new TextBox();
+            cboTipoSolicitud = new ComboBox();
+            lblTipoSolicitud = new Label();
             pnlAcciones = new Panel();
             flpAcciones = new FlowLayoutPanel();
             btnCancelar = new Button();
@@ -302,16 +304,24 @@
             tlpDatosEditables.ColumnCount = 2;
             tlpDatosEditables.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             tlpDatosEditables.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tlpDatosEditables.Controls.Add(lblMotivo, 0, 0);
-            tlpDatosEditables.Controls.Add(txtMotivo, 1, 0);
+            tlpDatosEditables.Controls.Add(lblMotivo, 0, 1);
+            tlpDatosEditables.Controls.Add(txtMotivo, 1, 1);
+            tlpDatosEditables.Controls.Add(lblTipoSolicitud, 0, 0);
+            tlpDatosEditables.Controls.Add(cboTipoSolicitud, 1, 0);
+            lblTipoSolicitud.Text = "Solicitud";
+            lblTipoSolicitud.Dock = DockStyle.Fill;
+            cboTipoSolicitud.Name = "cboTipoSolicitud";
+            cboTipoSolicitud.Dock = DockStyle.Fill;
+            cboTipoSolicitud.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboTipoSolicitud.Items.AddRange(new object[] { "Síntoma o problema", "Servicio definido", "Solicitud mixta" });
+            cboTipoSolicitud.SelectedIndexChanged += CampoEditable_Cambio;
             tlpDatosEditables.Dock = DockStyle.Fill;
             tlpDatosEditables.Location = new Point(21, 251);
             tlpDatosEditables.Name = "tlpDatosEditables";
             tlpDatosEditables.Padding = new Padding(8);
-            tlpDatosEditables.RowCount = 1;
+            tlpDatosEditables.RowCount = 2;
+            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
             tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tlpDatosEditables.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpDatosEditables.Size = new Size(762, 124);
             tlpDatosEditables.TabIndex = 2;
             // 
@@ -441,6 +451,8 @@
         private TableLayoutPanel tlpDatosEditables;
         private Label lblMotivo;
         private TextBox txtMotivo;
+        private ComboBox cboTipoSolicitud;
+        private Label lblTipoSolicitud;
         private Panel pnlAcciones;
         private FlowLayoutPanel flpAcciones;
         private Button btnCancelar;

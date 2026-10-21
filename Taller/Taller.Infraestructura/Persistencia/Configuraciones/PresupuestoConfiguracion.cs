@@ -14,27 +14,13 @@ public sealed class PresupuestoConfiguracion
     {
         builder.ToTable("Presupuestos", tabla =>
         {
-            // Cada tipo tiene un único origen.
-            tabla.HasCheckConstraint(
-                "CK_Presupuestos_Origen",
-                """
-                (
-                    [Tipo] = N'Diagnostico'
-                    AND [IdAtencion] IS NOT NULL
-                    AND [IdDiagnostico] IS NULL
-                )
-                OR
-                (
-                    [Tipo] = N'Reparacion'
-                    AND [IdAtencion] IS NULL
-                    AND [IdDiagnostico] IS NOT NULL
-                )
-                """);
-
+            tabla.HasCheckConstraint("CK_Presupuestos_Origen",
+                "[Tipo] IN (N'Diagnostico', N'Reparacion') AND ([Tipo] <> N'Diagnostico' OR [IdDiagnostico] IS NULL)");
             tabla.HasCheckConstraint(
                 "CK_Presupuestos_Estado",
                 """
                 [Estado] IN (
+                    N'Borrador',
                     N'PendientePresentacion',
                     N'PendienteDecision',
                     N'Aceptado',
@@ -49,7 +35,8 @@ public sealed class PresupuestoConfiguracion
                 """
                 (
                     [Estado] IN (
-                        N'PendientePresentacion',
+                        N'Borrador',
+                    N'PendientePresentacion',
                         N'PendienteDecision'
                     )
                     AND [IdUsuarioDecision] IS NULL
@@ -67,7 +54,7 @@ public sealed class PresupuestoConfiguracion
                 "CK_Presupuestos_Presentacion",
                 """
                 (
-                    [Estado] = N'PendientePresentacion'
+                    [Estado] IN (N'Borrador', N'PendientePresentacion')
                     AND [FechaPresentacion] IS NULL
                 )
                 OR
@@ -115,7 +102,7 @@ public sealed class PresupuestoConfiguracion
             .IsRequired();
 
         builder.Property(p => p.IdAtencion)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(p => p.IdDiagnostico)
             .IsRequired(false);
@@ -151,11 +138,15 @@ public sealed class PresupuestoConfiguracion
             .IsRowVersion();
 
         // Solo un presupuesto del cargo inicial por atención.
-        builder.HasIndex(p => p.IdAtencion)
+        builder.HasIndex(p => p.IdAtencion, "UX_Presupuestos_DiagnosticoPorAtencion")
             .HasDatabaseName("UX_Presupuestos_DiagnosticoPorAtencion")
             .IsUnique()
-            .HasFilter("[IdAtencion] IS NOT NULL");
+            .HasFilter("[Tipo] = N'Diagnostico'");
 
+        builder.HasIndex(p => p.IdAtencion).HasDatabaseName("IX_Presupuestos_Atencion")
+            .IsUnique(false);
+        builder.HasIndex(p => p.IdAtencion, "UX_Presupuestos_BorradorPorAtencion")
+            .IsUnique().HasFilter("[Tipo] = N'Reparacion' AND [Estado] = N'Borrador'");
         // Un diagnóstico puede fundamentar varias propuestas.
         builder.HasIndex(p => p.IdDiagnostico)
             .HasDatabaseName("IX_Presupuestos_IdDiagnostico");
@@ -163,12 +154,13 @@ public sealed class PresupuestoConfiguracion
         builder.HasOne(p => p.Atencion)
             .WithMany()
             .HasForeignKey(p => p.IdAtencion)
-            .IsRequired(false)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Diagnostico)
             .WithMany()
-            .HasForeignKey(p => p.IdDiagnostico)
+            .HasForeignKey(p => new { p.IdDiagnostico, p.IdAtencion })
+            .HasPrincipalKey(d => new { d.IdDiagnostico, d.IdAtencion })
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 

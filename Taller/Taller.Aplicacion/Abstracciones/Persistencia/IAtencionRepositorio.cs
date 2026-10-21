@@ -43,7 +43,7 @@ public interface IAtencionRepositorio
     /// Guarda el envío a diagnóstico, el presupuesto inicial
     /// con su detalle y el evento del historial conjuntamente.
     /// </summary>
-    Task EnviarADiagnosticoAsync(
+    Task ConfirmarIngresoAsync(
         Atencion atencion,
         Presupuesto presupuesto,
         HistorialAtencion historial);

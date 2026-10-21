@@ -55,7 +55,11 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
 
         var entrada = _contexto.Entry(atencion);
         entrada.State = EntityState.Added;
-
+        foreach (var evento in atencion.Historial)
+        {
+            evento.Atencion = atencion;
+            _contexto.HistorialAtenciones.Add(evento);
+        }
         await GuardarAsync(entrada);
     }
 
@@ -67,7 +71,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// La atención, el presupuesto, sus detalles y el historial
     /// se persisten mediante un único guardado.
     /// </remarks>
-    public async Task EnviarADiagnosticoAsync(
+    public async Task ConfirmarIngresoAsync(
         Atencion atencion,
         Presupuesto presupuesto,
         HistorialAtencion historial)
@@ -76,12 +80,12 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         ArgumentNullException.ThrowIfNull(presupuesto);
         ArgumentNullException.ThrowIfNull(historial);
 
-        if (atencion.Estado != EstadoAtencion.PendienteDiagnostico
+        if (atencion.Estado != EstadoAtencion.EnEvaluacionTecnica
             || atencion.IdTecnicoEnActividad is not null
             || atencion.ActividadTecnica is not null)
         {
             throw new ArgumentException(
-                "La atención debe quedar pendiente de diagnóstico y sin reserva.",
+                "La atención debe quedar en evaluación técnica y sin reserva.",
                 nameof(atencion));
         }
 
@@ -225,6 +229,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         entradaAtencion.Property(a => a.IdCliente).IsModified = true;
         entradaAtencion.Property(a => a.IdVehiculo).IsModified = true;
         entradaAtencion.Property(a => a.MotivoConsulta).IsModified = true;
+        entradaAtencion.Property(a => a.TipoSolicitud).IsModified = true;
         entradaAtencion.Property(a => a.Estado).IsModified = true;
         entradaAtencion.Property(a => a.FechaCierre).IsModified = true;
 
@@ -472,6 +477,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     {
         return _contexto.Atenciones
             .AsNoTracking()
+            .Include(a => a.Evaluacion)
             .Include(a => a.Cliente)
             .Include(a => a.Vehiculo)
                 .ThenInclude(v => v.Modelo)

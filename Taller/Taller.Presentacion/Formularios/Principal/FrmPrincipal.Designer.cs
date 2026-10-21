@@ -189,7 +189,7 @@
             btnDiagnosticos.Size = new Size(213, 48);
             btnDiagnosticos.TabIndex = 9;
             btnDiagnosticos.TabStop = false;
-            btnDiagnosticos.Text = "Diagnósticos";
+            btnDiagnosticos.Text = "Evaluaciones técnicas";
             btnDiagnosticos.TextAlign = ContentAlignment.MiddleLeft;
             btnDiagnosticos.UseVisualStyleBackColor = false;
             btnDiagnosticos.Click += btnDiagnosticos_Click;
@@ -446,6 +446,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.WhiteSmoke;
+            FormClosing += FrmPrincipal_FormClosing;
             ClientSize = new Size(1084, 661);
             Controls.Add(pnlContenido);
             Controls.Add(pnlEncabezado);

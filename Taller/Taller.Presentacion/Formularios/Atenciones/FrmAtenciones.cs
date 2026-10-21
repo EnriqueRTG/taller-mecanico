@@ -11,7 +11,7 @@ using Taller.Presentacion.Navegacion;
 
 namespace Taller.Presentacion.Formularios.Atenciones
 {
-    public partial class FrmAtenciones : Form
+    public partial class FrmAtenciones : Form, IFormularioConOperacion
     {
         #region Campos privados
         private readonly AtencionServicio _atencionServicio;
@@ -20,7 +20,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private readonly AutorizacionNavegacion _autorizacionNavegacion;
         private List<AtencionFila> _atenciones = [];
         private bool _formularioNuevaAtencionAbierto;
-        private bool _tomandoDiagnostico;
+        private bool _tomandoDiagnostico = false;
+        private bool _cargandoDatos;
+        public bool OperacionEnCurso => _cargandoDatos;
         #endregion
 
         #region Constructor y modelo de presentación
@@ -44,6 +46,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private sealed class AtencionFila
         {
             public int IdAtencion { get; init; }
+            public bool EvaluacionFinalizada { get; init; }
 
             public int? IdTecnicoEnActividad { get; init; }
 
@@ -333,6 +336,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
         private async Task CargarAtencionesAsync()
         {
+            if (_cargandoDatos) return;
+            _cargandoDatos = true;
             try
             {
                 Cursor = Cursors.WaitCursor;
@@ -368,6 +373,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             {
                 Cursor = Cursors.Default;
                 EstablecerEstadoCarga(false);
+                _cargandoDatos = false;
             }
         }
 
@@ -401,6 +407,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             return new AtencionFila
             {
                 IdAtencion = atencion.IdAtencion,
+                EvaluacionFinalizada = atencion.Evaluacion?.Finalizada == true,
                 IdTecnicoEnActividad = atencion.IdTecnicoEnActividad,
                 Fecha = atencion.FechaApertura,
                 Dominio = atencion.Vehiculo.Dominio,
@@ -665,37 +672,34 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 puedeGestionar &&
                 fila.EstadoValor == EstadoAtencion.Abierta;
 
-            btnCancelarAtencion.Enabled =
-                puedeGestionar;
+            btnCancelarAtencion.Enabled = false;
 
-            btnRegistrarEntrega.Enabled =
-                puedeGestionar;
+            btnRegistrarEntrega.Enabled = false;
 
             btnVerHistorial.Enabled =
                 puedeConsultarComoTecnico;
 
             bool puedeTomarDiagnostico =
-                fila.EstadoValor == EstadoAtencion.PendienteDiagnostico
+                !fila.EvaluacionFinalizada && (fila.EstadoValor == EstadoAtencion.PendienteDiagnostico || fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica)
                 && fila.IdTecnicoEnActividad is null
                 && fila.ActividadTecnica is null;
 
             bool puedeRegistrarDiagnostico =
                 fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica
                 && fila.IdTecnicoEnActividad == usuario.Id
-                && fila.ActividadTecnica == ActividadTecnica.Diagnostico;
+                && fila.ActividadTecnica is ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto;
 
             btnRegistrarDiagnostico.Text =
                 puedeRegistrarDiagnostico
-                    ? "Registrar diagnóstico"
-                    : "Tomar diagnóstico";
+                    ? "Continuar evaluación"
+                    : "Tomar evaluación";
 
             btnRegistrarDiagnostico.Enabled =
                 !_tomandoDiagnostico
                 && puedeConsultarComoTecnico
                 && (puedeTomarDiagnostico || puedeRegistrarDiagnostico);
 
-            btnFinalizarTrabajo.Enabled =
-                puedeConsultarComoTecnico;
+            btnFinalizarTrabajo.Enabled = false;
         }
 
         private void DeshabilitarAcciones()
@@ -864,11 +868,11 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
         }
 
-        private void BtnEditar_Click(
+        private async void BtnEditar_Click(
             object? sender,
             EventArgs e)
         {
-            AbrirEdicionSeleccionada();
+            await AbrirEdicionSeleccionada();
         }
 
         private void BtnCancelarAtencion_Click(
@@ -967,14 +971,14 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
 
             bool puedeTomar =
-                fila.EstadoValor == EstadoAtencion.PendienteDiagnostico
+                !fila.EvaluacionFinalizada && (fila.EstadoValor == EstadoAtencion.PendienteDiagnostico || fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica)
                 && fila.IdTecnicoEnActividad is null
                 && fila.ActividadTecnica is null;
 
             bool puedeRetomar =
                 fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica
                 && fila.IdTecnicoEnActividad == usuario.Id
-                && fila.ActividadTecnica == ActividadTecnica.Diagnostico;
+                && fila.ActividadTecnica is ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto;
 
             if (!puedeTomar && !puedeRetomar)
             {
@@ -1091,7 +1095,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 new FrmDetalleAtencion(
                         fila.IdAtencion,
                         _atencionServicio,
-                        _sesionUsuario);
+                        _sesionUsuario,
+                        _serviceProvider.GetRequiredService<EvaluacionServicio>());
 
             formulario.ShowDialog(this);
 
@@ -1101,80 +1106,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
         /// <summary>
         /// Abre directamente el formulario demostrativo de registro
         /// de diagnóstico para la atención seleccionada.
-        /// </summary>
-        private void AbrirRegistroDiagnosticoSeleccionado()
-        {
-            AtencionFila? fila =
-                ObtenerFilaSeleccionada();
-
-            if (fila is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "Seleccioná una atención para registrar el diagnóstico.",
-                    "Registrar diagnóstico",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            Usuario? usuario =
-                _sesionUsuario.UsuarioActual;
-
-            if (usuario is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "No existe una sesión de usuario válida.",
-                    "Registrar diagnóstico",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            bool puedeRegistrar =
-                _autorizacionNavegacion.TienePermiso(
-                    usuario.RolId,
-                    PermisoAplicacion.GestionarDiagnosticos);
-
-            if (!puedeRegistrar)
-            {
-                MessageBox.Show(
-                    this,
-                    "Solamente el personal técnico puede registrar diagnósticos.",
-                    "Acceso restringido",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            using var formulario =
-                new FrmRegistrarDiagnostico();
-
-            DialogResult resultado =
-                formulario.ShowDialog(this);
-
-            if (resultado != DialogResult.OK)
-            {
-                return;
-            }
-
-            MessageBox.Show(
-                this,
-                "El diagnóstico se registró de manera simulada.\n\n" +
-                "La persistencia y actualización definitiva de la atención " +
-                "se incorporarán en una entrega posterior.",
-                "Diagnóstico registrado",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-
-        /// <summary>
-        /// Abre de manera modal la pantalla demostrativa de edición
-        /// para la atención seleccionada.
         /// </summary>
         private async Task AbrirEdicionSeleccionada()
         {
@@ -1405,6 +1336,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             {
                 return fila.EstadoValor switch
                 {
+                    EstadoAtencion.EnEvaluacionTecnica when fila.EvaluacionFinalizada => 0,
                     EstadoAtencion.PendienteDecision => 0,
 
                     EstadoAtencion.TrabajoFinalizado

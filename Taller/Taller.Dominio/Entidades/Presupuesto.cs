@@ -9,8 +9,8 @@ namespace Taller.Dominio.Entidades;
 /// El presupuesto de diagnóstico se vincula directamente
 /// con la atención.
 ///
-/// El presupuesto de reparación se vincula con el diagnóstico
-/// que fundamenta los trabajos propuestos.
+/// Toda propuesta pertenece a una atención. Puede vincular un informe
+/// de diagnóstico o describir directamente un servicio definido.
 /// </remarks>
 public sealed class Presupuesto
 {
@@ -19,14 +19,13 @@ public sealed class Presupuesto
     public TipoPresupuesto Tipo { get; set; }
 
     /// <summary>
-    /// Atención asociada al servicio inicial de diagnóstico.
-    /// Es null en los presupuestos de reparación.
+    /// Atención a la que pertenece la propuesta, con o sin diagnóstico.
     /// </summary>
-    public int? IdAtencion { get; set; }
+    public int IdAtencion { get; set; }
 
     /// <summary>
     /// Informe que fundamenta una propuesta de reparación.
-    /// Es null en el presupuesto del servicio inicial.
+    /// Es opcional: los servicios definidos pueden presupuestarse sin diagnóstico.
     /// </summary>
     public int? IdDiagnostico { get; set; }
 
@@ -65,7 +64,7 @@ public sealed class Presupuesto
     /// </summary>
     public byte[] Version { get; set; } = [];
 
-    public Atencion? Atencion { get; set; }
+    public Atencion Atencion { get; set; } = null!;
 
     public Diagnostico? Diagnostico { get; set; }
 

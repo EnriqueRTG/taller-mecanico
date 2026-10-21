@@ -62,6 +62,11 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("TipoSolicitud")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<byte[]>("Version")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -83,11 +88,13 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.ToTable("Atenciones", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Atenciones_ActividadTecnica", "[ActividadTecnica] IS NULL \r\nOR [ActividadTecnica] IN (\r\n    N'Diagnostico',\r\n    N'Presupuesto',\r\n    N'Ejecucion'\r\n)");
+                            t.HasCheckConstraint("CK_Atenciones_ActividadTecnica", "[ActividadTecnica] IS NULL \nOR [ActividadTecnica] IN (\n    N'Diagnostico',\n    N'Presupuesto',\n    N'Ejecucion'\n)");
 
-                            t.HasCheckConstraint("CK_Atenciones_Estado", "[Estado] IN (\r\n    N'Abierta',\r\n    N'PendienteDiagnostico',\r\n    N'EnEvaluacionTecnica',\r\n    N'PendienteDecision',\r\n    N'EnEjecucion',\r\n    N'Pausada',\r\n    N'TrabajoFinalizado',\r\n    N'PendienteLiquidacion',\r\n    N'Cerrada',\r\n    N'Cancelada'\r\n)");
+                            t.HasCheckConstraint("CK_Atenciones_Estado", "[Estado] IN (\n    N'Abierta',\n    N'PendienteDiagnostico',\n    N'EnEvaluacionTecnica',\n    N'PendienteDecision',\n    N'EnEjecucion',\n    N'Pausada',\n    N'TrabajoFinalizado',\n    N'PendienteLiquidacion',\n    N'Cerrada',\n    N'Cancelada'\n)");
 
-                            t.HasCheckConstraint("CK_Atenciones_ReservaTecnica", "(\r\n    [IdTecnicoEnActividad] IS NULL\r\n    AND [ActividadTecnica] IS NULL\r\n)\r\nOR\r\n(\r\n    [IdTecnicoEnActividad] IS NOT NULL\r\n    AND [ActividadTecnica] IS NOT NULL\r\n)");
+                            t.HasCheckConstraint("CK_Atenciones_ReservaTecnica", "(\n    [IdTecnicoEnActividad] IS NULL\n    AND [ActividadTecnica] IS NULL\n)\nOR\n(\n    [IdTecnicoEnActividad] IS NOT NULL\n    AND [ActividadTecnica] IS NOT NULL\n)");
+
+                            t.HasCheckConstraint("CK_Atenciones_TipoSolicitud", "[TipoSolicitud] IN (N'Problema', N'ServicioDefinido', N'Mixta')");
                         });
                 });
 
@@ -227,13 +234,13 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.ToTable("Conceptos", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Conceptos_DisponibleParaIngreso", "[DisponibleParaIngreso] = 0\r\nOR [Tipo] = N'Servicio'");
+                            t.HasCheckConstraint("CK_Conceptos_DisponibleParaIngreso", "[DisponibleParaIngreso] = 0\nOR [Tipo] = N'Servicio'");
 
                             t.HasCheckConstraint("CK_Conceptos_Nombre", "LEN(LTRIM(RTRIM(Nombre))) > 0");
 
-                            t.HasCheckConstraint("CK_Conceptos_PrecioReferencia", "[PrecioReferencia] IS NULL OR \r\n[PrecioReferencia] >= 0");
+                            t.HasCheckConstraint("CK_Conceptos_PrecioReferencia", "[PrecioReferencia] IS NULL OR \n[PrecioReferencia] >= 0");
 
-                            t.HasCheckConstraint("CK_Conceptos_Tipo", "[Tipo] IN (\r\n    N'Servicio', \r\n    N'Repuesto', \r\n    N'Consumible')");
+                            t.HasCheckConstraint("CK_Conceptos_Tipo", "[Tipo] IN (\n    N'Servicio', \n    N'Repuesto', \n    N'Consumible')");
                         });
                 });
 
@@ -304,6 +311,59 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.EvaluacionAtencion", b =>
+                {
+                    b.Property<int>("IdAtencion")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FallaDetectada")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Finalizada")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IdTecnicoUltimaEdicion")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IncluyeDiagnostico")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Kilometraje")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("SoloEvaluacion")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TrabajoRecomendado")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdAtencion");
+
+                    b.HasIndex("IdTecnicoUltimaEdicion");
+
+                    b.ToTable("EvaluacionesAtencion", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_EvaluacionesAtencion_Kilometraje", "[Kilometraje] IS NULL OR [Kilometraje] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.HistorialAtencion", b =>
                 {
                     b.Property<int>("IdHistorialAtencion")
@@ -355,9 +415,9 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         {
                             t.HasCheckConstraint("CK_HistorialAtenciones_Accion", "LEN(LTRIM(RTRIM([Accion]))) > 0");
 
-                            t.HasCheckConstraint("CK_HistorialAtenciones_EstadoAnterior", "[EstadoAnterior] IS NULL\r\nOR [EstadoAnterior] IN (\r\n    N'Abierta',\r\n    N'PendienteDiagnostico',\r\n    N'EnEvaluacionTecnica',\r\n    N'PendienteDecision',\r\n    N'EnEjecucion',\r\n    N'Pausada',\r\n    N'TrabajoFinalizado',\r\n    N'PendienteLiquidacion',\r\n    N'Cerrada',\r\n    N'Cancelada'\r\n)");
+                            t.HasCheckConstraint("CK_HistorialAtenciones_EstadoAnterior", "[EstadoAnterior] IS NULL\nOR [EstadoAnterior] IN (\n    N'Abierta',\n    N'PendienteDiagnostico',\n    N'EnEvaluacionTecnica',\n    N'PendienteDecision',\n    N'EnEjecucion',\n    N'Pausada',\n    N'TrabajoFinalizado',\n    N'PendienteLiquidacion',\n    N'Cerrada',\n    N'Cancelada'\n)");
 
-                            t.HasCheckConstraint("CK_HistorialAtenciones_EstadoNuevo", "[EstadoNuevo] IN (\r\n    N'Abierta',\r\n    N'PendienteDiagnostico',\r\n    N'EnEvaluacionTecnica',\r\n    N'PendienteDecision',\r\n    N'EnEjecucion',\r\n    N'Pausada',\r\n    N'TrabajoFinalizado',\r\n    N'PendienteLiquidacion',\r\n    N'Cerrada',\r\n    N'Cancelada'\r\n)");
+                            t.HasCheckConstraint("CK_HistorialAtenciones_EstadoNuevo", "[EstadoNuevo] IN (\n    N'Abierta',\n    N'PendienteDiagnostico',\n    N'EnEvaluacionTecnica',\n    N'PendienteDecision',\n    N'EnEjecucion',\n    N'Pausada',\n    N'TrabajoFinalizado',\n    N'PendienteLiquidacion',\n    N'Cerrada',\n    N'Cancelada'\n)");
                         });
                 });
 
@@ -434,7 +494,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<DateTime?>("FechaPresentacion")
                         .HasColumnType("datetime2(0)");
 
-                    b.Property<int?>("IdAtencion")
+                    b.Property<int>("IdAtencion")
                         .HasColumnType("int");
 
                     b.Property<int?>("IdDiagnostico")
@@ -464,9 +524,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasKey("IdPresupuesto");
 
                     b.HasIndex("IdAtencion")
-                        .IsUnique()
-                        .HasDatabaseName("UX_Presupuestos_DiagnosticoPorAtencion")
-                        .HasFilter("[IdAtencion] IS NOT NULL");
+                        .HasDatabaseName("IX_Presupuestos_Atencion");
 
                     b.HasIndex("IdDiagnostico")
                         .HasDatabaseName("IX_Presupuestos_IdDiagnostico");
@@ -475,19 +533,30 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.HasIndex("IdUsuarioDecision");
 
+                    b.HasIndex("IdDiagnostico", "IdAtencion");
+
+                    b.HasIndex(new[] { "IdAtencion" }, "UX_Presupuestos_BorradorPorAtencion")
+                        .IsUnique()
+                        .HasFilter("[Tipo] = N'Reparacion' AND [Estado] = N'Borrador'");
+
+                    b.HasIndex(new[] { "IdAtencion" }, "UX_Presupuestos_DiagnosticoPorAtencion")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Presupuestos_DiagnosticoPorAtencion")
+                        .HasFilter("[Tipo] = N'Diagnostico'");
+
                     b.ToTable("Presupuestos", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Presupuestos_Decision", "(\r\n    [Estado] IN (\r\n        N'PendientePresentacion',\r\n        N'PendienteDecision'\r\n    )\r\n    AND [IdUsuarioDecision] IS NULL\r\n    AND [FechaDecision] IS NULL\r\n)\r\nOR\r\n(\r\n    [Estado] IN (N'Aceptado', N'Rechazado')\r\n    AND [IdUsuarioDecision] IS NOT NULL\r\n    AND [FechaDecision] IS NOT NULL\r\n)");
+                            t.HasCheckConstraint("CK_Presupuestos_Decision", "(\n    [Estado] IN (\n        N'Borrador',\n    N'PendientePresentacion',\n        N'PendienteDecision'\n    )\n    AND [IdUsuarioDecision] IS NULL\n    AND [FechaDecision] IS NULL\n)\nOR\n(\n    [Estado] IN (N'Aceptado', N'Rechazado')\n    AND [IdUsuarioDecision] IS NOT NULL\n    AND [FechaDecision] IS NOT NULL\n)");
 
                             t.HasCheckConstraint("CK_Presupuestos_DiagnosticoAceptado", "[Tipo] <> N'Diagnostico' OR [Estado] = N'Aceptado'");
 
-                            t.HasCheckConstraint("CK_Presupuestos_Estado", "[Estado] IN (\r\n    N'PendientePresentacion',\r\n    N'PendienteDecision',\r\n    N'Aceptado',\r\n    N'Rechazado'\r\n)");
+                            t.HasCheckConstraint("CK_Presupuestos_Estado", "[Estado] IN (\n    N'Borrador',\n    N'PendientePresentacion',\n    N'PendienteDecision',\n    N'Aceptado',\n    N'Rechazado'\n)");
 
-                            t.HasCheckConstraint("CK_Presupuestos_Fechas", "(\r\n    [FechaPresentacion] IS NULL\r\n    OR [FechaPresentacion] >= [FechaCreacion]\r\n)\r\nAND\r\n(\r\n    [FechaDecision] IS NULL\r\n    OR (\r\n        [FechaPresentacion] IS NOT NULL\r\n        AND [FechaDecision] >= [FechaPresentacion]\r\n    )\r\n)");
+                            t.HasCheckConstraint("CK_Presupuestos_Fechas", "(\n    [FechaPresentacion] IS NULL\n    OR [FechaPresentacion] >= [FechaCreacion]\n)\nAND\n(\n    [FechaDecision] IS NULL\n    OR (\n        [FechaPresentacion] IS NOT NULL\n        AND [FechaDecision] >= [FechaPresentacion]\n    )\n)");
 
-                            t.HasCheckConstraint("CK_Presupuestos_Origen", "(\r\n    [Tipo] = N'Diagnostico'\r\n    AND [IdAtencion] IS NOT NULL\r\n    AND [IdDiagnostico] IS NULL\r\n)\r\nOR\r\n(\r\n    [Tipo] = N'Reparacion'\r\n    AND [IdAtencion] IS NULL\r\n    AND [IdDiagnostico] IS NOT NULL\r\n)");
+                            t.HasCheckConstraint("CK_Presupuestos_Origen", "[Tipo] IN (N'Diagnostico', N'Reparacion') AND ([Tipo] <> N'Diagnostico' OR [IdDiagnostico] IS NULL)");
 
-                            t.HasCheckConstraint("CK_Presupuestos_Presentacion", "(\r\n    [Estado] = N'PendientePresentacion'\r\n    AND [FechaPresentacion] IS NULL\r\n)\r\nOR\r\n(\r\n    [Estado] IN (\r\n        N'PendienteDecision',\r\n        N'Aceptado',\r\n        N'Rechazado'\r\n    )\r\n    AND [FechaPresentacion] IS NOT NULL\r\n)");
+                            t.HasCheckConstraint("CK_Presupuestos_Presentacion", "(\n    [Estado] IN (N'Borrador', N'PendientePresentacion')\n    AND [FechaPresentacion] IS NULL\n)\nOR\n(\n    [Estado] IN (\n        N'PendienteDecision',\n        N'Aceptado',\n        N'Rechazado'\n    )\n    AND [FechaPresentacion] IS NOT NULL\n)");
                         });
                 });
 
@@ -552,23 +621,23 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.ToTable("PresupuestoDetalles", null, t =>
                         {
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_Avance", "(\r\n    [EstadoEjecucion] IN (N'NoIniciado', N'Omitido')\r\n    AND [CantidadEjecutada] = 0\r\n)\r\nOR\r\n(\r\n    [EstadoEjecucion] IN (N'EnCurso', N'Parcial')\r\n    AND [CantidadEjecutada] < [Cantidad]\r\n)\r\nOR\r\n(\r\n    [EstadoEjecucion] = N'Completado'\r\n    AND [CantidadEjecutada] = [Cantidad]\r\n)");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_Avance", "(\n    [EstadoEjecucion] IN (N'NoIniciado', N'Omitido')\n    AND [CantidadEjecutada] = 0\n)\nOR\n(\n    [EstadoEjecucion] IN (N'EnCurso', N'Parcial')\n    AND [CantidadEjecutada] < [Cantidad]\n)\nOR\n(\n    [EstadoEjecucion] = N'Completado'\n    AND [CantidadEjecutada] = [Cantidad]\n)");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_Cantidad", "[Cantidad] > 0");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_CantidadEjecutada", "[CantidadEjecutada] >= 0\r\nAND [CantidadEjecutada] <= [Cantidad]");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_CantidadEjecutada", "[CantidadEjecutada] >= 0\nAND [CantidadEjecutada] <= [Cantidad]");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_Descripcion", "LEN(LTRIM(RTRIM([Descripcion]))) > 0");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_EstadoEjecucion", "[EstadoEjecucion] IN (\r\n    N'NoIniciado',\r\n    N'EnCurso',\r\n    N'Parcial',\r\n    N'Completado',\r\n    N'Omitido'\r\n)");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_EstadoEjecucion", "[EstadoEjecucion] IN (\n    N'NoIniciado',\n    N'EnCurso',\n    N'Parcial',\n    N'Completado',\n    N'Omitido'\n)");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_Justificacion", "[EstadoEjecucion] NOT IN (N'Parcial', N'Omitido')\r\nOR (\r\n    [ObservacionesEjecucion] IS NOT NULL\r\n    AND LEN(LTRIM(RTRIM([ObservacionesEjecucion]))) > 0\r\n)");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_Justificacion", "[EstadoEjecucion] NOT IN (N'Parcial', N'Omitido')\nOR (\n    [ObservacionesEjecucion] IS NOT NULL\n    AND LEN(LTRIM(RTRIM([ObservacionesEjecucion]))) > 0\n)");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_PrecioUnitario", "[PrecioUnitario] >= 0");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_PresupuestoCambio", "[IdPresupuestoCambio] IS NULL\r\nOR [IdPresupuestoCambio] <> [IdPresupuesto]");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_PresupuestoCambio", "[IdPresupuestoCambio] IS NULL\nOR [IdPresupuestoCambio] <> [IdPresupuesto]");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_RegistroTecnico", "(\r\n    [IdTecnicoRegistro] IS NULL\r\n    AND [FechaRegistroEjecucion] IS NULL\r\n)\r\nOR\r\n(\r\n    [IdTecnicoRegistro] IS NOT NULL\r\n    AND [FechaRegistroEjecucion] IS NOT NULL\r\n)");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_RegistroTecnico", "(\n    [IdTecnicoRegistro] IS NULL\n    AND [FechaRegistroEjecucion] IS NULL\n)\nOR\n(\n    [IdTecnicoRegistro] IS NOT NULL\n    AND [FechaRegistroEjecucion] IS NOT NULL\n)");
                         });
                 });
 
@@ -774,6 +843,25 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("TecnicoAutor");
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.EvaluacionAtencion", b =>
+                {
+                    b.HasOne("Taller.Dominio.Entidades.Atencion", "Atencion")
+                        .WithOne("Evaluacion")
+                        .HasForeignKey("Taller.Dominio.Entidades.EvaluacionAtencion", "IdAtencion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Taller.Dominio.Entidades.Usuario", "TecnicoUltimaEdicion")
+                        .WithMany()
+                        .HasForeignKey("IdTecnicoUltimaEdicion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Atencion");
+
+                    b.Navigation("TecnicoUltimaEdicion");
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.HistorialAtencion", b =>
                 {
                     b.HasOne("Taller.Dominio.Entidades.Atencion", "Atencion")
@@ -816,12 +904,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasOne("Taller.Dominio.Entidades.Atencion", "Atencion")
                         .WithMany()
                         .HasForeignKey("IdAtencion")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Taller.Dominio.Entidades.Diagnostico", "Diagnostico")
-                        .WithMany()
-                        .HasForeignKey("IdDiagnostico")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioCreacion")
                         .WithMany()
@@ -832,6 +916,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasOne("Taller.Dominio.Entidades.Usuario", "UsuarioDecision")
                         .WithMany()
                         .HasForeignKey("IdUsuarioDecision")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Taller.Dominio.Entidades.Diagnostico", "Diagnostico")
+                        .WithMany()
+                        .HasForeignKey("IdDiagnostico", "IdAtencion")
+                        .HasPrincipalKey("IdDiagnostico", "IdAtencion")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Atencion");
@@ -901,6 +991,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
             modelBuilder.Entity("Taller.Dominio.Entidades.Atencion", b =>
                 {
                     b.Navigation("Diagnosticos");
+
+                    b.Navigation("Evaluacion");
 
                     b.Navigation("Historial");
                 });

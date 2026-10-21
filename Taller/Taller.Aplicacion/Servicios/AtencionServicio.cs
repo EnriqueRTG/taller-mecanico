@@ -1,6 +1,5 @@
 ﻿
 using Taller.Aplicacion.Abstracciones.Persistencia;
-using Taller.Aplicacion.Configuracion;
 using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
@@ -20,7 +19,6 @@ public sealed class AtencionServicio
     private readonly IVehiculoRepositorio _vehiculoRepositorio;
     private readonly IUsuarioRepositorio _usuarioRepositorio;
     private readonly IConceptoRepositorio _conceptoRepositorio;
-    private readonly IngresoDiagnosticoOpciones _ingresoDiagnosticoOpciones;
     private readonly SesionUsuario _sesionUsuario;
 
     /// <summary>
@@ -33,7 +31,6 @@ public sealed class AtencionServicio
         IVehiculoRepositorio vehiculoRepositorio,
         IUsuarioRepositorio usuarioRepositorio,
         IConceptoRepositorio conceptoRepositorio,
-        IngresoDiagnosticoOpciones ingresoDiagnosticoOpciones,
         SesionUsuario sesionUsuario)
     {
         _atencionRepositorio = atencionRepositorio;
@@ -41,9 +38,6 @@ public sealed class AtencionServicio
         _vehiculoRepositorio = vehiculoRepositorio;
         _usuarioRepositorio = usuarioRepositorio;
         _conceptoRepositorio = conceptoRepositorio;
-        _ingresoDiagnosticoOpciones = ingresoDiagnosticoOpciones
-    ?? throw new ArgumentNullException(
-        nameof(ingresoDiagnosticoOpciones));
         _sesionUsuario = sesionUsuario;
     }
 
@@ -100,18 +94,6 @@ public sealed class AtencionServicio
     }
 
     /// <summary>
-    /// Devuelve únicamente el servicio configurado para el ingreso.
-    /// </summary>
-    public async Task<List<Concepto>> ListarServiciosParaIngresoAsync()
-    {
-        await ObtenerAdministrativoActualAsync();
-
-        var concepto = await ObtenerConceptoIngresoAsync();
-
-        return new List<Concepto> { concepto };
-    }
-
-    /// <summary>
     /// Lista los servicios disponibles para preparar
     /// el ingreso autorizado por el cliente.
     /// </summary>
@@ -147,8 +129,12 @@ public sealed class AtencionServicio
         int idCliente,
         int idVehiculo,
         int idUsuarioRecepcion,
-        string motivoConsulta)
+        string motivoConsulta,
+        TipoSolicitudAtencion tipoSolicitud = TipoSolicitudAtencion.Problema)
     {
+        if (!Enum.IsDefined(tipoSolicitud)) throw new ValidacionException("Seleccione el tipo de solicitud.");
+        var recepcion = await ObtenerAdministrativoActualAsync();
+        if (recepcion.Id != idUsuarioRecepcion) throw new ValidacionException("Usuario de recepción inválido.");
         ValidarId(idCliente, nameof(idCliente));
         ValidarId(idVehiculo, nameof(idVehiculo));
         ValidarId(idUsuarioRecepcion, nameof(idUsuarioRecepcion));
@@ -171,12 +157,18 @@ public sealed class AtencionServicio
             IdCliente = idCliente,
             IdVehiculo = idVehiculo,
             IdUsuarioRecepcion = idUsuarioRecepcion,
+            TipoSolicitud = tipoSolicitud,
             FechaApertura = DateTime.Now,
             MotivoConsulta = motivoConsulta,
             Estado = EstadoAtencion.Abierta,
             FechaCierre = null
         };
 
+        atencion.Historial.Add(new HistorialAtencion {
+            IdUsuario = recepcion.Id, Fecha = atencion.FechaApertura,
+            Accion = "AtencionAbierta", EstadoAnterior = null, EstadoNuevo = EstadoAtencion.Abierta,
+            Observaciones = $"Solicitud: {tipoSolicitud}. Motivo registrado por Recepción."
+        });
         await _atencionRepositorio.AgregarAsync(atencion);
 
         return atencion;
@@ -190,8 +182,11 @@ public sealed class AtencionServicio
         int idAtencion,
         int idCliente,
         int idVehiculo,
-        string motivoConsulta)
+        string motivoConsulta,
+        TipoSolicitudAtencion? tipoSolicitud = null,
+        byte[]? version = null)
     {
+        if (tipoSolicitud.HasValue && !Enum.IsDefined(tipoSolicitud.Value)) throw new ValidacionException("Tipo de solicitud inválido.");
         ValidarId(idAtencion, nameof(idAtencion));
         ValidarId(idCliente, nameof(idCliente));
         ValidarId(idVehiculo, nameof(idVehiculo));
@@ -199,6 +194,8 @@ public sealed class AtencionServicio
         var administrativo = await ObtenerAdministrativoActualAsync();
 
         var atencion = await ObtenerAtencionRequeridaAsync(idAtencion);
+        if (version is not null && !version.SequenceEqual(atencion.Version))
+            throw new ConflictoConcurrenciaException("La atención cambió. Vuelva a abrir la edición.");
 
         if (atencion.Estado != EstadoAtencion.Abierta
             || atencion.FechaCierre is not null)
@@ -231,7 +228,8 @@ public sealed class AtencionServicio
         // No genera una actualización ni un evento si nada cambió.
         if (atencion.IdCliente == idCliente
             && atencion.IdVehiculo == idVehiculo
-            && atencion.MotivoConsulta == motivoConsulta)
+            && atencion.MotivoConsulta == motivoConsulta
+            && (!tipoSolicitud.HasValue || atencion.TipoSolicitud == tipoSolicitud.Value))
         {
             return;
         }
@@ -245,6 +243,7 @@ public sealed class AtencionServicio
         atencion.IdCliente = idCliente;
         atencion.IdVehiculo = idVehiculo;
         atencion.MotivoConsulta = motivoConsulta;
+        atencion.TipoSolicitud = tipoSolicitud ?? atencion.TipoSolicitud;
 
         var historial = new HistorialAtencion
         {
@@ -254,7 +253,7 @@ public sealed class AtencionServicio
             Accion = "DatosRecepcionModificados",
             EstadoAnterior = atencion.Estado,
             EstadoNuevo = atencion.Estado,
-            Observaciones = observaciones
+            Observaciones = observaciones + $" Tipo de solicitud: {atencion.TipoSolicitud}."
         };
 
         await _atencionRepositorio.ActualizarConHistorialAsync(
@@ -262,162 +261,7 @@ public sealed class AtencionServicio
             historial);
     }
 
-    /// <summary>
-    /// Cambia una atención abierta al estado EnProceso.
-    /// </summary>
-    public async Task IniciarProcesoAsync(
-        int idAtencion)
-    {
-        ValidarId(idAtencion, nameof(idAtencion));
-
-        var atencion =
-            await ObtenerAtencionRequeridaAsync(idAtencion);
-
-        if (atencion.Estado != EstadoAtencion.Abierta)
-        {
-            throw new InvalidOperationException(
-                "Solo una atención abierta puede pasar a estado EnProceso.");
-        }
-
-        atencion.Estado = EstadoAtencion.EnEjecucion;
-
-        await _atencionRepositorio.ActualizarAsync(atencion);
-    }
-
-    /// <summary>
-    /// Confirma el ingreso al circuito técnico y registra
-    /// el cargo inicial previamente autorizado por el cliente.
-    /// </summary>
-    /// <remarks>
-    /// El importe corresponde al servicio mínimo de ingreso
-    /// e inspección acordado, exigible desde este momento.
-    /// No significa que el informe técnico esté terminado.
-    /// </remarks>
-    public async Task EnviarADiagnosticoAsync(
-        int idAtencion,
-        int idConcepto,
-        decimal importe,
-        bool clienteAutoriza)
-    {
-        ValidarId(idAtencion, nameof(idAtencion));
-        ValidarId(idConcepto, nameof(idConcepto));
-
-        var administrativo = await ObtenerAdministrativoActualAsync();
-
-        if (!clienteAutoriza)
-        {
-            throw new InvalidOperationException(
-                "Debe registrar la autorización del cliente para el servicio inicial.");
-        }
-
-        if (importe <= 0 ||
-            importe > 9999999999999999.99m ||
-            decimal.Round(importe, 2) != importe)
-        {
-            throw new ArgumentException(
-                "El importe debe ser positivo, tener como máximo dos decimales y estar dentro del rango permitido.",
-                nameof(importe));
-        }
-
-        var atencion = await ObtenerAtencionRequeridaAsync(
-            idAtencion);
-
-        if (atencion.Estado != EstadoAtencion.Abierta ||
-            atencion.FechaCierre is not null)
-        {
-            throw new InvalidOperationException(
-                "Solo una atención abierta puede enviarse a diagnóstico.");
-        }
-
-        if (atencion.IdTecnicoEnActividad is not null ||
-            atencion.ActividadTecnica is not null)
-        {
-            throw new InvalidOperationException(
-                "La atención tiene una actividad reservada.");
-        }
-
-        if (idConcepto != _ingresoDiagnosticoOpciones.IdConcepto)
-        {
-            throw new ValidacionException(
-                "Debe utilizar el servicio configurado para el ingreso a diagnóstico.",
-                nameof(idConcepto));
-        }
-
-        var concepto = await ObtenerConceptoIngresoAsync();
-
-        var descripcion = concepto.Nombre.Trim();
-
-        if (string.IsNullOrWhiteSpace(descripcion) ||
-            descripcion.Length > 500)
-        {
-            throw new InvalidOperationException(
-                "El concepto no tiene una descripción válida para presupuestarlo.");
-        }
-
-        await ValidarClienteAsync(atencion.IdCliente);
-        await ValidarVehiculoAsync(atencion.IdVehiculo);
-
-        var fecha = DateTime.Now;
-        var estadoAnterior = atencion.Estado;
-
-        var presupuesto = new Presupuesto
-        {
-            Tipo = TipoPresupuesto.Diagnostico,
-            IdAtencion = atencion.IdAtencion,
-            IdDiagnostico = null,
-            IdUsuarioCreacion = administrativo.Id,
-            FechaCreacion = fecha,
-            Estado = EstadoPresupuesto.Aceptado,
-            FechaPresentacion = fecha,
-            IdUsuarioDecision = administrativo.Id,
-            FechaDecision = fecha,
-            Observaciones =
-                "El cliente autorizó el cargo inicial al confirmar el ingreso al circuito técnico."
-        };
-
-        presupuesto.Detalles.Add(new PresupuestoDetalle
-        {
-            IdConcepto = concepto.IdConcepto,
-            Descripcion = descripcion,
-            Cantidad = 1m,
-            PrecioUnitario = importe,
-
-            // Cargo inicial devengado al confirmar el ingreso.
-            // No representa la finalización del informe técnico.
-            EstadoEjecucion = EstadoEjecucionDetalle.Completado,
-            CantidadEjecutada = 1m,
-            ObservacionesEjecucion =
-                "Cargo inicial generado al confirmar el ingreso, conforme a la autorización del cliente."
-        });
-
-        atencion.Estado = EstadoAtencion.PendienteDiagnostico;
-
-        var historial = new HistorialAtencion
-        {
-            IdAtencion = atencion.IdAtencion,
-            IdUsuario = administrativo.Id,
-            Fecha = fecha,
-            Accion = "AtencionEnviadaADiagnostico",
-            EstadoAnterior = estadoAnterior,
-            EstadoNuevo = atencion.Estado,
-            Observaciones =
-                "Recepción confirmó el ingreso y registró la autorización del cargo inicial."
-        };
-
-        await _atencionRepositorio.EnviarADiagnosticoAsync(
-            atencion,
-            presupuesto,
-            historial);
-    }
-
-    /// <summary>
-    /// Confirma el ingreso al circuito técnico con los servicios
-    /// iniciales autorizados por el cliente.
-    /// </summary>
-    /// <remarks>
-    /// La autorización no representa ejecución ni pago.
-    /// La atención, el presupuesto y el historial se guardan juntos.
-    /// </remarks>
+    /// <summary>Autoriza los servicios iniciales seleccionados, sin registrarlos como ejecutados ni cobrados.</summary>
     public async Task ConfirmarIngresoAsync(
         ConfirmarIngresoDto datos)
     {
@@ -476,6 +320,8 @@ public sealed class AtencionServicio
 
         var atencion = await ObtenerAtencionRequeridaAsync(
             datos.IdAtencion);
+        if (datos.VersionAtencion is null || datos.VersionAtencion.Length != 8 || !datos.VersionAtencion.SequenceEqual(atencion.Version))
+            throw new ConflictoConcurrenciaException("La atención cambió desde que abrió el detalle. Vuelva a abrirlo antes de confirmar.");
 
         if (atencion.Estado != EstadoAtencion.Abierta
             || atencion.FechaCierre is not null)
@@ -608,14 +454,14 @@ public sealed class AtencionServicio
         };
 
         var estadoAnterior = atencion.Estado;
-        atencion.Estado = EstadoAtencion.PendienteDiagnostico;
+        atencion.Estado = EstadoAtencion.EnEvaluacionTecnica;
 
         var historial = new HistorialAtencion
         {
             IdAtencion = atencion.IdAtencion,
             IdUsuario = administrativo.Id,
             Fecha = fecha,
-            Accion = "AtencionEnviadaADiagnostico",
+            Accion = "ServiciosInicialesAutorizados",
             EstadoAnterior = estadoAnterior,
             EstadoNuevo = atencion.Estado,
             Observaciones =
@@ -623,195 +469,10 @@ public sealed class AtencionServicio
                 "servicio(s) autorizado(s), pendientes de ejecución."
         };
 
-        await _atencionRepositorio.EnviarADiagnosticoAsync(
+        await _atencionRepositorio.ConfirmarIngresoAsync(
             atencion,
             presupuesto,
             historial);
-    }
-
-    /// <summary>
-    /// Reserva el diagnóstico inicial para el técnico autenticado
-    /// y cambia la atención a evaluación técnica.
-    /// </summary>
-    /// <remarks>
-    /// La reserva y el evento del historial se guardan juntos.
-    /// La versión de la atención permite detectar si otra operación
-    /// la modificó después de consultar su disponibilidad.
-    /// </remarks>
-    public async Task TomarDiagnosticoAsync(
-        int idAtencion)
-    {
-        ValidarId(idAtencion, nameof(idAtencion));
-
-        var tecnico = await ObtenerTecnicoActualAsync();
-
-        var atencion = await ObtenerAtencionRequeridaAsync(
-            idAtencion);
-
-        if (atencion.Estado != EstadoAtencion.PendienteDiagnostico)
-        {
-            throw new InvalidOperationException(
-                "Solo puede iniciar el diagnóstico de una atención pendiente de diagnóstico.");
-        }
-
-        if (atencion.IdTecnicoEnActividad is not null ||
-            atencion.ActividadTecnica is not null)
-        {
-            throw new InvalidOperationException(
-                "La atención ya tiene una actividad reservada. Actualice la información.");
-        }
-
-        var estadoAnterior = atencion.Estado;
-
-        atencion.IdTecnicoEnActividad = tecnico.Id;
-        atencion.ActividadTecnica = ActividadTecnica.Diagnostico;
-        atencion.Estado = EstadoAtencion.EnEvaluacionTecnica;
-
-        var historial = new HistorialAtencion
-        {
-            IdAtencion = atencion.IdAtencion,
-            IdUsuario = tecnico.Id,
-            Fecha = DateTime.Now,
-            Accion = "ActividadTomada",
-            EstadoAnterior = estadoAnterior,
-            EstadoNuevo = atencion.Estado,
-            Observaciones = "El técnico tomó el diagnóstico inicial."
-        };
-
-        await _atencionRepositorio.ActualizarConHistorialAsync(
-            atencion,
-            historial);
-    }
-
-    /// <summary>
-    /// Libera la reserva del diagnóstico inicial sin completarlo
-    /// y devuelve la atención a la espera de un técnico.
-    /// </summary>
-    /// <remarks>
-    /// Solo puede liberar la actividad el técnico que la tomó.
-    /// No elimina informes ni cancela el cargo inicial autorizado.
-    /// </remarks>
-    public async Task LiberarDiagnosticoAsync(
-        int idAtencion)
-    {
-        ValidarId(idAtencion, nameof(idAtencion));
-
-        var tecnico = await ObtenerTecnicoActualAsync();
-
-        var atencion = await ObtenerAtencionRequeridaAsync(
-            idAtencion);
-
-        if (atencion.Estado != EstadoAtencion.EnEvaluacionTecnica ||
-            atencion.ActividadTecnica != ActividadTecnica.Diagnostico)
-        {
-            throw new InvalidOperationException(
-                "La atención no tiene un diagnóstico inicial en actividad.");
-        }
-
-        if (atencion.IdTecnicoEnActividad != tecnico.Id)
-        {
-            throw new InvalidOperationException(
-                "Solo el técnico que tomó el diagnóstico puede liberar esta actividad.");
-        }
-
-        var estadoAnterior = atencion.Estado;
-
-        atencion.IdTecnicoEnActividad = null;
-        atencion.ActividadTecnica = null;
-        atencion.Estado = EstadoAtencion.PendienteDiagnostico;
-
-        var historial = new HistorialAtencion
-        {
-            IdAtencion = atencion.IdAtencion,
-            IdUsuario = tecnico.Id,
-            Fecha = DateTime.Now,
-            Accion = "ActividadLiberada",
-            EstadoAnterior = estadoAnterior,
-            EstadoNuevo = atencion.Estado,
-            Observaciones =
-                "El técnico liberó el diagnóstico inicial sin completar el informe."
-        };
-
-        await _atencionRepositorio.ActualizarConHistorialAsync(
-            atencion,
-            historial);
-    }
-
-    /// <summary>
-    /// Cancela una atención que aún no se encuentra cerrada.
-    /// </summary>
-    public async Task CancelarAsync(
-        int idAtencion)
-    {
-        ValidarId(idAtencion, nameof(idAtencion));
-
-        var atencion =
-            await ObtenerAtencionRequeridaAsync(idAtencion);
-
-        if (atencion.Estado == EstadoAtencion.Cerrada)
-        {
-            throw new InvalidOperationException(
-                "Una atención cerrada no puede ser cancelada.");
-        }
-
-        if (atencion.Estado == EstadoAtencion.Cancelada)
-        {
-            throw new InvalidOperationException(
-                "La atención ya se encuentra cancelada.");
-        }
-
-        atencion.Estado = EstadoAtencion.Cancelada;
-
-        await _atencionRepositorio.ActualizarAsync(atencion);
-    }
-
-    /// <summary>
-    /// Cierra una atención y registra la fecha de cierre.
-    /// El cierre representa también la entrega del vehículo.
-    /// </summary>
-    public async Task CerrarAsync(
-        int idAtencion)
-    {
-        ValidarId(idAtencion, nameof(idAtencion));
-
-        var atencion =
-            await ObtenerAtencionRequeridaAsync(idAtencion);
-
-        if (atencion.Estado == EstadoAtencion.Cerrada)
-        {
-            throw new InvalidOperationException(
-                "La atención ya se encuentra cerrada.");
-        }
-
-        if (atencion.Estado == EstadoAtencion.Cancelada)
-        {
-            throw new InvalidOperationException(
-                "Una atención cancelada no puede ser cerrada.");
-        }
-
-        if (atencion.Estado != EstadoAtencion.EnEjecucion)
-        {
-            throw new InvalidOperationException(
-                "Solo una atención en proceso puede ser cerrada.");
-        }
-
-        /*
-         * MÁS ADELANTE:
-         *
-         * Antes de cerrar deberán verificarse reglas como:
-         *
-         * - Proceso técnico terminado.
-         * - Comprobante generado.
-         * - Saldo pendiente igual a cero.
-         *
-         * Cuando esas entidades estén implementadas,
-         * estas validaciones se incorporarán aquí.
-         */
-
-        atencion.Estado = EstadoAtencion.Cerrada;
-        atencion.FechaCierre = DateTime.Now;
-
-        await _atencionRepositorio.ActualizarAsync(atencion);
     }
 
     // -----------------------------------------------------------------
@@ -955,38 +616,6 @@ public sealed class AtencionServicio
     }
 
     /// <summary>
-    /// Obtiene al técnico autenticado y verifica que continúe
-    /// activo y autorizado para realizar operaciones técnicas.
-    /// </summary>
-    private async Task<Usuario> ObtenerTecnicoActualAsync()
-    {
-        var usuarioSesion = _sesionUsuario.UsuarioActual;
-
-        if (usuarioSesion is null)
-        {
-            throw new InvalidOperationException(
-                "Debe iniciar sesión para realizar esta operación.");
-        }
-
-        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(
-            usuarioSesion.Id);
-
-        if (usuario is null || !usuario.Activo)
-        {
-            throw new InvalidOperationException(
-                "El usuario de la sesión no existe o está inactivo.");
-        }
-
-        if (usuario.RolId != RolesSistema.TecnicoId)
-        {
-            throw new InvalidOperationException(
-                "Solo un técnico puede tomar esta actividad.");
-        }
-
-        return usuario;
-    }
-
-    /// <summary>
     /// Obtiene al usuario autenticado y verifica que sea
     /// un administrativo activo.
     /// </summary>
@@ -1022,31 +651,5 @@ public sealed class AtencionServicio
     /// Obtiene el servicio configurado para el ingreso
     /// y comprueba que esté disponible para utilizarse.
     /// </summary>
-    private async Task<Concepto> ObtenerConceptoIngresoAsync()
-    {
-        var concepto = await _conceptoRepositorio.ObtenerPorIdAsync(
-            _ingresoDiagnosticoOpciones.IdConcepto);
 
-        if (concepto is null)
-        {
-            throw new ValidacionException(
-                "El concepto configurado para el ingreso a diagnóstico no existe.");
-        }
-
-        if (!concepto.Activo
-            || concepto.Categoria is null
-            || !concepto.Categoria.Activo)
-        {
-            throw new ValidacionException(
-                "El concepto de ingreso o su categoría están inactivos.");
-        }
-
-        if (concepto.Tipo != TipoConcepto.Servicio)
-        {
-            throw new ValidacionException(
-                "El concepto configurado para el ingreso debe ser un servicio.");
-        }
-
-        return concepto;
-    }
 }

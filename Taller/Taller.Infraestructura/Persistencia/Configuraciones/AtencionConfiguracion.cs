@@ -62,6 +62,8 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
                 """);
         });
 
+        builder.Property(a => a.TipoSolicitud).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.ToTable("Atenciones", t => t.HasCheckConstraint("CK_Atenciones_TipoSolicitud", "[TipoSolicitud] IN (N'Problema', N'ServicioDefinido', N'Mixta')"));
         builder.HasKey(a => a.IdAtencion);
 
         builder.Property(a => a.IdAtencion)

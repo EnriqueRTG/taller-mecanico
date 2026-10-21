@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<AtencionServicio>();
         services.AddScoped<CategoriaServicio>();
         services.AddScoped<DiagnosticoServicio>();
+        services.AddScoped<EvaluacionServicio>();
 
         return services;
     }

@@ -8,6 +8,8 @@ public sealed class ConfirmarIngresoDto
 {
     public int IdAtencion { get; init; }
 
+    public byte[] VersionAtencion { get; init; } = [];
+
     /// <summary>
     /// Indica que Recepción registró la autorización del cliente
     /// para el conjunto de servicios e importes seleccionados.

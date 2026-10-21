@@ -62,7 +62,7 @@ public partial class FrmEditarAtencion : Form
     }
 
     /// <summary>
-    /// Configura el formulario y carga los datos demostrativos.
+    /// Configura el formulario y carga los datos reales de la atención.
     /// </summary>
     private async void FrmEditarAtencion_Load(
         object? sender,
@@ -94,7 +94,7 @@ public partial class FrmEditarAtencion : Form
             {
                 throw new InvalidOperationException(
                     "Solo pueden editarse atenciones abiertas, " +
-                    "antes de confirmar su ingreso a diagnóstico.");
+                    "antes de confirmar su envío a evaluación técnica.");
             }
 
             _atencionActual = atencion;
@@ -115,6 +115,7 @@ public partial class FrmEditarAtencion : Form
                 atencion.FechaApertura.ToString("dd/MM/yyyy HH:mm");
 
             txtMotivo.Text = atencion.MotivoConsulta;
+            cboTipoSolicitud.SelectedIndex = (int)atencion.TipoSolicitud - 1;
 
             _hayCambios = false;
             _formularioInicializado = true;
@@ -208,13 +209,16 @@ public partial class FrmEditarAtencion : Form
             _guardando = true;
             btnGuardar.Enabled = false;
             txtMotivo.Enabled = false;
+            cboTipoSolicitud.Enabled = false;
             Cursor = Cursors.WaitCursor;
 
             await _atencionServicio.ModificarAsync(
                 _idAtencion,
                 _atencionActual.IdCliente,
                 _atencionActual.IdVehiculo,
-                txtMotivo.Text.Trim());
+                txtMotivo.Text.Trim(),
+                (TipoSolicitudAtencion)(cboTipoSolicitud.SelectedIndex + 1),
+                _atencionActual.Version);
 
             _cambiosConfirmados = true;
             _hayCambios = false;
@@ -248,6 +252,7 @@ public partial class FrmEditarAtencion : Form
                 Cursor = Cursors.Default;
                 btnGuardar.Enabled = true;
                 txtMotivo.Enabled = true;
+                cboTipoSolicitud.Enabled = true;
             }
         }
     }

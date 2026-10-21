@@ -1,0 +1,17 @@
+name: Compilar y probar Taller
+on:
+  pull_request:
+    paths: ['Taller/**', '.github/workflows/validar-taller.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build Taller/Taller.sln --configuration Release --nologo
+      - run: dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj --configuration Release --no-build --nologo

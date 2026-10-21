@@ -87,6 +87,7 @@ public partial class FrmNuevaAtencion : Form
     {
         ConfigurarFormulario();
         CargarTiposDocumento();
+        cboTipoSolicitud.SelectedIndex = 0;
         MostrarUsuarioRecepcion();
         ActualizarEstadoBotonRegistrar();
 
@@ -809,7 +810,8 @@ public partial class FrmNuevaAtencion : Form
                     _clienteSeleccionado.IdCliente,
                     _vehiculoSeleccionado.IdVehiculo,
                     usuario.Id,
-                    txtMotivo.Text.Trim());
+                    txtMotivo.Text.Trim(),
+                    (Taller.Dominio.Enumeraciones.TipoSolicitudAtencion)(cboTipoSolicitud.SelectedIndex + 1));
 
             MessageBox.Show(
                 $"Atención N.º {atencion.IdAtencion} registrada correctamente.",

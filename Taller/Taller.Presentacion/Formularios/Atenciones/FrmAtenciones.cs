@@ -674,7 +674,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
             btnCancelarAtencion.Enabled = false;
 
-            btnRegistrarEntrega.Enabled = false;
+            btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
 
             btnVerHistorial.Enabled =
                 puedeConsultarComoTecnico;
@@ -699,7 +699,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 && puedeConsultarComoTecnico
                 && (puedeTomarDiagnostico || puedeRegistrarDiagnostico);
 
-            btnFinalizarTrabajo.Enabled = false;
+            btnFinalizarTrabajo.Enabled = puedeConsultarComoTecnico && fila.EstadoValor == EstadoAtencion.EnEjecucion
+                && (fila.IdTecnicoEnActividad == null || fila.IdTecnicoEnActividad == usuario.Id);
         }
 
         private void DeshabilitarAcciones()
@@ -885,59 +886,13 @@ namespace Taller.Presentacion.Formularios.Atenciones
         /// <summary>
         /// Abre el formulario de entrega para la atención seleccionada.
         /// </summary>
-        private void BtnRegistrarEntrega_Click(
-            object? sender,
-            EventArgs e)
+        private async void BtnRegistrarEntrega_Click(object? sender, EventArgs e)
         {
-            AtencionFila? fila = ObtenerFilaSeleccionada();
-
-            if (fila is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "Seleccioná una atención para registrar la entrega.",
-                    "Atención no seleccionada",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            var usuario = _sesionUsuario.UsuarioActual;
-
-            if (usuario is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "No se pudo identificar al usuario actual.",
-                    "Sesión no disponible",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            bool puedeGestionar =
-                _autorizacionNavegacion.TienePermiso(
-                    usuario.RolId,
-                    PermisoAplicacion.GestionarAtenciones);
-
-            if (!puedeGestionar)
-            {
-                MessageBox.Show(
-                    this,
-                    "No posee permisos para registrar la entrega.",
-                    "Acceso restringido",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            using FrmRegistrarEntrega formulario =
-                new();
-
-            formulario.ShowDialog(this);
+            var fila = ObtenerFilaSeleccionada();
+            if (fila == null || _sesionUsuario.UsuarioActual?.RolId != RolesSistema.AdministrativoId) return;
+            using var formulario = new Taller.Presentacion.Formularios.Comprobantes.FrmComprobantePagos(
+                fila.IdAtencion, _serviceProvider.GetRequiredService<CobroServicio>());
+            formulario.ShowDialog(this); await CargarAtencionesAsync();
         }
         #endregion
 
@@ -994,67 +949,13 @@ namespace Taller.Presentacion.Formularios.Atenciones
         /// Abre el formulario de finalización del trabajo técnico
         /// para la atención seleccionada.
         /// </summary>
-        private void BtnFinalizarTrabajo_Click(
-            object? sender,
-            EventArgs e)
+        private async void BtnFinalizarTrabajo_Click(object? sender, EventArgs e)
         {
-            AtencionFila? fila =
-                ObtenerFilaSeleccionada();
-
-            if (fila is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "Seleccioná una atención para finalizar el trabajo.",
-                    "Atención no seleccionada",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            var usuario =
-                _sesionUsuario.UsuarioActual;
-
-            if (usuario is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "No se pudo identificar al usuario actual.",
-                    "Sesión no disponible",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            bool puedeFinalizarTrabajo =
-                _autorizacionNavegacion.TienePermiso(
-                    usuario.RolId,
-                    PermisoAplicacion.ConsultarAtencionesAsignadas);
-
-            if (!puedeFinalizarTrabajo)
-            {
-                MessageBox.Show(
-                    this,
-                    "No posee permisos para finalizar trabajos técnicos.",
-                    "Acceso restringido",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            using FrmFinalizarTrabajo formulario =
-                new();
-
-            if (formulario.ShowDialog(this) !=
-                DialogResult.OK)
-            {
-                return;
-            }
-
-            ActualizarAccionesSeleccion();
+            var fila = ObtenerFilaSeleccionada();
+            if (fila == null || _sesionUsuario.UsuarioActual?.RolId != RolesSistema.TecnicoId) return;
+            using var formulario = new FrmEjecutarAtencion(fila.IdAtencion,
+                _serviceProvider.GetRequiredService<EjecucionServicio>(), _sesionUsuario);
+            formulario.ShowDialog(this); await CargarAtencionesAsync();
         }
         #endregion
 
@@ -1293,14 +1194,14 @@ namespace Taller.Presentacion.Formularios.Atenciones
         #endregion
 
         private void DgvAtenciones_CellDoubleClickAsync(
-            object sender, 
+            object sender,
             DataGridViewCellEventArgs e)
         {
 
         }
 
         private async void BtnIniciarProceso_ClickAsync(
-            object sender, 
+            object sender,
             EventArgs e)
         {
             await AbrirDetalleSeleccionadoAsync();

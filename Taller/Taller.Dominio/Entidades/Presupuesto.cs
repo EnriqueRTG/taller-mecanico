@@ -15,6 +15,13 @@ namespace Taller.Dominio.Entidades;
 public sealed class Presupuesto
 {
     public int IdPresupuesto { get; set; }
+    /// <summary>Propuesta anterior conservada al solicitar una revisión.</summary>
+    public int? IdPresupuestoAnterior { get; set; }
+    public Presupuesto? PresupuestoAnterior { get; set; }
+    public bool Vigente { get; set; } = true;
+    public string? MotivoRevision { get; set; }
+    public string? ObservacionesDecision { get; set; }
+    public bool AlcanceValidado { get; set; }
 
     public TipoPresupuesto Tipo { get; set; }
 

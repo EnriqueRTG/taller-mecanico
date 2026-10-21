@@ -100,6 +100,7 @@ public sealed class PresupuestoDetalleConfiguracion
                 """);
         });
 
+        builder.Property(d => d.AceptadoPorCliente).IsRequired(false);
         builder.HasKey(d => d.IdPresupuestoDetalle);
 
         builder.Property(d => d.IdPresupuestoDetalle)

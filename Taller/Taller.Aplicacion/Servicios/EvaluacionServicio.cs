@@ -40,9 +40,15 @@ public sealed class EvaluacionServicio(
     }
 
     private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string texto) =>
-        repositorio.AgregarHistorial(new HistorialAtencion {
-            IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = DateTime.Now, Accion = accion,
-            EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = texto
+        repositorio.AgregarHistorial(new HistorialAtencion
+        {
+            IdAtencion = a.IdAtencion,
+            IdUsuario = u.Id,
+            Fecha = DateTime.Now,
+            Accion = accion,
+            EstadoAnterior = anterior,
+            EstadoNuevo = a.Estado,
+            Observaciones = texto
         });
 
     public async Task EnviarAEvaluacionAsync(int id, TipoSolicitudAtencion tipo, byte[] version)
@@ -74,7 +80,7 @@ public sealed class EvaluacionServicio(
                 throw new ValidacionException("La atención no está pendiente de evaluación.");
             if ((await repositorio.ObtenerAvanceAsync(id))?.Finalizada == true)
                 throw new ValidacionException("La evaluación ya está finalizada.");
-            if ((await repositorio.ObtenerPresupuestosAsync(id)).Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Estado != EstadoPresupuesto.Borrador))
+            if ((await repositorio.ObtenerPresupuestosAsync(id)).Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
                 throw new ValidacionException("La propuesta ya está preparada. Consúltela en Presupuestos.");
             if (a.IdTecnicoEnActividad is not null) throw new ValidacionException("La actividad ya fue tomada. Actualice el listado.");
             var anterior = a.Estado;
@@ -113,9 +119,14 @@ public sealed class EvaluacionServicio(
         try
         {
             await AutorizarAsync(tecnico: true);
-            return (await repositorio.ListarCatalogoAsync()).Select(c => new ConceptoPropuestaDto {
-                IdConcepto = c.IdConcepto, Nombre = c.Nombre, Categoria = c.Categoria.Nombre,
-                Descripcion = c.Descripcion, Tipo = c.Tipo, PrecioReferencia = c.PrecioReferencia
+            return (await repositorio.ListarCatalogoAsync()).Select(c => new ConceptoPropuestaDto
+            {
+                IdConcepto = c.IdConcepto,
+                Nombre = c.Nombre,
+                Categoria = c.Categoria.Nombre,
+                Descripcion = c.Descripcion,
+                Tipo = c.Tipo,
+                PrecioReferencia = c.PrecioReferencia
             }).ToList();
         }
         finally { unidad.DescartarCambios(); }
@@ -132,20 +143,34 @@ public sealed class EvaluacionServicio(
             if (avance?.Finalizada == true) throw new ValidacionException("La evaluación ya se finalizó.");
             var presupuestos = await repositorio.ObtenerPresupuestosAsync(id);
             var informe = (await repositorio.ObtenerDiagnosticosAsync(id)).FirstOrDefault(d => d.Tipo == TipoDiagnostico.Inicial);
-            var borrador = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Estado == EstadoPresupuesto.Borrador);
-            return new EvaluacionAtencionDto {
-                IdAtencion = id, VersionAtencion = a.Version.ToArray(), TipoSolicitud = a.TipoSolicitud,
+            var borrador = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
+            return new EvaluacionAtencionDto
+            {
+                IdAtencion = id,
+                VersionAtencion = a.Version.ToArray(),
+                TipoSolicitud = a.TipoSolicitud,
                 Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
                 Vehiculo = a.Vehiculo.Dominio + " · " + a.Vehiculo.Modelo.Marca.Nombre + " " + a.Vehiculo.Modelo.Nombre,
-                Motivo = a.MotivoConsulta, InformeHistorico = informe != null, IncluyeDiagnostico = avance?.IncluyeDiagnostico ?? (informe != null || a.TipoSolicitud != TipoSolicitudAtencion.ServicioDefinido),
+                Motivo = a.MotivoConsulta,
+                MotivoRevision = borrador?.MotivoRevision,
+                InformeHistorico = informe != null,
+                IncluyeDiagnostico = avance?.IncluyeDiagnostico ?? (informe != null || a.TipoSolicitud != TipoSolicitudAtencion.ServicioDefinido),
                 FallaDetectada = avance?.FallaDetectada ?? informe?.FallaDetectada ?? "",
                 TrabajoRecomendado = avance?.TrabajoRecomendado ?? informe?.TrabajoRecomendado ?? "",
                 Kilometraje = avance?.Kilometraje ?? informe?.Kilometraje,
-                Observaciones = avance?.Observaciones ?? informe?.Observaciones, SoloEvaluacion = avance?.SoloEvaluacion ?? false,
+                Observaciones = avance?.Observaciones ?? informe?.Observaciones,
+                SoloEvaluacion = avance?.SoloEvaluacion ?? false,
                 Items = borrador?.Detalles.Select(d => new ItemPropuestaDto { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList() ?? [],
                 ServiciosIniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico && p.Estado == EstadoPresupuesto.Aceptado)
-                    .SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto { IdDetalle = d.IdPresupuestoDetalle,
-                        Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList()
+                    .SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto
+                    {
+                        IdDetalle = d.IdPresupuestoDetalle,
+                        Descripcion = d.Descripcion,
+                        Cantidad = d.Cantidad,
+                        PrecioUnitario = d.PrecioUnitario,
+                        Estado = d.EstadoEjecucion,
+                        Observaciones = d.ObservacionesEjecucion
+                    }).ToList()
             };
         }
         finally { unidad.DescartarCambios(); }
@@ -177,7 +202,7 @@ public sealed class EvaluacionServicio(
             if (finalizar && !datos.SoloEvaluacion && datos.Items.Count == 0)
                 throw new ValidacionException("Agregue la propuesta o indique que finaliza sin propuesta, con su motivo.");
             var presupuestos = await repositorio.ObtenerPresupuestosAsync(a.IdAtencion);
-            if (presupuestos.Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Estado != EstadoPresupuesto.Borrador))
+            if (presupuestos.Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
                 throw new ValidacionException("Ya existe una propuesta confirmada. Su revisión requiere un nuevo circuito.");
             var catalogo = (await repositorio.ListarCatalogoAsync()).ToDictionary(c => c.IdConcepto);
             if (datos.Items.GroupBy(i => i.IdConcepto).Any(g => g.Count() > 1)) throw new ValidacionException("No repita conceptos en la propuesta.");
@@ -231,17 +256,27 @@ public sealed class EvaluacionServicio(
             avance.Observaciones = datos.Observaciones?.Trim(); avance.Kilometraje = datos.Kilometraje;
             avance.SoloEvaluacion = datos.SoloEvaluacion; avance.Finalizada = finalizar;
             avance.IdTecnicoUltimaEdicion = usuario.Id; avance.FechaActualizacion = DateTime.Now;
-            var propuesta = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Estado == EstadoPresupuesto.Borrador);
+            var propuesta = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
             if (datos.Items.Count > 0 || propuesta is not null)
             {
                 if (propuesta is null)
                 {
-                    propuesta = new Presupuesto { IdAtencion = a.IdAtencion, Tipo = TipoPresupuesto.Reparacion, Estado = EstadoPresupuesto.Borrador,
-                        IdUsuarioCreacion = usuario.Id, FechaCreacion = DateTime.Now };
+                    propuesta = new Presupuesto
+                    {
+                        IdAtencion = a.IdAtencion,
+                        Tipo = TipoPresupuesto.Reparacion,
+                        Estado = EstadoPresupuesto.Borrador,
+                        IdUsuarioCreacion = usuario.Id,
+                        FechaCreacion = DateTime.Now
+                    };
                     repositorio.AgregarPresupuesto(propuesta);
                 }
-                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle {
-                    IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario
+                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle
+                {
+                    IdConcepto = i.IdConcepto,
+                    Descripcion = i.Descripcion.Trim(),
+                    Cantidad = i.Cantidad,
+                    PrecioUnitario = i.PrecioUnitario
                 }));
                 propuesta.Observaciones = avance.Observaciones;
             }
@@ -254,9 +289,17 @@ public sealed class EvaluacionServicio(
                     throw new ValidacionException("El informe inicial existente es histórico. Consérvelo sin modificar; use las observaciones de la propuesta para aclaraciones.");
                 if (datos.IncluyeDiagnostico && informe is null)
                 {
-                    informe = new Diagnostico { IdAtencion = a.IdAtencion, IdTecnicoAutor = usuario.Id, FechaDiagnostico = DateTime.Now,
-                        Tipo = TipoDiagnostico.Inicial, FallaDetectada = avance.FallaDetectada, TrabajoRecomendado = avance.TrabajoRecomendado,
-                        Kilometraje = avance.Kilometraje, Observaciones = avance.Observaciones };
+                    informe = new Diagnostico
+                    {
+                        IdAtencion = a.IdAtencion,
+                        IdTecnicoAutor = usuario.Id,
+                        FechaDiagnostico = DateTime.Now,
+                        Tipo = TipoDiagnostico.Inicial,
+                        FallaDetectada = avance.FallaDetectada,
+                        TrabajoRecomendado = avance.TrabajoRecomendado,
+                        Kilometraje = avance.Kilometraje,
+                        Observaciones = avance.Observaciones
+                    };
                     repositorio.AgregarDiagnostico(informe);
                 }
                 if (!datos.SoloEvaluacion && propuesta is not null)
@@ -299,7 +342,7 @@ public sealed class EvaluacionServicio(
                 ?? throw new ValidacionException("El presupuesto no existe.");
             var a = await AtencionAsync(datos.IdAtencion);
             var p = (await repositorio.ObtenerPresupuestosAsync(a.IdAtencion)).Single(p => p.IdPresupuesto == idPresupuesto);
-            if (p.Estado != EstadoPresupuesto.PendientePresentacion || p.Tipo != TipoPresupuesto.Reparacion || version is null || version.Length != 8 || !p.Version.SequenceEqual(version))
+            if ((!p.Vigente || p.Estado != EstadoPresupuesto.PendientePresentacion) || p.Tipo != TipoPresupuesto.Reparacion || version is null || version.Length != 8 || !p.Version.SequenceEqual(version))
                 throw new ValidacionException("La propuesta cambió o ya fue presentada. Actualice el listado.");
             if (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.IdTecnicoEnActividad is not null)
                 throw new ValidacionException("La atención no está disponible para presentar esta propuesta.");

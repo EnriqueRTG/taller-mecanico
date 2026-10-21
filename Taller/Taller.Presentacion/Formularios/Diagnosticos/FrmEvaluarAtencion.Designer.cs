@@ -13,8 +13,8 @@ partial class FrmEvaluarAtencion
         components = new System.ComponentModel.Container();
         tlpPrincipal = new TableLayoutPanel();
         tlpPrincipal.Name = "tlpPrincipal";
-        lblResumen = new Label();
-        lblResumen.Name = "lblResumen";
+        txtResumen = new TextBox();
+        txtResumen.Name = "txtResumen";
         tabs = new TabControl();
         tabs.Name = "tabs";
         tabInforme = new TabPage();
@@ -106,8 +106,8 @@ partial class FrmEvaluarAtencion
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         Controls.Add(tlpPrincipal);
         Text = "Evaluación técnica y propuesta";
-        tlpPrincipal.Controls.Add(lblResumen, 0, 0);
-        lblResumen.Dock = DockStyle.Fill;
+        tlpPrincipal.Controls.Add(txtResumen, 0, 0);
+        txtResumen.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(tabs, 0, 1);
         tabs.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(lblAviso, 0, 2);
@@ -283,10 +283,11 @@ partial class FrmEvaluarAtencion
         btnFinalizar.FlatStyle = FlatStyle.Flat;
         CancelButton = btnCerrar;
         btnCerrar.DialogResult = DialogResult.None;
+        txtResumen.ReadOnly=true;txtResumen.Multiline=true;txtResumen.ScrollBars=ScrollBars.Vertical;txtResumen.TabStop=false;
         ResumeLayout(false);
     }
     private TableLayoutPanel tlpPrincipal = null!;
-    private Label lblResumen = null!;
+    private TextBox txtResumen = null!;
     private TabControl tabs = null!;
     private TabPage tabInforme = null!;
     private TabPage tabPropuesta = null!;

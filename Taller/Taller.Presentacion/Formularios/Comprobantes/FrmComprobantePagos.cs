@@ -1,288 +1,80 @@
-﻿using Taller.Presentacion.Estilos;
-
+﻿using Taller.Aplicacion.DTOs.Cobros;
+using Taller.Aplicacion.Servicios;
+using Taller.Presentacion.Formularios.Compartidos;
+using Taller.Presentacion.Impresion;
+using Taller.Dominio.Enumeraciones;
 namespace Taller.Presentacion.Formularios.Comprobantes;
-
-/// <summary>
-/// Representa la gestión visual del comprobante y de los pagos
-/// asociados con una atención.
-/// </summary>
-/// <remarks>
-/// Durante la primera entrega utiliza información demostrativa
-/// y conserva los cambios únicamente mientras la ventana permanece abierta.
-/// </remarks>
+/// <summary>Gestiona documentos económicos reales y pagos, conservando toda su historia.</summary>
 public partial class FrmComprobantePagos : Form
 {
-    #region Constantes y campos
-
-    private const decimal TotalPresupuesto = 43500m;
-
-    private bool _comprobanteEmitido;
-    private decimal _totalAbonado;
-
-    #endregion
-
-    #region Inicialización
-
-    public FrmComprobantePagos()
+    private readonly int _id; private readonly CobroServicio _servicio; private CuentaAtencionDto? _datos;
+    private bool _ocupado, _cargando;
+    public FrmComprobantePagos(int id, CobroServicio servicio) { InitializeComponent(); _id = id; _servicio = servicio; }
+    private async void Cargar(object? s, EventArgs e) => await RecargarAsync();
+    private async Task RecargarAsync()
     {
-        InitializeComponent();
-    }
-
-    private void FrmComprobantePagos_Load(
-        object? sender,
-        EventArgs e)
-    {
-        ConfigurarFormulario();
-        AplicarEstilos();
-        CargarDatosSimulados();
-        ActualizarResumenFinanciero();
-    }
-
-    private void ConfigurarFormulario()
-    {
-        Text = "Comprobante y pagos";
-        StartPosition = FormStartPosition.CenterParent;
-        ShowInTaskbar = false;
-
-        CancelButton = btnCerrar;
-    }
-
-    #endregion
-
-    #region Datos simulados
-
-    private void CargarDatosSimulados()
-    {
-        lblNumeroAtencion.Text =
-            "Atención N.º 000001";
-
-        lblClienteValor.Text =
-            "Juan Pérez";
-
-        lblVehiculoValor.Text =
-            "Honda Fit";
-
-        lblDominioValor.Text =
-            "AB345CD";
-
-        lblPresupuestoValor.Text =
-            FormatearImporte(TotalPresupuesto);
-
-        _comprobanteEmitido = false;
-        _totalAbonado = 0m;
-
-        dgvPagos.Rows.Clear();
-        dgvPagos.ClearSelection();
-        dgvPagos.CurrentCell = null;
-    }
-
-    #endregion
-
-    #region Eventos
-
-    private void BtnEmitirComprobante_Click(
-        object? sender,
-        EventArgs e)
-    {
-        SimularEmisionComprobante();
-    }
-
-    private void BtnRegistrarPago_Click(
-    object? sender,
-    EventArgs e)
-    {
-        decimal saldoPendiente =
-            TotalPresupuesto - _totalAbonado;
-
-        if (!_comprobanteEmitido)
+        _cargando = true; tlpPrincipal.Enabled = false;
+        try
         {
-            MessageBox.Show(
-                this,
-                "Primero debe emitirse el comprobante.",
-                "Registrar pago",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
-            return;
+            _datos = await _servicio.ObtenerAsync(_id); var d = _datos.Comprobante; lblResumen.Text = _datos.Resumen;
+            dgvItems.DataSource = d?.Items ?? _datos.ItemsPorLiquidar; dgvPagos.DataSource = d?.Pagos;
+            if (d != null) txtObservaciones.Text = d.Observaciones; txtObservaciones.ReadOnly = d != null;
+            lblSaldo.Text = d == null ? $"Por liquidar: {_datos.TotalPorLiquidar:N2}. Revise los conceptos antes de emitir." : $"{d.Numero} · Total {d.Total:N2} · Pagado {d.Pagado:N2} · Saldo {d.Saldo:N2}";
+            var abierta = _datos.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
+            btnEmitir.Enabled = abierta && d == null; btnPago.Enabled = abierta && d is { Saldo: > 0 }; btnEntregar.Enabled = abierta && d is { Saldo: 0 };
+            btnImprimir.Enabled = d != null; Seleccion(null, EventArgs.Empty);
         }
-
-        if (saldoPendiente <= 0)
-        {
-            MessageBox.Show(
-                this,
-                "El comprobante no posee saldo pendiente.",
-                "Registrar pago",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
-            return;
-        }
-
-        using FrmRegistrarPago formulario =
-            new(saldoPendiente);
-
-        if (formulario.ShowDialog(this) != DialogResult.OK)
-        {
-            return;
-        }
-
-        AgregarPagoSimulado(formulario);
+        catch (Exception ex) { Error(ex); }
+        finally { _cargando = false; tlpPrincipal.Enabled = true; }
     }
-
-    /// <summary>
-    /// Incorpora el pago simulado a la grilla y actualiza
-    /// el resumen financiero.
-    /// </summary>
-    private void AgregarPagoSimulado(
-        FrmRegistrarPago formulario)
+    private PagoConsultaDto? PagoSeleccionado => dgvPagos.CurrentRow?.DataBoundItem as PagoConsultaDto;
+    private void Seleccion(object? s, EventArgs e)
     {
-        string referencia =
-            string.IsNullOrWhiteSpace(formulario.Referencia)
-                ? "Sin referencia"
-                : formulario.Referencia;
-
-        dgvPagos.Rows.Add(
-            formulario.FechaPago.ToString("dd/MM/yyyy HH:mm"),
-            formulario.MedioPago,
-            referencia,
-            FormatearImporte(formulario.Importe),
-            "Administrativo actual");
-
-        _totalAbonado += formulario.Importe;
-
-        ActualizarResumenFinanciero();
-        dgvPagos.ClearSelection();
+        btnRecibo.Enabled = PagoSeleccionado != null;
+        btnAnular.Enabled = PagoSeleccionado is { Anulado: false } && _datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
     }
-
-    private void BtnCerrar_Click(
-        object? sender,
-        EventArgs e)
+    private async Task OperarAsync(Func<Task> accion)
     {
-        Close();
+        if (_ocupado) return; _ocupado = true; tlpPrincipal.Enabled = false;
+        try { await accion(); await RecargarAsync(); }
+        catch (Exception ex) { Error(ex); }
+        finally { _ocupado = false; tlpPrincipal.Enabled = true; }
     }
-
-    #endregion
-
-    #region Simulación del comprobante
-
-    private void SimularEmisionComprobante()
+    private async void Emitir(object? s, EventArgs e)
     {
-        if (_comprobanteEmitido)
-        {
-            MessageBox.Show(
-                this,
-                "El comprobante ya fue emitido durante esta sesión.",
-                "Comprobante emitido",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
-            return;
-        }
-
-        DialogResult respuesta =
-            MessageBox.Show(
-                this,
-                "¿Desea simular la emisión del comprobante " +
-                "correspondiente a esta atención?",
-                "Emitir comprobante",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-
-        if (respuesta != DialogResult.Yes)
-        {
-            return;
-        }
-
-        _comprobanteEmitido = true;
-
-        MessageBox.Show(
-            this,
-            "El comprobante fue emitido correctamente.",
-            "Comprobante emitido",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-
-        ActualizarResumenFinanciero();
+        if (_datos == null || _ocupado) return;
+        if (MessageBox.Show(this, $"¿Emitir liquidación interna por {_datos.TotalPorLiquidar:N2}? Se conservarán los conceptos e importes; no podrá editarlos después de emitir.", "Liquidación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        await OperarAsync(async () => { await _servicio.LiquidarAsync(_id, _datos.VersionAtencion, txtObservaciones.Text); });
     }
-
-    private void ActualizarResumenFinanciero()
+    private async void RegistrarPago(object? s, EventArgs e)
     {
-        decimal saldo =
-            TotalPresupuesto - _totalAbonado;
-
-        lblEstadoValor.Text =
-            _comprobanteEmitido
-                ? "Emitido"
-                : "No emitido";
-
-        lblEstadoValor.ForeColor =
-            _comprobanteEmitido
-                ? Color.FromArgb(22, 101, 52)
-                : Color.FromArgb(180, 83, 9);
-
-        lblNumeroValor.Text =
-            _comprobanteEmitido
-                ? "C-000001"
-                : "Sin asignar";
-
-        lblAbonadoValor.Text =
-            FormatearImporte(_totalAbonado);
-
-        lblSaldoValor.Text =
-            FormatearImporte(saldo);
-
-        lblSaldoValor.ForeColor =
-            saldo <= 0
-                ? Color.FromArgb(22, 101, 52)
-                : Color.FromArgb(185, 28, 28);
-
-        btnEmitirComprobante.Enabled =
-            !_comprobanteEmitido;
-
-        btnRegistrarPago.Enabled =
-            _comprobanteEmitido && saldo > 0;
-
-        decimal saldoPendiente =
-            TotalPresupuesto - _totalAbonado;
-
-        btnRegistrarPago.Enabled =
-            _comprobanteEmitido
-            && saldoPendiente > 0;
-
-        btnEmitirComprobante.Enabled =
-            !_comprobanteEmitido;
+        if (_datos?.Comprobante is not { } d || _ocupado) return;
+        using var f = new FrmRegistrarPago(d, _servicio); f.ShowDialog(this); await RecargarAsync();
     }
-
-    private static string FormatearImporte(
-        decimal importe)
+    private async void Anular(object? s, EventArgs e)
     {
-        return importe.ToString(
-            "C2",
-            new System.Globalization.CultureInfo("es-AR"));
+        if (_datos?.Comprobante is not { } d || PagoSeleccionado is not { } pago || _ocupado) return;
+        using var f = new FrmSolicitarMotivo("Anular registro de pago", $"Recibo {pago.Numero} por {pago.Importe:N2}. La anulación conserva el original y repone el saldo. Registra una corrección administrativa; no realiza una devolución bancaria.");
+        if (f.ShowDialog(this) == DialogResult.OK) await OperarAsync(() => _servicio.AnularPagoAsync(d.IdComprobante, pago.IdPago, d.Version, f.Motivo));
     }
-
-    #endregion
-
-    #region Estilos
-
-    private void AplicarEstilos()
+    private async void Entregar(object? s, EventArgs e)
     {
-        BackColor =
-            EstilosInterfaz.FondoAplicacion;
-
-        EstilosInterfaz.AplicarBotonPrimario(
-            btnEmitirComprobante);
-
-        EstilosInterfaz.AplicarBotonPrimario(
-            btnRegistrarPago);
-
-        EstilosInterfaz.AplicarBotonSecundario(
-            btnCerrar);
-
-        EstilosInterfaz.AplicarGrilla(
-            dgvPagos);
+        if (_datos == null || _ocupado) return;
+        using var f = new FrmSolicitarMotivo("Registrar entrega del vehículo", "Indique la condición de entrega, el resultado del trabajo y quién retira. Solo se permite entregar con saldo exactamente cero.");
+        if (f.ShowDialog(this) == DialogResult.OK) await OperarAsync(() => _servicio.EntregarAsync(_id, _datos.VersionAtencion, f.Motivo));
     }
-
-    #endregion
+    private async void Imprimir(object? s, EventArgs e)
+    {
+        if (_ocupado) return;
+        await OperarAsync(async () => { var cuenta = await _servicio.ObtenerAsync(_id); if (cuenta.Comprobante is { } d) ImpresionDocumento.Mostrar(this, TextoDocumentos.Liquidacion(d)); });
+    }
+    private async void Recibo(object? s, EventArgs e)
+    {
+        if (PagoSeleccionado is not { } seleccionado || _ocupado) return;
+        await OperarAsync(async () => { var cuenta = await _servicio.ObtenerAsync(_id); if (cuenta.Comprobante is { } d && d.Pagos.SingleOrDefault(p => p.IdPago == seleccionado.IdPago) is { } p) ImpresionDocumento.Mostrar(this, TextoDocumentos.Recibo(d, p)); });
+    }
+    private async void Actualizar(object? s,EventArgs e) { if(!_ocupado&&!_cargando) await RecargarAsync(); }
+    private void Cerrar(object? s, EventArgs e) => Close();
+    private void AlCerrar(object? s, FormClosingEventArgs e) { if (_ocupado || _cargando) e.Cancel = true; }
+    private void Error(Exception ex) => MessageBox.Show(this, ex.Message, "Liquidación y cobros", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 }

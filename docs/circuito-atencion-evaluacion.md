@@ -1,6 +1,6 @@
 # Atención, evaluación y propuesta
 
-Esta entrega comprende la apertura de la atención, la evaluación del técnico y la preparación/presentación de un presupuesto real. Las decisiones de aceptación, revisión o rechazo, la reparación, liquidación, pagos y comprobantes se implementarán en otra entrega. Las pantallas antiguas de esos módulos que aún contienen demostraciones no constituyen persistencia real.
+Este documento describe la etapa de apertura, evaluación y propuesta. La extensión ya implementada de decisiones por ítem, ejecución, liquidación, pagos parciales y entrega se documenta en [la adenda funcional v1.0](ERS/ADENDA-v1.0-presupuestos-cobros.md) y [su guía de pruebas](probar-decision-ejecucion-cobros.md). Esa adenda prevalece sobre las referencias a trabajo futuro de esta primera etapa.
 
 ## Circuito y decisiones
 
@@ -24,7 +24,7 @@ Los servicios iniciales se guardan como un documento aceptado de tipo `Diagnosti
 - **Finalizar evaluación y propuesta** exige informe para problema/mixta, resuelve servicios iniciales y guarda todo en una operación atómica. El informe queda histórico y la propuesta pendiente de presentación. No autoriza reparar.
 - **Finalizar sin propuesta** exige motivo y ningún ítem propuesto; elimina únicamente el borrador de propuesta no presentado, conserva el informe y servicios iniciales, y deja la atención pendiente de liquidación/revisión de cargos. Esto no confirma ningún cobro ni que deba cobrarse.
 
-Recepción consulta la propuesta en **Presupuestos**. **Registrar comunicación al cliente** confirma que informó alcance e importes y pasa a pendiente de decisión. No representa aceptación. Los borradores se continúan desde Evaluaciones técnicas. Las futuras revisiones deben preservar el presupuesto presentado y producir una nueva versión; esta entrega bloquea sobrescribir una propuesta confirmada.
+Recepción consulta la propuesta en **Presupuestos**. **Registrar comunicación al cliente** confirma que informó alcance e importes y pasa a pendiente de decisión. No representa aceptación. Los borradores se continúan desde Evaluaciones técnicas. Las revisiones preservan el presupuesto presentado y producen una nueva versión antes de ejecutar. La decisión puede excluir ítems sin borrarlos del documento original; véase la adenda para el circuito completo.
 
 ## Organización
 

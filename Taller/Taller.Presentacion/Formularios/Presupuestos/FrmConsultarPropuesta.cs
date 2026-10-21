@@ -6,7 +6,7 @@ public partial class FrmConsultarPropuesta : Form
     public FrmConsultarPropuesta(PresupuestoConsultaDto datos)
     {
         InitializeComponent();
-        lblResumen.Text = $"Presupuesto {datos.IdPresupuesto:D6} · Atención {datos.IdAtencion:D6} · {datos.Cliente} · {datos.Vehiculo}\nTipo: {datos.TipoDescripcion} · Estado: {datos.EstadoDescripcion}";
+        lblResumen.Text = $"Presupuesto {datos.IdPresupuesto:D6} · Atención {datos.IdAtencion:D6} · {datos.Cliente} · {datos.Vehiculo}\nTipo: {datos.TipoDescripcion} · Estado: {datos.EstadoDescripcion} · {(datos.Vigente ? "Vigente" : "Histórico")} · Revisa: {datos.IdPresupuestoAnterior?.ToString() ?? "—"}";
         dgvItems.DataSource = datos.Items;
         txtObservaciones.Text = datos.Observaciones;
         lblTotal.Text = $"Total del documento: {datos.Total:N2}. No es un comprobante de pago. Los cargos iniciales pertenecen a su propio documento.";

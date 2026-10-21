@@ -53,6 +53,12 @@ public sealed class TallerDbContext : DbContext
     // Conjunto de conceptos administrados por Entity Framework Core.
     public DbSet<Concepto> Conceptos => Set<Concepto>();
 
+    public DbSet<Comprobante> Comprobantes => Set<Comprobante>();
+    public DbSet<ComprobanteDetalle> ComprobanteDetalles => Set<ComprobanteDetalle>();
+    public DbSet<Pago> Pagos => Set<Pago>();
+    public DbSet<PagoMedio> PagoMedios => Set<PagoMedio>();
+    public DbSet<MedioPago> MediosPago => Set<MedioPago>();
+
     public DbSet<Presupuesto> Presupuestos =>
     Set<Presupuesto>();
 

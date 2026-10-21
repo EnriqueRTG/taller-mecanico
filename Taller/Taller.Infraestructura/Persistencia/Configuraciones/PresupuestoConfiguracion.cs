@@ -92,6 +92,10 @@ public sealed class PresupuestoConfiguracion
         });
 
         builder.HasKey(p => p.IdPresupuesto);
+        builder.Property(p => p.Vigente).IsRequired();
+        builder.Property(p => p.MotivoRevision).HasMaxLength(1000);
+        builder.Property(p => p.ObservacionesDecision).HasMaxLength(1000);
+        builder.HasOne(p => p.PresupuestoAnterior).WithMany().HasForeignKey(p => p.IdPresupuestoAnterior).OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(p => p.IdPresupuesto)
             .ValueGeneratedOnAdd();
@@ -146,7 +150,7 @@ public sealed class PresupuestoConfiguracion
         builder.HasIndex(p => p.IdAtencion).HasDatabaseName("IX_Presupuestos_Atencion")
             .IsUnique(false);
         builder.HasIndex(p => p.IdAtencion, "UX_Presupuestos_BorradorPorAtencion")
-            .IsUnique().HasFilter("[Tipo] = N'Reparacion' AND [Estado] = N'Borrador'");
+            .IsUnique().HasFilter("[Tipo] = N'Reparacion' AND [Estado] = N'Borrador' AND [Vigente] = 1");
         // Un diagnóstico puede fundamentar varias propuestas.
         builder.HasIndex(p => p.IdDiagnostico)
             .HasDatabaseName("IX_Presupuestos_IdDiagnostico");

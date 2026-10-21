@@ -18,16 +18,18 @@ public partial class FrmEvaluarAtencion : Form
     { InitializeComponent(); _id = id; _servicio = servicio; }
     private async void Cargar(object? s, EventArgs e)
     {
-        try {
+        try
+        {
             _catalogo = await _servicio.ListarCatalogoAsync();
             CargarDatos(await _servicio.ObtenerAsync(_id));
             FiltrarCatalogo(null, EventArgs.Empty);
-        } catch (Exception ex) { MostrarError(ex); Close(); }
+        }
+        catch (Exception ex) { MostrarError(ex); Close(); }
     }
     private void CargarDatos(EvaluacionAtencionDto d)
     {
         _cargando = true; _datos = d;
-        lblResumen.Text = $"Atención {d.IdAtencion:D6} · {d.Cliente} · {d.Vehiculo}\nSolicitud: {d.TipoSolicitud} · {d.Motivo}";
+        txtResumen.Text = $"Atención {d.IdAtencion:D6} · {d.Cliente} · {d.Vehiculo}\nSolicitud: {d.TipoSolicitud} · {d.Motivo}" + (string.IsNullOrWhiteSpace(d.MotivoRevision) ? "" : $"\nRevisión solicitada: {d.MotivoRevision}");
         chkInforme.Checked = d.IncluyeDiagnostico;
         chkInforme.Enabled = d.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido && !d.InformeHistorico;
         txtHallazgo.ReadOnly = d.InformeHistorico; txtTrabajo.ReadOnly = d.InformeHistorico;
@@ -85,7 +87,8 @@ public partial class FrmEvaluarAtencion : Form
         if (dgvIniciales.DataSource is not null) BindingContext?[dgvIniciales.DataSource]?.EndCurrentEdit();
         if (finalizar && MessageBox.Show(this, "¿Finalizar la evaluación? El informe quedará como histórico y la propuesta lista para que Recepción la comunique. Esto no autoriza reparar.", "Finalizar evaluación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
         _ocupado = true; tlpPrincipal.Enabled = false;
-        try {
+        try
+        {
             _datos.IncluyeDiagnostico = chkInforme.Checked; _datos.SoloEvaluacion = chkSinPropuesta.Checked;
             _datos.FallaDetectada = txtHallazgo.Text; _datos.TrabajoRecomendado = txtTrabajo.Text;
             _datos.Observaciones = txtObservaciones.Text; _datos.Kilometraje = chkKm.Checked ? (int)nudKm.Value : null;
@@ -94,7 +97,8 @@ public partial class FrmEvaluarAtencion : Form
             _sucio = false;
             if (finalizar) { Finalizada = true; DialogResult = DialogResult.OK; }
             else { CargarDatos(await _servicio.ObtenerAsync(_id)); lblAviso.Text = "Avance guardado. Puede cerrar y continuar luego; la reserva sigue a su nombre."; }
-        } catch (Exception ex) { MostrarError(ex); }
+        }
+        catch (Exception ex) { MostrarError(ex); }
         finally { _ocupado = false; tlpPrincipal.Enabled = true; }
         if (Finalizada) Close();
     }

@@ -17,10 +17,15 @@ public sealed class EvaluacionRepositorio(TallerDbContext contexto) : IEvaluacio
         .Where(c => c.Activo && c.Categoria.Activo).OrderBy(c => c.Nombre).ToListAsync();
     public Task<List<EvaluacionBandejaDto>> ListarAsync() => contexto.Atenciones.AsNoTracking()
         .Where(a => a.Estado != EstadoAtencion.Cerrada && a.Estado != EstadoAtencion.Cancelada && (a.Estado == EstadoAtencion.PendienteDiagnostico || a.Estado == EstadoAtencion.EnEvaluacionTecnica || contexto.Set<EvaluacionAtencion>().Any(e => e.IdAtencion == a.IdAtencion && e.Finalizada)))
-        .Select(a => new EvaluacionBandejaDto {
-            IdAtencion = a.IdAtencion, Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
-            Vehiculo = a.Vehiculo.Dominio + " · " + a.Vehiculo.Modelo.Nombre, Motivo = a.MotivoConsulta,
-            TipoSolicitud = a.TipoSolicitud, Fecha = a.Historial.Select(h => (DateTime?)h.Fecha).Max() ?? a.FechaApertura, IdTecnico = a.IdTecnicoEnActividad,
+        .Select(a => new EvaluacionBandejaDto
+        {
+            IdAtencion = a.IdAtencion,
+            Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
+            Vehiculo = a.Vehiculo.Dominio + " · " + a.Vehiculo.Modelo.Nombre,
+            Motivo = a.MotivoConsulta,
+            TipoSolicitud = a.TipoSolicitud,
+            Fecha = a.Historial.Select(h => (DateTime?)h.Fecha).Max() ?? a.FechaApertura,
+            IdTecnico = a.IdTecnicoEnActividad,
             Tecnico = a.TecnicoEnActividad == null ? "Disponible" : a.TecnicoEnActividad.Apellido + ", " + a.TecnicoEnActividad.Nombre,
             Finalizada = contexto.Set<EvaluacionAtencion>().Any(e => e.IdAtencion == a.IdAtencion && e.Finalizada),
             IdDiagnostico = a.Diagnosticos.Where(d => d.Tipo == TipoDiagnostico.Inicial).Select(d => (int?)d.IdDiagnostico).FirstOrDefault()
@@ -29,11 +34,21 @@ public sealed class EvaluacionRepositorio(TallerDbContext contexto) : IEvaluacio
     {
         var datos = await contexto.Presupuestos.AsNoTracking().Include(p => p.Atencion).ThenInclude(a => a.Cliente)
             .Include(p => p.Atencion).ThenInclude(a => a.Vehiculo).Include(p => p.Detalles).ToListAsync();
-        return datos.Select(p => new PresupuestoConsultaDto {
-            IdPresupuesto = p.IdPresupuesto, IdAtencion = p.IdAtencion, Cliente = p.Atencion.Cliente.Apellido + ", " + p.Atencion.Cliente.Nombre,
-            Vehiculo = p.Atencion.Vehiculo.Dominio, Fecha = p.FechaCreacion, Tipo = p.Tipo, Estado = p.Estado,
-            Version = p.Version, Observaciones = p.Observaciones,
-            Items = p.Detalles.Select(d => new ItemPropuestaDto { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList()
+        return datos.Select(p => new PresupuestoConsultaDto
+        {
+            IdPresupuesto = p.IdPresupuesto,
+            IdAtencion = p.IdAtencion,
+            Cliente = p.Atencion.Cliente.Apellido + ", " + p.Atencion.Cliente.Nombre,
+            Vehiculo = p.Atencion.Vehiculo.Dominio,
+            Fecha = p.FechaDecision ?? p.FechaPresentacion ?? p.FechaCreacion,
+            Tipo = p.Tipo,
+            Estado = p.Estado,
+            Vigente = p.Vigente,
+            IdPresupuestoAnterior = p.IdPresupuestoAnterior,
+            TotalAceptado = p.Detalles.Where(d => d.AceptadoPorCliente == true).Sum(d => decimal.Round(d.Cantidad * d.PrecioUnitario, 2, MidpointRounding.AwayFromZero)),
+            Version = p.Version,
+            Observaciones = p.Observaciones,
+            Items = p.Detalles.Select(d => new ItemPropuestaDto { IdDetalle = d.IdPresupuestoDetalle, AceptadoPorCliente = d.AceptadoPorCliente, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList()
         }).ToList();
     }
     public void PrepararVersion(Atencion a, byte[] version)

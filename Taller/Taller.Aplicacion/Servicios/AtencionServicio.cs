@@ -164,9 +164,13 @@ public sealed class AtencionServicio
             FechaCierre = null
         };
 
-        atencion.Historial.Add(new HistorialAtencion {
-            IdUsuario = recepcion.Id, Fecha = atencion.FechaApertura,
-            Accion = "AtencionAbierta", EstadoAnterior = null, EstadoNuevo = EstadoAtencion.Abierta,
+        atencion.Historial.Add(new HistorialAtencion
+        {
+            IdUsuario = recepcion.Id,
+            Fecha = atencion.FechaApertura,
+            Accion = "AtencionAbierta",
+            EstadoAnterior = null,
+            EstadoNuevo = EstadoAtencion.Abierta,
             Observaciones = $"Solicitud: {tipoSolicitud}. Motivo registrado por Recepción."
         });
         await _atencionRepositorio.AgregarAsync(atencion);
@@ -426,6 +430,7 @@ public sealed class AtencionServicio
             detalles.Add(new PresupuestoDetalle
             {
                 IdConcepto = concepto.IdConcepto,
+                AceptadoPorCliente = true,
                 Descripcion = descripcion,
                 Cantidad = servicio.Cantidad,
                 PrecioUnitario = servicio.PrecioUnitario,

@@ -80,6 +80,7 @@ partial class FrmConsultarPropuesta
         BackColor = Color.FromArgb(248, 250, 252);
         CancelButton = btnCerrar;
         btnCerrar.DialogResult = DialogResult.None;
+        dgvItems.Columns.Add(new DataGridViewCheckBoxColumn{Name="colAceptado",DataPropertyName="AceptadoPorCliente",HeaderText="Cliente acepta",ThreeState=true,FillWeight=80,ReadOnly=true});
         ResumeLayout(false);
     }
     private TableLayoutPanel tlpPrincipal = null!;

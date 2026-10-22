@@ -84,7 +84,7 @@ public partial class FrmDecisionPresupuesto : Form
         if (_ocupado || _datos == null || _servicio == null)
             return;
         dgvItems.EndEdit();
-        if (MessageBox.Show(this, "¿Registrar esta decisión del cliente? El técnico revisará el alcance aceptado antes de ejecutar.", "Registrar decisión", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        if (MessageBox.Show(this, "¿Registrar esta decisión del cliente? Una selección parcial queda pendiente de revisión técnica y nueva aceptación; todavía no autoriza trabajos.", "Registrar decisión", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             return;
         _ocupado = true;
         tlpPrincipal.Enabled = false;

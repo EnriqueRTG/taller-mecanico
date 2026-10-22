@@ -1,13 +1,15 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Diagnosticos;
 partial class FrmEvaluarAtencion
 {
     private System.ComponentModel.IContainer? components;
     protected override void Dispose(bool disposing)
     {
-        if (disposing) components?.Dispose();
+        if (disposing)
+            components?.Dispose();
         base.Dispose(disposing);
     }
+
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
@@ -115,8 +117,12 @@ partial class FrmEvaluarAtencion
         lblAviso.Text = "Cerrar conserva la reserva. Para ceder la actividad use Liberar en la bandeja.";
         tlpPrincipal.Controls.Add(flpAcciones, 0, 3);
         flpAcciones.Dock = DockStyle.Fill;
-        tabs.Controls.Add(tabInforme); tabs.Controls.Add(tabPropuesta); tabs.Controls.Add(tabIniciales);
-        tabInforme.Text = "Informe / conclusión"; tabPropuesta.Text = "Propuesta económica"; tabIniciales.Text = "Servicios iniciales autorizados";
+        tabs.Controls.Add(tabInforme);
+        tabs.Controls.Add(tabPropuesta);
+        tabs.Controls.Add(tabIniciales);
+        tabInforme.Text = "Informe / conclusión";
+        tabPropuesta.Text = "Propuesta económica";
+        tabIniciales.Text = "Servicios iniciales autorizados";
         tlpInforme.Dock = DockStyle.Fill;
         tlpInforme.Padding = new Padding(12);
         tlpInforme.ColumnCount = 1;
@@ -147,10 +153,12 @@ partial class FrmEvaluarAtencion
         txtTrabajo.Dock = DockStyle.Fill;
         tlpInforme.Controls.Add(flpKm, 0, 5);
         flpKm.Dock = DockStyle.Fill;
-        chkKm.Text = "Kilometraje registrado"; chkKm.AutoSize = true; chkKm.CheckedChanged += Cambiado;
-        flpKm.Controls.Add(chkKm); flpKm.Controls.Add(nudKm);
+        chkKm.Text = "Kilometraje registrado";
+        chkKm.AutoSize = true;
+        chkKm.CheckedChanged += Cambiado;
+        flpKm.Controls.Add(chkKm);
+        flpKm.Controls.Add(nudKm);
         nudKm.Width = 180;
-
         tlpInforme.Controls.Add(lblObservaciones, 0, 6);
         lblObservaciones.Dock = DockStyle.Fill;
         lblObservaciones.Text = "Observaciones / motivo si no se propone reparación";
@@ -159,11 +167,23 @@ partial class FrmEvaluarAtencion
         tlpInforme.Controls.Add(chkSinPropuesta, 0, 8);
         chkSinPropuesta.Dock = DockStyle.Fill;
         chkSinPropuesta.Text = "Finalizar sin propuesta de reparación (requiere motivo y propuesta vacía)";
-        txtHallazgo.Multiline = true; txtHallazgo.MaxLength = 1000; txtHallazgo.ScrollBars = ScrollBars.Vertical; txtHallazgo.TextChanged += Cambiado;
-        txtTrabajo.Multiline = true; txtTrabajo.MaxLength = 1000; txtTrabajo.ScrollBars = ScrollBars.Vertical; txtTrabajo.TextChanged += Cambiado;
-        txtObservaciones.Multiline = true; txtObservaciones.MaxLength = 1000; txtObservaciones.ScrollBars = ScrollBars.Vertical; txtObservaciones.TextChanged += Cambiado;
-        nudKm.Maximum = 2000000000; nudKm.AccessibleName = "Kilometraje"; nudKm.ValueChanged += Cambiado;
-        chkInforme.CheckedChanged += Cambiado; chkSinPropuesta.CheckedChanged += Cambiado;
+        txtHallazgo.Multiline = true;
+        txtHallazgo.MaxLength = 1000;
+        txtHallazgo.ScrollBars = ScrollBars.Vertical;
+        txtHallazgo.TextChanged += Cambiado;
+        txtTrabajo.Multiline = true;
+        txtTrabajo.MaxLength = 1000;
+        txtTrabajo.ScrollBars = ScrollBars.Vertical;
+        txtTrabajo.TextChanged += Cambiado;
+        txtObservaciones.Multiline = true;
+        txtObservaciones.MaxLength = 1000;
+        txtObservaciones.ScrollBars = ScrollBars.Vertical;
+        txtObservaciones.TextChanged += Cambiado;
+        nudKm.Maximum = 2000000000;
+        nudKm.AccessibleName = "Kilometraje";
+        nudKm.ValueChanged += Cambiado;
+        chkInforme.CheckedChanged += Cambiado;
+        chkSinPropuesta.CheckedChanged += Cambiado;
         tlpPropuesta.Dock = DockStyle.Fill;
         tlpPropuesta.Padding = new Padding(12);
         tlpPropuesta.ColumnCount = 1;
@@ -172,7 +192,7 @@ partial class FrmEvaluarAtencion
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 75));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
@@ -185,22 +205,42 @@ partial class FrmEvaluarAtencion
         txtDescripcion.Dock = DockStyle.Fill;
         tlpPropuesta.Controls.Add(flpItem, 0, 3);
         flpItem.Dock = DockStyle.Fill;
+        chkAportaCliente = new CheckBox
+        {
+            Name = "chkAportaCliente",
+            Text = "Material del cliente",
+            AutoSize = true
+        };
+        chkAportaCliente.CheckedChanged += OrigenCambiado;
+        flpItem.Controls.Add(chkAportaCliente);
         tlpPropuesta.Controls.Add(lblPrecio, 0, 4);
         lblPrecio.Dock = DockStyle.Fill;
         tlpPropuesta.Controls.Add(dgvItems, 0, 5);
         dgvItems.Dock = DockStyle.Fill;
         tlpPropuesta.Controls.Add(lblTotal, 0, 6);
         lblTotal.Dock = DockStyle.Fill;
-        txtBuscar.PlaceholderText = "Buscar concepto por nombre, categoría o descripción"; txtBuscar.TextChanged += FiltrarCatalogo;
-        cboConcepto.DropDownStyle = ComboBoxStyle.DropDownList; cboConcepto.SelectedIndexChanged += ConceptoCambiado;
-        txtDescripcion.MaxLength = 500; txtDescripcion.PlaceholderText = "Descripción y especificación del ítem";
-        lblCantidadItem.Text = "Cantidad"; lblCantidadItem.AutoSize = true;
-        lblImporteItem.Text = "Precio unitario"; lblImporteItem.AutoSize = true;
+        txtBuscar.PlaceholderText = "Buscar concepto por nombre, categoría o descripción";
+        txtBuscar.TextChanged += FiltrarCatalogo;
+        cboConcepto.DropDownStyle = ComboBoxStyle.DropDownList;
+        cboConcepto.SelectedIndexChanged += ConceptoCambiado;
+        txtDescripcion.MaxLength = 500;
+        txtDescripcion.PlaceholderText = "Descripción y especificación del ítem";
+        lblCantidadItem.Text = "Cantidad";
+        lblCantidadItem.AutoSize = true;
+        lblImporteItem.Text = "Precio unitario";
+        lblImporteItem.AutoSize = true;
         flpItem.Controls.Add(lblCantidadItem);
         flpItem.Controls.Add(nudCantidad);
-        flpItem.Controls.Add(lblImporteItem); flpItem.Controls.Add(nudPrecio);
-        nudCantidad.DecimalPlaces = 3; nudCantidad.Minimum = 0.001M; nudCantidad.Maximum = 1000000; nudCantidad.Value = 1; nudCantidad.Width = 100;
-        nudPrecio.DecimalPlaces = 2; nudPrecio.Maximum = 1000000000; nudPrecio.Width = 120;
+        flpItem.Controls.Add(lblImporteItem);
+        flpItem.Controls.Add(nudPrecio);
+        nudCantidad.DecimalPlaces = 3;
+        nudCantidad.Minimum = 0.001M;
+        nudCantidad.Maximum = 1000000;
+        nudCantidad.Value = 1;
+        nudCantidad.Width = 100;
+        nudPrecio.DecimalPlaces = 2;
+        nudPrecio.Maximum = 1000000000;
+        nudPrecio.Width = 120;
         btnAgregar.Text = "Agregar ítem";
         btnAgregar.AutoSize = true;
         btnAgregar.Height = 34;
@@ -225,6 +265,7 @@ partial class FrmEvaluarAtencion
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Descripción", FillWeight = 240, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad", FillWeight = 70, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
+        dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporta", MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPrecioUnitario", DataPropertyName = "PrecioUnitario", HeaderText = "Precio unitario", FillWeight = 85, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSubtotal", DataPropertyName = "Subtotal", HeaderText = "Subtotal", FillWeight = 85, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         tlpIniciales.Dock = DockStyle.Fill;
@@ -274,7 +315,15 @@ partial class FrmEvaluarAtencion
         btnCerrar.Height = 34;
         btnCerrar.Click += Cerrar;
         flpAcciones.Controls.Add(btnCerrar);
-
+        btnSeguimiento = new Button
+        {
+            Name = "btnSeguimiento",
+            Text = "Hallazgos y ampliación de inspección",
+            AutoSize = true
+        };
+        btnSeguimiento.Click += Seguimiento;
+        flpAcciones.Controls.Add(btnSeguimiento);
+        flpAcciones.AutoScroll = true;
         Load += Cargar;
         FormClosing += AlCerrar;
         BackColor = Color.FromArgb(248, 250, 252);
@@ -283,9 +332,15 @@ partial class FrmEvaluarAtencion
         btnFinalizar.FlatStyle = FlatStyle.Flat;
         CancelButton = btnCerrar;
         btnCerrar.DialogResult = DialogResult.None;
-        txtResumen.ReadOnly=true;txtResumen.Multiline=true;txtResumen.ScrollBars=ScrollBars.Vertical;txtResumen.TabStop=false;
+        txtResumen.ReadOnly = true;
+        txtResumen.Multiline = true;
+        txtResumen.ScrollBars = ScrollBars.Vertical;
+        txtResumen.TabStop = false;
         ResumeLayout(false);
     }
+
+    private Button btnSeguimiento = null!;
+    private CheckBox chkAportaCliente = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private TextBox txtResumen = null!;
     private TabControl tabs = null!;

@@ -1,5 +1,4 @@
-﻿namespace Taller.Dominio.Enumeraciones;
-
+namespace Taller.Dominio.Enumeraciones;
 /// <summary>
 /// Define la situación de una propuesta respecto de su
 /// presentación y de la decisión del cliente.
@@ -12,18 +11,18 @@ public enum EstadoPresupuesto
 {
     /// <summary>Propuesta en elaboración, todavía no disponible para presentar.</summary>
     Borrador = 0,
+    /// <summary>Selección del cliente aún no autorizada: requiere propuesta técnicamente viable y nueva aceptación.</summary>
+    PendienteRevisionTecnica = 5,
     /// <summary>
     /// La propuesta está registrada y espera ser comunicada
     /// al cliente por Recepción.
     /// </summary>
     PendientePresentacion = 1,
-
     /// <summary>
     /// Recepción comunicó la propuesta y se espera registrar
     /// la decisión del cliente.
     /// </summary>
     PendienteDecision = 2,
-
     /// <summary>
     /// El cliente autorizó los conceptos y precios propuestos.
     /// </summary>
@@ -32,7 +31,6 @@ public enum EstadoPresupuesto
     /// directamente en este estado al confirmar su autorización.
     /// </remarks>
     Aceptado = 3,
-
     /// <summary>
     /// El cliente rechazó la propuesta.
     /// Sus conceptos no quedan autorizados para ejecutarse.

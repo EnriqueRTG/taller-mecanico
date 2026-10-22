@@ -87,7 +87,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 throw new ValidacionException("La atención no está pendiente de evaluación.");
             if ((await repositorio.ObtenerAvanceAsync(id))?.Finalizada == true)
                 throw new ValidacionException("La evaluación ya está finalizada.");
-            if ((await repositorio.ObtenerPresupuestosAsync(id)).Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
+            if ((await repositorio.ObtenerPresupuestosAsync(id)).Any(p => p.Tipo == TipoPresupuesto.Reparacion && !p.EsAdicional && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
                 throw new ValidacionException("La propuesta ya está preparada. Consúltela en Presupuestos.");
             if (a.IdTecnicoEnActividad is not null)
                 throw new ValidacionException("La actividad ya fue tomada. Actualice el listado.");
@@ -160,7 +160,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 throw new ValidacionException("La evaluación ya se finalizó.");
             var presupuestos = await repositorio.ObtenerPresupuestosAsync(id);
             var informe = (await repositorio.ObtenerDiagnosticosAsync(id)).FirstOrDefault(d => d.Tipo == TipoDiagnostico.Inicial);
-            var borrador = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
+            var borrador = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && !p.EsAdicional && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
             return new EvaluacionAtencionDto
             {
                 IdAtencion = id,
@@ -177,8 +177,8 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 Kilometraje = avance?.Kilometraje ?? informe?.Kilometraje,
                 Observaciones = avance?.Observaciones ?? informe?.Observaciones,
                 SoloEvaluacion = avance?.SoloEvaluacion ?? false,
-                Items = borrador?.Detalles.Select(d => new ItemPropuestaDto { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList() ?? [],
-                ServiciosIniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto { IdDetalle = d.IdPresupuestoDetalle, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList()
+                Items = borrador?.Detalles.Select(d => new ItemPropuestaDto { OrigenMaterial = d.OrigenMaterial, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList() ?? [],
+                ServiciosIniciales = presupuestos.Where(p => (p.Tipo == TipoPresupuesto.Diagnostico || p.EsInspeccion && p.Vigente) && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto { IdDetalle = d.IdPresupuestoDetalle, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList()
             };
         }
         finally
@@ -217,11 +217,15 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             if (finalizar && !datos.SoloEvaluacion && datos.Items.Count == 0)
                 throw new ValidacionException("Agregue la propuesta o indique que finaliza sin propuesta, con su motivo.");
             var presupuestos = await repositorio.ObtenerPresupuestosAsync(a.IdAtencion);
-            if (presupuestos.Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
+            if (presupuestos.Any(p => p.Tipo == TipoPresupuesto.Reparacion && !p.EsAdicional && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
                 throw new ValidacionException("Ya existe una propuesta confirmada. Su revisión requiere un nuevo circuito.");
+            if (finalizar && (a.Pausas.Any(p => p.FechaResolucion == null) || presupuestos.Any(p => p.EsAdicional && p.Vigente && p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendientePresentacion or EstadoPresupuesto.PendienteDecision or EstadoPresupuesto.PendienteRevisionTecnica)))
+                throw new ValidacionException("Resuelva pausas y propuestas adicionales de inspección antes de finalizar la evaluación.");
             var catalogo = (await repositorio.ListarCatalogoAsync()).ToDictionary(c => c.IdConcepto);
             if (datos.Items.GroupBy(i => i.IdConcepto).Any(g => g.Count() > 1))
                 throw new ValidacionException("No repita conceptos en la propuesta.");
+            if (datos.Items.Count > 0)
+                _ = SeguimientoTrabajoServicio.PrepararItems(datos.Items, catalogo.Values.ToList());
             decimal total = 0;
             const decimal maximo = 9999999999999999.99m;
             foreach (var item in datos.Items)
@@ -237,7 +241,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 total += item.Subtotal;
             }
 
-            var iniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico).SelectMany(p => p.Detalles).ToList();
+            var iniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico || p.EsInspeccion && p.Vigente && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles).ToList();
             if (datos.ServiciosIniciales.Select(d => d.IdDetalle).Distinct().Count() != iniciales.Count || datos.ServiciosIniciales.Count != iniciales.Count)
                 throw new ValidacionException("Los servicios iniciales cambiaron. Vuelva a abrir la evaluación.");
             foreach (var registro in datos.ServiciosIniciales)
@@ -252,6 +256,8 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                     throw new ValidacionException("Justifique cada servicio omitido.");
                 if (finalizar && registro.Estado == EstadoEjecucionDetalle.NoIniciado)
                     throw new ValidacionException("Resuelva los servicios iniciales: completados u omitidos con justificación.");
+                if (registro.Estado != detalle.EstadoEjecucion && registro.Estado != EstadoEjecucionDetalle.Omitido && a.Pausas.Any(p => p.FechaResolucion == null && (p.IdDetalle == null || p.IdDetalle == detalle.IdPresupuestoDetalle)))
+                    throw new ValidacionException("El servicio inicial está pausado. Resuelva su causa antes de ejecutarlo.");
                 if (detalle.EstadoEjecucion != registro.Estado || detalle.ObservacionesEjecucion != registro.Observaciones?.Trim())
                 {
                     detalle.EstadoEjecucion = registro.Estado;
@@ -280,7 +286,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             avance.Finalizada = finalizar;
             avance.IdTecnicoUltimaEdicion = usuario.Id;
             avance.FechaActualizacion = DateTime.Now;
-            var propuesta = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
+            var propuesta = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && !p.EsAdicional && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
             if (datos.Items.Count > 0 || propuesta is not null)
             {
                 if (propuesta is null)
@@ -296,7 +302,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                     repositorio.AgregarPresupuesto(propuesta);
                 }
 
-                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle { IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario }));
+                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle { OrigenMaterial = i.OrigenMaterial, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario }));
                 propuesta.Observaciones = avance.Observaciones;
             }
 
@@ -376,12 +382,14 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             var p = (await repositorio.ObtenerPresupuestosAsync(a.IdAtencion)).Single(p => p.IdPresupuesto == idPresupuesto);
             if ((!p.Vigente || p.Estado != EstadoPresupuesto.PendientePresentacion) || p.Tipo != TipoPresupuesto.Reparacion || version is null || version.Length != 8 || !p.Version.SequenceEqual(version))
                 throw new ValidacionException("La propuesta cambió o ya fue presentada. Actualice el listado.");
-            if (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.IdTecnicoEnActividad is not null)
+            if ((!p.EsAdicional && (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.IdTecnicoEnActividad is not null)) || (p.EsAdicional && a.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))
                 throw new ValidacionException("La atención no está disponible para presentar esta propuesta.");
             p.Estado = EstadoPresupuesto.PendienteDecision;
             p.FechaPresentacion = DateTime.Now;
             var anterior = a.Estado;
-            a.Estado = EstadoAtencion.PendienteDecision;
+            if (!p.EsAdicional)
+                a.Estado = EstadoAtencion.PendienteDecision;
+            repositorio.PrepararVersion(a, a.Version);
             Evento(a, usuario, "PresupuestoPresentado", anterior, "Recepción registró que comunicó la propuesta al cliente. Decisión pendiente.");
             await unidad.GuardarCambiosAsync();
         }

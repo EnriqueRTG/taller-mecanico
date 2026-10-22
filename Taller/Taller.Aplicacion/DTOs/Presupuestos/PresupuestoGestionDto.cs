@@ -1,8 +1,10 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
+
 namespace Taller.Aplicacion.DTOs.Presupuestos;
 /// <summary>Contrato de datos para presupuestos, independiente de los controles de presentación.</summary>
 public sealed class PresupuestoGestionDto
 {
+    public bool EsAdicional { get; set; }
     public int IdPresupuesto { get; set; }
     public int IdAtencion { get; set; }
     public EstadoPresupuesto Estado { get; set; }

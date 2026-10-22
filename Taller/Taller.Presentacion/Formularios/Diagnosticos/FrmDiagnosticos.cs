@@ -6,6 +6,7 @@ namespace Taller.Presentacion.Formularios.Diagnosticos;
 /// <summary>Bandeja de trabajo técnico: reserva, continuación, liberación y consulta de informes.</summary>
 public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFormularioConOperacion
 {
+    private readonly IServiceProvider _proveedor;
     private readonly EvaluacionServicio _servicio;
     private readonly DiagnosticoServicio _diagnosticos;
     private readonly SesionUsuario _sesion;
@@ -15,9 +16,10 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
     private bool _cargando;
     public bool OperacionEnCurso => _ocupado || _cargando;
 
-    public FrmDiagnosticos(EvaluacionServicio servicio, DiagnosticoServicio diagnosticos, SesionUsuario sesion)
+    public FrmDiagnosticos(EvaluacionServicio servicio, DiagnosticoServicio diagnosticos, SesionUsuario sesion, IServiceProvider proveedor)
     {
         InitializeComponent();
+        _proveedor = proveedor;
         _servicio = servicio;
         _diagnosticos = diagnosticos;
         _sesion = sesion;
@@ -110,7 +112,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
                 return;
             if (d.IdTecnico == null)
                 await _servicio.TomarAsync(id);
-            using var f = new FrmEvaluarAtencion(id, _servicio);
+            using var f = new FrmEvaluarAtencion(id, _servicio, _proveedor);
             f.ShowDialog(this);
             if (f.Finalizada)
                 MessageBox.Show(this, "Evaluación finalizada. La propuesta está disponible en Presupuestos para su presentación por Recepción.");

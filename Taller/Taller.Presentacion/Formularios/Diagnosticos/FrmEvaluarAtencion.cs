@@ -7,6 +7,7 @@ namespace Taller.Presentacion.Formularios.Diagnosticos;
 /// <summary>Registra un avance técnico o finaliza el informe y su propuesta. Cerrar no libera la actividad.</summary>
 public partial class FrmEvaluarAtencion : Form
 {
+    private readonly IServiceProvider _proveedor;
     private readonly EvaluacionServicio _servicio;
     private readonly int _id;
     private EvaluacionAtencionDto? _datos;
@@ -16,9 +17,10 @@ public partial class FrmEvaluarAtencion : Form
     private bool _cargando = true, _ocupado, _sucio;
     public bool Finalizada { get; private set; }
 
-    public FrmEvaluarAtencion(int id, EvaluacionServicio servicio)
+    public FrmEvaluarAtencion(int id, EvaluacionServicio servicio, IServiceProvider proveedor)
     {
         InitializeComponent();
+        _proveedor = proveedor;
         _id = id;
         _servicio = servicio;
     }
@@ -104,9 +106,22 @@ public partial class FrmEvaluarAtencion : Form
 
         if (string.IsNullOrWhiteSpace(txtDescripcion.Text))
             return;
-        _items.Add(new ItemPropuestaDto { IdConcepto = c.IdConcepto, Descripcion = txtDescripcion.Text.Trim(), Cantidad = nudCantidad.Value, PrecioUnitario = nudPrecio.Value });
+        if (chkAportaCliente.Checked && c.Tipo == TipoConcepto.Servicio)
+        {
+            MessageBox.Show(this, "El cliente puede aportar repuestos o consumibles, no servicios.");
+            return;
+        }
+
+        _items.Add(new ItemPropuestaDto { OrigenMaterial = chkAportaCliente.Checked ? OrigenMaterial.Cliente : OrigenMaterial.Taller, IdConcepto = c.IdConcepto, Descripcion = txtDescripcion.Text.Trim(), Cantidad = nudCantidad.Value, PrecioUnitario = chkAportaCliente.Checked ? 0 : nudPrecio.Value });
         _sucio = true;
         ActualizarTotal();
+    }
+
+    private void OrigenCambiado(object? s, EventArgs e)
+    {
+        nudPrecio.Enabled = !chkAportaCliente.Checked;
+        if (chkAportaCliente.Checked)
+            nudPrecio.Value = 0;
     }
 
     private void Quitar(object? s, EventArgs e)
@@ -194,6 +209,33 @@ public partial class FrmEvaluarAtencion : Form
 
         if (_sucio && MessageBox.Show(this, "Hay cambios sin guardar. ¿Cerrar y descartarlos? Los avances guardados y la reserva se conservan.", "Cerrar evaluación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             e.Cancel = true;
+    }
+
+    private async void Seguimiento(object? s, EventArgs e)
+    {
+        if (_ocupado || _cargando)
+            return;
+        if (_sucio)
+        {
+            MessageBox.Show(this, "Guarde primero el avance de la evaluación.");
+            return;
+        }
+
+        _ocupado = true;
+        try
+        {
+            using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(_id, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor), _servicio, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<PresupuestoServicio>(_proveedor));
+            f.ShowDialog(this);
+            CargarDatos(await _servicio.ObtenerAsync(_id));
+        }
+        catch (Exception ex)
+        {
+            MostrarError(ex);
+        }
+        finally
+        {
+            _ocupado = false;
+        }
     }
 
     private void MostrarError(Exception ex) => Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Evaluación técnica");

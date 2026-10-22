@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<Taller.Aplicacion.Seguridad.AutorizacionOperativa>();
         services.AddScoped<PresupuestoServicio>();
         services.AddScoped<EjecucionServicio>();
+        services.AddScoped<SeguimientoTrabajoServicio>();
         services.AddScoped<CobroServicio>();
         services.AddScoped<ReporteServicio>();
         services.AddSingleton<TimeProvider>(TimeProvider.System);

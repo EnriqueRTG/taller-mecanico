@@ -7,15 +7,17 @@ namespace Taller.Presentacion.Formularios.Atenciones;
 /// <summary>Registra el trabajo real de los ítems aceptados; conserva avances y reserva técnica.</summary>
 public partial class FrmEjecutarAtencion : Form
 {
+    private readonly IServiceProvider _proveedor;
     private readonly int _id;
     private readonly EjecucionServicio _servicio;
     private readonly SesionUsuario _sesion;
     private EjecucionAtencionDto? _datos;
     private BindingList<EjecucionItemDto> _items = [];
     private bool _ocupado, _sucio, _cargando;
-    public FrmEjecutarAtencion(int id, EjecucionServicio servicio, SesionUsuario sesion)
+    public FrmEjecutarAtencion(int id, EjecucionServicio servicio, SesionUsuario sesion, IServiceProvider proveedor)
     {
         InitializeComponent();
+        _proveedor = proveedor;
         _id = id;
         _servicio = servicio;
         _sesion = sesion;
@@ -122,6 +124,33 @@ public partial class FrmEjecutarAtencion : Form
         _datos.Items = _items.ToList();
         _datos.Observaciones = txtObservaciones.Text;
         await OperarAsync(() => _servicio.GuardarAsync(_datos, finalizar, interrumpir));
+    }
+
+    private async void Seguimiento(object? s, EventArgs e)
+    {
+        if (_ocupado || _cargando)
+            return;
+        if (_sucio)
+        {
+            MessageBox.Show(this, "Guarde el avance o vuelva a abrir la ejecución antes de modificar el seguimiento.");
+            return;
+        }
+
+        _ocupado = true;
+        try
+        {
+            using var f = new FrmSeguimientoTrabajo(_id, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor), Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<EvaluacionServicio>(_proveedor), Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<PresupuestoServicio>(_proveedor));
+            f.ShowDialog(this);
+            await RecargarAsync();
+        }
+        catch (Exception ex)
+        {
+            Error(ex);
+        }
+        finally
+        {
+            _ocupado = false;
+        }
     }
 
     private void Cerrar(object? s, EventArgs e) => Close();

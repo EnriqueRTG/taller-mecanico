@@ -1,8 +1,10 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
+
 namespace Taller.Aplicacion.DTOs.Atenciones;
 /// <summary>Datos del circuito técnico y su propuesta económica.</summary>
 public sealed class ItemPropuestaDto
 {
+    public OrigenMaterial OrigenMaterial { get; set; }
     public int IdDetalle { get; set; }
     public bool? AceptadoPorCliente { get; set; }
     public int IdConcepto { get; set; }

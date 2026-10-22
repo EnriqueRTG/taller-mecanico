@@ -1,3 +1,5 @@
+> Actualización del circuito: consultar [hallazgos, adicionales y materiales del cliente](hallazgos-adicionales-materiales.md). Esa ampliación reemplaza la aceptación parcial inmediata y la limitación de una sola propuesta durante la ejecución descritas en versiones anteriores.
+
 # Atención, evaluación y propuesta
 
 Este documento describe la etapa de apertura, evaluación y propuesta. La extensión ya implementada de decisiones por ítem, ejecución, liquidación, pagos parciales y entrega se documenta en [la adenda funcional v1.0](ERS/ADENDA-v1.0-presupuestos-cobros.md) y [su guía de pruebas](probar-decision-ejecucion-cobros.md). Esa adenda prevalece sobre las referencias a trabajo futuro de esta primera etapa.

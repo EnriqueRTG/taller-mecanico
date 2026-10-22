@@ -47,7 +47,7 @@ public sealed class IntegracionSqlPruebas
                 db.Database.SetCommandTimeout(120);
                 if (anterior)
                 {
-                    var prev = db.Database.GetMigrations().Reverse().Skip(1).First();
+                    var prev = db.Database.GetMigrations().Single(m => m.EndsWith("_DecisionesEjecucionLiquidacionYCobros"));
                     await db.GetService<IMigrator>().MigrateAsync(prev);
                 }
                 else
@@ -167,7 +167,11 @@ public sealed class IntegracionSqlPruebas
                 INSERT dbo.Modelos(Nombre,Activo,IdMarca) VALUES(N'Modelo previo',1,@marca);DECLARE @modelo int=SCOPE_IDENTITY();
                 INSERT dbo.Vehiculos(Dominio,Anio,Color,IdModelo,Activo,FechaAlta) VALUES(N'AD789FG',2020,N'Gris',@modelo,1,GETDATE());DECLARE @vehiculo int=SCOPE_IDENTITY();
                 INSERT dbo.Usuarios(NombreUsuario,PasswordHash,Nombre,Apellido,RolId,Activo,FechaAlta) VALUES(N'recepcion-previa',N'hash',N'Recepción',N'Previa',2,1,GETDATE());DECLARE @usuario int=SCOPE_IDENTITY();
-                INSERT dbo.Atenciones(IdCliente,IdVehiculo,IdUsuarioRecepcion,MotivoConsulta,Estado,FechaApertura,TipoSolicitud) VALUES(@cliente,@vehiculo,@usuario,N'Solicitud que debe conservarse',N'Abierta',GETDATE(),N'Problema');
+                INSERT dbo.Atenciones(IdCliente,IdVehiculo,IdUsuarioRecepcion,MotivoConsulta,Estado,FechaApertura,TipoSolicitud) VALUES(@cliente,@vehiculo,@usuario,N'Solicitud que debe conservarse',N'Abierta',GETDATE(),N'Problema');DECLARE @atencion int=SCOPE_IDENTITY();
+                INSERT dbo.Categorias(Nombre,Activo) VALUES(N'Categoría previa',1);DECLARE @categoria int=SCOPE_IDENTITY();
+                INSERT dbo.Conceptos(IdCategoria,Tipo,Nombre,Activo,DisponibleParaIngreso) VALUES(@categoria,N'Servicio',N'Trabajo previo',1,0);DECLARE @concepto int=SCOPE_IDENTITY();
+                INSERT dbo.Presupuestos(IdAtencion,Tipo,Estado,IdUsuarioCreacion,FechaCreacion,FechaPresentacion,IdUsuarioDecision,FechaDecision,Vigente,AlcanceValidado) VALUES(@atencion,N'Reparacion',N'Aceptado',@usuario,GETDATE(),GETDATE(),@usuario,GETDATE(),1,1);DECLARE @presupuesto int=SCOPE_IDENTITY();
+                INSERT dbo.PresupuestoDetalles(IdPresupuesto,IdConcepto,Descripcion,Cantidad,PrecioUnitario,EstadoEjecucion,CantidadEjecutada,AceptadoPorCliente) VALUES(@presupuesto,@concepto,N'Ítem previo conservado',1,125,N'NoIniciado',0,1);
                 """, sql).ExecuteNonQueryAsync();
         }
 
@@ -178,6 +182,11 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(8, c.Version.Length);
         Assert.Equal(8, v.Version.Length);
         Assert.Equal("Cliente previo", c.Nombre);
+        var previo = await db.PresupuestoDetalles.SingleAsync();
+        Assert.Equal(OrigenMaterial.Taller, previo.OrigenMaterial);
+        Assert.Equal(125, previo.PrecioUnitario);
+        Assert.True(previo.AceptadoPorCliente);
+        Assert.Empty(await db.Set<HallazgoAtencion>().ToListAsync());
         Assert.Equal("Solicitud que debe conservarse", (await db.Atenciones.SingleAsync()).MotivoConsulta);
     }
 
@@ -302,5 +311,125 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(EstadoAtencion.Cerrada, (await recepcion.ObtenerPorIdAsync(a.IdAtencion))!.Estado);
         Assert.Single(await db.Diagnosticos.ToListAsync());
         Assert.Equal(2, await db.Set<Pago>().CountAsync());
+    }
+
+    [SqlRespaldoFact]
+    public async Task SeleccionParcialHallazgoAdicionalYMaterialCliente_ConRestriccionesSQLYVersionReal()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var db = b.Contexto();
+        var acceso = Acceso(db, ids.Recepcion, out var sesion);
+        var usuarios = new UsuarioRepositorio(db);
+        var er = new EvaluacionRepositorio(db);
+        var cr = new CircuitoRepositorio(db);
+        var unidad = new UnidadDeTrabajo(db);
+        var cliente = await new ClienteServicio(new ClienteRepositorio(db), acceso).RegistrarAsync("DNI", "34567890", "Ana", "Prueba", null, null, null);
+        var vehiculo = await new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso).RegistrarAsync("AD789FG", 2020, "Gris", ids.Modelo);
+        var concepto = await db.Conceptos.SingleAsync(c => c.IdConcepto == ids.Concepto);
+        var repuesto = new Concepto
+        {
+            Nombre = "Repuesto SQL",
+            Tipo = TipoConcepto.Repuesto,
+            IdCategoria = concepto.IdCategoria,
+            Activo = true
+        };
+        db.Add(repuesto);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var a = new Atencion
+        {
+            IdCliente = cliente.IdCliente,
+            IdVehiculo = vehiculo.IdVehiculo,
+            IdUsuarioRecepcion = ids.Recepcion,
+            Estado = EstadoAtencion.PendienteDecision,
+            MotivoConsulta = "Servicio definido solicitado",
+            TipoSolicitud = TipoSolicitudAtencion.ServicioDefinido
+        };
+        db.Add(a);
+        await db.SaveChangesAsync();
+        var p = new Presupuesto
+        {
+            IdAtencion = a.IdAtencion,
+            Tipo = TipoPresupuesto.Reparacion,
+            Estado = EstadoPresupuesto.PendienteDecision,
+            IdUsuarioCreacion = ids.Tecnico,
+            FechaCreacion = DateTime.Now,
+            FechaPresentacion = DateTime.Now,
+            Detalles = [new()
+            {
+                IdConcepto = ids.Concepto,
+                Descripcion = "Trabajo principal",
+                Cantidad = 1,
+                PrecioUnitario = 100
+            }, new()
+            {
+                IdConcepto = repuesto.IdConcepto,
+                Descripcion = "Repuesto propuesto",
+                Cantidad = 1,
+                PrecioUnitario = 20
+            }
+
+            ]
+        };
+        db.Add(p);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var ps = new PresupuestoServicio(er, cr, unidad, acceso);
+        var ev = new EvaluacionServicio(er, usuarios, unidad, sesion);
+        var seg = new SeguimientoTrabajoServicio(er, cr, unidad, acceso);
+        var ejec = new EjecucionServicio(er, cr, unidad, acceso);
+        var cobro = new CobroServicio(cr, er, unidad, acceso);
+        var original = await ps.ObtenerAsync(p.IdPresupuesto);
+        await ps.DecidirAsync(new() { IdPresupuesto = p.IdPresupuesto, Version = original.Version, ItemsAceptados = [original.Items.First(i => i.IdConcepto == ids.Concepto).IdDetalle], Observaciones = "Cliente solicita solo la tarea independiente" });
+        sesion.Iniciar(new Usuario { Id = ids.Tecnico });
+        await Assert.ThrowsAsync<ValidacionException>(() => ejec.ObtenerAsync(a.IdAtencion));
+        original = await ps.ObtenerAsync(p.IdPresupuesto);
+        int revisado = await seg.RevisarSeleccionAsync(p.IdPresupuesto, original.Version, [new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo principal viable", Cantidad = 1, PrecioUnitario = 100 }], "Es técnicamente viable ejecutar por separado");
+        sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+        var rev = await ps.ObtenerAsync(revisado);
+        await ev.PresentarAsync(revisado, rev.Version);
+        rev = await ps.ObtenerAsync(revisado);
+        await ps.DecidirAsync(new() { IdPresupuesto = revisado, Version = rev.Version, ItemsAceptados = rev.Items.Select(i => i.IdDetalle).ToList() });
+        sesion.Iniciar(new Usuario { Id = ids.Tecnico });
+        var e = await ejec.ObtenerAsync(a.IdAtencion);
+        await ejec.TomarAsync(a.IdAtencion, e.Version, "");
+        var seguimiento = await seg.ObtenerAsync(a.IdAtencion);
+        int tarea = seguimiento.Items.Single().IdDetalle;
+        await seg.RegistrarHallazgoAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdDetalle = tarea, Descripcion = "Hallazgo durante el desarme", Recomendacion = "Requiere material adicional", ImpideContinuar = true });
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => seg.PausarAsync(a.IdAtencion, seguimiento.Version, null, "Token anterior al hallazgo"));
+        seguimiento = await seg.ObtenerAsync(a.IdAtencion);
+        int adicional = await seg.CrearAdicionalAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdHallazgo = seguimiento.Hallazgos.Single().Id, Motivo = "El cliente aportará la pieza, el taller realiza el trabajo", Items = [new() { IdConcepto = repuesto.IdConcepto, Descripcion = "Pieza aportada", Cantidad = 1, OrigenMaterial = OrigenMaterial.Cliente }, new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo adicional", Cantidad = 1, PrecioUnitario = 50 }] });
+        sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+        var ad = await ps.ObtenerAsync(adicional);
+        await ev.PresentarAsync(adicional, ad.Version);
+        ad = await ps.ObtenerAsync(adicional);
+        await ps.DecidirAsync(new() { IdPresupuesto = adicional, Version = ad.Version, ItemsAceptados = ad.Items.Select(i => i.IdDetalle).ToList() });
+        sesion.Iniciar(new Usuario { Id = ids.Tecnico });
+        seguimiento = await seg.ObtenerAsync(a.IdAtencion);
+        var material = seguimiento.Items.Single(i => i.Origen == OrigenMaterial.Cliente);
+        await seg.RecibirMaterialAsync(a.IdAtencion, seguimiento.Version, material.IdDetalle, 1, true, "Pieza recibida y verificada apta");
+        seguimiento = await seg.ObtenerAsync(a.IdAtencion);
+        await seg.ResolverPausaAsync(a.IdAtencion, seguimiento.Version, seguimiento.Pausas.Single().Id, "Material disponible; puede continuar");
+        e = await ejec.ObtenerAsync(a.IdAtencion);
+        Assert.Equal(3, e.Items.Count);
+        foreach (var item in e.Items)
+        {
+            item.CantidadEjecutada = item.CantidadAutorizada;
+            item.Estado = EstadoEjecucionDetalle.Completado;
+        }
+
+        await ejec.GuardarAsync(e, true);
+        sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+        var cuenta = await cobro.ObtenerAsync(a.IdAtencion);
+        await cobro.LiquidarAsync(a.IdAtencion, cuenta.VersionAtencion, "Liquidar trabajos realizados");
+        cuenta = await cobro.ObtenerAsync(a.IdAtencion);
+        Assert.Equal(150, cuenta.Comprobante!.Total);
+        Assert.Equal(2, cuenta.Comprobante.Items.Count);
+        Assert.False((await ps.ObtenerAsync(p.IdPresupuesto)).Vigente);
+        Assert.True((await ps.ObtenerAsync(revisado)).Vigente);
+        Assert.True((await ps.ObtenerAsync(adicional)).Vigente);
+        Assert.Single(await db.Set<HallazgoAtencion>().ToListAsync());
+        Assert.NotNull((await db.Set<PausaTrabajo>().SingleAsync()).FechaResolucion);
     }
 }

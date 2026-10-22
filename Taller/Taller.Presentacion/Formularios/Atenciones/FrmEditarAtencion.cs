@@ -1,4 +1,4 @@
-﻿using Taller.Presentacion.Estilos;
+using Taller.Presentacion.Estilos;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
@@ -10,8 +10,7 @@ namespace Taller.Presentacion.Formularios.Atenciones;
 /// permitidos de una atención.
 /// </summary>
 /// <remarks>
-/// Durante la primera entrega utiliza información simulada y no
-/// realiza modificaciones sobre la base de datos.
+/// Carga la atención seleccionada y persiste sus datos editables mediante el servicio de aplicación.
 /// </remarks>
 public partial class FrmEditarAtencion : Form
 {
@@ -48,7 +47,7 @@ public partial class FrmEditarAtencion : Form
     /// Inicializa una nueva instancia del formulario.
     /// </summary>
     public FrmEditarAtencion(
-        int idAtencion, 
+        int idAtencion,
         AtencionServicio atencionServicio)
     {
         ArgumentNullException.ThrowIfNull(atencionServicio);
@@ -313,7 +312,7 @@ public partial class FrmEditarAtencion : Form
 
     /// <summary>
     /// Comprueba que los campos obligatorios contengan
-    /// información válida para la simulación.
+    /// información válida antes de persistir los cambios.
     /// </summary>
     private bool ValidarFormulario()
     {
@@ -373,7 +372,7 @@ public partial class FrmEditarAtencion : Form
     #endregion
 
     #region Simulación y cierre
-/// <summary>
+    /// <summary>
     /// Devuelve Cancel cuando el formulario se cierra
     /// sin confirmar una modificación.
     /// </summary>

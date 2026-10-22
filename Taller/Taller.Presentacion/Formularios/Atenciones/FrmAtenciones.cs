@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
@@ -655,12 +655,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
                     usuario.RolId,
                     PermisoAplicacion.ConsultarAtencionesAsignadas);
 
-            // Durante la primera entrega las acciones se habilitan
-            // al seleccionar una atención para demostrar el circuito
-            // completo de navegación.
-            //
-            // Las restricciones por estado y etapa se incorporarán
-            // junto con la lógica de negocio definitiva.
             btnVerDetalle.Enabled =
                 puedeGestionar || puedeConsultarComoTecnico;
 
@@ -672,7 +666,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 puedeGestionar &&
                 fila.EstadoValor == EstadoAtencion.Abierta;
 
-            btnCancelarAtencion.Enabled = false;
+            btnCancelarAtencion.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
 
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
 
@@ -876,11 +870,11 @@ namespace Taller.Presentacion.Formularios.Atenciones
             await AbrirEdicionSeleccionada();
         }
 
-        private void BtnCancelarAtencion_Click(
+        private async void BtnCancelarAtencion_Click(
             object? sender,
             EventArgs e)
         {
-            ConfirmarCancelacionAtencion();
+            await CancelarAperturaSeleccionadaAsync();
         }
 
         /// <summary>
@@ -1005,7 +999,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         }
 
         /// <summary>
-        /// Abre directamente el formulario demostrativo de registro
+        /// Abre directamente el formulario de registro
         /// de diagnóstico para la atención seleccionada.
         /// </summary>
         private async Task AbrirEdicionSeleccionada()
@@ -1074,99 +1068,24 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 MessageBoxIcon.Information);
         }
 
-        /// <summary>
-        /// Solicita confirmación para simular el inicio del proceso
-        /// de la atención seleccionada.
-        /// </summary>
-        private void ConfirmarInicioProceso()
+        private async Task CancelarAperturaSeleccionadaAsync()
         {
-            AtencionFila? fila =
-                ObtenerFilaSeleccionada();
-
-            if (fila is null)
+            var fila = ObtenerFilaSeleccionada(); if (fila is null || _cargandoDatos) return;
+            using var motivo = new Taller.Presentacion.Formularios.Compartidos.FrmSolicitarMotivo("Cancelar apertura", "Solo se cancela una atención abierta que no haya ingresado al circuito técnico. Indique el motivo.");
+            if (motivo.ShowDialog(this) != DialogResult.OK) return;
+            try
             {
-                MessageBox.Show(
-                    this,
-                    "Seleccioná una atención para iniciar su proceso.",
-                    "Iniciar proceso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
+                _cargandoDatos = true; DeshabilitarAcciones();
+                var a = await _atencionServicio.ObtenerPorIdAsync(fila.IdAtencion) ?? throw new InvalidOperationException("La atención ya no existe.");
+                await _serviceProvider.GetRequiredService<EvaluacionServicio>().CancelarAperturaAsync(a.IdAtencion, a.Version, motivo.Motivo);
             }
-
-            DialogResult respuesta =
-                MessageBox.Show(
-                    this,
-                    $"¿Desea iniciar el proceso de la atención N.º {fila.Numero}?\n\n" +
-                    "En la implementación definitiva, la atención avanzará " +
-                    "a la etapa de evaluación técnica.",
-                    "Iniciar proceso",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2);
-
-            if (respuesta != DialogResult.Yes)
-            {
-                return;
-            }
-
-            MessageBox.Show(
-                this,
-                "El inicio del proceso fue simulado correctamente.\n\n" +
-                "La atención quedaría disponible para la evaluación técnica.",
-                "Proceso iniciado",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            catch (Exception ex) { MessageBox.Show(this, ex.Message, "Cancelar apertura"); }
+            finally { _cargandoDatos = false; }
+            await CargarAtencionesAsync();
         }
 
         /// <summary>
-        /// Solicita confirmación para simular la cancelación lógica
-        /// de la atención seleccionada.
-        /// </summary>
-        private void ConfirmarCancelacionAtencion()
-        {
-            AtencionFila? fila =
-                ObtenerFilaSeleccionada();
-
-            if (fila is null)
-            {
-                MessageBox.Show(
-                    this,
-                    "Seleccioná una atención para cancelarla.",
-                    "Cancelar atención",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                return;
-            }
-
-            DialogResult respuesta =
-                MessageBox.Show(
-                    this,
-                    $"¿Confirma la cancelación de la atención N.º {fila.Numero}?\n\n" +
-                    "La cancelación definitiva será lógica: la atención " +
-                    "permanecerá registrada en el historial del sistema.",
-                    "Cancelar atención",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2);
-
-            if (respuesta != DialogResult.Yes)
-            {
-                return;
-            }
-
-            MessageBox.Show(
-                this,
-                "La cancelación de la atención fue simulada correctamente.",
-                "Atención cancelada",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-
-        /// <summary>
-        /// Abre el historial demostrativo del vehículo correspondiente
+        /// Abre el historial real del vehículo correspondiente
         /// a la atención seleccionada.
         /// </summary>
         private void AbrirHistorialSeleccionado()
@@ -1187,7 +1106,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
 
             using var formulario =
-                new FrmHistorialVehiculo();
+                _serviceProvider.GetRequiredService<FrmHistorialVehiculo>();
 
             formulario.ShowDialog(this);
         }

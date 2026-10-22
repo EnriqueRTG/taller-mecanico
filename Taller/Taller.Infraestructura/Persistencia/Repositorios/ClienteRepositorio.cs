@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Dominio.Entidades;
@@ -29,8 +29,10 @@ public sealed class ClienteRepositorio : IClienteRepositorio
     /// </summary>
     public async Task ActualizarAsync(Cliente cliente)
     {
-        _contexto.Clientes.Update(cliente);
-        await _contexto.SaveChangesAsync();
+        var entrada = _contexto.Entry(cliente);
+        entrada.State = EntityState.Modified;
+        try { await _contexto.SaveChangesAsync(); }
+        finally { entrada.State = EntityState.Detached; }
     }
 
     /// <summary>
@@ -38,8 +40,10 @@ public sealed class ClienteRepositorio : IClienteRepositorio
     /// </summary>
     public async Task AgregarAsync(Cliente cliente)
     {
-        await _contexto.Clientes.AddAsync(cliente);
-        await _contexto.SaveChangesAsync();
+        var entrada = _contexto.Entry(cliente);
+        entrada.State = EntityState.Added;
+        try { await _contexto.SaveChangesAsync(); }
+        finally { entrada.State = EntityState.Detached; }
     }
 
     /// <summary>
@@ -67,7 +71,7 @@ public sealed class ClienteRepositorio : IClienteRepositorio
     /// </summary>
     public async Task<List<Cliente>> ListarActivosAsync()
     {
-        return await _contexto.Clientes
+        return await _contexto.Clientes.AsNoTracking()
             .Where(c => c.Activo)
             .OrderBy(c => c.Apellido)
             .ThenBy(c => c.Nombre)
@@ -79,7 +83,7 @@ public sealed class ClienteRepositorio : IClienteRepositorio
     /// </summary>
     public async Task<List<Cliente>> ListarInactivosAsync()
     {
-        return await _contexto.Clientes
+        return await _contexto.Clientes.AsNoTracking()
             .Where(c => !c.Activo)
             .OrderBy(c => c.Apellido)
             .ThenBy(c => c.Nombre)
@@ -91,7 +95,7 @@ public sealed class ClienteRepositorio : IClienteRepositorio
     /// </summary>
     public async Task<Cliente?> ObtenerPorDocumentoAsync(string tipoDocumento, string documento)
     {
-        return await _contexto.Clientes
+        return await _contexto.Clientes.AsNoTracking()
             .FirstOrDefaultAsync(c => c.TipoDocumento == tipoDocumento && c.Documento == documento);
     }
 
@@ -100,7 +104,7 @@ public sealed class ClienteRepositorio : IClienteRepositorio
     /// </summary>
     public async Task<Cliente?> ObtenerPorIdAsync(int id)
     {
-        return await _contexto.Clientes
+        return await _contexto.Clientes.AsNoTracking()
             .FirstOrDefaultAsync(c => c.IdCliente == id);
     }
 }

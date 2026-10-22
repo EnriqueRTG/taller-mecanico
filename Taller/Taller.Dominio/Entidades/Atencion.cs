@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Dominio.Entidades;
 
@@ -66,12 +66,10 @@ public sealed class Atencion
     /// </summary>
     public ICollection<Diagnostico> Diagnosticos { get; set; } = new List<Diagnostico>();
 
-    /// <summary>
-    /// Eventos registrados durante el ciclo de la atención.
-    /// </summary>
     /// <summary>Avance o cierre de la evaluación y propuesta técnica.</summary>
     public EvaluacionAtencion? Evaluacion { get; set; }
 
+    /// <summary>Eventos registrados durante el ciclo de la atención.</summary>
     public ICollection<HistorialAtencion> Historial { get; set; }
         = new List<HistorialAtencion>();
 }

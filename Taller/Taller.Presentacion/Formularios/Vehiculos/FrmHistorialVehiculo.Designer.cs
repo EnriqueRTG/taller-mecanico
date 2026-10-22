@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Vehiculos
+namespace Taller.Presentacion.Formularios.Vehiculos
 {
     partial class FrmHistorialVehiculo
     {
@@ -241,7 +241,7 @@
             lblClienteTitulo.Name = "lblClienteTitulo";
             lblClienteTitulo.Size = new Size(201, 27);
             lblClienteTitulo.TabIndex = 3;
-            lblClienteTitulo.Text = "CLIENTE ACTUAL";
+            lblClienteTitulo.Text = "CLIENTE ÚLTIMA ATENCIÓN";
             lblClienteTitulo.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblDominioValor
@@ -471,6 +471,7 @@
             pnlAcciones.ResumeLayout(false);
             tlpAcciones.ResumeLayout(false);
             tlpAcciones.PerformLayout();
+            FormClosing += Formulario_FormClosing;
             ResumeLayout(false);
         }
 

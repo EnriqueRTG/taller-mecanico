@@ -1,12 +1,17 @@
+using Taller.Aplicacion.Servicios;
 namespace Taller.Presentacion.Formularios.Vehiculos;
 
 /// <summary>
-/// Simula la edición de los datos del vehículo seleccionado.
+/// Persiste la edición de los datos del vehículo seleccionado.
 /// </summary>
 public partial class FrmEditarVehiculo : Form
 {
-    public FrmEditarVehiculo()
+    private readonly VehiculoServicio _servicio;
+    private int _id;
+    private bool _guardando;
+    public FrmEditarVehiculo(VehiculoServicio servicio)
     {
+        _servicio = servicio;
         InitializeComponent();
         ConfigurarFormulario();
     }
@@ -21,14 +26,15 @@ public partial class FrmEditarVehiculo : Form
         bool activo,
         DateTime fechaAlta)
     {
+        _id = id;
         txtId.Text = id.ToString();
-        txtNombreUsuario.Text = marca;
-        txtFechaAlta.Text = modelo;
-        txtEstado.Text = anio.ToString();
-        textBox1.Text = color;
-        textBox4.Text = fechaAlta.ToString("dd/MM/yyyy");
-        textBox3.Text = activo ? "Habilitado" : "Deshabilitado";
-        txtApellido.Text = dominio;
+        txtMarca.Text = marca;
+        txtModelo.Text = modelo;
+        txtAnio.Text = anio.ToString();
+        txtColor.Text = color;
+        txtFechaAltaVehiculo.Text = fechaAlta.ToString("dd/MM/yyyy");
+        txtEstadoVehiculo.Text = activo ? "Habilitado" : "Deshabilitado";
+        txtDominio.Text = dominio;
 
         Text = $"Editar vehículo - {dominio}";
     }
@@ -42,19 +48,24 @@ public partial class FrmEditarVehiculo : Form
             "Modifique los datos del vehículo que considere necesarios.";
 
         ConfigurarCamposEditables();
+        txtId.ReadOnly = true; txtId.TabStop = false;
+        txtMarca.ReadOnly = true; txtMarca.TabStop = false;
+        txtModelo.ReadOnly = true; txtModelo.TabStop = false;
+        txtEstadoVehiculo.ReadOnly = true; txtEstadoVehiculo.TabStop = false;
+        txtFechaAltaVehiculo.ReadOnly = true; txtFechaAltaVehiculo.TabStop = false;
 
-        txtNombreUsuario.MaxLength = 80;
-        txtFechaAlta.MaxLength = 100;
-        txtEstado.MaxLength = 4;
-        textBox1.MaxLength = 50;
+
+        txtMarca.MaxLength = 80;
+        txtModelo.MaxLength = 100;
+        txtAnio.MaxLength = 4;
+        txtColor.MaxLength = 50;
 
         // El propietario no forma parte de la edición del vehículo.
         label2.Visible = false;
         textBox2.Visible = false;
         textBox2.TabStop = false;
 
-        btnGuardar.Click += BtnGuardar_Click;
-        btnCancelar.Click += BtnCancelar_Click;
+
     }
 
     private void ConfigurarCamposEditables()
@@ -62,13 +73,13 @@ public partial class FrmEditarVehiculo : Form
         TextBox[] campos =
         [
             txtId,
-            txtApellido,
-            txtNombreUsuario,
-            txtFechaAlta,
-            txtEstado,
-            textBox1,
-            textBox3,
-            textBox4
+            txtDominio,
+            txtMarca,
+            txtModelo,
+            txtAnio,
+            txtColor,
+            txtEstadoVehiculo,
+            txtFechaAltaVehiculo
         ];
 
         foreach (TextBox campo in campos)
@@ -83,11 +94,11 @@ public partial class FrmEditarVehiculo : Form
 
     private bool ValidarDatosEditables()
     {
-        if (string.IsNullOrWhiteSpace(txtApellido.Text)
-            || string.IsNullOrWhiteSpace(txtNombreUsuario.Text)
-            || string.IsNullOrWhiteSpace(txtFechaAlta.Text)
-            || string.IsNullOrWhiteSpace(txtEstado.Text)
-            || string.IsNullOrWhiteSpace(textBox1.Text))
+        if (string.IsNullOrWhiteSpace(txtDominio.Text)
+            || string.IsNullOrWhiteSpace(txtMarca.Text)
+            || string.IsNullOrWhiteSpace(txtModelo.Text)
+            || string.IsNullOrWhiteSpace(txtAnio.Text)
+            || string.IsNullOrWhiteSpace(txtColor.Text))
         {
             MessageBox.Show(
                 "Complete el dominio, la marca, el modelo, el año y el color.",
@@ -97,7 +108,7 @@ public partial class FrmEditarVehiculo : Form
             return false;
         }
 
-        if (!int.TryParse(txtEstado.Text, out int anio)
+        if (!int.TryParse(txtAnio.Text, out int anio)
             || anio < 1900
             || anio > DateTime.Today.Year + 1)
         {
@@ -106,27 +117,28 @@ public partial class FrmEditarVehiculo : Form
                 "Año inválido",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-            txtEstado.Focus();
+            txtAnio.Focus();
             return false;
         }
 
         return true;
     }
 
-    private void BtnGuardar_Click(object? sender, EventArgs e)
+    private async void BtnGuardar_Click(object? sender, EventArgs e)
     {
-        if (!ValidarDatosEditables())
-            return;
-
-        MessageBox.Show(
-            "Los datos del vehículo fueron guardados en la simulación.",
-            "Edición de vehículo",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-
-        DialogResult = DialogResult.OK;
-        Close();
+        if (_guardando || !ValidarDatosEditables()) return;
+        try
+        {
+            _guardando = true; btnGuardar.Enabled = btnCancelar.Enabled = false;
+            var actual = await _servicio.ObtenerPorIdAsync(_id) ?? throw new InvalidOperationException("El vehículo ya no existe.");
+            await _servicio.ModificarAsync(_id, txtDominio.Text, int.Parse(txtAnio.Text), txtColor.Text, actual.IdModelo);
+            DialogResult = DialogResult.OK; Close();
+        }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Guardar vehículo"); }
+        finally { _guardando = false; btnGuardar.Enabled = btnCancelar.Enabled = true; }
     }
+
+    private void Formulario_FormClosing(object? sender, FormClosingEventArgs e) { if (_guardando && DialogResult != DialogResult.OK) e.Cancel = true; }
 
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {

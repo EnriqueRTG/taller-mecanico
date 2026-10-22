@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Taller.Presentacion.Formularios.Atenciones;
 using Taller.Presentacion.Formularios.Autenticacion;
 using Taller.Presentacion.Formularios.Clientes;
@@ -13,7 +13,6 @@ using Taller.Presentacion.Formularios.Vehiculos;
 using Taller.Presentacion.Seguridad;
 
 namespace Taller.Presentacion;
-
 /// <summary>
 /// Registra los formularios y servicios pertenecientes
 /// a la capa de Presentación.
@@ -24,45 +23,32 @@ public static class DependencyInjection
     /// Agrega al contenedor de dependencias los componentes
     /// utilizados por la interfaz de usuario.
     /// </summary>
-    public static IServiceCollection AddPresentacion(
-        this IServiceCollection services)
+    public static IServiceCollection AddPresentacion(this IServiceCollection services)
     {
         services.AddTransient<FrmLogin>();
-
         services.AddTransient<FrmPrincipal>();
         services.AddTransient<FrmInicio>();
-
+        services.AddTransient<Taller.Presentacion.Formularios.Catalogo.FrmCatalogo>();
         services.AddTransient<FrmUsuarios>();
         services.AddTransient<FrmAltaUsuario>();
         services.AddTransient<FrmEditarUsuario>();
         services.AddTransient<FrmGestionarCredenciales>();
-
         services.AddTransient<FrmAtenciones>();
         services.AddTransient<FrmNuevaAtencion>();
-
         services.AddTransient<FrmClientes>();
         services.AddTransient<FrmAltaCliente>();
         services.AddTransient<FrmEditarCliente>();
-
         services.AddTransient<FrmVehiculos>();
         services.AddTransient<FrmAltaVehiculo>();
         services.AddTransient<FrmEditarVehiculo>();
         services.AddTransient<FrmHistorialVehiculo>();
-
         services.AddTransient<FrmDiagnosticos>();
-
         services.AddTransient<FrmPresupuestos>();
-
         services.AddTransient<FrmComprobantes>();
-
         services.AddTransient<FrmReportes>();
-
         services.AddTransient<FrmRespaldoRestauracion>();
-
         services.AddSingleton<AutorizacionNavegacion>();
-
         services.AddTransient<AplicacionContexto>();
-
         return services;
     }
 }

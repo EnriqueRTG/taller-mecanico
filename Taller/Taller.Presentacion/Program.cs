@@ -1,3 +1,4 @@
+using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,76 +7,58 @@ using Taller.Infraestructura;
 using Taller.Infraestructura.Persistencia.Inicializacion;
 using Taller.Presentacion.Formularios.Autenticacion;
 using Taller.Presentacion.Formularios.Principal;
-using Taller.Aplicacion.Configuracion;
 
 namespace Taller.Presentacion;
-
 internal static class Program
 {
     [STAThread]
     private static void Main(string[] args)
     {
+        var carpetaLog = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SGTM", "Logs");
+        Serilog.Log.Logger = new Serilog.LoggerConfiguration().WriteTo.File(Path.Combine(carpetaLog, "sgtm-.log"), rollingInterval: Serilog.RollingInterval.Day, retainedFileCountLimit: 7, fileSizeLimitBytes: 2_000_000, rollOnFileSizeLimit: true).CreateLogger();
         ApplicationConfiguration.Initialize();
-
-        var builder = Host.CreateApplicationBuilder(args);
-
-        builder.Configuration
-            .AddJsonFile(
-                "appsettings.json",
-                optional: false,
-                reloadOnChange: true)
-            .AddJsonFile(
-                "appsettings.Local.json",
-                optional: true,
-                reloadOnChange: true);
-
-        // Obtiene el concepto definido para el ingreso a diagnóstico.
-        var idConceptoIngreso = builder.Configuration
-            .GetValue<int?>("IngresoDiagnostico:IdConcepto");
-
-        if (idConceptoIngreso is null || idConceptoIngreso.Value <= 0)
+        try
         {
-            throw new InvalidOperationException(
-                "Debe configurar IngresoDiagnostico:IdConcepto " +
-                "con un identificador de concepto válido.");
+            Ejecutar(args);
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show("SGTM no pudo iniciar. Revise la configuración de conexión y mantenimiento con el personal técnico.\n\n" + ex.Message, "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        finally
+        {
+            Serilog.Log.CloseAndFlush();
+        }
+    }
 
-        builder.Services.AddSingleton(
-            new IngresoDiagnosticoOpciones
-            {
-                IdConcepto = idConceptoIngreso.Value
-            });
-
+    private static void Ejecutar(string[] args)
+    {
+        var builder = Host.CreateApplicationBuilder(args);
+        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
         // Registra los servicios de la capa de Aplicación.
         builder.Services.AddAplicacion();
-
         // Registra persistencia, repositorios y seguridad.
-        builder.Services.AddInfraestructura(
-            builder.Configuration);
-
+        builder.Services.AddInfraestructura(builder.Configuration);
         // Registra formularios y componentes de Presentación.
         builder.Services.AddPresentacion();
-
         using var host = builder.Build();
         using var scope = host.Services.CreateScope();
-
-        var inicializador =
-            scope.ServiceProvider
-                .GetRequiredService<InicializadorDatos>();
-
+        var inicializador = scope.ServiceProvider.GetRequiredService<InicializadorDatos>();
         // La inicialización debe completarse sobre el mismo hilo STA
         // que luego ejecutará el bucle principal de Windows Forms.
         // Un Main async puede continuar en un hilo MTA después del await
         // y provocar errores al abrir OpenFileDialog o SaveFileDialog.
-        inicializador
-            .InicializarAsync()
-            .GetAwaiter()
-            .GetResult();
+        try
+        {
+            inicializador.InicializarAsync().GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("No se pudo iniciar SGTM. Puede haber una recuperación en curso o un problema de conexión.\n\n" + ex.Message + "\n\nSi el mantenimiento se interrumpió, contacte al personal técnico; no intente operar con otra copia de la base.", "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
 
-        var aplicacionContexto =
-            scope.ServiceProvider
-                .GetRequiredService<AplicacionContexto>();
-
+        var aplicacionContexto = scope.ServiceProvider.GetRequiredService<AplicacionContexto>();
         Application.Run(aplicacionContexto);
     }
 }

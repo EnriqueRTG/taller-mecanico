@@ -32,7 +32,7 @@ public static class InicializadorCatalogoConceptos
             [
                 (TipoConcepto.Servicio,
                     "Ingreso e inspección diagnóstica inicial",
-                    "Servicio mínimo de ingreso e inspección inicial. " +
+                    "Inspección diagnóstica general según el alcance acordado. " +
                     "No autoriza reparaciones."),
 
                 (TipoConcepto.Servicio,
@@ -51,7 +51,14 @@ public static class InicializadorCatalogoConceptos
                     "Inspección del sistema de refrigeración",
                     "Evaluación del sistema de refrigeración. No incluye reparaciones.")
             ],
-            cancellationToken);
+            cancellationToken,
+            serviciosDisponiblesParaIngreso:
+            [
+                "Ingreso e inspección diagnóstica inicial",
+                "Diagnóstico electrónico",
+                "Inspección del sistema de frenos",
+                "Inspección del sistema de refrigeración"
+            ]);
 
         await AgregarCategoriaAsync(
             contexto,
@@ -283,13 +290,24 @@ public static class InicializadorCatalogoConceptos
 
     /// <summary>
     /// Busca una categoría e incorpora los conceptos que todavía no existen.
+    /// Conserva la configuración de los registros existentes.
     /// </summary>
+    /// <param name="contexto">Contexto utilizado para cargar el catálogo.</param>
+    /// <param name="nombre">Nombre de la categoría.</param>
+    /// <param name="descripcion">Descripción inicial de la categoría.</param>
+    /// <param name="conceptos">Conceptos iniciales de la categoría.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <param name="serviciosDisponiblesParaIngreso">
+    /// Nombres de los servicios que se habilitan para ingreso
+    /// únicamente cuando se crean.
+    /// </param>
     private static async Task AgregarCategoriaAsync(
         TallerDbContext contexto,
         string nombre,
         string descripcion,
         (TipoConcepto Tipo, string Nombre, string Descripcion)[] conceptos,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string[]? serviciosDisponiblesParaIngreso = null)
     {
         var categoria = await contexto.Categorias
             .SingleOrDefaultAsync(
@@ -310,7 +328,7 @@ public static class InicializadorCatalogoConceptos
 
         foreach (var dato in conceptos)
         {
-            // Una categoría nueva todavía no tiene registros persistidos.
+            // Una categoría nueva todavía no tiene conceptos persistidos.
             var existe = categoria.IdCategoria != 0
                 && await contexto.Conceptos.AnyAsync(
                     c => c.IdCategoria == categoria.IdCategoria
@@ -320,8 +338,15 @@ public static class InicializadorCatalogoConceptos
 
             if (existe)
             {
+                // No sobrescribe precios, estados ni disponibilidad.
                 continue;
             }
+
+            bool disponibleParaIngreso =
+                dato.Tipo == TipoConcepto.Servicio
+                && serviciosDisponiblesParaIngreso?.Contains(
+                    dato.Nombre,
+                    StringComparer.Ordinal) == true;
 
             contexto.Conceptos.Add(new Concepto
             {
@@ -330,7 +355,8 @@ public static class InicializadorCatalogoConceptos
                 Nombre = dato.Nombre,
                 Descripcion = dato.Descripcion,
                 PrecioReferencia = null,
-                Activo = true
+                Activo = true,
+                DisponibleParaIngreso = disponibleParaIngreso
             });
         }
     }

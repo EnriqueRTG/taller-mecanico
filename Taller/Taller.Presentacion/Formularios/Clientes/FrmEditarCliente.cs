@@ -1,80 +1,63 @@
-namespace Taller.Presentacion.Formularios.Clientes;
+using Taller.Aplicacion.Servicios;
 
+namespace Taller.Presentacion.Formularios.Clientes;
 /// <summary>
-/// Simula la edición de los datos del cliente seleccionado.
+/// Persiste la edición de los datos del cliente seleccionado.
 /// </summary>
 public partial class FrmEditarCliente : Form
 {
-    public FrmEditarCliente()
+    private readonly ClienteServicio _servicio;
+    private int _id;
+    private bool _guardando;
+    public FrmEditarCliente(ClienteServicio servicio)
     {
+        _servicio = servicio;
         InitializeComponent();
         ConfigurarFormulario();
     }
 
-    public void PrepararEdicion(
-        int id,
-        string tipoDocumento,
-        string documento,
-        string nombreCompleto,
-        string telefono,
-        string email,
-        string direccion,
-        bool activo,
-        DateTime fechaAlta)
+    private byte[] _version = [];
+    public void PrepararEdicion(Taller.Aplicacion.DTOs.Clientes.ClienteEdicionDto c)
     {
-        string[] partes = nombreCompleto.Split(
-            ',', 2, StringSplitOptions.TrimEntries);
-
-        txtId.Text = id.ToString();
-        txtNombreUsuario.Text = documento;
-        txtFechaAlta.Text = tipoDocumento;
-        txtEstado.Text = partes.Length > 1 ? partes[1] : nombreCompleto;
-        textBox2.Text = partes.Length > 1 ? partes[0] : string.Empty;
-        txtApellido.Text = telefono;
-        txtNombre.Text = email;
-        textBox4.Text = direccion;
-        textBox3.Text = activo ? "Habilitado" : "Deshabilitado";
-        textBox1.Text = fechaAlta.ToString("dd/MM/yyyy");
-
-        Text = $"Editar cliente - {nombreCompleto}";
+        _id = c.Id;
+        _version = c.Version.ToArray();
+        txtId.Text = c.Id.ToString();
+        txtDocumento.Text = c.Documento;
+        txtTipoDocumento.Text = c.TipoDocumento;
+        txtNombreCliente.Text = c.Nombre;
+        txtApellidoCliente.Text = c.Apellido;
+        txtTelefono.Text = c.Telefono;
+        txtEmail.Text = c.Email;
+        txtDireccion.Text = c.Direccion;
+        txtEstadoCliente.Text = c.Activo ? "Habilitado" : "Deshabilitado";
+        txtFechaAltaCliente.Text = c.FechaAlta.ToString("dd/MM/yyyy");
+        Text = $"Editar cliente - {c.Apellido}, {c.Nombre}";
     }
 
     private void ConfigurarFormulario()
     {
         StartPosition = FormStartPosition.CenterParent;
         ShowInTaskbar = false;
-
-        lblDescripcion.Text =
-            "Modifique los datos del cliente que considere necesarios.";
-
+        lblDescripcion.Text = "Modifique los datos del cliente que considere necesarios.";
         ConfigurarCamposEditables();
-
-        txtEstado.MaxLength = 100;
-        textBox2.MaxLength = 100;
-        txtApellido.MaxLength = 30;
-        txtNombre.MaxLength = 150;
-        textBox4.MaxLength = 200;
-
-        btnGuardar.Click += BtnGuardar_Click;
-        btnCancelar.Click += BtnCancelar_Click;
+        txtId.ReadOnly = true;
+        txtId.TabStop = false;
+        txtEstadoCliente.ReadOnly = true;
+        txtEstadoCliente.TabStop = false;
+        txtFechaAltaCliente.ReadOnly = true;
+        txtFechaAltaCliente.TabStop = false;
+        txtNombreCliente.MaxLength = 80;
+        txtApellidoCliente.MaxLength = 80;
+        txtTipoDocumento.MaxLength = 20;
+        txtDocumento.MaxLength = 20;
+        txtTelefono.MaxLength = 30;
+        txtEmail.MaxLength = 120;
+        txtDireccion.MaxLength = 200;
     }
 
     private void ConfigurarCamposEditables()
     {
-        TextBox[] campos =
-        [
-            txtId,
-            txtNombreUsuario,
-            txtFechaAlta,
-            txtEstado,
-            textBox2,
-            txtApellido,
-            txtNombre,
-            textBox4,
-            textBox3,
-            textBox1
-        ];
-
+        TextBox[] campos = [txtId, txtDocumento, txtTipoDocumento, txtNombreCliente, txtApellidoCliente, txtTelefono, txtEmail, txtDireccion, txtEstadoCliente, txtFechaAltaCliente];
         foreach (TextBox campo in campos)
         {
             campo.ReadOnly = false;
@@ -87,47 +70,50 @@ public partial class FrmEditarCliente : Form
 
     private bool ValidarDatosEditables()
     {
-        if (string.IsNullOrWhiteSpace(txtEstado.Text)
-            || string.IsNullOrWhiteSpace(textBox2.Text))
+        if (string.IsNullOrWhiteSpace(txtNombreCliente.Text) || string.IsNullOrWhiteSpace(txtApellidoCliente.Text))
         {
-            MessageBox.Show(
-                "Complete el nombre y el apellido.",
-                "Datos incompletos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
+            MessageBox.Show("Complete el nombre y el apellido.", "Datos incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return false;
         }
 
-        string email = txtNombre.Text.Trim();
-
-        if (!string.IsNullOrWhiteSpace(email)
-            && (!email.Contains('@') || email.StartsWith('@') || email.EndsWith('@')))
+        string email = txtEmail.Text.Trim();
+        if (!string.IsNullOrWhiteSpace(email) && (!email.Contains('@') || email.StartsWith('@') || email.EndsWith('@')))
         {
-            MessageBox.Show(
-                "Ingrese un correo electrónico válido o deje el campo vacío.",
-                "Correo inválido",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-            txtNombre.Focus();
+            MessageBox.Show("Ingrese un correo electrónico válido o deje el campo vacío.", "Correo inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            txtEmail.Focus();
             return false;
         }
 
         return true;
     }
 
-    private void BtnGuardar_Click(object? sender, EventArgs e)
+    private async void BtnGuardar_Click(object? sender, EventArgs e)
     {
-        if (!ValidarDatosEditables())
+        if (_guardando || !ValidarDatosEditables())
             return;
+        try
+        {
+            _guardando = true;
+            btnGuardar.Enabled = btnCancelar.Enabled = false;
+            await _servicio.ModificarAsync(_id, txtTipoDocumento.Text, txtDocumento.Text, txtNombreCliente.Text, txtApellidoCliente.Text, txtTelefono.Text, txtEmail.Text, txtDireccion.Text, _version);
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+        catch (Exception ex)
+        {
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Guardar cliente");
+        }
+        finally
+        {
+            _guardando = false;
+            btnGuardar.Enabled = btnCancelar.Enabled = true;
+        }
+    }
 
-        MessageBox.Show(
-            "Los datos del cliente fueron guardados en la simulación.",
-            "Edición de cliente",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-
-        DialogResult = DialogResult.OK;
-        Close();
+    private void Formulario_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (_guardando && DialogResult != DialogResult.OK)
+            e.Cancel = true;
     }
 
     private void BtnCancelar_Click(object? sender, EventArgs e)

@@ -1,43 +1,43 @@
+using Taller.Aplicacion.Servicios;
 using Taller.Presentacion.Estilos;
 
 namespace Taller.Presentacion.Formularios.Vehiculos;
-
 /// <summary>
 /// Representa la consulta visual del historial de atenciones
 /// asociadas a un vehículo.
 /// </summary>
 public partial class FrmHistorialVehiculo : Form
 {
-    private string _dominio = "AB345CD";
-    private string _modelo = "Honda Fit";
-    private int _anio = 2020;
-    private string _cliente = "Juan Pérez";
-
-    public FrmHistorialVehiculo()
+    private bool _cargando;
+    private string _dominio = "";
+    private string _modelo = "";
+    private int _anio = 0;
+    private string _cliente = "";
+    private readonly AtencionServicio _atenciones;
+    private readonly VehiculoServicio _vehiculos;
+    public FrmHistorialVehiculo(AtencionServicio atenciones, VehiculoServicio vehiculos)
     {
+        _atenciones = atenciones;
+        _vehiculos = vehiculos;
         InitializeComponent();
     }
 
     /// <summary>
     /// Recibe los datos de la fila seleccionada antes de abrir el historial.
     /// </summary>
-    public void PrepararConsulta(
-        string dominio,
-        string modelo,
-        int anio,
-        string cliente)
+    public void PrepararConsulta(string dominio, string modelo, int anio, string cliente)
     {
         _dominio = string.IsNullOrWhiteSpace(dominio) ? "Sin dominio" : dominio;
         _modelo = string.IsNullOrWhiteSpace(modelo) ? "Sin modelo" : modelo;
         _anio = anio;
-        _cliente = string.IsNullOrWhiteSpace(cliente) ? "Sin propietario" : cliente;
+        _cliente = string.IsNullOrWhiteSpace(cliente) ? "Sin atenciones previas" : cliente;
     }
 
-    private void FrmHistorialVehiculo_Load(object? sender, EventArgs e)
+    private async void FrmHistorialVehiculo_Load(object? sender, EventArgs e)
     {
         ConfigurarFormulario();
         AplicarEstilos();
-        CargarDatosSimulados();
+        await CargarAsync();
     }
 
     private void ConfigurarFormulario()
@@ -48,47 +48,43 @@ public partial class FrmHistorialVehiculo : Form
         CancelButton = btnCerrar;
     }
 
-    private void CargarDatosSimulados()
+    private async Task CargarAsync()
     {
-        lblDominioEncabezado.Text = _dominio;
-        lblDominioValor.Text = _dominio;
-        lblModeloValor.Text = _modelo;
-        lblAnioValor.Text = _anio.ToString();
-        lblClienteValor.Text = _cliente;
+        try
+        {
+            _cargando = true;
+            btnCerrar.Enabled = false;
+            lblDominioEncabezado.Text = lblDominioValor.Text = _dominio;
+            lblModeloValor.Text = _modelo;
+            lblAnioValor.Text = _anio.ToString();
+            lblClienteValor.Text = _cliente;
+            var vehiculo = await _vehiculos.ObtenerPorDominioAsync(_dominio) ?? throw new InvalidOperationException("El vehículo ya no existe.");
+            var datos = await _atenciones.ListarPorVehiculoAsync(vehiculo.IdVehiculo);
+            var ultima = datos.OrderByDescending(a => a.FechaApertura).FirstOrDefault();
+            lblClienteValor.Text = ultima is null ? "Sin atenciones" : ultima.Cliente.Apellido + ", " + ultima.Cliente.Nombre;
+            dgvHistorial.Rows.Clear();
+            foreach (var a in datos.OrderByDescending(a => a.FechaApertura))
+                dgvHistorial.Rows.Add(a.IdAtencion.ToString("D6"), a.FechaApertura.ToString("dd/MM/yyyy"), a.MotivoConsulta, string.Join(" · ", a.Diagnosticos.Select(d => d.FallaDetectada)), string.Join(" · ", a.Diagnosticos.Select(d => d.TrabajoRecomendado)), ReporteServicio.Legible(a.Estado.ToString()));
+            lblCantidad.Text = $"{datos.Count} atenciones registradas";
+            dgvHistorial.ClearSelection();
+        }
+        catch (Exception ex)
+        {
+            dgvHistorial.Rows.Clear();
+            lblCantidad.Text = "No se pudo cargar el historial";
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Historial del vehículo");
+        }
+        finally
+        {
+            _cargando = false;
+            btnCerrar.Enabled = true;
+        }
+    }
 
-        dgvHistorial.Rows.Clear();
-
-        dgvHistorial.Rows.Add(
-            "000001",
-            "07/09/2026",
-            "Dificultades para arrancar",
-            "Falla en el sistema de encendido",
-            "Revisión y mantenimiento del sistema",
-            "Finalizada");
-
-        dgvHistorial.Rows.Add(
-            "000014",
-            "15/05/2026",
-            "Mantenimiento general",
-            "Mantenimiento preventivo",
-            "Cambio de aceite y filtros",
-            "Finalizada");
-
-        dgvHistorial.Rows.Add(
-            "000027",
-            "10/02/2026",
-            "Ruido en el tren delantero",
-            "Desgaste de componentes",
-            "Ajuste y reemplazo de bujes",
-            "Finalizada");
-
-        lblCantidad.Text = dgvHistorial.Rows.Count == 1
-            ? "1 atención registrada"
-            : $"{dgvHistorial.Rows.Count} atenciones registradas";
-
-        dgvHistorial.ClearSelection();
-        dgvHistorial.CurrentCell = null;
-        dgvHistorial.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
+    private void Formulario_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (_cargando)
+            e.Cancel = true;
     }
 
     private void BtnCerrar_Click(object? sender, EventArgs e)

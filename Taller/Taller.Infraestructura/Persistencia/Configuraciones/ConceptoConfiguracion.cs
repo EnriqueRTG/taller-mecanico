@@ -30,6 +30,14 @@ public sealed class ConceptoConfiguracion : IEntityTypeConfiguration<Concepto>
                 [PrecioReferencia] IS NULL OR 
                 [PrecioReferencia] >= 0
                 """); // Asegura que el precio de referencia sea nulo o no negativo
+
+            // Los repuestos y consumibles no se ofrecen como servicios de ingreso.
+            tabla.HasCheckConstraint(
+                "CK_Conceptos_DisponibleParaIngreso",
+                """
+                [DisponibleParaIngreso] = 0
+                OR [Tipo] = N'Servicio'
+                """);
         });
 
         builder.HasKey(c => c.IdConcepto);
@@ -59,6 +67,10 @@ public sealed class ConceptoConfiguracion : IEntityTypeConfiguration<Concepto>
 
         builder.Property(c => c.Activo)
             .IsRequired();
+
+        builder.Property(c => c.DisponibleParaIngreso)
+            .IsRequired()
+            .HasDefaultValue(false);
 
         // Facilita listar conceptos de una categoría específica.
         builder.HasIndex(c => c.IdCategoria)

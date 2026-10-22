@@ -1,5 +1,4 @@
-﻿namespace Taller.Dominio.Entidades;
-
+namespace Taller.Dominio.Entidades;
 /// <summary>
 /// Representa un vehículo en el sistema.
 /// </summary>
@@ -10,14 +9,14 @@ public sealed class Vehiculo
     public int Anio { get; set; }
     public string Color { get; set; } = null!;
     public bool Activo { get; set; } = true;
+    /// <summary>Versión de SQL Server que debe conservarse desde que se abre una edición.</summary>
+    public byte[] Version { get; set; } = [];
     public DateTime FechaAlta { get; set; } = DateTime.Now;
     public int IdModelo { get; set; }
-
     /// <summary>
     /// Representa el modelo asociado a este vehículo.
     /// </summary>
     public Modelo Modelo { get; set; } = null!;
-
     /// <summary>
     /// Representa la colección de atenciones asociadas a este vehículo.
     /// </summary>

@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Clientes
+namespace Taller.Presentacion.Formularios.Clientes
 {
     partial class FrmEditarCliente
     {
@@ -40,32 +40,32 @@
             label3 = new Label();
             label2 = new Label();
             label1 = new Label();
-            textBox2 = new TextBox();
+            txtApellidoCliente = new TextBox();
             lblId = new Label();
             lblNombreUsuario = new Label();
             txtId = new TextBox();
-            txtNombreUsuario = new TextBox();
-            txtFechaAlta = new TextBox();
-            txtEstado = new TextBox();
+            txtDocumento = new TextBox();
+            txtTipoDocumento = new TextBox();
+            txtNombreCliente = new TextBox();
             lblNombre = new Label();
             lblApellido = new Label();
             lblRol = new Label();
-            txtApellido = new TextBox();
-            txtNombre = new TextBox();
+            txtTelefono = new TextBox();
+            txtEmail = new TextBox();
             lblFechaAlta = new Label();
             lblEstado = new Label();
-            textBox1 = new TextBox();
-            textBox3 = new TextBox();
-            textBox4 = new TextBox();
+            txtFechaAltaCliente = new TextBox();
+            txtEstadoCliente = new TextBox();
+            txtDireccion = new TextBox();
             tlpPrincipal.SuspendLayout();
             flpAcciones.SuspendLayout();
             pnlCabecera.SuspendLayout();
             pnlDatos.SuspendLayout();
             tlpDatos.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // tlpPrincipal
-            // 
+            //
             tlpPrincipal.BackColor = Color.FromArgb(245, 247, 250);
             tlpPrincipal.ColumnCount = 1;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -82,9 +82,9 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 87F));
             tlpPrincipal.Size = new Size(622, 701);
             tlpPrincipal.TabIndex = 1;
-            // 
+            //
             // flpAcciones
-            // 
+            //
             flpAcciones.Controls.Add(btnGuardar);
             flpAcciones.Controls.Add(btnCancelar);
             flpAcciones.Dock = DockStyle.Fill;
@@ -96,9 +96,9 @@
             flpAcciones.Size = new Size(558, 87);
             flpAcciones.TabIndex = 0;
             flpAcciones.WrapContents = false;
-            // 
+            //
             // btnGuardar
-            // 
+            //
             btnGuardar.BackColor = Color.FromArgb(30, 64, 175);
             btnGuardar.Cursor = Cursors.Hand;
             btnGuardar.FlatAppearance.BorderSize = 0;
@@ -114,9 +114,9 @@
             btnGuardar.TabIndex = 3;
             btnGuardar.Text = "Guardar cambios";
             btnGuardar.UseVisualStyleBackColor = false;
-            // 
+            //
             // btnCancelar
-            // 
+            //
             btnCancelar.BackColor = Color.White;
             btnCancelar.Cursor = Cursors.Hand;
             btnCancelar.DialogResult = DialogResult.Cancel;
@@ -133,9 +133,9 @@
             btnCancelar.TabIndex = 4;
             btnCancelar.Text = "Cancelar";
             btnCancelar.UseVisualStyleBackColor = false;
-            // 
+            //
             // pnlCabecera
-            // 
+            //
             pnlCabecera.Controls.Add(lblDescripcion);
             pnlCabecera.Controls.Add(lblTitulo);
             pnlCabecera.Dock = DockStyle.Fill;
@@ -144,9 +144,9 @@
             pnlCabecera.Name = "pnlCabecera";
             pnlCabecera.Size = new Size(558, 100);
             pnlCabecera.TabIndex = 0;
-            // 
+            //
             // lblDescripcion
-            // 
+            //
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.5F);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
@@ -155,9 +155,9 @@
             lblDescripcion.Size = new Size(347, 21);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Modifique los datos personales y el rol asignado.";
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 17.25F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
@@ -166,9 +166,9 @@
             lblTitulo.Size = new Size(196, 40);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Editar cliente";
-            // 
+            //
             // pnlDatos
-            // 
+            //
             pnlDatos.BackColor = Color.White;
             pnlDatos.Controls.Add(tlpDatos);
             pnlDatos.Dock = DockStyle.Fill;
@@ -178,9 +178,9 @@
             pnlDatos.Padding = new Padding(2, 3, 2, 3);
             pnlDatos.Size = new Size(558, 456);
             pnlDatos.TabIndex = 1;
-            // 
+            //
             // tlpDatos
-            // 
+            //
             tlpDatos.AutoScroll = true;
             tlpDatos.ColumnCount = 2;
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 171F));
@@ -188,23 +188,23 @@
             tlpDatos.Controls.Add(label3, 0, 7);
             tlpDatos.Controls.Add(label2, 0, 6);
             tlpDatos.Controls.Add(label1, 0, 5);
-            tlpDatos.Controls.Add(textBox2, 1, 4);
+            tlpDatos.Controls.Add(txtApellidoCliente, 1, 4);
             tlpDatos.Controls.Add(lblId, 0, 0);
             tlpDatos.Controls.Add(lblNombreUsuario, 0, 1);
             tlpDatos.Controls.Add(txtId, 1, 0);
-            tlpDatos.Controls.Add(txtNombreUsuario, 1, 1);
-            tlpDatos.Controls.Add(txtFechaAlta, 1, 2);
-            tlpDatos.Controls.Add(txtEstado, 1, 3);
+            tlpDatos.Controls.Add(txtDocumento, 1, 1);
+            tlpDatos.Controls.Add(txtTipoDocumento, 1, 2);
+            tlpDatos.Controls.Add(txtNombreCliente, 1, 3);
             tlpDatos.Controls.Add(lblNombre, 0, 2);
             tlpDatos.Controls.Add(lblApellido, 0, 3);
             tlpDatos.Controls.Add(lblRol, 0, 4);
-            tlpDatos.Controls.Add(txtApellido, 1, 5);
-            tlpDatos.Controls.Add(txtNombre, 1, 6);
+            tlpDatos.Controls.Add(txtTelefono, 1, 5);
+            tlpDatos.Controls.Add(txtEmail, 1, 6);
             tlpDatos.Controls.Add(lblFechaAlta, 0, 9);
             tlpDatos.Controls.Add(lblEstado, 0, 8);
-            tlpDatos.Controls.Add(textBox1, 1, 9);
-            tlpDatos.Controls.Add(textBox3, 1, 8);
-            tlpDatos.Controls.Add(textBox4, 1, 7);
+            tlpDatos.Controls.Add(txtFechaAltaCliente, 1, 9);
+            tlpDatos.Controls.Add(txtEstadoCliente, 1, 8);
+            tlpDatos.Controls.Add(txtDireccion, 1, 7);
             tlpDatos.Dock = DockStyle.Fill;
             tlpDatos.Location = new Point(2, 3);
             tlpDatos.Margin = new Padding(0);
@@ -222,9 +222,9 @@
             tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
             tlpDatos.Size = new Size(554, 450);
             tlpDatos.TabIndex = 0;
-            // 
+            //
             // label3
-            // 
+            //
             label3.Anchor = AnchorStyles.Left;
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -236,9 +236,9 @@
             label3.TabIndex = 17;
             label3.Text = "Dirección:";
             label3.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // label2
-            // 
+            //
             label2.Anchor = AnchorStyles.Left;
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -250,9 +250,9 @@
             label2.TabIndex = 15;
             label2.Text = "Email:";
             label2.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // label1
-            // 
+            //
             label1.Anchor = AnchorStyles.Left;
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -264,24 +264,24 @@
             label1.TabIndex = 14;
             label1.Text = "Teléfono:";
             label1.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // textBox2
-            // 
-            textBox2.Anchor = AnchorStyles.Left;
-            textBox2.BackColor = Color.FromArgb(241, 245, 249);
-            textBox2.BorderStyle = BorderStyle.FixedSingle;
-            textBox2.Font = new Font("Segoe UI", 9.75F);
-            textBox2.ForeColor = Color.FromArgb(71, 85, 105);
-            textBox2.Location = new Point(171, 273);
-            textBox2.Margin = new Padding(0, 11, 0, 11);
-            textBox2.Name = "textBox2";
-            textBox2.ReadOnly = true;
-            textBox2.Size = new Size(383, 29);
-            textBox2.TabIndex = 12;
-            textBox2.TabStop = false;
-            // 
+            //
+            // txtApellidoCliente
+            //
+            txtApellidoCliente.Anchor = AnchorStyles.Left;
+            txtApellidoCliente.BackColor = Color.FromArgb(241, 245, 249);
+            txtApellidoCliente.BorderStyle = BorderStyle.FixedSingle;
+            txtApellidoCliente.Font = new Font("Segoe UI", 9.75F);
+            txtApellidoCliente.ForeColor = Color.FromArgb(71, 85, 105);
+            txtApellidoCliente.Location = new Point(171, 273);
+            txtApellidoCliente.Margin = new Padding(0, 11, 0, 11);
+            txtApellidoCliente.Name = "txtApellidoCliente";
+            txtApellidoCliente.ReadOnly = true;
+            txtApellidoCliente.Size = new Size(383, 29);
+            txtApellidoCliente.TabIndex = 12;
+            txtApellidoCliente.TabStop = false;
+            //
             // lblId
-            // 
+            //
             lblId.Anchor = AnchorStyles.Left;
             lblId.AutoSize = true;
             lblId.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -293,9 +293,9 @@
             lblId.TabIndex = 0;
             lblId.Text = "ID:";
             lblId.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblNombreUsuario
-            // 
+            //
             lblNombreUsuario.Anchor = AnchorStyles.Left;
             lblNombreUsuario.AutoSize = true;
             lblNombreUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -307,9 +307,9 @@
             lblNombreUsuario.TabIndex = 1;
             lblNombreUsuario.Text = "Documento:";
             lblNombreUsuario.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // txtId
-            // 
+            //
             txtId.Anchor = AnchorStyles.Left;
             txtId.BackColor = Color.FromArgb(241, 245, 249);
             txtId.BorderStyle = BorderStyle.FixedSingle;
@@ -322,54 +322,54 @@
             txtId.Size = new Size(383, 29);
             txtId.TabIndex = 7;
             txtId.TabStop = false;
-            // 
-            // txtNombreUsuario
-            // 
-            txtNombreUsuario.Anchor = AnchorStyles.Left;
-            txtNombreUsuario.BackColor = Color.FromArgb(241, 245, 249);
-            txtNombreUsuario.BorderStyle = BorderStyle.FixedSingle;
-            txtNombreUsuario.Font = new Font("Segoe UI", 9.75F);
-            txtNombreUsuario.ForeColor = Color.FromArgb(71, 85, 105);
-            txtNombreUsuario.Location = new Point(171, 81);
-            txtNombreUsuario.Margin = new Padding(0, 11, 0, 11);
-            txtNombreUsuario.Name = "txtNombreUsuario";
-            txtNombreUsuario.ReadOnly = true;
-            txtNombreUsuario.Size = new Size(383, 29);
-            txtNombreUsuario.TabIndex = 8;
-            txtNombreUsuario.TabStop = false;
-            // 
-            // txtFechaAlta
-            // 
-            txtFechaAlta.Anchor = AnchorStyles.Left;
-            txtFechaAlta.BackColor = Color.FromArgb(241, 245, 249);
-            txtFechaAlta.BorderStyle = BorderStyle.FixedSingle;
-            txtFechaAlta.Font = new Font("Segoe UI", 9.75F);
-            txtFechaAlta.ForeColor = Color.FromArgb(71, 85, 105);
-            txtFechaAlta.Location = new Point(171, 145);
-            txtFechaAlta.Margin = new Padding(0, 11, 0, 11);
-            txtFechaAlta.Name = "txtFechaAlta";
-            txtFechaAlta.ReadOnly = true;
-            txtFechaAlta.Size = new Size(383, 29);
-            txtFechaAlta.TabIndex = 9;
-            txtFechaAlta.TabStop = false;
-            // 
-            // txtEstado
-            // 
-            txtEstado.Anchor = AnchorStyles.Left;
-            txtEstado.BackColor = Color.FromArgb(241, 245, 249);
-            txtEstado.BorderStyle = BorderStyle.FixedSingle;
-            txtEstado.Font = new Font("Segoe UI", 9.75F);
-            txtEstado.ForeColor = Color.FromArgb(71, 85, 105);
-            txtEstado.Location = new Point(171, 209);
-            txtEstado.Margin = new Padding(0, 11, 0, 11);
-            txtEstado.Name = "txtEstado";
-            txtEstado.ReadOnly = true;
-            txtEstado.Size = new Size(383, 29);
-            txtEstado.TabIndex = 10;
-            txtEstado.TabStop = false;
-            // 
+            //
+            // txtDocumento
+            //
+            txtDocumento.Anchor = AnchorStyles.Left;
+            txtDocumento.BackColor = Color.FromArgb(241, 245, 249);
+            txtDocumento.BorderStyle = BorderStyle.FixedSingle;
+            txtDocumento.Font = new Font("Segoe UI", 9.75F);
+            txtDocumento.ForeColor = Color.FromArgb(71, 85, 105);
+            txtDocumento.Location = new Point(171, 81);
+            txtDocumento.Margin = new Padding(0, 11, 0, 11);
+            txtDocumento.Name = "txtDocumento";
+            txtDocumento.ReadOnly = true;
+            txtDocumento.Size = new Size(383, 29);
+            txtDocumento.TabIndex = 8;
+            txtDocumento.TabStop = false;
+            //
+            // txtTipoDocumento
+            //
+            txtTipoDocumento.Anchor = AnchorStyles.Left;
+            txtTipoDocumento.BackColor = Color.FromArgb(241, 245, 249);
+            txtTipoDocumento.BorderStyle = BorderStyle.FixedSingle;
+            txtTipoDocumento.Font = new Font("Segoe UI", 9.75F);
+            txtTipoDocumento.ForeColor = Color.FromArgb(71, 85, 105);
+            txtTipoDocumento.Location = new Point(171, 145);
+            txtTipoDocumento.Margin = new Padding(0, 11, 0, 11);
+            txtTipoDocumento.Name = "txtTipoDocumento";
+            txtTipoDocumento.ReadOnly = true;
+            txtTipoDocumento.Size = new Size(383, 29);
+            txtTipoDocumento.TabIndex = 9;
+            txtTipoDocumento.TabStop = false;
+            //
+            // txtNombreCliente
+            //
+            txtNombreCliente.Anchor = AnchorStyles.Left;
+            txtNombreCliente.BackColor = Color.FromArgb(241, 245, 249);
+            txtNombreCliente.BorderStyle = BorderStyle.FixedSingle;
+            txtNombreCliente.Font = new Font("Segoe UI", 9.75F);
+            txtNombreCliente.ForeColor = Color.FromArgb(71, 85, 105);
+            txtNombreCliente.Location = new Point(171, 209);
+            txtNombreCliente.Margin = new Padding(0, 11, 0, 11);
+            txtNombreCliente.Name = "txtNombreCliente";
+            txtNombreCliente.ReadOnly = true;
+            txtNombreCliente.Size = new Size(383, 29);
+            txtNombreCliente.TabIndex = 10;
+            txtNombreCliente.TabStop = false;
+            //
             // lblNombre
-            // 
+            //
             lblNombre.Anchor = AnchorStyles.Left;
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -381,9 +381,9 @@
             lblNombre.TabIndex = 4;
             lblNombre.Text = "Tipo documento:";
             lblNombre.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblApellido
-            // 
+            //
             lblApellido.Anchor = AnchorStyles.Left;
             lblApellido.AutoSize = true;
             lblApellido.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -395,9 +395,9 @@
             lblApellido.TabIndex = 5;
             lblApellido.Text = "Nombre:";
             lblApellido.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblRol
-            // 
+            //
             lblRol.Anchor = AnchorStyles.Left;
             lblRol.AutoSize = true;
             lblRol.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -409,39 +409,39 @@
             lblRol.TabIndex = 6;
             lblRol.Text = "Apellido:";
             lblRol.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // txtApellido
-            // 
-            txtApellido.Anchor = AnchorStyles.Left;
-            txtApellido.BackColor = Color.White;
-            txtApellido.BorderStyle = BorderStyle.FixedSingle;
-            txtApellido.Font = new Font("Segoe UI", 9.75F);
-            txtApellido.ForeColor = Color.FromArgb(51, 65, 85);
-            txtApellido.Location = new Point(171, 337);
-            txtApellido.Margin = new Padding(0, 11, 0, 11);
-            txtApellido.MaxLength = 100;
-            txtApellido.Name = "txtApellido";
-            txtApellido.PlaceholderText = "teléfono";
-            txtApellido.Size = new Size(383, 29);
-            txtApellido.TabIndex = 1;
-            // 
-            // txtNombre
-            // 
-            txtNombre.Anchor = AnchorStyles.Left;
-            txtNombre.BackColor = Color.White;
-            txtNombre.BorderStyle = BorderStyle.FixedSingle;
-            txtNombre.Font = new Font("Segoe UI", 9.75F);
-            txtNombre.ForeColor = Color.FromArgb(51, 65, 85);
-            txtNombre.Location = new Point(171, 401);
-            txtNombre.Margin = new Padding(0, 11, 0, 11);
-            txtNombre.MaxLength = 100;
-            txtNombre.Name = "txtNombre";
-            txtNombre.PlaceholderText = "email";
-            txtNombre.Size = new Size(383, 29);
-            txtNombre.TabIndex = 0;
-            // 
+            //
+            // txtTelefono
+            //
+            txtTelefono.Anchor = AnchorStyles.Left;
+            txtTelefono.BackColor = Color.White;
+            txtTelefono.BorderStyle = BorderStyle.FixedSingle;
+            txtTelefono.Font = new Font("Segoe UI", 9.75F);
+            txtTelefono.ForeColor = Color.FromArgb(51, 65, 85);
+            txtTelefono.Location = new Point(171, 337);
+            txtTelefono.Margin = new Padding(0, 11, 0, 11);
+            txtTelefono.MaxLength = 100;
+            txtTelefono.Name = "txtTelefono";
+            txtTelefono.PlaceholderText = "teléfono";
+            txtTelefono.Size = new Size(383, 29);
+            txtTelefono.TabIndex = 1;
+            //
+            // txtEmail
+            //
+            txtEmail.Anchor = AnchorStyles.Left;
+            txtEmail.BackColor = Color.White;
+            txtEmail.BorderStyle = BorderStyle.FixedSingle;
+            txtEmail.Font = new Font("Segoe UI", 9.75F);
+            txtEmail.ForeColor = Color.FromArgb(51, 65, 85);
+            txtEmail.Location = new Point(171, 401);
+            txtEmail.Margin = new Padding(0, 11, 0, 11);
+            txtEmail.MaxLength = 100;
+            txtEmail.Name = "txtEmail";
+            txtEmail.PlaceholderText = "email";
+            txtEmail.Size = new Size(383, 29);
+            txtEmail.TabIndex = 0;
+            //
             // lblFechaAlta
-            // 
+            //
             lblFechaAlta.Anchor = AnchorStyles.Left;
             lblFechaAlta.AutoSize = true;
             lblFechaAlta.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -453,9 +453,9 @@
             lblFechaAlta.TabIndex = 2;
             lblFechaAlta.Text = "Fecha de alta:";
             lblFechaAlta.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblEstado
-            // 
+            //
             lblEstado.Anchor = AnchorStyles.Left;
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -467,57 +467,59 @@
             lblEstado.TabIndex = 3;
             lblEstado.Text = "Estado:";
             lblEstado.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // textBox1
-            // 
-            textBox1.Anchor = AnchorStyles.Left;
-            textBox1.BackColor = Color.FromArgb(241, 245, 249);
-            textBox1.BorderStyle = BorderStyle.FixedSingle;
-            textBox1.Font = new Font("Segoe UI", 9.75F);
-            textBox1.ForeColor = Color.FromArgb(71, 85, 105);
-            textBox1.Location = new Point(171, 593);
-            textBox1.Margin = new Padding(0, 11, 0, 11);
-            textBox1.Name = "textBox1";
-            textBox1.ReadOnly = true;
-            textBox1.Size = new Size(383, 29);
-            textBox1.TabIndex = 11;
-            textBox1.TabStop = false;
-            // 
-            // textBox3
-            // 
-            textBox3.Anchor = AnchorStyles.Left;
-            textBox3.BackColor = Color.FromArgb(241, 245, 249);
-            textBox3.BorderStyle = BorderStyle.FixedSingle;
-            textBox3.Font = new Font("Segoe UI", 9.75F);
-            textBox3.ForeColor = Color.FromArgb(71, 85, 105);
-            textBox3.Location = new Point(171, 529);
-            textBox3.Margin = new Padding(0, 11, 0, 11);
-            textBox3.Name = "textBox3";
-            textBox3.ReadOnly = true;
-            textBox3.Size = new Size(383, 29);
-            textBox3.TabIndex = 13;
-            textBox3.TabStop = false;
-            // 
-            // textBox4
-            // 
-            textBox4.Anchor = AnchorStyles.Left;
-            textBox4.BackColor = Color.White;
-            textBox4.BorderStyle = BorderStyle.FixedSingle;
-            textBox4.Font = new Font("Segoe UI", 9.75F);
-            textBox4.ForeColor = Color.FromArgb(51, 65, 85);
-            textBox4.Location = new Point(171, 465);
-            textBox4.Margin = new Padding(0, 11, 0, 11);
-            textBox4.MaxLength = 100;
-            textBox4.Name = "textBox4";
-            textBox4.PlaceholderText = "dirección";
-            textBox4.Size = new Size(383, 29);
-            textBox4.TabIndex = 16;
-            // 
+            //
+            // txtFechaAltaCliente
+            //
+            txtFechaAltaCliente.Anchor = AnchorStyles.Left;
+            txtFechaAltaCliente.BackColor = Color.FromArgb(241, 245, 249);
+            txtFechaAltaCliente.BorderStyle = BorderStyle.FixedSingle;
+            txtFechaAltaCliente.Font = new Font("Segoe UI", 9.75F);
+            txtFechaAltaCliente.ForeColor = Color.FromArgb(71, 85, 105);
+            txtFechaAltaCliente.Location = new Point(171, 593);
+            txtFechaAltaCliente.Margin = new Padding(0, 11, 0, 11);
+            txtFechaAltaCliente.Name = "txtFechaAltaCliente";
+            txtFechaAltaCliente.ReadOnly = true;
+            txtFechaAltaCliente.Size = new Size(383, 29);
+            txtFechaAltaCliente.TabIndex = 11;
+            txtFechaAltaCliente.TabStop = false;
+            //
+            // txtEstadoCliente
+            //
+            txtEstadoCliente.Anchor = AnchorStyles.Left;
+            txtEstadoCliente.BackColor = Color.FromArgb(241, 245, 249);
+            txtEstadoCliente.BorderStyle = BorderStyle.FixedSingle;
+            txtEstadoCliente.Font = new Font("Segoe UI", 9.75F);
+            txtEstadoCliente.ForeColor = Color.FromArgb(71, 85, 105);
+            txtEstadoCliente.Location = new Point(171, 529);
+            txtEstadoCliente.Margin = new Padding(0, 11, 0, 11);
+            txtEstadoCliente.Name = "txtEstadoCliente";
+            txtEstadoCliente.ReadOnly = true;
+            txtEstadoCliente.Size = new Size(383, 29);
+            txtEstadoCliente.TabIndex = 13;
+            txtEstadoCliente.TabStop = false;
+            //
+            // txtDireccion
+            //
+            txtDireccion.Anchor = AnchorStyles.Left;
+            txtDireccion.BackColor = Color.White;
+            txtDireccion.BorderStyle = BorderStyle.FixedSingle;
+            txtDireccion.Font = new Font("Segoe UI", 9.75F);
+            txtDireccion.ForeColor = Color.FromArgb(51, 65, 85);
+            txtDireccion.Location = new Point(171, 465);
+            txtDireccion.Margin = new Padding(0, 11, 0, 11);
+            txtDireccion.MaxLength = 100;
+            txtDireccion.Name = "txtDireccion";
+            txtDireccion.PlaceholderText = "dirección";
+            txtDireccion.Size = new Size(383, 29);
+            txtDireccion.TabIndex = 16;
+            //
             // FrmEditarCliente
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(622, 701);
+            ClientSize = new Size(650, 620);
+            pnlDatos.AutoScroll = true;
+            tlpDatos.MinimumSize = new Size(0, 500);
             Controls.Add(tlpPrincipal);
             Name = "FrmEditarCliente";
             ShowIcon = false;
@@ -529,6 +531,10 @@
             pnlDatos.ResumeLayout(false);
             tlpDatos.ResumeLayout(false);
             tlpDatos.PerformLayout();
+            btnGuardar.DialogResult=DialogResult.None;
+            btnGuardar.Click += BtnGuardar_Click;
+            btnCancelar.Click += BtnCancelar_Click;
+            FormClosing += Formulario_FormClosing;
             ResumeLayout(false);
         }
 
@@ -551,17 +557,17 @@
         private Label lblApellido;
         private Label lblRol;
         private TextBox txtId;
-        private TextBox txtNombreUsuario;
-        private TextBox txtFechaAlta;
-        private TextBox txtEstado;
-        private TextBox txtNombre;
-        private TextBox txtApellido;
-        private TextBox textBox1;
-        private TextBox textBox3;
-        private TextBox textBox2;
+        private TextBox txtDocumento;
+        private TextBox txtTipoDocumento;
+        private TextBox txtNombreCliente;
+        private TextBox txtEmail;
+        private TextBox txtTelefono;
+        private TextBox txtFechaAltaCliente;
+        private TextBox txtEstadoCliente;
+        private TextBox txtApellidoCliente;
         private Label label2;
         private Label label1;
         private Label label3;
-        private TextBox textBox4;
+        private TextBox txtDireccion;
     }
 }

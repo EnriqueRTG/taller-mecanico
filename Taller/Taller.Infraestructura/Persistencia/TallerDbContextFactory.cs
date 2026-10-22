@@ -34,17 +34,21 @@ public sealed class TallerDbContextFactory
         // En caso contrario, se construye la ruta partiendo desde
         // la raíz del repositorio:
         // Taller/Taller.Presentacion.
-        var presentationPath =
-            Path.GetFileName(currentDirectory)
-                .Equals(
-                    "Taller.Presentacion",
-                    StringComparison.OrdinalIgnoreCase)
-            ? currentDirectory
-            : Path.GetFullPath(
-                Path.Combine(
-                    currentDirectory,
-                    "Taller",
-                    "Taller.Presentacion"));
+        var directorio = new DirectoryInfo(currentDirectory);
+        string? presentationPath = null;
+        while (directorio is not null && presentationPath is null)
+        {
+            foreach (var candidato in new[] { directorio.FullName,
+                Path.Combine(directorio.FullName, "Taller.Presentacion"),
+                Path.Combine(directorio.FullName, "Taller", "Taller.Presentacion") })
+            {
+                if (File.Exists(Path.Combine(candidato, "Taller.Presentacion.csproj")))
+                { presentationPath = candidato; break; }
+            }
+            directorio = directorio.Parent;
+        }
+        if (presentationPath is null)
+            throw new InvalidOperationException("No se encontró Taller.Presentacion desde el directorio actual.");
 
         // Construye la configuración que utilizará EF Core
         // durante las operaciones realizadas en tiempo de diseño.

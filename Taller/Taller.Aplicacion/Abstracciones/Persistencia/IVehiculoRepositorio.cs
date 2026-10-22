@@ -1,13 +1,13 @@
-﻿using Taller.Dominio.Entidades;
+using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Abstracciones.Persistencia;
-
 /// <summary>
 /// Define las operaciones de persistencia necesarias
 /// para trabajar con vehículos dentro de la aplicación.
 /// </summary>
-public interface IVehiculoRepositorio 
+public interface IVehiculoRepositorio
 {
+    Task<List<Vehiculo>> ListarTodosAsync();
     Task<Vehiculo?> ObtenerPorIdAsync(int idVehiculo);
     Task<Vehiculo?> ObtenerPorDominioAsync(string dominio);
     Task<List<Vehiculo>> ListarActivosAsync();

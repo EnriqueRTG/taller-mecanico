@@ -1,6 +1,4 @@
-﻿
 namespace Taller.Presentacion.Seguridad;
-
 /// <summary>
 /// Representa las funciones protegidas disponibles
 /// desde la interfaz del sistema.
@@ -11,7 +9,6 @@ public enum PermisoAplicacion
     GestionarUsuarios,
     ConsultarReportesGenerales,
     GestionarRespaldo,
-
     // Administrativo
     GestionarClientes,
     GestionarVehiculos,
@@ -20,7 +17,7 @@ public enum PermisoAplicacion
     GestionarDecisionPresupuesto,
     GestionarComprobantesPagos,
     ConsultarReportesOperativos,
-
+    ConsultarCatalogo,
     // Técnico
     ConsultarAtencionesAsignadas,
     GestionarDiagnosticos,

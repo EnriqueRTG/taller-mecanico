@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Dominio.Entidades;
 
@@ -16,7 +16,7 @@ public sealed class HistorialAtencion
 
     /// <summary>
     /// Usuario que realizó la acción registrada.
-    /// <summary>
+    /// </summary>
     public int IdUsuario { get; set; }
     public int? IdDiagnostico { get; set; }
     public DateTime Fecha { get; set; }
@@ -24,7 +24,7 @@ public sealed class HistorialAtencion
     /// <summary>
     /// Identifica la operación realizada sobre la atención.
     /// Ej: AtencionAbierta, ActividadTomada, ActividadLiberada
-    /// <summary>
+    /// </summary>
     public string Accion { get; set; } = null!;
 
     /// <summary>

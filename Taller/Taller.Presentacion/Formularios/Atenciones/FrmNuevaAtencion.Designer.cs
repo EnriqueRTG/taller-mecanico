@@ -36,6 +36,7 @@
             tlpBusquedaCliente = new TableLayoutPanel();
             lblTipoDocumento = new Label();
             cboTipoDocumento = new ComboBox();
+            cboTipoSolicitud = new ComboBox();
             lblDocumento = new Label();
             txtDocumento = new TextBox();
             btnBuscarCliente = new Button();
@@ -624,7 +625,12 @@
             tlpMotivo.ColumnCount = 1;
             tlpMotivo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpMotivo.Controls.Add(lblSeccionMotivo, 0, 0);
-            tlpMotivo.Controls.Add(lblAyudaMotivo, 0, 1);
+            tlpMotivo.Controls.Add(cboTipoSolicitud, 0, 1);
+            cboTipoSolicitud.Name = "cboTipoSolicitud";
+            cboTipoSolicitud.Dock = DockStyle.Fill;
+            cboTipoSolicitud.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboTipoSolicitud.Items.AddRange(new object[] { "Síntoma o problema: requiere evaluación", "Servicio definido: preparar propuesta", "Solicitud mixta: problema y servicio definido" });
+            cboTipoSolicitud.AccessibleName = "Tipo de solicitud";
             tlpMotivo.Controls.Add(txtMotivo, 0, 2);
             tlpMotivo.Controls.Add(lblContadorMotivo, 0, 3);
             tlpMotivo.Dock = DockStyle.Fill;
@@ -815,6 +821,7 @@
         private TableLayoutPanel tlpBusquedaCliente;
         private Label lblTipoDocumento;
         private ComboBox cboTipoDocumento;
+        private ComboBox cboTipoSolicitud;
         private Label lblDocumento;
         private TextBox txtDocumento;
         private Button btnBuscarCliente;

@@ -33,6 +33,16 @@ public sealed class UnidadDeTrabajo : IUnidadDeTrabajo
                 "Actualice los datos antes de continuar.",
                 ex);
         }
+        catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && sql.Errors.Cast<SqlError>().Any(e =>
+            (e.Number == 2601 || e.Number == 2627) && e.Message.Contains("IX_Pagos_IdOperacion", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new ConflictoConcurrenciaException("Este cobro pudo haberse registrado. Se comprobará el identificador del intento.", ex);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && sql.Errors.Cast<SqlError>().Any(e =>
+            (e.Number == 2601 || e.Number == 2627) && e.Message.Contains("IX_Comprobantes_IdAtencion", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new ValidacionException("La atención ya fue liquidada por otra operación. Actualice el listado.");
+        }
         catch (DbUpdateException ex)
             when (EsDiagnosticoInicialDuplicado(ex))
         {

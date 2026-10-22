@@ -1,232 +1,211 @@
-using Taller.Presentacion.Estilos;
+using Taller.Aplicacion.DTOs.Respaldos;
+using Taller.Aplicacion.Servicios;
+using Taller.Presentacion.Navegacion;
 
 namespace Taller.Presentacion.Formularios.Sistema;
-
-/// <summary>
-/// Simula la creación y restauración de copias de seguridad.
-/// </summary>
-/// <remarks>
-/// Esta versión no ejecuta comandos contra SQL Server. Las operaciones
-/// se conservan únicamente en memoria mientras el formulario está abierto.
-/// </remarks>
-public partial class FrmRespaldoRestauracion : Form
+/// <summary>Administración real de copias, agente y recuperación. Las rutas se interpretan en SQL Server.</summary>
+public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
 {
-    private bool _archivoValidado;
+    private readonly RespaldoServicio _servicio;
+    private readonly SesionUsuario _sesion;
+    private ProgramaRespaldoDto _programa = new();
+    private PlanRestauracionDto? _plan;
+    private bool _configurando;
+    private bool _reiniciar;
+    public bool OperacionEnCurso { get; private set; }
 
-    public FrmRespaldoRestauracion()
+    public FrmRespaldoRestauracion(RespaldoServicio servicio, SesionUsuario sesion)
     {
         InitializeComponent();
+        _servicio = servicio;
+        _sesion = sesion;
     }
 
-    private void FrmRespaldoRestauracion_Load(object? sender, EventArgs e)
+    private sealed record DiaOpcion(DayOfWeek Dia, string Nombre);
+    private async void Formulario_Load(object? sender, EventArgs e)
     {
-        AplicarEstilos();
-        CargarValoresIniciales();
-        CargarHistorialDemostrativo();
-        ActualizarAccionesRestauracion();
-    }
-
-    private void CargarValoresIniciales()
-    {
-        txtBaseDatos.Text = "SGTM_DB";
-        txtCarpeta.Text = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "SGTM",
-            "Respaldos");
-        txtNombreArchivo.Text = GenerarNombreSugerido();
-        lblUltimoRespaldo.Text = "Último respaldo: 20/09/2026 18:30";
-    }
-
-    private static string GenerarNombreSugerido()
-    {
-        return $"SGTM_DB_{DateTime.Now:yyyyMMdd_HHmm}.bak";
-    }
-
-    private void CargarHistorialDemostrativo()
-    {
-        dgvHistorial.Rows.Clear();
-        AgregarHistorial(DateTime.Now.AddDays(-3), "Respaldo", "SGTM_DB_20260920_1830.bak", "Administrador", "Correcto");
-        AgregarHistorial(DateTime.Now.AddDays(-10), "Respaldo", "SGTM_DB_20260913_1745.bak", "Administrador", "Correcto");
-        AgregarHistorial(DateTime.Now.AddDays(-18), "Restauración", "SGTM_DB_20260905_0900.bak", "Administrador", "Correcto");
-        dgvHistorial.ClearSelection();
-        dgvHistorial.CurrentCell = null;
-    }
-
-    private void BtnExaminarCarpeta_Click(object? sender, EventArgs e)
-    {
-        using var dialogo = new SaveFileDialog
+        _configurando = true;
+        cboTipo.DataSource = Enum.GetValues<TipoRespaldo>();
+        cboZona.Items.AddRange(["Argentina Standard Time", "UTC"]);
+        cboZona.SelectedIndex = 0;
+        cboDia.DisplayMember = "Nombre";
+        cboDia.ValueMember = "Dia";
+        cboDia.DataSource = Enum.GetValues<DayOfWeek>().Select(d => new DiaOpcion(d, System.Globalization.CultureInfo.GetCultureInfo("es-AR").DateTimeFormat.GetDayName(d))).ToList();
+        _configurando = false;
+        if (!_servicio.Habilitado)
         {
-            Title = "Guardar copia de seguridad",
-            Filter = "Copia de seguridad de SQL Server (*.bak)|*.bak",
-            DefaultExt = "bak",
-            AddExtension = true,
-            OverwritePrompt = true,
-            InitialDirectory = Directory.Exists(txtCarpeta.Text)
-                ? txtCarpeta.Text
-                : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            FileName = AsegurarExtensionBak(txtNombreArchivo.Text.Trim())
-        };
-
-        if (dialogo.ShowDialog(ObtenerVentanaPropietaria()) == DialogResult.OK)
-        {
-            txtCarpeta.Text = Path.GetDirectoryName(dialogo.FileName)
-                ?? string.Empty;
-            txtNombreArchivo.Text = Path.GetFileName(dialogo.FileName);
-            lblEstado.Text = "Ubicación y nombre del respaldo seleccionados.";
-        }
-    }
-
-    private void BtnCrearRespaldo_Click(object? sender, EventArgs e)
-    {
-        if (!ValidarDatosRespaldo()) return;
-
-        string archivo = AsegurarExtensionBak(txtNombreArchivo.Text.Trim());
-        string rutaCompleta = Path.Combine(txtCarpeta.Text.Trim(), archivo);
-
-        DialogResult respuesta = MessageBox.Show(
-            this,
-            $"¿Desea simular la creación del respaldo?\n\n{rutaCompleta}",
-            "Crear respaldo",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button2);
-
-        if (respuesta != DialogResult.Yes) return;
-
-        AgregarHistorial(DateTime.Now, "Respaldo", archivo, "Administrador actual", "Correcto");
-        lblUltimoRespaldo.Text = $"Último respaldo: {DateTime.Now:dd/MM/yyyy HH:mm}";
-        lblEstado.Text = "Respaldo simulado correctamente. No se creó un archivo físico.";
-        txtNombreArchivo.Text = GenerarNombreSugerido();
-
-        MessageBox.Show(this, "La creación del respaldo fue simulada correctamente.", "Respaldo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-    }
-
-    private bool ValidarDatosRespaldo()
-    {
-        if (string.IsNullOrWhiteSpace(txtCarpeta.Text))
-        {
-            MostrarAdvertencia("Seleccione una carpeta de destino.", btnExaminarCarpeta);
-            return false;
-        }
-        if (string.IsNullOrWhiteSpace(txtNombreArchivo.Text))
-        {
-            MostrarAdvertencia("Ingrese un nombre para el archivo de respaldo.", txtNombreArchivo);
-            return false;
-        }
-        if (txtNombreArchivo.Text.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-        {
-            MostrarAdvertencia("El nombre contiene caracteres no permitidos.", txtNombreArchivo);
-            return false;
-        }
-        return true;
-    }
-
-    private static string AsegurarExtensionBak(string nombre)
-    {
-        return nombre.EndsWith(".bak", StringComparison.OrdinalIgnoreCase) ? nombre : $"{nombre}.bak";
-    }
-
-    private void BtnExaminarArchivo_Click(object? sender, EventArgs e)
-    {
-        using var dialogo = new OpenFileDialog
-        {
-            Title = "Seleccionar copia de seguridad",
-            Filter = "Copias de seguridad de SQL Server (*.bak)|*.bak|Todos los archivos (*.*)|*.*",
-            CheckFileExists = true,
-            Multiselect = false
-        };
-
-        if (dialogo.ShowDialog(ObtenerVentanaPropietaria()) != DialogResult.OK) return;
-
-        txtArchivoRestaurar.Text = dialogo.FileName;
-        FileInfo archivo = new(dialogo.FileName);
-        lblDetalleArchivo.Text = $"{archivo.Name} · {FormatearTamano(archivo.Length)} · Modificado {archivo.LastWriteTime:dd/MM/yyyy HH:mm}";
-        _archivoValidado = false;
-        lblEstado.Text = "Archivo seleccionado. Valídelo antes de restaurar.";
-        ActualizarAccionesRestauracion();
-    }
-
-    private void BtnValidarArchivo_Click(object? sender, EventArgs e)
-    {
-        string ruta = txtArchivoRestaurar.Text.Trim();
-        if (string.IsNullOrWhiteSpace(ruta) || !File.Exists(ruta))
-        {
-            MostrarAdvertencia("Seleccione un archivo de respaldo existente.", btnExaminarArchivo);
-            return;
-        }
-        if (!string.Equals(Path.GetExtension(ruta), ".bak", StringComparison.OrdinalIgnoreCase))
-        {
-            MostrarAdvertencia("El archivo seleccionado debe tener extensión .bak.", btnExaminarArchivo);
+            lblEstado.Text = "Configuración técnica pendiente. Instale la base de control y habilite Respaldos en todos los clientes. El agente funciona separado de SGTM. Consulte docs/respaldos-restauracion.md con su técnico.";
+            tabs.Enabled = btnActualizar.Enabled = false;
             return;
         }
 
-        _archivoValidado = true;
-        lblEstado.Text = "Archivo validado para la simulación de restauración.";
-        ActualizarAccionesRestauracion();
-        MessageBox.Show(this, "El archivo posee un formato válido para la simulación.", "Archivo validado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        await ActualizarAsync();
     }
 
-    private void BtnRestaurar_Click(object? sender, EventArgs e)
+    private IProgress<string> Progreso() => new Progress<string>(texto =>
     {
-        if (!_archivoValidado) return;
-
-        DialogResult respuesta = MessageBox.Show(
-            this,
-            "La restauración reemplazaría la información actual de la base de datos.\n\n¿Confirma que desea continuar con la simulación?",
-            "Confirmar restauración",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Warning,
-            MessageBoxDefaultButton.Button2);
-
-        if (respuesta != DialogResult.Yes) return;
-
-        string nombre = Path.GetFileName(txtArchivoRestaurar.Text);
-        AgregarHistorial(DateTime.Now, "Restauración", nombre, "Administrador actual", "Correcto");
-        lblEstado.Text = "Restauración simulada correctamente. La base de datos no fue modificada.";
-        _archivoValidado = false;
-        ActualizarAccionesRestauracion();
-
-        MessageBox.Show(this, "La restauración fue simulada correctamente.", "Restauración", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        if (!IsDisposed)
+            lblEstado.Text = texto;
+    });
+    private async Task EjecutarAsync(Func<Task> tarea)
+    {
+        if (OperacionEnCurso)
+            return;
+        try
+        {
+            OperacionEnCurso = true;
+            tabs.Enabled = btnActualizar.Enabled = false;
+            Cursor = Cursors.WaitCursor;
+            await tarea();
+        }
+        catch (Exception ex)
+        {
+            if (ex is Microsoft.Data.SqlClient.SqlException or Microsoft.EntityFrameworkCore.DbUpdateException)
+            {
+                lblEstado.Text = "No se completó la operación SQL. Consulte la referencia de asistencia y el estado de control antes de repetir una recuperación.";
+                Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this,ex,"Respaldos y recuperación");
+            }
+            else
+            {
+                lblEstado.Text = "Operación no completada: " + ex.Message;
+                MessageBox.Show(this,ex.Message,"Respaldos y recuperación",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+            }
+        }
+        finally
+        {
+            _configurando = false;
+            OperacionEnCurso = false;
+            if (!IsDisposed)
+            {
+                tabs.Enabled = btnActualizar.Enabled = true;
+                Cursor = Cursors.Default;
+                ActualizarAcciones();
+            }
+        }
     }
 
-    private void ActualizarAccionesRestauracion()
+    private async Task CargarDatosAsync()
     {
-        btnValidarArchivo.Enabled = !string.IsNullOrWhiteSpace(txtArchivoRestaurar.Text);
-        btnRestaurar.Enabled = _archivoValidado;
-    }
-
-    private void AgregarHistorial(DateTime fecha, string tipo, string archivo, string usuario, string resultado)
-    {
-        dgvHistorial.Rows.Insert(0, fecha.ToString("dd/MM/yyyy HH:mm"), tipo, archivo, usuario, resultado);
-        DataGridViewCell celda = dgvHistorial.Rows[0].Cells[colResultado.Index];
-        celda.Style.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        celda.Style.ForeColor = resultado == "Correcto" ? Color.FromArgb(21, 128, 61) : Color.FromArgb(185, 28, 28);
+        var estado = await _servicio.ConsultarAsync();
+        _programa = await _servicio.ObtenerProgramaAsync();
+        _configurando = true;
+        dgvCopias.DataSource = estado.Copias.ToList();
+        dgvHistorial.DataSource = estado.Historial.ToList();
+        dgvCopias.ClearSelection();
         dgvHistorial.ClearSelection();
+        chkProgramado.Checked = _programa.Activo;
+        chkDiferenciales.Checked = _programa.Diferenciales;
+        txtCarpetaAuto.Text = _programa.CarpetaServidor;
+        if (txtCarpetaManual.Text.Length == 0)
+            txtCarpetaManual.Text = _programa.CarpetaServidor;
+        dtpHora.Value = DateTime.Today.AddMinutes(_programa.MinutoDelDia);
+        cboDia.SelectedValue = _programa.DiaCompleta;
+        if (!cboZona.Items.Contains(_programa.ZonaHoraria))
+            cboZona.Items.Add(_programa.ZonaHoraria);
+        cboZona.SelectedItem = _programa.ZonaHoraria;
+        string senal = _programa.UltimaSenalAgenteUtc is { } h ? $"Última señal del agente: {h:dd/MM/yyyy HH:mm:ss} UTC" : "Nunca se recibió una señal del agente";
+        bool reciente = _programa.UltimaSenalAgenteUtc is { } ultima && DateTimeOffset.UtcNow - ultima < TimeSpan.FromMinutes(3);
+        txtEstadoPrograma.Text = $"{(reciente ? "Agente con señal reciente" : "ATENCIÓN: agente sin señal reciente; no se garantiza ejecución automática")}. {senal}.\r\nPróxima ejecución: {(_programa.ProximaUtc is { } p ? TimeZoneInfo.ConvertTime(p, Taller.Aplicacion.Respaldos.PoliticaRespaldos.ResolverZona(_programa.ZonaHoraria)).ToString("dd/MM/yyyy HH:mm zzz") : "Desactivada")} · Zona: {_programa.ZonaHoraria}.\r\nÚltimo resultado: {_programa.UltimoResultado}";
+        _plan = null;
+        txtPlan.Text = "Seleccione una copia registrada y presione Ensayar restauración. La completa base se incorpora automáticamente si selecciona una diferencial.";
+        lblEstado.Text = $"Base: {estado.BaseDatos} · Generación {estado.Generacion} · {estado.Copias.Count} copias registradas. {estado.Detalle}";
+        _configurando = false;
     }
 
-    private static string FormatearTamano(long bytes)
+    private async Task ActualizarAsync() => await EjecutarAsync(CargarDatosAsync);
+    private void ActualizarAcciones()
     {
-        return bytes >= 1024 * 1024 ? $"{bytes / 1024d / 1024d:0.##} MB" : $"{Math.Max(1, bytes / 1024d):0.##} KB";
+        btnEnsayar.Enabled = dgvCopias.SelectedRows.Count == 1;
+        btnRestaurar.Enabled = _plan != null;
     }
 
-    private void MostrarAdvertencia(string mensaje, Control control)
+    private void DgvCopias_SelectionChanged(object? sender, EventArgs e)
     {
-        MessageBox.Show(this, mensaje, "Datos incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        control.Focus();
+        if (_configurando)
+            return;
+        _plan = null;
+        txtPlan.Text = "Selección modificada: debe ensayar nuevamente antes de restaurar.";
+        ActualizarAcciones();
     }
 
-    private IWin32Window ObtenerVentanaPropietaria()
+    private async void BtnActualizar_Click(object? sender, EventArgs e) => await ActualizarAsync();
+    private async void BtnCrear_Click(object? sender, EventArgs e)
     {
-        return Form.ActiveForm ?? this;
+        await EjecutarAsync(async () =>
+        {
+            var copia = await _servicio.CrearAsync((TipoRespaldo)cboTipo.SelectedItem!, txtCarpetaManual.Text, Progreso());
+            await CargarDatosAsync();
+            MessageBox.Show(this, "Copia principal creada y verificada.\n" + copia.RutaServidor + "\n" + copia.Advertencia, "Respaldo", MessageBoxButtons.OK, copia.Advertencia.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+        });
     }
 
-    private void AplicarEstilos()
+    private async void BtnGuardarPrograma_Click(object? sender, EventArgs e)
     {
-        EstilosInterfaz.AplicarBotonSecundario(btnExaminarCarpeta);
-        EstilosInterfaz.AplicarBotonPrimario(btnCrearRespaldo);
-        EstilosInterfaz.AplicarBotonSecundario(btnExaminarArchivo);
-        EstilosInterfaz.AplicarBotonSecundario(btnValidarArchivo);
-        EstilosInterfaz.AplicarBotonPeligro(btnRestaurar);
-        EstilosInterfaz.AplicarGrilla(dgvHistorial);
+        await EjecutarAsync(async () =>
+        {
+            var p = _programa with
+            {
+                Activo = chkProgramado.Checked,
+                Diferenciales = chkDiferenciales.Checked,
+                DiaCompleta = (DayOfWeek)cboDia.SelectedValue!,
+                MinutoDelDia = dtpHora.Value.Hour * 60 + dtpHora.Value.Minute,
+                ZonaHoraria = cboZona.SelectedItem?.ToString() ?? "",
+                CarpetaServidor = txtCarpetaAuto.Text
+            };
+            await _servicio.GuardarProgramaAsync(p);
+            await CargarDatosAsync();
+            MessageBox.Show(this, "Plan guardado. Revise la señal del agente: guardar el plan no instala ni inicia el servicio de Windows.", "Programación");
+        });
+    }
+
+    private async void BtnEnsayar_Click(object? sender, EventArgs e)
+    {
+        if (dgvCopias.SelectedRows.Count != 1 || dgvCopias.SelectedRows[0].DataBoundItem is not CopiaRespaldoDto c)
+            return;
+        _plan = null;
+        ActualizarAcciones();
+        await EjecutarAsync(async () =>
+        {
+            _plan = await _servicio.ProbarRestauracionAsync(c.Id, Progreso());
+            txtPlan.Text = _plan.Resumen + $"\r\nPlan válido hasta {_plan.VenceUtc:HH:mm:ss} UTC. La autorización exige dos cuentas distintas y una ventana de mantenimiento.";
+        });
+    }
+
+    private async void BtnRestaurar_Click(object? sender, EventArgs e)
+    {
+        if (_plan is null)
+            return;
+        using var aprobacion = new FrmAprobarRestauracion(_sesion.UsuarioActual?.NombreUsuario ?? "", _plan.Resumen);
+        if (aprobacion.ShowDialog(this) != DialogResult.OK)
+            return;
+        try
+        {
+            await EjecutarAsync(async () =>
+            {
+                var resultado = await _servicio.RestaurarAsync(_plan.Token, aprobacion.UsuarioPrimero, aprobacion.ClavePrimero, aprobacion.UsuarioSegundo, aprobacion.ClaveSegundo, aprobacion.Motivo, aprobacion.ReconoceConsecuencias, Progreso());
+                _reiniciar = true;
+                OperacionEnCurso = false;
+                MessageBox.Show(this, resultado.Mensaje + "\r\nCopia protectora: " + resultado.RutaProtectora, "Recuperación", MessageBoxButtons.OK, resultado.Restaurada ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+                Application.Exit();
+            });
+        }
+        finally
+        {
+            aprobacion.LimpiarClaves();
+            if (!_reiniciar)
+            {
+                _plan = null;
+                ActualizarAcciones();
+            }
+        }
+    }
+
+    private void Formulario_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (OperacionEnCurso)
+        {
+            e.Cancel = true;
+            MessageBox.Show(this, "Espere a que termine la operación. No apague el equipo durante una recuperación.", "Operación en curso");
+        }
     }
 }

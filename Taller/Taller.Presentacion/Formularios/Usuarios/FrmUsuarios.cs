@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Presentacion.Formularios.Usuarios;
-
 /// <summary>
 /// Permite consultar, filtrar y administrar los usuarios
 /// registrados en el sistema.
@@ -14,50 +13,33 @@ namespace Taller.Presentacion.Formularios.Usuarios;
 /// comunicación de resultados.
 ///
 /// La obtención y las reglas relacionadas con usuarios se delegan
-/// en <see cref="UsuarioServicio"/>.
+/// en <see cref = "UsuarioServicio"/>.
 /// </remarks>
 public partial class FrmUsuarios : Form
 {
     private readonly UsuarioServicio _usuarioServicio;
     private readonly IServiceProvider _proveedorServicios;
     private readonly SesionUsuario _sesionUsuario;
-
     private List<Usuario> _usuarios = [];
     private bool _cargando;
-
     /// <summary>
     /// Inicializa una nueva instancia del formulario de usuarios.
     /// </summary>
-    /// <param name="usuarioServicio">
+    /// <param name = "usuarioServicio">
     /// Servicio de aplicación utilizado para consultar usuarios.
     /// </param>
-    /// <param name="proveedorServicios">
+    /// <param name = "proveedorServicios">
     /// Proveedor utilizado para resolver formularios auxiliares.
     /// </param>
-    /// <exception cref="ArgumentNullException">
+    /// <exception cref = "ArgumentNullException">
     /// Se produce cuando alguna dependencia requerida es nula.
     /// </exception>
-    public FrmUsuarios(
-        UsuarioServicio usuarioServicio,
-        IServiceProvider proveedorServicios,
-        SesionUsuario sesionUsuario)
+    public FrmUsuarios(UsuarioServicio usuarioServicio, IServiceProvider proveedorServicios, SesionUsuario sesionUsuario)
     {
         InitializeComponent();
-
-        _usuarioServicio =
-            usuarioServicio
-            ?? throw new ArgumentNullException(
-                nameof(usuarioServicio));
-
-        _proveedorServicios =
-            proveedorServicios
-            ?? throw new ArgumentNullException(
-                nameof(proveedorServicios));
-
-        _sesionUsuario = sesionUsuario
-            ?? throw new ArgumentNullException(
-                nameof(sesionUsuario));
-
+        _usuarioServicio = usuarioServicio ?? throw new ArgumentNullException(nameof(usuarioServicio));
+        _proveedorServicios = proveedorServicios ?? throw new ArgumentNullException(nameof(proveedorServicios));
+        _sesionUsuario = sesionUsuario ?? throw new ArgumentNullException(nameof(sesionUsuario));
         dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
     }
 
@@ -65,13 +47,10 @@ public partial class FrmUsuarios : Form
     /// Configura los controles y carga los usuarios cuando
     /// se abre el formulario.
     /// </summary>
-    protected override async void OnLoad(
-        EventArgs e)
+    protected override async void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
-
         ConfigurarFormulario();
-
         await CargarUsuariosAsync();
     }
 
@@ -81,13 +60,11 @@ public partial class FrmUsuarios : Form
     private void ConfigurarFormulario()
     {
         dgvUsuarios.AutoGenerateColumns = false;
-
         cboEstado.Items.Clear();
         cboEstado.Items.Add("Todos");
         cboEstado.Items.Add("Activos");
         cboEstado.Items.Add("Inactivos");
         cboEstado.SelectedIndex = 0;
-
         txtBuscar.Clear();
     }
 
@@ -100,23 +77,14 @@ public partial class FrmUsuarios : Form
         try
         {
             CambiarEstadoCarga(true);
-
-            _usuarios =
-                await _usuarioServicio.ListarAsync();
-
+            _usuarios = await _usuarioServicio.ListarAsync();
             AplicarFiltros();
         }
         catch (Exception)
         {
             _usuarios = [];
             AplicarFiltros();
-
-            MessageBox.Show(
-                "No fue posible cargar los usuarios. " +
-                "Verifique la conexión e inténtelo nuevamente.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show("No fue posible cargar los usuarios. " + "Verifique la conexión e inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
@@ -130,94 +98,37 @@ public partial class FrmUsuarios : Form
     /// </summary>
     private void AplicarFiltros()
     {
-        string busqueda =
-            txtBuscar.Text.Trim();
-
-        IEnumerable<Usuario> consulta =
-            _usuarios;
-
+        string busqueda = txtBuscar.Text.Trim();
+        IEnumerable<Usuario> consulta = _usuarios;
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
-            consulta = consulta.Where(usuario =>
-                usuario.NombreUsuario.Contains(
-                    busqueda,
-                    StringComparison.OrdinalIgnoreCase)
-                ||
-                usuario.Nombre.Contains(
-                    busqueda,
-                    StringComparison.OrdinalIgnoreCase)
-                ||
-                usuario.Apellido.Contains(
-                    busqueda,
-                    StringComparison.OrdinalIgnoreCase));
+            consulta = consulta.Where(usuario => usuario.NombreUsuario.Contains(busqueda, StringComparison.OrdinalIgnoreCase) || usuario.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) || usuario.Apellido.Contains(busqueda, StringComparison.OrdinalIgnoreCase));
         }
 
         consulta = cboEstado.SelectedIndex switch
         {
-            1 => consulta.Where(
-                usuario => usuario.Activo),
-
-            2 => consulta.Where(
-                usuario => !usuario.Activo),
-
+            1 => consulta.Where(usuario => usuario.Activo),
+            2 => consulta.Where(usuario => !usuario.Activo),
             _ => consulta
         };
-
-        List<UsuarioFila> filas =
-            consulta
-                .Select(usuario => new UsuarioFila
-                {
-                    Id = usuario.Id,
-
-                    NombreUsuario =
-                        usuario.NombreUsuario,
-
-                    NombreCompleto =
-                        $"{usuario.Apellido}, {usuario.Nombre}",
-
-                    Rol =
-                        usuario.Rol?.Nombre
-                        ?? "Rol no disponible",
-
-                    Estado =
-                        usuario.Activo
-                            ? "Activo"
-                            : "Inactivo",
-
-                    FechaAlta =
-                        usuario.FechaAlta
-                })
-                .ToList();
-
+        List<UsuarioFila> filas = consulta.Select(usuario => new UsuarioFila { Id = usuario.Id, NombreUsuario = usuario.NombreUsuario, NombreCompleto = $"{usuario.Apellido}, {usuario.Nombre}", Rol = usuario.Rol?.Nombre ?? "Rol no disponible", Estado = usuario.Activo ? "Activo" : "Inactivo", FechaAlta = usuario.FechaAlta }).ToList();
         dgvUsuarios.DataSource = null;
         dgvUsuarios.DataSource = filas;
         dgvUsuarios.ClearSelection();
-
         ActualizarEstadoAcciones();
-
-        lblCantidad.Text =
-            filas.Count == 1
-                ? "1 usuario encontrado"
-                : $"{filas.Count} usuarios encontrados";
+        lblCantidad.Text = filas.Count == 1 ? "1 usuario encontrado" : $"{filas.Count} usuarios encontrados";
     }
 
     /// <summary>
     /// Abre el formulario de alta y actualiza el listado
     /// cuando se registra correctamente un usuario.
     /// </summary>
-    private async void btnNuevoUsuario_Click(
-        object? sender,
-        EventArgs e)
+    private async void btnNuevoUsuario_Click(object? sender, EventArgs e)
     {
         try
         {
-            using FrmAltaUsuario formulario =
-                _proveedorServicios
-                    .GetRequiredService<FrmAltaUsuario>();
-
-            DialogResult resultado =
-                formulario.ShowDialog(this);
-
+            using FrmAltaUsuario formulario = _proveedorServicios.GetRequiredService<FrmAltaUsuario>();
+            DialogResult resultado = formulario.ShowDialog(this);
             if (resultado == DialogResult.OK)
             {
                 await CargarUsuariosAsync();
@@ -225,21 +136,14 @@ public partial class FrmUsuarios : Form
         }
         catch (Exception)
         {
-            MessageBox.Show(
-                "No fue posible abrir el formulario " +
-                "de alta de usuarios.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show("No fue posible abrir el formulario " + "de alta de usuarios.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
     /// <summary>
     /// Actualiza manualmente el listado de usuarios.
     /// </summary>
-    private async void btnActualizar_Click(
-        object? sender,
-        EventArgs e)
+    private async void btnActualizar_Click(object? sender, EventArgs e)
     {
         await CargarUsuariosAsync();
     }
@@ -247,9 +151,7 @@ public partial class FrmUsuarios : Form
     /// <summary>
     /// Actualiza la grilla cuando cambia el texto de búsqueda.
     /// </summary>
-    private void txtBuscar_TextChanged(
-        object? sender,
-        EventArgs e)
+    private void txtBuscar_TextChanged(object? sender, EventArgs e)
     {
         AplicarFiltros();
     }
@@ -257,9 +159,7 @@ public partial class FrmUsuarios : Form
     /// <summary>
     /// Actualiza la grilla cuando cambia el filtro de estado.
     /// </summary>
-    private void cboEstado_SelectedIndexChanged(
-        object? sender,
-        EventArgs e)
+    private void cboEstado_SelectedIndexChanged(object? sender, EventArgs e)
     {
         AplicarFiltros();
     }
@@ -267,20 +167,17 @@ public partial class FrmUsuarios : Form
     /// <summary>
     /// Habilita o bloquea los controles mientras se cargan datos.
     /// </summary>
-    /// <param name="cargando">
+    /// <param name = "cargando">
     /// Indica si existe una carga en curso.
     /// </param>
-    private void CambiarEstadoCarga(
-    bool cargando)
+    private void CambiarEstadoCarga(bool cargando)
     {
         _cargando = cargando;
-
         btnNuevoUsuario.Enabled = !cargando;
         btnActualizar.Enabled = !cargando;
         txtBuscar.Enabled = !cargando;
         cboEstado.Enabled = !cargando;
         dgvUsuarios.Enabled = !cargando;
-
         ActualizarEstadoAcciones();
     }
 
@@ -288,36 +185,23 @@ public partial class FrmUsuarios : Form
     /// Aplica colores diferenciados según el estado
     /// mostrado en cada fila.
     /// </summary>
-    private void dgvUsuarios_CellFormatting(
-        object? sender,
-        DataGridViewCellFormattingEventArgs e)
+    private void dgvUsuarios_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
     {
-        if (e.RowIndex < 0
-            || e.ColumnIndex < 0
-            || dgvUsuarios.Columns[e.ColumnIndex].Name
-                != "colEstado")
+        if (e.RowIndex < 0 || e.ColumnIndex < 0 || dgvUsuarios.Columns[e.ColumnIndex].Name != "colEstado")
         {
             return;
         }
 
-        string? estado =
-            e.Value?.ToString();
-
+        string? estado = e.Value?.ToString();
         if (estado == "Activo")
         {
-            e.CellStyle.ForeColor =
-                Color.FromArgb(22, 101, 52);
-
-            e.CellStyle.SelectionForeColor =
-                Color.FromArgb(22, 101, 52);
+            e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
+            e.CellStyle.SelectionForeColor = Color.FromArgb(22, 101, 52);
         }
         else if (estado == "Inactivo")
         {
-            e.CellStyle.ForeColor =
-                Color.FromArgb(185, 28, 28);
-
-            e.CellStyle.SelectionForeColor =
-                Color.FromArgb(185, 28, 28);
+            e.CellStyle.ForeColor = Color.FromArgb(185, 28, 28);
+            e.CellStyle.SelectionForeColor = Color.FromArgb(185, 28, 28);
         }
     }
 
@@ -328,19 +212,10 @@ public partial class FrmUsuarios : Form
     private sealed class UsuarioFila
     {
         public int Id { get; init; }
-
-        public string NombreUsuario { get; init; }
-            = string.Empty;
-
-        public string NombreCompleto { get; init; }
-            = string.Empty;
-
-        public string Rol { get; init; }
-            = string.Empty;
-
-        public string Estado { get; init; }
-            = string.Empty;
-
+        public string NombreUsuario { get; init; } = string.Empty;
+        public string NombreCompleto { get; init; } = string.Empty;
+        public string Rol { get; init; } = string.Empty;
+        public string Estado { get; init; } = string.Empty;
         public DateTime FechaAlta { get; init; }
     }
 
@@ -354,8 +229,7 @@ public partial class FrmUsuarios : Form
             return null;
         }
 
-        return dgvUsuarios.SelectedRows[0].DataBoundItem
-            as UsuarioFila;
+        return dgvUsuarios.SelectedRows[0].DataBoundItem as UsuarioFila;
     }
 
     /// <summary>
@@ -363,51 +237,24 @@ public partial class FrmUsuarios : Form
     /// </summary>
     private void ActualizarEstadoAcciones()
     {
-        UsuarioFila? fila =
-            ObtenerFilaSeleccionada();
-
-        bool haySeleccion =
-            !_cargando && fila is not null;
-
+        UsuarioFila? fila = ObtenerFilaSeleccionada();
+        bool haySeleccion = !_cargando && fila is not null;
         btnEditarUsuario.Enabled = haySeleccion;
         btnGestionarCredenciales.Enabled = haySeleccion;
-
-        int? ejecutorId =
-            _sesionUsuario.UsuarioActual?.Id;
-
-        bool esCuentaPropia =
-            fila is not null
-            && fila.Id == ejecutorId;
-
-        btnCambiarEstado.Enabled =
-            haySeleccion && !esCuentaPropia;
-
-        bool usuarioActivo =
-            fila?.Estado == "Activo";
-
-        btnCambiarEstado.Text =
-            usuarioActivo
-                ? "Deshabilitar usuario"
-                : "Habilitar usuario";
-
-        btnCambiarEstado.ForeColor =
-            usuarioActivo
-                ? Color.FromArgb(185, 28, 28)
-                : Color.FromArgb(30, 64, 175);
-
-        btnCambiarEstado.FlatAppearance.BorderColor =
-            usuarioActivo
-                ? Color.FromArgb(185, 28, 28)
-                : Color.FromArgb(30, 64, 175);
+        int? ejecutorId = _sesionUsuario.UsuarioActual?.Id;
+        bool esCuentaPropia = fila is not null && fila.Id == ejecutorId;
+        btnCambiarEstado.Enabled = haySeleccion && !esCuentaPropia;
+        bool usuarioActivo = fila?.Estado == "Activo";
+        btnCambiarEstado.Text = usuarioActivo ? "Deshabilitar usuario" : "Habilitar usuario";
+        btnCambiarEstado.ForeColor = usuarioActivo ? Color.FromArgb(185, 28, 28) : Color.FromArgb(30, 64, 175);
+        btnCambiarEstado.FlatAppearance.BorderColor = usuarioActivo ? Color.FromArgb(185, 28, 28) : Color.FromArgb(30, 64, 175);
     }
 
     /// <summary>
     /// Actualiza las acciones disponibles cuando cambia
     /// la fila seleccionada.
     /// </summary>
-    private void dgvUsuarios_SelectionChanged(
-        object? sender,
-        EventArgs e)
+    private void dgvUsuarios_SelectionChanged(object? sender, EventArgs e)
     {
         ActualizarEstadoAcciones();
     }
@@ -416,35 +263,20 @@ public partial class FrmUsuarios : Form
     /// Abre el formulario para editar los datos del usuario
     /// seleccionado y actualiza el listado después de guardar.
     /// </summary>
-    private async void btnEditarUsuario_Click(
-    object? sender,
-    EventArgs e)
+    private async void btnEditarUsuario_Click(object? sender, EventArgs e)
     {
-        UsuarioFila? fila =
-            ObtenerFilaSeleccionada();
-
+        UsuarioFila? fila = ObtenerFilaSeleccionada();
         if (fila is null)
         {
-            MessageBox.Show(
-                "Debe seleccionar un usuario.",
-                "Selección requerida",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("Debe seleccionar un usuario.", "Selección requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
         try
         {
-            using FrmEditarUsuario formulario =
-                _proveedorServicios
-                    .GetRequiredService<FrmEditarUsuario>();
-
+            using FrmEditarUsuario formulario = _proveedorServicios.GetRequiredService<FrmEditarUsuario>();
             formulario.PrepararEdicion(fila.Id);
-
-            DialogResult resultado =
-                formulario.ShowDialog(this);
-
+            DialogResult resultado = formulario.ShowDialog(this);
             if (resultado == DialogResult.OK)
             {
                 await CargarUsuariosAsync();
@@ -452,84 +284,41 @@ public partial class FrmUsuarios : Form
         }
         catch (Exception)
         {
-            MessageBox.Show(
-                "No fue posible abrir el formulario " +
-                "de edición del usuario.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show("No fue posible abrir el formulario " + "de edición del usuario.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
-    private async void btnGestionarCredenciales_Click(
-        object? sender,
-        EventArgs e)
+
+    private async void btnGestionarCredenciales_Click(object? sender, EventArgs e)
     {
         UsuarioFila? fila = ObtenerFilaSeleccionada();
-
         if (fila is null)
         {
-            MessageBox.Show(
-                "Debe seleccionar un usuario.",
-                "Selección requerida",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("Debe seleccionar un usuario.", "Selección requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
-        using FrmGestionarCredenciales formulario =
-            _proveedorServicios
-                .GetRequiredService<FrmGestionarCredenciales>();
-
+        using FrmGestionarCredenciales formulario = _proveedorServicios.GetRequiredService<FrmGestionarCredenciales>();
         formulario.PrepararGestion(fila.Id);
-
-        DialogResult resultado =
-            formulario.ShowDialog(this);
-
+        DialogResult resultado = formulario.ShowDialog(this);
         if (resultado == DialogResult.OK)
         {
             await CargarUsuariosAsync();
         }
     }
-    private async void btnCambiarEstado_Click(
-        object? sender,
-        EventArgs e)
+
+    private async void btnCambiarEstado_Click(object? sender, EventArgs e)
     {
-        UsuarioFila? fila =
-            ObtenerFilaSeleccionada();
-
-        Usuario? ejecutor =
-            _sesionUsuario.UsuarioActual;
-
+        UsuarioFila? fila = ObtenerFilaSeleccionada();
+        Usuario? ejecutor = _sesionUsuario.UsuarioActual;
         if (fila is null || ejecutor is null)
         {
-            MessageBox.Show(
-                "Seleccione un usuario e inicie sesión nuevamente " +
-                "si la sesión ya no está disponible.",
-                "Operación no disponible",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("Seleccione un usuario e inicie sesión nuevamente " + "si la sesión ya no está disponible.", "Operación no disponible", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
-        bool habilitar =
-            fila.Estado == "Inactivo";
-
-        string accion =
-            habilitar
-                ? "habilitar"
-                : "deshabilitar";
-
-        DialogResult confirmacion =
-            MessageBox.Show(
-                $"¿Desea {accion} la cuenta " +
-                $"\"{fila.NombreUsuario}\"?",
-                "Confirmar cambio de estado",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-
+        bool habilitar = fila.Estado == "Inactivo";
+        string accion = habilitar ? "habilitar" : "deshabilitar";
+        DialogResult confirmacion = MessageBox.Show($"¿Desea {accion} la cuenta " + $"\"{fila.NombreUsuario}\"?", "Confirmar cambio de estado", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
         if (confirmacion != DialogResult.Yes)
         {
             return;
@@ -538,30 +327,16 @@ public partial class FrmUsuarios : Form
         try
         {
             CambiarEstadoCarga(true);
-
-            await _usuarioServicio.CambiarEstadoAsync(
-                fila.Id,
-                habilitar,
-                ejecutor.Id);
-
+            await _usuarioServicio.CambiarEstadoAsync(fila.Id, habilitar, ejecutor.Id);
             await CargarUsuariosAsync();
         }
         catch (InvalidOperationException ex)
         {
-            MessageBox.Show(
-                ex.Message,
-                "No se pudo cambiar el estado",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo cambiar el estado");
         }
         catch (Exception)
         {
-            MessageBox.Show(
-                "No fue posible cambiar el estado del usuario. " +
-                "Inténtelo nuevamente.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show("No fue posible cambiar el estado del usuario. " + "Inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {

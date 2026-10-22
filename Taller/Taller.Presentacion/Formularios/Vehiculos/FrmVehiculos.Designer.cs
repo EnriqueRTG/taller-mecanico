@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Vehiculos
+namespace Taller.Presentacion.Formularios.Vehiculos
 {
     partial class FrmVehiculos
     {
@@ -69,9 +69,9 @@
             pnlAccionesUsuario.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
@@ -80,9 +80,9 @@
             lblTitulo.Size = new Size(250, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión de vehículos";
-            // 
+            //
             // lblDescripcion
-            // 
+            //
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
@@ -91,9 +91,9 @@
             lblDescripcion.Size = new Size(291, 17);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Consulta de vehículos y antecedentes asociados.";
-            // 
+            //
             // tlpPrincipal
-            // 
+            //
             tlpPrincipal.ColumnCount = 1;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpPrincipal.Controls.Add(pnlGrilla, 0, 3);
@@ -113,9 +113,9 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tlpPrincipal.Size = new Size(658, 308);
             tlpPrincipal.TabIndex = 2;
-            // 
+            //
             // pnlGrilla
-            // 
+            //
             pnlGrilla.BackColor = Color.White;
             pnlGrilla.Controls.Add(dgvUsuarios);
             pnlGrilla.Dock = DockStyle.Fill;
@@ -125,12 +125,12 @@
             pnlGrilla.Padding = new Padding(1);
             pnlGrilla.Size = new Size(658, 106);
             pnlGrilla.TabIndex = 5;
-            // 
+            //
             // dgvUsuarios
-            // 
+            //
             dgvUsuarios.AllowUserToAddRows = false;
             dgvUsuarios.AllowUserToDeleteRows = false;
-            dgvUsuarios.AllowUserToResizeColumns = false;
+            dgvUsuarios.AllowUserToResizeColumns = true;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
             dataGridViewCellStyle1.ForeColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(219, 234, 254);
@@ -175,76 +175,76 @@
             dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvUsuarios.Size = new Size(656, 104);
             dgvUsuarios.TabIndex = 5;
-            // 
+            //
             // colId
-            // 
+            //
             colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colId.DataPropertyName = "Id";
             colId.HeaderText = "ID";
-            colId.MinimumWidth = 6;
+            colId.MinimumWidth = 45;
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 60;
-            // 
+            //
             // dominio
-            // 
+            //
             dominio.DataPropertyName = "dominio";
             dominio.FillWeight = 110F;
             dominio.HeaderText = "Domino";
-            dominio.MinimumWidth = 6;
+            dominio.MinimumWidth = 90;
             dominio.Name = "dominio";
             dominio.ReadOnly = true;
-            // 
+            //
             // año
-            // 
+            //
             año.DataPropertyName = "año";
             año.FillWeight = 170F;
             año.HeaderText = "Año";
-            año.MinimumWidth = 6;
+            año.MinimumWidth = 60;
             año.Name = "año";
             año.ReadOnly = true;
-            // 
+            //
             // color
-            // 
+            //
             color.DataPropertyName = "color";
             color.FillWeight = 110F;
             color.HeaderText = "Color";
-            color.MinimumWidth = 6;
+            color.MinimumWidth = 90;
             color.Name = "color";
             color.ReadOnly = true;
-            // 
+            //
             // colEstado
-            // 
+            //
             colEstado.DataPropertyName = "Estado";
             dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             colEstado.DefaultCellStyle = dataGridViewCellStyle3;
             colEstado.FillWeight = 75F;
             colEstado.HeaderText = "Estado";
-            colEstado.MinimumWidth = 6;
+            colEstado.MinimumWidth = 100;
             colEstado.Name = "colEstado";
             colEstado.ReadOnly = true;
-            // 
+            //
             // colFechaAlta
-            // 
+            //
             colFechaAlta.DataPropertyName = "FechaAlta";
             dataGridViewCellStyle4.Format = "d";
             dataGridViewCellStyle4.NullValue = null;
             colFechaAlta.DefaultCellStyle = dataGridViewCellStyle4;
             colFechaAlta.FillWeight = 95F;
             colFechaAlta.HeaderText = "Fecha de alta";
-            colFechaAlta.MinimumWidth = 6;
+            colFechaAlta.MinimumWidth = 100;
             colFechaAlta.Name = "colFechaAlta";
             colFechaAlta.ReadOnly = true;
-            // 
+            //
             // modelo
-            // 
+            //
             modelo.HeaderText = "Modelo";
-            modelo.MinimumWidth = 6;
+            modelo.MinimumWidth = 160;
             modelo.Name = "modelo";
             modelo.ReadOnly = true;
-            // 
+            //
             // pnlCabecera
-            // 
+            //
             pnlCabecera.BackColor = Color.White;
             pnlCabecera.Controls.Add(label1);
             pnlCabecera.Controls.Add(btnNuevoUsuario);
@@ -256,9 +256,9 @@
             pnlCabecera.Padding = new Padding(18, 9, 18, 8);
             pnlCabecera.Size = new Size(658, 55);
             pnlCabecera.TabIndex = 0;
-            // 
+            //
             // label1
-            // 
+            //
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9.5F);
             label1.ForeColor = Color.FromArgb(100, 116, 139);
@@ -267,9 +267,9 @@
             label1.Size = new Size(294, 17);
             label1.TabIndex = 2;
             label1.Text = "Administre los vehículos y los accesos al sistema.";
-            // 
+            //
             // btnNuevoUsuario
-            // 
+            //
             btnNuevoUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnNuevoUsuario.BackColor = Color.FromArgb(30, 64, 175);
             btnNuevoUsuario.Cursor = Cursors.Hand;
@@ -286,9 +286,9 @@
             btnNuevoUsuario.TabIndex = 0;
             btnNuevoUsuario.Text = "＋ Nuevo vehiculo";
             btnNuevoUsuario.UseVisualStyleBackColor = false;
-            // 
+            //
             // label2
-            // 
+            //
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label2.ForeColor = Color.FromArgb(15, 23, 42);
@@ -297,9 +297,9 @@
             label2.Size = new Size(216, 30);
             label2.TabIndex = 0;
             label2.Text = "Gestión de vehículos";
-            // 
+            //
             // pnlFiltros
-            // 
+            //
             pnlFiltros.BackColor = Color.White;
             pnlFiltros.Controls.Add(btnActualizar);
             pnlFiltros.Controls.Add(cboEstado);
@@ -313,9 +313,9 @@
             pnlFiltros.Padding = new Padding(16, 8, 16, 8);
             pnlFiltros.Size = new Size(658, 61);
             pnlFiltros.TabIndex = 1;
-            // 
+            //
             // btnActualizar
-            // 
+            //
             btnActualizar.Cursor = Cursors.Hand;
             btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
             btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
@@ -330,9 +330,9 @@
             btnActualizar.TabIndex = 3;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
-            // 
+            //
             // cboEstado
-            // 
+            //
             cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cboEstado.FormattingEnabled = true;
@@ -341,9 +341,9 @@
             cboEstado.Name = "cboEstado";
             cboEstado.Size = new Size(127, 25);
             cboEstado.TabIndex = 2;
-            // 
+            //
             // lblEstado
-            // 
+            //
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
@@ -352,9 +352,9 @@
             lblEstado.Size = new Size(43, 15);
             lblEstado.TabIndex = 2;
             lblEstado.Text = "Estado";
-            // 
+            //
             // txtBuscar
-            // 
+            //
             txtBuscar.BorderStyle = BorderStyle.FixedSingle;
             txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtBuscar.Location = new Point(16, 32);
@@ -363,9 +363,9 @@
             txtBuscar.PlaceholderText = "Dominio";
             txtBuscar.Size = new Size(245, 25);
             txtBuscar.TabIndex = 1;
-            // 
+            //
             // lblBuscar
-            // 
+            //
             lblBuscar.AutoSize = true;
             lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
@@ -374,9 +374,9 @@
             lblBuscar.Size = new Size(44, 15);
             lblBuscar.TabIndex = 0;
             lblBuscar.Text = "Buscar";
-            // 
+            //
             // lblCantidad
-            // 
+            //
             lblCantidad.AutoSize = true;
             lblCantidad.Dock = DockStyle.Fill;
             lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
@@ -387,9 +387,9 @@
             lblCantidad.TabIndex = 4;
             lblCantidad.Text = "0 usuarios encontrados";
             lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // pnlAccionesUsuario
-            // 
+            //
             pnlAccionesUsuario.Controls.Add(flowLayoutPanel1);
             pnlAccionesUsuario.Dock = DockStyle.Fill;
             pnlAccionesUsuario.Location = new Point(0, 132);
@@ -398,9 +398,9 @@
             pnlAccionesUsuario.Padding = new Padding(16, 5, 16, 5);
             pnlAccionesUsuario.Size = new Size(658, 36);
             pnlAccionesUsuario.TabIndex = 6;
-            // 
+            //
             // flowLayoutPanel1
-            // 
+            //
             flowLayoutPanel1.BackColor = Color.White;
             flowLayoutPanel1.Controls.Add(btnEditarUsuario);
             flowLayoutPanel1.Controls.Add(btnGestionarCredenciales);
@@ -412,9 +412,9 @@
             flowLayoutPanel1.Size = new Size(626, 26);
             flowLayoutPanel1.TabIndex = 0;
             flowLayoutPanel1.WrapContents = false;
-            // 
+            //
             // btnEditarUsuario
-            // 
+            //
             btnEditarUsuario.Cursor = Cursors.Hand;
             btnEditarUsuario.Enabled = false;
             btnEditarUsuario.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
@@ -430,9 +430,9 @@
             btnEditarUsuario.TabIndex = 0;
             btnEditarUsuario.Text = "Editar datos";
             btnEditarUsuario.UseVisualStyleBackColor = false;
-            // 
+            //
             // btnGestionarCredenciales
-            // 
+            //
             btnGestionarCredenciales.Cursor = Cursors.Hand;
             btnGestionarCredenciales.Enabled = false;
             btnGestionarCredenciales.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
@@ -448,9 +448,9 @@
             btnGestionarCredenciales.TabIndex = 1;
             btnGestionarCredenciales.Text = "Gestionar credenciales";
             btnGestionarCredenciales.UseVisualStyleBackColor = false;
-            // 
+            //
             // btnCambiarEstado
-            // 
+            //
             btnCambiarEstado.Cursor = Cursors.Hand;
             btnCambiarEstado.Enabled = false;
             btnCambiarEstado.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
@@ -466,9 +466,9 @@
             btnCambiarEstado.TabIndex = 2;
             btnCambiarEstado.Text = "Deshabilitar vehiculo";
             btnCambiarEstado.UseVisualStyleBackColor = false;
-            // 
+            //
             // FrmVehiculos
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
@@ -491,6 +491,18 @@
             pnlFiltros.PerformLayout();
             pnlAccionesUsuario.ResumeLayout(false);
             flowLayoutPanel1.ResumeLayout(false);
+
+        btnNuevoUsuario.Click += BtnNuevoVehiculo_Click;
+        btnEditarUsuario.Click += BtnEditarVehiculo_Click;
+        btnGestionarCredenciales.Click += BtnVerHistorial_Click;
+        btnCambiarEstado.Click += BtnCambiarEstado_Click;
+        btnActualizar.Click += BtnActualizar_Click;
+        txtBuscar.TextChanged += Filtro_Cambio;
+        cboEstado.SelectedIndexChanged += Filtro_Cambio;
+        dgvUsuarios.SelectionChanged += DgvVehiculos_SelectionChanged;
+        dgvUsuarios.CellDoubleClick += DgvVehiculos_CellDoubleClick;
+        dgvUsuarios.CellFormatting += DgvVehiculos_CellFormatting;
+            Load += Formulario_Load;
             ResumeLayout(false);
             PerformLayout();
         }

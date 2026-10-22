@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Vehiculos
+namespace Taller.Presentacion.Formularios.Vehiculos
 {
     partial class FrmAltaVehiculo
     {
@@ -6,7 +6,6 @@
         /// Variable necesaria para el diseñador.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
         /// <summary>
         /// Limpia los recursos utilizados.
         /// </summary>
@@ -20,8 +19,7 @@
             base.Dispose(disposing);
         }
 
-        #region Código generado por el Diseñador de Windows Forms
-
+#region Código generado por el Diseñador de Windows Forms
         /// <summary>
         /// Método necesario para admitir el Diseñador.
         /// No modificar el contenido de este método con el editor de código.
@@ -264,12 +262,12 @@
             nudAnio.Dock = DockStyle.Fill;
             nudAnio.Location = new Point(426, 47);
             nudAnio.Margin = new Padding(0, 3, 0, 3);
-            nudAnio.Maximum = new decimal(new int[] { 2100, 0, 0, 0 });
-            nudAnio.Minimum = new decimal(new int[] { 1900, 0, 0, 0 });
+            nudAnio.Maximum = new decimal (new int[] { 2100, 0, 0, 0 });
+            nudAnio.Minimum = new decimal (new int[] { 1900, 0, 0, 0 });
             nudAnio.Name = "nudAnio";
             nudAnio.Size = new Size(217, 23);
             nudAnio.TabIndex = 1;
-            nudAnio.Value = new decimal(new int[] { 1900, 0, 0, 0 });
+            nudAnio.Value = new decimal (new int[] { 1900, 0, 0, 0 });
             nudAnio.ValueChanged += CampoObligatorio_Cambio;
             // 
             // lblColor
@@ -481,6 +479,7 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Registrar vehículo ";
+            FormClosing += Guardado_FormClosing;
             Load += FrmAltaVehiculo_Load;
             tlpPrincipal.ResumeLayout(false);
             pnlEncabezado.ResumeLayout(false);
@@ -499,8 +498,7 @@
             ResumeLayout(false);
         }
 
-        #endregion
-
+#endregion
         private TableLayoutPanel tlpPrincipal;
         private Panel pnlEncabezado;
         private Panel pnlContenido;

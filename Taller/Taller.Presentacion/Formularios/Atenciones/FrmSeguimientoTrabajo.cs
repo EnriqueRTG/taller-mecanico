@@ -24,9 +24,19 @@ public partial class FrmSeguimientoTrabajo : Form
         _presupuestos = presupuestos;
     }
 
-    private async void Cargar(object? s, EventArgs e) => await OperarAsync(() => Task.CompletedTask);
+    private async void Cargar(object? s, EventArgs e)
+    {
+        Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
+        await OperarAsync(() => Task.CompletedTask);
+    }
+
     private async Task RecargarAsync()
     {
+        _datos = null;
+        dgvHallazgos.DataSource = null;
+        dgvPausas.DataSource = null;
+        dgvMateriales.DataSource = null;
+        btnHallazgo.Enabled = btnAdicional.Enabled = btnResolver.Enabled = btnRecibir.Enabled = btnPausar.Enabled = false;
         _datos = await _servicio.ObtenerAsync(_id);
         lblResumen.Text = _datos.Resumen + " · Seleccione una tarea o Toda la intervención. Un hallazgo no autoriza cargos.";
         dgvHallazgos.DataSource = _datos.Hallazgos;

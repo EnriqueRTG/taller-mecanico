@@ -34,6 +34,7 @@ public partial class FrmPrepararPropuesta : Form
 
     private async void Cargar(object? s, EventArgs e)
     {
+        Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
         tlpPrincipal.Enabled = false;
         try
         {

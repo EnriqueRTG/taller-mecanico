@@ -23,7 +23,12 @@ public partial class FrmEjecutarAtencion : Form
         _sesion = sesion;
     }
 
-    private async void Cargar(object? s, EventArgs e) => await RecargarAsync();
+    private async void Cargar(object? s, EventArgs e)
+    {
+        Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
+        await RecargarAsync();
+    }
+
     private async Task RecargarAsync()
     {
         _cargando = true;

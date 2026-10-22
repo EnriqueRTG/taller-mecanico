@@ -168,6 +168,10 @@ partial class FrmPrepararPropuesta
         tlpPrincipal.Controls.Add(lblTotal, 0, 4);
         tlpPrincipal.Controls.Add(txtMotivo, 0, 5);
         tlpPrincipal.Controls.Add(acciones, 0, 6);
+        tlpPrincipal.AutoScroll = true;
+        dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+        dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvItems.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         Controls.Add(tlpPrincipal);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10);

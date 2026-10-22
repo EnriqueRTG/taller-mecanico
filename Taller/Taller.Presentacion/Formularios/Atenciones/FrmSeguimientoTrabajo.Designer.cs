@@ -254,6 +254,16 @@ partial class FrmSeguimientoTrabajo
         tlpPrincipal.Controls.Add(cboTarea, 0, 1);
         tlpPrincipal.Controls.Add(tabs, 0, 2);
         tlpPrincipal.Controls.Add(acciones, 0, 3);
+        tlpPrincipal.AutoScroll = true;
+        dgvHallazgos.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+        dgvHallazgos.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvHallazgos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        dgvPausas.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+        dgvPausas.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvPausas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        dgvMateriales.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+        dgvMateriales.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvMateriales.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         Controls.Add(tlpPrincipal);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10);

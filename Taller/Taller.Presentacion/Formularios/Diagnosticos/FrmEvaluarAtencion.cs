@@ -27,6 +27,7 @@ public partial class FrmEvaluarAtencion : Form
 
     private async void Cargar(object? s, EventArgs e)
     {
+        Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
         try
         {
             _catalogo = await _servicio.ListarCatalogoAsync();

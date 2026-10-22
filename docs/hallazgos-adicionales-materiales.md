@@ -77,7 +77,7 @@ SQL conserva claves externas sin borrado en cascada, restricciones de textos, ca
 2. Compilar y aplicar la cadena de migraciones de esta rama, incluida `20261022205915_HallazgosAdicionalesYMaterialesCliente`, con el proyecto de infraestructura y la configuración de conexión correcta.
 3. No revertir esta migración después de registrar evidencias nuevas: su `Down` elimina las columnas/tablas añadidas. Para recuperación conservar una copia completa y el código compatible.
 4. Si se usa el módulo de respaldos, crear una nueva copia completa después de migrar; las restauraciones comprueban compatibilidad de esquema.
-5. Probar en Windows HD/FHD y escalas 100 %, 125 % y 150 %. La compilación cruzada y las pruebas de servicios no verifican visualmente las ventanas.
+5. Las ventanas de evaluación, ejecución y seguimiento limitan su tamaño al área útil después del escalado de Windows; las nuevas pantallas conservan desplazamiento y columnas redimensionables. Probar en Windows HD/FHD y escalas 100 %, 125 % y 150 %. La compilación cruzada y las pruebas de servicios no verifican visualmente las ventanas.
 
 Pruebas automáticas: selección parcial sin autorización prematura; revisión técnica y nueva aceptación; adicional aceptado/rechazado; pausa selectiva; material recibido no conforme/conforme sin cobro; bloqueo de finalización con pendientes; revalidación de permisos/reserva/versiones; ampliación de inspección; revisión de adicional. SQL optativo aislado cubre migraciones con documentos previos y el recorrido selección parcial → hallazgo bloqueante → adicional → material aportado → resolución → ejecución → liquidación, con rowversion real. Las bases SQL de pruebas son temporales; nunca se usa la base operativa.
 

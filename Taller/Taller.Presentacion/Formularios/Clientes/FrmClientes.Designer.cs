@@ -108,7 +108,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             //
             dgvUsuarios.AllowUserToAddRows = false;
             dgvUsuarios.AllowUserToDeleteRows = false;
-            dgvUsuarios.AllowUserToResizeColumns = false;
+            dgvUsuarios.AllowUserToResizeColumns = true;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
             dataGridViewCellStyle1.ForeColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(219, 234, 254);
@@ -159,7 +159,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colId.DataPropertyName = "Id";
             colId.HeaderText = "ID";
-            colId.MinimumWidth = 6;
+            colId.MinimumWidth = 45;
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 60;
@@ -169,7 +169,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             dni.DataPropertyName = "dni";
             dni.FillWeight = 110F;
             dni.HeaderText = "Documento";
-            dni.MinimumWidth = 6;
+            dni.MinimumWidth = 95;
             dni.Name = "dni";
             dni.ReadOnly = true;
             //
@@ -178,7 +178,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             tipo_documento.DataPropertyName = "tipo_documento";
             tipo_documento.FillWeight = 110F;
             tipo_documento.HeaderText = "Tipo documento";
-            tipo_documento.MinimumWidth = 6;
+            tipo_documento.MinimumWidth = 85;
             tipo_documento.Name = "tipo_documento";
             tipo_documento.ReadOnly = true;
             //
@@ -187,28 +187,28 @@ namespace Taller.Presentacion.Formularios.Clientes
             colNombreCompleto.DataPropertyName = "NombreCompleto";
             colNombreCompleto.FillWeight = 170F;
             colNombreCompleto.HeaderText = "Nombre completo";
-            colNombreCompleto.MinimumWidth = 6;
+            colNombreCompleto.MinimumWidth = 160;
             colNombreCompleto.Name = "colNombreCompleto";
             colNombreCompleto.ReadOnly = true;
             //
             // telefono
             //
             telefono.HeaderText = "Teléfono";
-            telefono.MinimumWidth = 6;
+            telefono.MinimumWidth = 100;
             telefono.Name = "telefono";
             telefono.ReadOnly = true;
             //
             // mail
             //
             mail.HeaderText = "Email";
-            mail.MinimumWidth = 6;
+            mail.MinimumWidth = 140;
             mail.Name = "mail";
             mail.ReadOnly = true;
             //
             // direccion
             //
             direccion.HeaderText = "Dirección";
-            direccion.MinimumWidth = 6;
+            direccion.MinimumWidth = 160;
             direccion.Name = "direccion";
             direccion.ReadOnly = true;
             //
@@ -219,7 +219,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             colEstado.DefaultCellStyle = dataGridViewCellStyle3;
             colEstado.FillWeight = 75F;
             colEstado.HeaderText = "Estado";
-            colEstado.MinimumWidth = 6;
+            colEstado.MinimumWidth = 100;
             colEstado.Name = "colEstado";
             colEstado.ReadOnly = true;
             //
@@ -231,7 +231,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             colFechaAlta.DefaultCellStyle = dataGridViewCellStyle4;
             colFechaAlta.FillWeight = 95F;
             colFechaAlta.HeaderText = "Fecha de alta";
-            colFechaAlta.MinimumWidth = 6;
+            colFechaAlta.MinimumWidth = 100;
             colFechaAlta.Name = "colFechaAlta";
             colFechaAlta.ReadOnly = true;
             //

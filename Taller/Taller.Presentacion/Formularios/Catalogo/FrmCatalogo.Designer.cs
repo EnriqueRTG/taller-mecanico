@@ -41,7 +41,7 @@ partial class FrmCatalogo
         tlpPrincipal.RowCount = 6;
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
@@ -87,6 +87,7 @@ partial class FrmCatalogo
         flpFiltros.Controls.AddRange([txtBuscar, cmbCategorias, cmbTiposConcepto, cboDisponibilidad, btnActualizar, btnLimpiar]);
         dgvConceptos.Name = "dgvConceptos";
         dgvConceptos.Dock = DockStyle.Fill;
+        dgvConceptos.ColumnHeadersHeightSizeMode=DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dgvConceptos.AutoGenerateColumns = false;
         dgvConceptos.ReadOnly = true;
         dgvConceptos.AllowUserToAddRows = false;

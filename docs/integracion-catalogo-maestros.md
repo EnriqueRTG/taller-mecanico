@@ -8,6 +8,7 @@ La intención del catálogo paralelo se conserva: consulta por categoría, tipo 
 
 ## Clientes y vehículos
 
+- Grillas de clientes/vehículos con columnas redimensionables y anchos mínimos para lectura; catálogo con encabezados adaptables y detalle de la selección.
 - Consultas persistidas, búsqueda sin distinguir mayúsculas/tildes y filtros de habilitados/deshabilitados/todos. Los registros activos tienen prioridad y luego se ordenan por alta más reciente e identificador.
 - Las altas y modificaciones de clientes/vehículos exigen recepción con cuenta y rol vigentes comprobados en base de datos. El técnico solo puede consultar un vehículo para su historial; no administra los datos maestros.
 - Alta y edición comparten validaciones de aplicación: obligatorios, longitudes de las columnas, DNI de 7/8 dígitos, CUIT/CUIL con verificador, pasaporte alfanumérico, correo y teléfono opcionales con formato, dominio normalizado, año permitido y marca/modelo disponible.

@@ -130,7 +130,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             //
             dgvUsuarios.AllowUserToAddRows = false;
             dgvUsuarios.AllowUserToDeleteRows = false;
-            dgvUsuarios.AllowUserToResizeColumns = false;
+            dgvUsuarios.AllowUserToResizeColumns = true;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 250, 252);
             dataGridViewCellStyle1.ForeColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(219, 234, 254);
@@ -181,7 +181,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colId.DataPropertyName = "Id";
             colId.HeaderText = "ID";
-            colId.MinimumWidth = 6;
+            colId.MinimumWidth = 45;
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 60;
@@ -191,7 +191,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             dominio.DataPropertyName = "dominio";
             dominio.FillWeight = 110F;
             dominio.HeaderText = "Domino";
-            dominio.MinimumWidth = 6;
+            dominio.MinimumWidth = 90;
             dominio.Name = "dominio";
             dominio.ReadOnly = true;
             //
@@ -200,7 +200,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             año.DataPropertyName = "año";
             año.FillWeight = 170F;
             año.HeaderText = "Año";
-            año.MinimumWidth = 6;
+            año.MinimumWidth = 60;
             año.Name = "año";
             año.ReadOnly = true;
             //
@@ -209,7 +209,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             color.DataPropertyName = "color";
             color.FillWeight = 110F;
             color.HeaderText = "Color";
-            color.MinimumWidth = 6;
+            color.MinimumWidth = 90;
             color.Name = "color";
             color.ReadOnly = true;
             //
@@ -220,7 +220,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             colEstado.DefaultCellStyle = dataGridViewCellStyle3;
             colEstado.FillWeight = 75F;
             colEstado.HeaderText = "Estado";
-            colEstado.MinimumWidth = 6;
+            colEstado.MinimumWidth = 100;
             colEstado.Name = "colEstado";
             colEstado.ReadOnly = true;
             //
@@ -232,14 +232,14 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             colFechaAlta.DefaultCellStyle = dataGridViewCellStyle4;
             colFechaAlta.FillWeight = 95F;
             colFechaAlta.HeaderText = "Fecha de alta";
-            colFechaAlta.MinimumWidth = 6;
+            colFechaAlta.MinimumWidth = 100;
             colFechaAlta.Name = "colFechaAlta";
             colFechaAlta.ReadOnly = true;
             //
             // modelo
             //
             modelo.HeaderText = "Modelo";
-            modelo.MinimumWidth = 6;
+            modelo.MinimumWidth = 160;
             modelo.Name = "modelo";
             modelo.ReadOnly = true;
             //

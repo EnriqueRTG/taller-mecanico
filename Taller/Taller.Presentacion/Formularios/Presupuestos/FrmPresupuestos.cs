@@ -7,6 +7,7 @@ namespace Taller.Presentacion.Formularios.Presupuestos;
 /// <summary>Consulta documentos reales; recepción registra la comunicación al cliente sin decidir por él.</summary>
 public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFormularioConOperacion
 {
+    private readonly SeguimientoTrabajoServicio _seguimiento;
     private readonly EvaluacionServicio _servicio;
     private readonly SesionUsuario _sesion;
     private readonly PresupuestoServicio _presupuestos;
@@ -15,12 +16,13 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     private bool _cargando;
     public bool OperacionEnCurso => _ocupado || _cargando;
 
-    public FrmPresupuestos(EvaluacionServicio servicio, SesionUsuario sesion, PresupuestoServicio presupuestos)
+    public FrmPresupuestos(EvaluacionServicio servicio, SesionUsuario sesion, PresupuestoServicio presupuestos, SeguimientoTrabajoServicio seguimiento)
     {
         InitializeComponent();
         _servicio = servicio;
         _sesion = sesion;
         _presupuestos = presupuestos;
+        _seguimiento = seguimiento;
     }
 
     private async void Cargar(object? s, EventArgs e)
@@ -58,7 +60,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     private void Filtrar(object? s, EventArgs e)
     {
         var q = txtBuscar.Text.Trim();
-        dgvDatos.DataSource = _datos.Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision).OrderBy(d => !d.Vigente ? 5 : d.Tipo == TipoPresupuesto.Reparacion && d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
+        dgvDatos.DataSource = _datos.Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision || cboEstado.SelectedIndex == 4 && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Tipo == TipoPresupuesto.Reparacion && d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
         dgvDatos.ClearSelection();
         dgvDatos.CurrentCell = null;
         Seleccion(null, EventArgs.Empty);
@@ -70,8 +72,9 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     {
         var recepcion = _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId;
         btnDecidir.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendienteDecision };
-        btnRevision.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion } && Fila.Estado != EstadoPresupuesto.Borrador;
-        btnVer.Enabled = !_ocupado && Fila != null;
+        btnRevision.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion } && Fila.Estado is not (EstadoPresupuesto.Borrador or EstadoPresupuesto.PendienteRevisionTecnica);
+        btnVer.Enabled = btnSeguimiento.Enabled = !_ocupado && Fila != null;
+        btnValidarSeleccion.Enabled = !_ocupado && !recepcion && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
         btnPresentar.Enabled = !_ocupado && _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendientePresentacion };
     }
 
@@ -135,7 +138,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         try
         {
             var id = await _presupuestos.SolicitarRevisionAsync(d.IdPresupuesto, d.Version, f.Motivo);
-            MessageBox.Show(this, $"Revisión {id:D6} preparada como borrador. El técnico puede continuar desde Evaluaciones técnicas.");
+            MessageBox.Show(this, d.EsAdicional ? $"Revisión {id:D6} pendiente de validación técnica desde Presupuestos." : $"Revisión {id:D6} preparada como borrador. El técnico puede continuar desde Evaluaciones técnicas.");
         }
         catch (Exception ex)
         {
@@ -145,6 +148,48 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         {
             _ocupado = false;
             tlpPrincipal.Enabled = true;
+            await RecargarAsync();
+        }
+    }
+
+    private async void ValidarSeleccion(object? s, EventArgs e)
+    {
+        if (_ocupado || Fila is not { } d)
+            return;
+        _ocupado = true;
+        try
+        {
+            using var f = new FrmPrepararPropuesta(d.IdAtencion, _seguimiento, _servicio, _presupuestos, presupuesto: d.IdPresupuesto);
+            f.ShowDialog(this);
+        }
+        catch (Exception ex)
+        {
+            Error(ex);
+        }
+        finally
+        {
+            _ocupado = false;
+            await RecargarAsync();
+        }
+    }
+
+    private async void Seguimiento(object? s, EventArgs e)
+    {
+        if (_ocupado || Fila is not { } d)
+            return;
+        _ocupado = true;
+        try
+        {
+            using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(d.IdAtencion, _seguimiento, _servicio, _presupuestos);
+            f.ShowDialog(this);
+        }
+        catch (Exception ex)
+        {
+            Error(ex);
+        }
+        finally
+        {
+            _ocupado = false;
             await RecargarAsync();
         }
     }

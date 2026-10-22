@@ -1,13 +1,15 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Presupuestos;
 partial class FrmDecisionPresupuesto
 {
     private System.ComponentModel.IContainer? components;
     protected override void Dispose(bool disposing)
     {
-        if (disposing) components?.Dispose();
+        if (disposing)
+            components?.Dispose();
         base.Dispose(disposing);
     }
+
     private void InitializeComponent()
     {
         tlpPrincipal = new TableLayoutPanel();
@@ -45,7 +47,8 @@ partial class FrmDecisionPresupuesto
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-        Controls.Add(tlpPrincipal);Text="Decisión del cliente por ítem";
+        Controls.Add(tlpPrincipal);
+        Text = "Decisión del cliente por ítem";
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
         lblResumen.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(dgvItems, 0, 1);
@@ -70,15 +73,22 @@ partial class FrmDecisionPresupuesto
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Concepto propuesto", FillWeight = 240, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad", FillWeight = 70, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
+        dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporta", MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPrecioUnitario", DataPropertyName = "PrecioUnitario", HeaderText = "Precio unitario", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSubtotal", DataPropertyName = "Subtotal", HeaderText = "Subtotal", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
-        dgvItems.ReadOnly=false;
-        dgvItems.Columns[0].ReadOnly=true;dgvItems.Columns[1].ReadOnly=true;dgvItems.Columns[2].ReadOnly=true;dgvItems.Columns[3].ReadOnly=true;
-        dgvItems.Columns.Insert(0,new DataGridViewCheckBoxColumn{Name="colAceptar",DataPropertyName="Aceptar",HeaderText="Acepta",FillWeight=60});
-        dgvItems.CellValueChanged+=Cambio;dgvItems.CurrentCellDirtyStateChanged+=CommitCelda;
-        txtMotivo.TextChanged+=TextoCambiado;
-        txtMotivo.Multiline=true;txtMotivo.MaxLength=1000;txtMotivo.ScrollBars=ScrollBars.Vertical;
-        txtMotivo.PlaceholderText="Motivo de los ítems excluidos o del rechazo. Obligatorio si no se acepta todo.";
+        dgvItems.ReadOnly = false;
+        dgvItems.Columns[0].ReadOnly = true;
+        dgvItems.Columns[1].ReadOnly = true;
+        dgvItems.Columns[2].ReadOnly = true;
+        dgvItems.Columns[3].ReadOnly = true;
+        dgvItems.Columns.Insert(0, new DataGridViewCheckBoxColumn { Name = "colAceptar", DataPropertyName = "Aceptar", HeaderText = "Acepta", FillWeight = 60 });
+        dgvItems.CellValueChanged += Cambio;
+        dgvItems.CurrentCellDirtyStateChanged += CommitCelda;
+        txtMotivo.TextChanged += TextoCambiado;
+        txtMotivo.Multiline = true;
+        txtMotivo.MaxLength = 1000;
+        txtMotivo.ScrollBars = ScrollBars.Vertical;
+        txtMotivo.PlaceholderText = "Motivo de los ítems excluidos o del rechazo. Obligatorio si no se acepta todo.";
         btnRechazar.Text = "Rechazar todos";
         btnRechazar.AutoSize = true;
         btnRechazar.Height = 34;
@@ -94,14 +104,17 @@ partial class FrmDecisionPresupuesto
         btnCerrar.Height = 34;
         btnCerrar.Click += Cerrar;
         flpAcciones.Controls.Add(btnCerrar);
-
         Load += Cargar;
         FormClosing += AlCerrar;
-        BackColor=Color.FromArgb(248,250,252);
-        btnGuardar.BackColor=Color.FromArgb(30,64,175);btnGuardar.ForeColor=Color.White;btnGuardar.FlatStyle=FlatStyle.Flat;
-        CancelButton=btnCerrar;btnCerrar.DialogResult=DialogResult.None;
+        BackColor = Color.FromArgb(248, 250, 252);
+        btnGuardar.BackColor = Color.FromArgb(30, 64, 175);
+        btnGuardar.ForeColor = Color.White;
+        btnGuardar.FlatStyle = FlatStyle.Flat;
+        CancelButton = btnCerrar;
+        btnCerrar.DialogResult = DialogResult.None;
         ResumeLayout(false);
     }
+
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblResumen = null!;
     private DataGridView dgvItems = null!;

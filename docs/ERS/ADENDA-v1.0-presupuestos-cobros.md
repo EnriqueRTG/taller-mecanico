@@ -1,3 +1,5 @@
+> Actualización del circuito: consultar [hallazgos, adicionales y materiales del cliente](../hallazgos-adicionales-materiales.md). Esa ampliación reemplaza la aceptación parcial inmediata y la limitación de una sola propuesta durante la ejecución descritas en versiones anteriores.
+
 # Adenda funcional v1.0 — Presupuestos, ejecución y cobros
 
 Fecha: 21/10/2026. Esta adenda documenta las decisiones de alcance adoptadas para la implementación y sustituye los puntos incompatibles del ERS v0.9. No es una aprobación docente del documento completo ni modifica silenciosamente el PDF anterior.

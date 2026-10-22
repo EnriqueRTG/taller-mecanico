@@ -1,3 +1,5 @@
+> Actualización del circuito: consultar [hallazgos, adicionales y materiales del cliente](hallazgos-adicionales-materiales.md). Esa ampliación reemplaza la aceptación parcial inmediata y la limitación de una sola propuesta durante la ejecución descritas en versiones anteriores.
+
 # Probar decisiones, ejecución, cobros y entrega
 
 Esta rama extiende `feature/circuito-atencion-evaluacion` y su migración previa. No es necesario fusionarla a `main` para descargarla y probarla. La adenda funcional está en `docs/ERS/ADENDA-v1.0-presupuestos-cobros.md`.

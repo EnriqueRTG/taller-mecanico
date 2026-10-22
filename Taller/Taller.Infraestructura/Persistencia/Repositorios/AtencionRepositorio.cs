@@ -7,7 +7,6 @@ using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Infraestructura.Persistencia.Repositorios;
-
 /// <summary>
 /// Implementa las consultas y operaciones de persistencia de atenciones.
 /// </summary>
@@ -19,40 +18,34 @@ namespace Taller.Infraestructura.Persistencia.Repositorios;
 public sealed class AtencionRepositorio : IAtencionRepositorio
 {
     private const string IndiceVehiculoActivo = "UX_Atenciones_VehiculoActivo";
-
     // Contexto de Entity Framework Core utilizado para acceder
     // y realizar operaciones sobre la base de datos.
     private readonly TallerDbContext _contexto;
-
     /// <summary>
     /// Inicializa una nueva instancia del repositorio de atenciones
     /// utilizando el contexto recibido mediante inyección de dependencias.
     /// </summary>
-    /// <param name="contexto">
+    /// <param name = "contexto">
     /// Contexto de Entity Framework Core utilizado para acceder a la base de datos.
     /// </param>
-    public AtencionRepositorio(TallerDbContext
-        contexto)
+    public AtencionRepositorio(TallerDbContext contexto)
     {
-        _contexto = contexto
-            ?? throw new ArgumentNullException(nameof(contexto));
+        _contexto = contexto ?? throw new ArgumentNullException(nameof(contexto));
     }
 
     /// <summary>
     /// Agrega una nueva atención a la base de datos.
     /// </summary>
-    /// <param name="atencion">
+    /// <param name = "atencion">
     /// Atención que se desea registrar.
     /// </param>
     /// <returns>
     /// Una tarea que representa la operación asincrónica.
     /// </returns>
-    public async Task AgregarAsync(
-        Atencion atencion)
+    public async Task AgregarAsync(Atencion atencion)
     {
         //Es una comprobación del contrato del método, no una validación de negocio.
         ArgumentNullException.ThrowIfNull(atencion);
-
         var entrada = _contexto.Entry(atencion);
         entrada.State = EntityState.Added;
         foreach (var evento in atencion.Historial)
@@ -60,6 +53,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
             evento.Atencion = atencion;
             _contexto.HistorialAtenciones.Add(evento);
         }
+
         await GuardarAsync(entrada);
     }
 
@@ -71,68 +65,40 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// La atención, el presupuesto, sus detalles y el historial
     /// se persisten mediante un único guardado.
     /// </remarks>
-    public async Task ConfirmarIngresoAsync(
-        Atencion atencion,
-        Presupuesto presupuesto,
-        HistorialAtencion historial)
+    public async Task ConfirmarIngresoAsync(Atencion atencion, Presupuesto presupuesto, HistorialAtencion historial)
     {
         ArgumentNullException.ThrowIfNull(atencion);
         ArgumentNullException.ThrowIfNull(presupuesto);
         ArgumentNullException.ThrowIfNull(historial);
-
-        if (atencion.Estado != EstadoAtencion.EnEvaluacionTecnica
-            || atencion.IdTecnicoEnActividad is not null
-            || atencion.ActividadTecnica is not null)
+        if (atencion.Estado != EstadoAtencion.EnEvaluacionTecnica || atencion.IdTecnicoEnActividad is not null || atencion.ActividadTecnica is not null)
         {
-            throw new ArgumentException(
-                "La atención debe quedar en evaluación técnica y sin reserva.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe quedar en evaluación técnica y sin reserva.", nameof(atencion));
         }
 
-        if (presupuesto.IdPresupuesto != 0
-            || presupuesto.Tipo != TipoPresupuesto.Diagnostico
-            || presupuesto.Estado != EstadoPresupuesto.Aceptado
-            || presupuesto.IdAtencion != atencion.IdAtencion
-            || presupuesto.IdDiagnostico is not null)
+        if (presupuesto.IdPresupuesto != 0 || presupuesto.Tipo != TipoPresupuesto.Diagnostico || presupuesto.Estado != EstadoPresupuesto.Aceptado || presupuesto.IdAtencion != atencion.IdAtencion || presupuesto.IdDiagnostico is not null)
         {
-            throw new ArgumentException(
-                "El presupuesto debe ser nuevo, de diagnóstico, aceptado " +
-                "y pertenecer a la atención.",
-                nameof(presupuesto));
+            throw new ArgumentException("El presupuesto debe ser nuevo, de diagnóstico, aceptado " + "y pertenecer a la atención.", nameof(presupuesto));
         }
 
         var detalles = presupuesto.Detalles.ToList();
-
         if (detalles.Count == 0)
         {
-            throw new ArgumentException(
-                "El presupuesto inicial debe contener al menos un servicio.",
-                nameof(presupuesto));
+            throw new ArgumentException("El presupuesto inicial debe contener al menos un servicio.", nameof(presupuesto));
         }
 
         foreach (var detalle in detalles)
         {
-            if (detalle.IdPresupuestoDetalle != 0
-                || detalle.IdPresupuesto != 0
-                || detalle.IdPresupuestoCambio is not null)
+            if (detalle.IdPresupuestoDetalle != 0 || detalle.IdPresupuesto != 0 || detalle.IdPresupuestoCambio is not null)
             {
-                throw new ArgumentException(
-                    "Los detalles deben ser nuevos y no tener " +
-                    "un presupuesto de cambio.",
-                    nameof(presupuesto));
+                throw new ArgumentException("Los detalles deben ser nuevos y no tener " + "un presupuesto de cambio.", nameof(presupuesto));
             }
         }
 
         var entradaPresupuesto = _contexto.Entry(presupuesto);
-
-        var entradasDetalles = detalles
-            .Select(detalle => _contexto.Entry(detalle))
-            .ToList();
-
+        var entradasDetalles = detalles.Select(detalle => _contexto.Entry(detalle)).ToList();
         try
         {
             entradaPresupuesto.State = EntityState.Added;
-
             foreach (var entradaDetalle in entradasDetalles)
             {
                 // EF completará la FK cuando se genere
@@ -145,17 +111,9 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
             // atención, historial, presupuesto y todos sus detalles.
             await ActualizarConHistorialAsync(atencion, historial);
         }
-        catch (DbUpdateException ex)
-            when (ex.InnerException is SqlException sqlEx
-                && sqlEx.Errors.Cast<SqlError>().Any(error =>
-                    (error.Number == 2601 || error.Number == 2627)
-                    && error.Message.Contains(
-                        "UX_Presupuestos_DiagnosticoPorAtencion",
-                        StringComparison.OrdinalIgnoreCase)))
+        catch (DbUpdateException ex)when (ex.InnerException is SqlException sqlEx && sqlEx.Errors.Cast<SqlError>().Any(error => (error.Number == 2601 || error.Number == 2627) && error.Message.Contains("UX_Presupuestos_DiagnosticoPorAtencion", StringComparison.OrdinalIgnoreCase)))
         {
-            throw new ValidacionException(
-                "La atención ya tiene registrados sus servicios iniciales.",
-                nameof(Presupuesto.IdAtencion));
+            throw new ValidacionException("La atención ya tiene registrados sus servicios iniciales.", nameof(Presupuesto.IdAtencion));
         }
         finally
         {
@@ -178,70 +136,48 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// Un único SaveChangesAsync guarda ambos cambios en una transacción.
     /// Si existe un conflicto de concurrencia, ninguno se confirma.
     /// </remarks>
-    public async Task ActualizarConHistorialAsync(
-        Atencion atencion,
-        HistorialAtencion historial)
+    public async Task ActualizarConHistorialAsync(Atencion atencion, HistorialAtencion historial)
     {
         ArgumentNullException.ThrowIfNull(atencion);
         ArgumentNullException.ThrowIfNull(historial);
-
         if (atencion.IdAtencion <= 0)
         {
-            throw new ArgumentException(
-                "La atención debe tener un identificador válido.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe tener un identificador válido.", nameof(atencion));
         }
 
         if (atencion.Version is null || atencion.Version.Length != 8)
         {
-            throw new ArgumentException(
-                "La atención debe tener una versión válida.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe tener una versión válida.", nameof(atencion));
         }
 
         if (historial.IdHistorialAtencion != 0)
         {
-            throw new ArgumentException(
-                "El evento del historial debe ser nuevo.",
-                nameof(historial));
+            throw new ArgumentException("El evento del historial debe ser nuevo.", nameof(historial));
         }
 
         if (historial.IdAtencion != atencion.IdAtencion)
         {
-            throw new ArgumentException(
-                "El evento debe corresponder a la atención actualizada.",
-                nameof(historial));
+            throw new ArgumentException("El evento debe corresponder a la atención actualizada.", nameof(historial));
         }
 
         if (historial.EstadoNuevo != atencion.Estado)
         {
-            throw new ArgumentException(
-                "El estado del evento debe coincidir con el de la atención.",
-                nameof(historial));
+            throw new ArgumentException("El estado del evento debe coincidir con el de la atención.", nameof(historial));
         }
 
         var entradaAtencion = _contexto.Entry(atencion);
         entradaAtencion.State = EntityState.Unchanged;
-
-        entradaAtencion.Property(a => a.Version).OriginalValue =
-            atencion.Version.ToArray();
-
+        entradaAtencion.Property(a => a.Version).OriginalValue = atencion.Version.ToArray();
         entradaAtencion.Property(a => a.IdCliente).IsModified = true;
         entradaAtencion.Property(a => a.IdVehiculo).IsModified = true;
         entradaAtencion.Property(a => a.MotivoConsulta).IsModified = true;
         entradaAtencion.Property(a => a.TipoSolicitud).IsModified = true;
         entradaAtencion.Property(a => a.Estado).IsModified = true;
         entradaAtencion.Property(a => a.FechaCierre).IsModified = true;
-
-        entradaAtencion.Property(a => a.IdTecnicoEnActividad)
-            .IsModified = true;
-
-        entradaAtencion.Property(a => a.ActividadTecnica)
-            .IsModified = true;
-
+        entradaAtencion.Property(a => a.IdTecnicoEnActividad).IsModified = true;
+        entradaAtencion.Property(a => a.ActividadTecnica).IsModified = true;
         var entradaHistorial = _contexto.Entry(historial);
         entradaHistorial.State = EntityState.Added;
-
         try
         {
             await GuardarAsync(entradaAtencion);
@@ -258,7 +194,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// Actualiza los datos editables y el estado de una atención,
     /// conservando la fecha de apertura y el usuario de recepción.
     /// </summary>
-    /// <param name="atencion">
+    /// <param name = "atencion">
     /// Atención cuyos datos se desean actualizar.
     /// </param>
     /// <returns>
@@ -268,39 +204,30 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// La propiedad Version debe contener la versión utilizada
     /// para validar y preparar esta operación.
     /// </remarks>
-    public async Task ActualizarAsync(
-        Atencion atencion)
+    public async Task ActualizarAsync(Atencion atencion)
     {
         // Es una comprobación del contrato del método, no una validación de negocio.
         ArgumentNullException.ThrowIfNull(atencion);
-
         if (atencion.IdAtencion <= 0)
         {
-            throw new ArgumentException(
-                "La atención debe tener un identificador válido.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe tener un identificador válido.", nameof(atencion));
         }
 
         if (atencion.Version is null || atencion.Version.Length != 8)
         {
-            throw new ArgumentException(
-                "La atención debe tener una versión válida para actualizarse.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe tener una versión válida para actualizarse.", nameof(atencion));
         }
 
         // Cambiar el estado de esta entrada no adjunta el grafo
         // de Cliente, Vehiculo y UsuarioRecepcion
         var entrada = _contexto.Entry(atencion);
         entrada.State = EntityState.Unchanged;
-
         entrada.Property(a => a.Version).OriginalValue = atencion.Version.ToArray();
-
         entrada.Property(a => a.IdCliente).IsModified = true;
         entrada.Property(a => a.IdVehiculo).IsModified = true;
         entrada.Property(a => a.MotivoConsulta).IsModified = true;
         entrada.Property(a => a.Estado).IsModified = true;
         entrada.Property(a => a.FechaCierre).IsModified = true;
-
         await GuardarAsync(entrada);
     }
 
@@ -308,61 +235,36 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// Prepara el cambio de reserva y su historial.
     /// El guardado corresponde a la unidad de trabajo.
     /// </summary>
-    public void PrepararCambioReservaConHistorial(
-        Atencion atencion,
-        HistorialAtencion historial)
+    public void PrepararCambioReservaConHistorial(Atencion atencion, HistorialAtencion historial)
     {
         ArgumentNullException.ThrowIfNull(atencion);
         ArgumentNullException.ThrowIfNull(historial);
-
         if (atencion.IdAtencion <= 0)
         {
-            throw new ArgumentException(
-                "La atención debe tener un identificador válido.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe tener un identificador válido.", nameof(atencion));
         }
 
         if (atencion.Version is null || atencion.Version.Length != 8)
         {
-            throw new ArgumentException(
-                "La atención debe tener una versión válida.",
-                nameof(atencion));
+            throw new ArgumentException("La atención debe tener una versión válida.", nameof(atencion));
         }
 
-        if (historial.IdHistorialAtencion != 0
-            || historial.IdAtencion != atencion.IdAtencion
-            || historial.EstadoNuevo != atencion.Estado)
+        if (historial.IdHistorialAtencion != 0 || historial.IdAtencion != atencion.IdAtencion || historial.EstadoNuevo != atencion.Estado)
         {
-            throw new ArgumentException(
-                "El evento debe ser nuevo y corresponder a la atención y su estado.",
-                nameof(historial));
+            throw new ArgumentException("El evento debe ser nuevo y corresponder a la atención y su estado.", nameof(historial));
         }
 
-        if (atencion.IdTecnicoEnActividad.HasValue
-            != atencion.ActividadTecnica.HasValue)
+        if (atencion.IdTecnicoEnActividad.HasValue != atencion.ActividadTecnica.HasValue)
         {
-            throw new ArgumentException(
-                "La reserva debe identificar tanto al técnico como a la actividad, " +
-                "o dejar ambos valores vacíos.",
-                nameof(atencion));
+            throw new ArgumentException("La reserva debe identificar tanto al técnico como a la actividad, " + "o dejar ambos valores vacíos.", nameof(atencion));
         }
 
         var entrada = _contexto.Entry(atencion);
-
         entrada.State = EntityState.Unchanged;
-
-        entrada.Property(a => a.Version).OriginalValue =
-            atencion.Version.ToArray();
-
-        entrada.Property(a => a.IdTecnicoEnActividad)
-            .IsModified = true;
-
-        entrada.Property(a => a.ActividadTecnica)
-            .IsModified = true;
-
-        entrada.Property(a => a.Estado)
-            .IsModified = true;
-
+        entrada.Property(a => a.Version).OriginalValue = atencion.Version.ToArray();
+        entrada.Property(a => a.IdTecnicoEnActividad).IsModified = true;
+        entrada.Property(a => a.ActividadTecnica).IsModified = true;
+        entrada.Property(a => a.Estado).IsModified = true;
         _contexto.Entry(historial).State = EntityState.Added;
     }
 
@@ -370,18 +272,14 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// Comprueba si el vehículo tiene una atención
     /// que no está cerrada ni cancelada.
     /// </summary>
-    /// <param name="idVehiculo">Identificador del vehículo.</param>
+    /// <param name = "idVehiculo">Identificador del vehículo.</param>
     /// <returns>
     /// <see langword="true"/> si existe una atención activa;
     /// en caso contrario, <see langword="false"/>.
     /// </returns>
-    public async Task<bool> ExisteAtencionActivaParaVehiculoAsync(
-        int idVehiculo)
+    public async Task<bool> ExisteAtencionActivaParaVehiculoAsync(int idVehiculo)
     {
-        return await _contexto.Atenciones.AnyAsync(a =>
-            a.IdVehiculo == idVehiculo &&
-            a.Estado != EstadoAtencion.Cerrada &&
-            a.Estado != EstadoAtencion.Cancelada);
+        return await _contexto.Atenciones.AnyAsync(a => a.IdVehiculo == idVehiculo && a.Estado != EstadoAtencion.Cerrada && a.Estado != EstadoAtencion.Cancelada);
     }
 
     /// <summary>
@@ -392,13 +290,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// </returns>
     public Task<List<Atencion>> ListarActivasAsync()
     {
-        return ConsultaConRelaciones()
-            .Where(a =>
-                a.Estado != EstadoAtencion.Cerrada &&
-                a.Estado != EstadoAtencion.Cancelada)
-            .OrderByDescending(a => a.FechaApertura)
-            .ThenByDescending(a => a.IdAtencion)
-            .ToListAsync();
+        return ConsultaConRelaciones().Where(a => a.Estado != EstadoAtencion.Cerrada && a.Estado != EstadoAtencion.Cancelada).OrderByDescending(a => a.FechaApertura).ThenByDescending(a => a.IdAtencion).ToListAsync();
     }
 
     /// <summary>
@@ -406,69 +298,52 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// </summary>
     public Task<List<Atencion>> ListarTodasAsync()
     {
-        return ConsultaConRelaciones()
-            .OrderByDescending(a => a.FechaApertura)
-            .ThenByDescending(a => a.IdAtencion)
-            .ToListAsync();
+        return ConsultaConRelaciones().OrderByDescending(a => a.FechaApertura).ThenByDescending(a => a.IdAtencion).ToListAsync();
     }
 
     /// <summary>
     /// Lista el historial del cliente, incluyendo
     /// atenciones cerradas y canceladas.
     /// </summary>
-    /// <param name="idCliente">
+    /// <param name = "idCliente">
     /// Identificador del cliente.
     /// </param>
     /// <returns>
     /// Lista de atenciones asociadas al cliente indicado.
     /// </returns>
-    public Task<List<Atencion>> ListarPorClienteAsync(
-        int idCliente)
+    public Task<List<Atencion>> ListarPorClienteAsync(int idCliente)
     {
-        return ConsultaConRelaciones()
-            .Include(a => a.Diagnosticos)
-            .Where(a => a.IdCliente == idCliente)
-            .OrderByDescending(a => a.FechaApertura)
-            .ThenByDescending(a => a.IdAtencion)
-            .ToListAsync();
+        return ConsultaConRelaciones().Include(a => a.Diagnosticos).Where(a => a.IdCliente == idCliente).OrderByDescending(a => a.FechaApertura).ThenByDescending(a => a.IdAtencion).ToListAsync();
     }
 
     /// <summary>
     /// Lista el historial del vehículo, incluyendo
     /// atenciones cerradas y canceladas.
     /// </summary>
-    /// <param name="idVehiculo">
+    /// <param name = "idVehiculo">
     /// Identificador del vehículo.
     /// </param>
     /// <returns>
     /// Lista de atenciones asociadas al vehículo indicado.
     /// </returns>
-    public Task<List<Atencion>> ListarPorVehiculoAsync(
-        int idVehiculo)
+    public Task<List<Atencion>> ListarPorVehiculoAsync(int idVehiculo)
     {
-        return ConsultaConRelaciones()
-            .Include(a => a.Diagnosticos)
-            .Where(a => a.IdVehiculo == idVehiculo)
-            .OrderByDescending(a => a.FechaApertura)
-            .ThenByDescending(a => a.IdAtencion)
-            .ToListAsync();
+        return ConsultaConRelaciones().Include(a => a.Diagnosticos).Where(a => a.IdVehiculo == idVehiculo).OrderByDescending(a => a.FechaApertura).ThenByDescending(a => a.IdAtencion).ToListAsync();
     }
 
     /// <summary>
     /// Obtiene una atención con sus datos relacionados y su versión.
     /// Devuelve null si no existe.
     /// </summary>
-    /// <param name="idAtencion">
+    /// <param name = "idAtencion">
     /// Identificador de la atención.
     /// </param>
     /// <returns>
     /// La atención encontrada o null si no existe.
     /// </returns>
-    public Task<Atencion?> ObtenerPorIdAsync(
-        int idAtencion)
+    public Task<Atencion?> ObtenerPorIdAsync(int idAtencion)
     {
-        return ConsultaConRelaciones()
-            .FirstOrDefaultAsync(a => a.IdAtencion == idAtencion);
+        return ConsultaConRelaciones().FirstOrDefaultAsync(a => a.IdAtencion == idAtencion);
     }
 
     /// <summary>
@@ -477,22 +352,13 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// </summary>
     private IQueryable<Atencion> ConsultaConRelaciones()
     {
-        return _contexto.Atenciones
-            .AsNoTracking()
-            .Include(a => a.Evaluacion)
-            .Include(a => a.Cliente)
-            .Include(a => a.Vehiculo)
-                .ThenInclude(v => v.Modelo)
-                    .ThenInclude(m => m.Marca)
-            .Include(a => a.UsuarioRecepcion)
-            .Include(a => a.TecnicoEnActividad);
+        return _contexto.Atenciones.AsNoTracking().Include(a => a.Pausas).AsSplitQuery().Include(a => a.Evaluacion).Include(a => a.Cliente).Include(a => a.Vehiculo).ThenInclude(v => v.Modelo).ThenInclude(m => m.Marca).Include(a => a.UsuarioRecepcion).Include(a => a.TecnicoEnActividad);
     }
 
     /// <summary>
     /// Persiste los cambios y traduce los conflictos conocidos.
     /// </summary>
-    private async Task GuardarAsync(
-       EntityEntry<Atencion> entrada)
+    private async Task GuardarAsync(EntityEntry<Atencion> entrada)
     {
         try
         {
@@ -500,17 +366,11 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            throw new ConflictoConcurrenciaException(
-                "La atención fue modificada o eliminada por otra operación. Actualice la información antes de continuar.",
-                ex);
+            throw new ConflictoConcurrenciaException("La atención fue modificada o eliminada por otra operación. Actualice la información antes de continuar.", ex);
         }
-        catch (DbUpdateException ex)
-            when (EsDuplicadoDeVehiculoActivo(ex))
+        catch (DbUpdateException ex)when (EsDuplicadoDeVehiculoActivo(ex))
         {
-            throw new ValidacionException(
-                "El vehículo ya tiene una atención activa. Actualizá el listado antes de continuar.",
-                nameof(Atencion.IdVehiculo)
-            );
+            throw new ValidacionException("El vehículo ya tiene una atención activa. Actualizá el listado antes de continuar.", nameof(Atencion.IdVehiculo));
         }
         finally
         {
@@ -524,15 +384,8 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// Identifica exclusivamente la violación del índice
     /// que limita las atenciones activas por vehículo.
     /// </summary>
-    private static bool EsDuplicadoDeVehiculoActivo(
-        DbUpdateException excepcion)
+    private static bool EsDuplicadoDeVehiculoActivo(DbUpdateException excepcion)
     {
-        return excepcion.InnerException is SqlException sqlEx &&
-             sqlEx.Errors.Cast<SqlError>().Any(error =>
-                 (error.Number == 2601 || error.Number == 2627) &&
-                 error.Message.Contains(
-                     IndiceVehiculoActivo, StringComparison.OrdinalIgnoreCase));
+        return excepcion.InnerException is SqlException sqlEx && sqlEx.Errors.Cast<SqlError>().Any(error => (error.Number == 2601 || error.Number == 2627) && error.Message.Contains(IndiceVehiculoActivo, StringComparison.OrdinalIgnoreCase));
     }
-
-
 }

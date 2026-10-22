@@ -1,13 +1,15 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Presupuestos;
 partial class FrmConsultarPropuesta
 {
     private System.ComponentModel.IContainer? components;
     protected override void Dispose(bool disposing)
     {
-        if (disposing) components?.Dispose();
+        if (disposing)
+            components?.Dispose();
         base.Dispose(disposing);
     }
+
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
@@ -41,7 +43,8 @@ partial class FrmConsultarPropuesta
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-        Controls.Add(tlpPrincipal); Text = "Consultar presupuesto";
+        Controls.Add(tlpPrincipal);
+        Text = "Consultar presupuesto";
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
         lblResumen.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(dgvItems, 0, 1);
@@ -52,7 +55,9 @@ partial class FrmConsultarPropuesta
         lblTotal.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(flpAcciones, 0, 4);
         flpAcciones.Dock = DockStyle.Fill;
-        txtObservaciones.ReadOnly = true; txtObservaciones.Multiline = true; txtObservaciones.ScrollBars = ScrollBars.Vertical;
+        txtObservaciones.ReadOnly = true;
+        txtObservaciones.Multiline = true;
+        txtObservaciones.ScrollBars = ScrollBars.Vertical;
         dgvItems.AutoGenerateColumns = false;
         dgvItems.AllowUserToAddRows = false;
         dgvItems.AllowUserToDeleteRows = false;
@@ -67,6 +72,7 @@ partial class FrmConsultarPropuesta
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Descripción", FillWeight = 240, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad", FillWeight = 70, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
+        dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporta", MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPrecioUnitario", DataPropertyName = "PrecioUnitario", HeaderText = "Precio unitario", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSubtotal", DataPropertyName = "Subtotal", HeaderText = "Subtotal", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         btnCerrar.Text = "Cerrar";
@@ -74,15 +80,13 @@ partial class FrmConsultarPropuesta
         btnCerrar.Height = 34;
         btnCerrar.Click += Cerrar;
         flpAcciones.Controls.Add(btnCerrar);
-
-
-
         BackColor = Color.FromArgb(248, 250, 252);
         CancelButton = btnCerrar;
         btnCerrar.DialogResult = DialogResult.None;
-        dgvItems.Columns.Add(new DataGridViewCheckBoxColumn{Name="colAceptado",DataPropertyName="AceptadoPorCliente",HeaderText="Cliente acepta",ThreeState=true,FillWeight=80,ReadOnly=true});
+        dgvItems.Columns.Add(new DataGridViewCheckBoxColumn { Name = "colAceptado", DataPropertyName = "AceptadoPorCliente", HeaderText = "Cliente acepta", ThreeState = true, FillWeight = 80, ReadOnly = true });
         ResumeLayout(false);
     }
+
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblResumen = null!;
     private DataGridView dgvItems = null!;

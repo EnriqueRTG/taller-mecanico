@@ -281,6 +281,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
         private static string ObtenerEtapaTemporal(Atencion atencion)
         {
+            if (atencion.Pausas.Any(p => p.FechaResolucion == null))
+                return atencion.Pausas.Any(p => p.FechaResolucion == null && p.IdDetalle == null) ? "Intervención pausada: consultar seguimiento" : "Hay tareas pausadas; otras pueden continuar";
             return atencion.Estado switch
             {
                 EstadoAtencion.Abierta => "Ingreso registrado",
@@ -384,6 +386,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             bool puedeGestionar = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.GestionarAtenciones);
             bool puedeConsultarComoTecnico = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.ConsultarAtencionesAsignadas);
             btnVerDetalle.Enabled = puedeGestionar || puedeConsultarComoTecnico;
+            btnSeguimiento.Enabled = fila.EstadoValor != EstadoAtencion.Abierta && (puedeGestionar || puedeConsultarComoTecnico);
             btnEditar.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnCancelarAtencion.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
@@ -398,6 +401,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
         private void DeshabilitarAcciones()
         {
+            btnSeguimiento.Enabled = false;
             btnVerDetalle.Enabled = false;
             btnEditar.Enabled = false;
             btnIniciarProceso.Enabled = false;
@@ -541,6 +545,27 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
 #endregion
 #region Eventos de consulta y acciones técnicas
+        private async void VerSeguimiento(object? sender, EventArgs e)
+        {
+            if (_cargandoDatos || _tomandoDiagnostico || ObtenerFilaSeleccionada()is not { } fila)
+                return;
+            _tomandoDiagnostico = true;
+            try
+            {
+                using var f = new FrmSeguimientoTrabajo(fila.IdAtencion, _serviceProvider.GetRequiredService<SeguimientoTrabajoServicio>(), _serviceProvider.GetRequiredService<EvaluacionServicio>(), _serviceProvider.GetRequiredService<PresupuestoServicio>());
+                f.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Seguimiento de atención");
+            }
+            finally
+            {
+                _tomandoDiagnostico = false;
+                await CargarAtencionesAsync();
+            }
+        }
+
         private async void BtnVerDetalle_ClickAsync(object? sender, EventArgs e)
         {
             await AbrirDetalleSeleccionadoAsync();
@@ -579,7 +604,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             var fila = ObtenerFilaSeleccionada();
             if (fila == null || _sesionUsuario.UsuarioActual?.RolId != RolesSistema.TecnicoId)
                 return;
-            using var formulario = new FrmEjecutarAtencion(fila.IdAtencion, _serviceProvider.GetRequiredService<EjecucionServicio>(), _sesionUsuario);
+            using var formulario = new FrmEjecutarAtencion(fila.IdAtencion, _serviceProvider.GetRequiredService<EjecucionServicio>(), _sesionUsuario, _serviceProvider);
             formulario.ShowDialog(this);
             await CargarAtencionesAsync();
         }

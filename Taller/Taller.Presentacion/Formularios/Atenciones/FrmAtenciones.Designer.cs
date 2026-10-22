@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Atenciones
+namespace Taller.Presentacion.Formularios.Atenciones
 {
     partial class FrmAtenciones
     {
@@ -6,22 +6,21 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name = "disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
+#region Windows Form Designer generated code
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
@@ -103,7 +102,7 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 75F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 85F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 75F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 125F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
             tlpPrincipal.Size = new Size(752, 460);
             tlpPrincipal.TabIndex = 0;
@@ -468,24 +467,35 @@
             // 
             // tlpPie
             // 
-            tlpPie.ColumnCount = 2;
-            tlpPie.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tlpPie.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75F));
-            tlpPie.Controls.Add(flpAcciones, 1, 0);
+            tlpPie.ColumnCount = 1;
+            tlpPie.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpPie.Controls.Add(flpAcciones, 0, 1);
             tlpPie.Controls.Add(lblCantidad, 0, 0);
             tlpPie.Dock = DockStyle.Fill;
             tlpPie.Location = new Point(12, 10);
             tlpPie.Margin = new Padding(0);
             tlpPie.Name = "tlpPie";
-            tlpPie.RowCount = 1;
+            tlpPie.RowCount = 2;
+            tlpPie.RowStyles.Add(new RowStyle(SizeType.Absolute, 23F));
             tlpPie.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPie.Size = new Size(728, 45);
             tlpPie.TabIndex = 0;
             // 
             // flpAcciones
             // 
-            flpAcciones.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            flpAcciones.AutoSize = true;
+            flpAcciones.Dock = DockStyle.Fill;
+            flpAcciones.AutoSize = false;
+            flpAcciones.AutoScroll = true;
+            btnSeguimiento = new Button
+            {
+                Name = "btnSeguimiento",
+                Text = "Seguimiento y hallazgos",
+                AutoSize = true,
+                Height = 34,
+                Enabled = false
+            };
+            btnSeguimiento.Click += VerSeguimiento;
+            flpAcciones.Controls.Add(btnSeguimiento);
             flpAcciones.Controls.Add(btnVerDetalle);
             flpAcciones.Controls.Add(btnEditar);
             flpAcciones.Controls.Add(btnIniciarProceso);
@@ -500,7 +510,7 @@
             flpAcciones.Padding = new Padding(0, 2, 0, 2);
             flpAcciones.Size = new Size(546, 38);
             flpAcciones.TabIndex = 4;
-            flpAcciones.WrapContents = false;
+            flpAcciones.WrapContents = true;
             // 
             // btnVerDetalle
             // 
@@ -684,8 +694,7 @@
             ResumeLayout(false);
         }
 
-        #endregion
-
+#endregion
         private TableLayoutPanel tlpPrincipal;
         private Panel pnlCabecera;
         private Label lblDescripcion;
@@ -711,6 +720,7 @@
         private Label lblEspacioActualizar;
         private TableLayoutPanel tlpPie;
         private FlowLayoutPanel flpAcciones;
+        private Button btnSeguimiento;
         private Button btnVerDetalle;
         private Button btnEditar;
         private Button btnIniciarProceso;

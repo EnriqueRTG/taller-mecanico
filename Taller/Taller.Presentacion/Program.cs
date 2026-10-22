@@ -16,6 +16,15 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
 
+        try { Ejecutar(args); }
+        catch(Exception ex)
+        {
+            MessageBox.Show("SGTM no pudo iniciar. Revise la configuración de conexión y mantenimiento con el personal técnico.\n\n"+ex.Message,"Inicio de SGTM",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+        }
+    }
+
+    private static void Ejecutar(string[] args)
+    {
         var builder = Host.CreateApplicationBuilder(args);
 
         builder.Configuration
@@ -49,10 +58,15 @@ internal static class Program
         // que luego ejecutará el bucle principal de Windows Forms.
         // Un Main async puede continuar en un hilo MTA después del await
         // y provocar errores al abrir OpenFileDialog o SaveFileDialog.
-        inicializador
-            .InicializarAsync()
-            .GetAwaiter()
-            .GetResult();
+        try
+        {
+            inicializador.InicializarAsync().GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("No se pudo iniciar SGTM. Puede haber una recuperación en curso o un problema de conexión.\n\n" + ex.Message + "\n\nSi el mantenimiento se interrumpió, contacte al personal técnico; no intente operar con otra copia de la base.", "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
 
         var aplicacionContexto =
             scope.ServiceProvider

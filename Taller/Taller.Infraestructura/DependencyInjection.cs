@@ -39,10 +39,17 @@ public static class DependencyInjection
         }
 
         // Configura Entity Framework Core para trabajar con SQL Server mediante TallerDbContext.
-        services.AddDbContext<TallerDbContext>(options =>
+        var respaldos = Taller.Infraestructura.Respaldos.OpcionesRespaldos.Desde(configuration, connectionString);
+        services.AddSingleton(respaldos);
+        services.AddSingleton<Taller.Infraestructura.Respaldos.GeneracionMantenimiento>();
+        services.AddSingleton<Taller.Infraestructura.Respaldos.IntercepcionMantenimiento>();
+        services.AddSingleton<Taller.Infraestructura.Respaldos.RegistroRespaldosSql>();
+        services.AddSingleton<IRespaldoMotor, Taller.Infraestructura.Respaldos.RespaldoSqlServer>();
+        services.AddDbContext<TallerDbContext>((proveedor, options) =>
         {
             options.UseSqlServer(connectionString);
             options.UsarSemillaCatalogo();
+            if (respaldos.Habilitado) options.AddInterceptors(proveedor.GetRequiredService<Taller.Infraestructura.Respaldos.IntercepcionMantenimiento>());
         });
 
         // Registra el repositorio concreto utilizado para

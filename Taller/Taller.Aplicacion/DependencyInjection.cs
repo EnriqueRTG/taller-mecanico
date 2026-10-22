@@ -30,6 +30,9 @@ public static class DependencyInjection
         services.AddScoped<EjecucionServicio>();
         services.AddScoped<CobroServicio>();
         services.AddScoped<ReporteServicio>();
+        services.AddSingleton<TimeProvider>(TimeProvider.System);
+        services.AddSingleton<Taller.Aplicacion.Respaldos.PlanesRestauracion>();
+        services.AddScoped<RespaldoServicio>();
 
         return services;
     }

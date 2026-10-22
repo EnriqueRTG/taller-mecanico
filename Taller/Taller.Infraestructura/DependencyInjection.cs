@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Abstracciones.Persistencia;
@@ -84,6 +84,7 @@ public static class DependencyInjection
         services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
         services.AddScoped<IEvaluacionRepositorio, EvaluacionRepositorio>();
         services.AddScoped<ICircuitoRepositorio, CircuitoRepositorio>();
+        services.AddScoped<IReporteRepositorio, ReporteRepositorio>();
 
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.

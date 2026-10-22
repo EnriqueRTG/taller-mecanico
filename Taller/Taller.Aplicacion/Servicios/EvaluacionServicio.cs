@@ -1,4 +1,4 @@
-﻿using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Atenciones;
 using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Constantes;
@@ -65,6 +65,27 @@ public sealed class EvaluacionServicio(
             a.Estado = EstadoAtencion.EnEvaluacionTecnica;
             Evento(a, usuario, "EvaluacionSolicitada", EstadoAtencion.Abierta,
                 "Se solicita revisión técnica y preparación de propuesta. No autoriza tareas cobrables ni reparaciones.");
+            await unidad.GuardarCambiosAsync();
+        }
+        finally { unidad.DescartarCambios(); }
+    }
+
+    /// <summary>Cancela una apertura antes del ingreso técnico; conserva el motivo y el historial.</summary>
+    public async Task CancelarAperturaAsync(int id, byte[] version, string motivo)
+    {
+        try
+        {
+            var usuario = await AutorizarAsync(recepcion: true);
+            var a = await AtencionAsync(id);
+            Seguridad.AutorizacionOperativa.Version(version, a.Version);
+            motivo = Seguridad.AutorizacionOperativa.Texto(motivo);
+            if (a.Estado != EstadoAtencion.Abierta || a.IdTecnicoEnActividad != null || a.FechaCierre != null
+                || await repositorio.ObtenerAvanceAsync(id) != null || (await repositorio.ObtenerPresupuestosAsync(id)).Count > 0
+                || (await repositorio.ObtenerDiagnosticosAsync(id)).Count > 0)
+                throw new ValidacionException("Solo puede cancelar una apertura sin ingreso, evaluación ni servicios autorizados. Los trabajos iniciados requieren resolver la actividad técnica y liquidar lo realizado.");
+            a.Estado = EstadoAtencion.Cancelada; a.FechaCierre = DateTime.Now;
+            repositorio.PrepararVersion(a, version);
+            Evento(a, usuario, "AperturaCancelada", EstadoAtencion.Abierta, motivo);
             await unidad.GuardarCambiosAsync();
         }
         finally { unidad.DescartarCambios(); }

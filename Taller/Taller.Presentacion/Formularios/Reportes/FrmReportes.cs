@@ -1,494 +1,96 @@
+using System.Text;
+using Taller.Aplicacion.DTOs.Reportes;
+using Taller.Aplicacion.Reportes;
 using Taller.Aplicacion.Servicios;
-
+using Taller.Presentacion.Impresion;
+using Taller.Presentacion.Navegacion;
 namespace Taller.Presentacion.Formularios.Reportes;
-
-/// <summary>
-/// Presenta reportes demostrativos adaptados al rol autenticado.
-/// </summary>
-public partial class FrmReportes : Form
+/// <summary>Genera documentos por rol. Los filtros modificados invalidan el documento anterior antes de exportarlo.</summary>
+public partial class FrmReportes : Form, IFormularioConOperacion
 {
-    private readonly SesionUsuario _sesionUsuario;
-    private readonly List<ReporteFila> _resultados = [];
+    private readonly ReporteServicio _servicio;
+    private ReporteDocumentoDto? _documento;
     private bool _configurando;
-
-    public FrmReportes(
-        UsuarioServicio usuarioServicio,
-        SesionUsuario sesionUsuario)
+    public bool OperacionEnCurso { get; private set; }
+    public FrmReportes(ReporteServicio servicio) { InitializeComponent(); _servicio = servicio; }
+    private async void FrmReportes_Load(object? sender, EventArgs e)
     {
-        InitializeComponent();
-
-        _ = usuarioServicio
-            ?? throw new ArgumentNullException(nameof(usuarioServicio));
-
-        _sesionUsuario = sesionUsuario
-            ?? throw new ArgumentNullException(nameof(sesionUsuario));
-
-        ConfigurarFormulario();
-        ConectarEventosAdicionales();
-        CargarTiposSegunRol();
-        CargarReporteInicial();
-        ActualizarEstadoAcciones();
-    }
-
-    private void ConfigurarFormulario()
-    {
-        _configurando = true;
-
-        desde.MaxDate = DateTime.Today;
-        hasta.MaxDate = DateTime.Today;
-        desde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        hasta.Value = DateTime.Today;
-
-        tipo_reporte.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
-
-        txtBuscar.PlaceholderText = "Código, descripción o responsable";
-
-        btnNuevoUsuario.Text = "Ver detalle";
-        btnNuevoUsuario.Size = new Size(125, 34);
-        btnNuevoUsuario.Visible = true;
-        ReubicarBotonDetalle();
-
-        btn_generar.Text = "Generar reporte";
-        btn_actualizar.Text = "Exportar";
-        button2.Text = "Limpiar";
-        button1.Text = "Imprimir";
-
-        ConfigurarGrilla();
-        _configurando = false;
-    }
-
-    private void ConfigurarGrilla()
-    {
-        dgvUsuarios.AutoGenerateColumns = false;
-        dgvUsuarios.Columns.Clear();
-        dgvUsuarios.MultiSelect = false;
-        dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-
-        dgvUsuarios.Columns.Add(CrearColumna("colCodigo", "Código", 70));
-        dgvUsuarios.Columns.Add(CrearColumna("colFecha", "Fecha", 85));
-        dgvUsuarios.Columns.Add(CrearColumna("colDescripcion", "Descripción", 190));
-        dgvUsuarios.Columns.Add(CrearColumna("colResponsable", "Responsable", 125));
-        dgvUsuarios.Columns.Add(CrearColumna("colEstadoReporte", "Estado", 90));
-        dgvUsuarios.Columns.Add(CrearColumna("colTotal", "Importe / cantidad", 100));
-    }
-
-    private static DataGridViewTextBoxColumn CrearColumna(
-        string nombre,
-        string encabezado,
-        float peso)
-    {
-        return new DataGridViewTextBoxColumn
+        try
         {
-            Name = nombre,
-            HeaderText = encabezado,
-            DataPropertyName = nombre switch
-            {
-                "colCodigo" => nameof(ReporteFila.Codigo),
-                "colFecha" => nameof(ReporteFila.FechaTexto),
-                "colDescripcion" => nameof(ReporteFila.Descripcion),
-                "colResponsable" => nameof(ReporteFila.Responsable),
-                "colEstadoReporte" => nameof(ReporteFila.Estado),
-                _ => nameof(ReporteFila.Valor)
-            },
-            FillWeight = peso,
-            ReadOnly = true
-        };
-    }
-
-    private void ConectarEventosAdicionales()
-    {
-        btnNuevoUsuario.Click += BtnVerDetalle_Click;
-        button2.Click += BtnLimpiar_Click;
-        button1.Click += BtnImprimir_Click;
-        txtBuscar.TextChanged += Filtro_Cambio;
-        cboEstado.SelectedIndexChanged += Filtro_Cambio;
-        dgvUsuarios.SelectionChanged += DgvReportes_SelectionChanged;
-        dgvUsuarios.CellDoubleClick += DgvReportes_CellDoubleClick;
-        pnlCabecera.Resize += (_, _) => ReubicarBotonDetalle();
-    }
-
-    private void ReubicarBotonDetalle()
-    {
-        btnNuevoUsuario.Location = new Point(
-            Math.Max(20, pnlCabecera.ClientSize.Width - btnNuevoUsuario.Width - 20),
-            18);
-    }
-
-    private string ObtenerRolActual()
-    {
-        return _sesionUsuario.UsuarioActual?.Rol?.Nombre?.Trim()
-            ?? "Administrador";
-    }
-
-    private void CargarTiposSegunRol()
-    {
-        _configurando = true;
-
-        string rol = ObtenerRolActual();
-        string rolNormalizado = rol.ToLowerInvariant();
-
-        tipo_reporte.Items.Clear();
-
-        if (rolNormalizado.Contains("técnico")
-            || rolNormalizado.Contains("tecnico"))
-        {
-            tipo_reporte.Items.AddRange(
-            [
-                "Atenciones asignadas",
-                "Diagnósticos realizados",
-                "Presupuestos confeccionados",
-                "Trabajos pendientes y finalizados"
-            ]);
+            OperacionEnCurso = true; pnlFiltros.Enabled = flpAcciones.Enabled = false;
+            _configurando = true; dtpHasta.MaxDate = dtpDesde.MaxDate = DateTime.Today;
+            dtpDesde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1); dtpHasta.Value = DateTime.Today;
+            cboTipo.DisplayMember = "Nombre"; cboTipo.ValueMember = "Tipo";
+            cboEstado.Items.Add("Todos"); cboEstado.SelectedIndex = 0;
+            cboTipo.DataSource = (await _servicio.ListarTiposAsync()).Select(t => new Opcion(t, ReporteServicio.Nombre(t))).ToList();
         }
-        else if (rolNormalizado.Contains("administrativo"))
-        {
-            tipo_reporte.Items.AddRange(
-            [
-                "Comprobantes y pagos",
-                "Atenciones registradas",
-                "Entregas de vehículos",
-                "Clientes y vehículos atendidos"
-            ]);
-        }
-        else
-        {
-            tipo_reporte.Items.AddRange(
-            [
-                "Ingresos y pagos por período",
-                "Atenciones por estado",
-                "Rendimiento de técnicos",
-                "Servicios más realizados",
-                "Presupuestos aprobados y rechazados"
-            ]);
-        }
-
-        lblDescripcion.Text =
-            $"Consulta y generación simulada de reportes · Rol: {rol}";
-
-        tipo_reporte.SelectedIndex = tipo_reporte.Items.Count > 0 ? 0 : -1;
-        _configurando = false;
-
-        ConfigurarEstadosSegunTipo();
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Reportes"); }
+        finally { _configurando = false; OperacionEnCurso = false; pnlFiltros.Enabled = flpAcciones.Enabled = true; ConfigurarPeriodo(); Invalidar(); }
     }
-
-    private void ConfigurarEstadosSegunTipo()
+    private sealed record Opcion(TipoReporte Tipo, string Nombre);
+    private void ConfigurarPeriodo()
     {
-        string tipo = tipo_reporte.SelectedItem?.ToString() ?? string.Empty;
-        string seleccionado = cboEstado.SelectedItem?.ToString() ?? "Todos";
-
-        _configurando = true;
-        cboEstado.Items.Clear();
-        cboEstado.Items.Add("Todos");
-
-        if (tipo.Contains("pago", StringComparison.OrdinalIgnoreCase)
-            || tipo.Contains("presupuesto", StringComparison.OrdinalIgnoreCase)
-            || tipo.Contains("ingreso", StringComparison.OrdinalIgnoreCase))
-        {
-            cboEstado.Items.AddRange(["Pagado", "Pendiente", "Aprobado", "Rechazado"]);
-        }
-        else
-        {
-            cboEstado.Items.AddRange(["Pendiente", "En proceso", "Finalizada"]);
-        }
-
-        int indice = cboEstado.Items.IndexOf(seleccionado);
-        cboEstado.SelectedIndex = indice >= 0 ? indice : 0;
-        _configurando = false;
+        bool periodo = (cboTipo.SelectedItem as Opcion)?.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica);
+        dtpDesde.Enabled = dtpHasta.Enabled = periodo;
+        lblMetodo.Text = periodo ? "El período utiliza la fecha del registro indicada en cada reporte. Presione Generar para consultar." : "Situación actual completa, incluyendo registros antiguos. Este reporte no utiliza filtro de fechas.";
     }
-
-    private void CargarReporteInicial()
+    private void Invalidar()
     {
-        if (tipo_reporte.SelectedItem is null)
-            return;
-
-        _resultados.Clear();
-        _resultados.AddRange(
-            CrearResultadosSimulados(tipo_reporte.SelectedItem.ToString()!));
-
-        AplicarFiltros();
+        if (_configurando) return;
+        _documento = null; dgvDetalle.DataSource = null; txtResumen.Clear(); pnlGrafico.Invalidate();
+        btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = false; lblCantidad.Text = "Configure los filtros y genere el documento.";
     }
-
-    private bool ValidarFechas()
+    private void Filtro_Cambio(object? sender, EventArgs e) => Invalidar();
+    private void CboTipo_SelectedIndexChanged(object? sender, EventArgs e)
     {
-        if (desde.Value.Date <= hasta.Value.Date)
-            return true;
-
-        MessageBox.Show(
-            "La fecha desde no puede ser mayor que la fecha hasta.",
-            "Período inválido",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Warning);
-
-        desde.Focus();
-        return false;
+        if (_configurando) return;
+        _configurando = true; cboEstado.Items.Clear(); cboEstado.Items.Add("Todos"); cboEstado.SelectedIndex = 0; _configurando = false;
+        ConfigurarPeriodo(); Invalidar();
     }
-
-    private void GenerarReporte()
+    private async void BtnGenerar_Click(object? sender, EventArgs e)
     {
-        if (!ValidarFechas())
-            return;
-
-        if (tipo_reporte.SelectedItem is null)
+        if (OperacionEnCurso || cboTipo.SelectedItem is not Opcion opcion) return;
+        try
         {
-            MessageBox.Show(
-                "Seleccione el tipo de reporte que desea generar.",
-                "Tipo de reporte requerido",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-            return;
+            OperacionEnCurso = true; pnlFiltros.Enabled = false; flpAcciones.Enabled = false; Cursor = Cursors.WaitCursor;
+            _documento = await _servicio.GenerarAsync(new SolicitudReporteDto { Tipo = opcion.Tipo, Desde = dtpDesde.Value.Date, Hasta = dtpHasta.Value.Date, Busqueda = txtBuscar.Text, Estado = cboEstado.SelectedItem?.ToString() ?? "Todos" });
+            // Actualiza opciones sin cambiar el filtro elegido ni regenerar con parámetros distintos.
+            _configurando = true; string estado = cboEstado.SelectedItem?.ToString() ?? "Todos";
+            if (estado == "Todos") { cboEstado.Items.Clear(); cboEstado.Items.Add("Todos"); foreach (var valor in _documento.Registros.Select(x => ReporteServicio.Legible(x.Estado)).Distinct().Order()) cboEstado.Items.Add(valor); cboEstado.SelectedIndex = 0; }
+            _configurando = false;
+            dgvDetalle.DataSource = _documento.Registros.Select(x => new { x.Codigo, Atencion = x.IdAtencion, x.Fecha, x.Descripcion, x.Responsable, Estado = ReporteServicio.Legible(x.Estado), x.Cantidad, x.Importe, x.ImporteAceptado }).ToList();
+            dgvDetalle.ClearSelection();
+            txtResumen.Text = string.Join("   |   ", _documento.Indicadores.Select(x => x.Nombre + ": " + x.Valor)) + Environment.NewLine + _documento.Recomendacion + Environment.NewLine + _documento.Metodologia;
+            lblMetodo.Text = _documento.Alcance + " · " + _documento.Filtros;
+            lblCantidad.Text = $"{_documento.Registros.Count} registros · generado {_documento.Generado:dd/MM/yyyy HH:mm:ss} · gráfico en {_documento.UnidadGrafico}";
+            btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = true; pnlGrafico.Invalidate();
         }
-
-        string tipo = tipo_reporte.SelectedItem.ToString()!;
-        _resultados.Clear();
-
-        _resultados.AddRange(CrearResultadosSimulados(tipo));
-        AplicarFiltros();
-
-        MessageBox.Show(
-            $"Se generó el reporte \"{tipo}\" con datos demostrativos.",
-            "Reporte generado",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        catch (Exception ex) { _configurando = false; Invalidar(); MessageBox.Show(this, ex.Message, "Generar reporte", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+        finally { _configurando = false; OperacionEnCurso = false; pnlFiltros.Enabled = flpAcciones.Enabled = true; Cursor = Cursors.Default; ConfigurarControlesPeriodo(); }
     }
-
-    private IEnumerable<ReporteFila> CrearResultadosSimulados(string tipo)
+    private void ConfigurarControlesPeriodo() { bool p = (cboTipo.SelectedItem as Opcion)?.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica); dtpDesde.Enabled = dtpHasta.Enabled = p; }
+    private void PnlGrafico_Paint(object? sender, PaintEventArgs e)
     {
-        DateTime fechaBase = hasta.Value.Date;
-
-        if (tipo.Contains("pago", StringComparison.OrdinalIgnoreCase)
-            || tipo.Contains("ingreso", StringComparison.OrdinalIgnoreCase))
-        {
-            return
-            [
-                new("R-001", fechaBase.AddDays(-8), "Pago de reparación integral",
-                    "María López", "Pagado", "$ 185.000"),
-                new("R-002", fechaBase.AddDays(-5), "Seña de presupuesto",
-                    "Carlos Ruiz", "Pendiente", "$ 48.500"),
-                new("R-003", fechaBase.AddDays(-2), "Pago de mantenimiento",
-                    "Laura Gómez", "Pagado", "$ 72.300")
-            ];
-        }
-
-        if (tipo.Contains("presupuesto", StringComparison.OrdinalIgnoreCase))
-        {
-            return
-            [
-                new("P-031", fechaBase.AddDays(-10), "Reparación de tren delantero",
-                    "Téc. Martín Silva", "Aprobado", "$ 210.000"),
-                new("P-034", fechaBase.AddDays(-6), "Cambio de distribución",
-                    "Téc. Ana Torres", "Pendiente", "$ 165.000"),
-                new("P-038", fechaBase.AddDays(-1), "Reparación eléctrica",
-                    "Téc. Martín Silva", "Rechazado", "$ 94.500")
-            ];
-        }
-
-        if (tipo.Contains("diagnóstico", StringComparison.OrdinalIgnoreCase))
-        {
-            return
-            [
-                new("D-018", fechaBase.AddDays(-7), "Falla en sistema de encendido",
-                    "Téc. Ana Torres", "Finalizada", "1 diagnóstico"),
-                new("D-021", fechaBase.AddDays(-4), "Ruido en tren delantero",
-                    "Téc. Martín Silva", "Finalizada", "1 diagnóstico"),
-                new("D-024", fechaBase.AddDays(-1), "Pérdida de refrigerante",
-                    "Téc. Ana Torres", "En proceso", "1 diagnóstico")
-            ];
-        }
-
-        return
-        [
-            new("A-104", fechaBase.AddDays(-9), $"{tipo}: mantenimiento general",
-                "Téc. Martín Silva", "Finalizada", "3 servicios"),
-            new("A-108", fechaBase.AddDays(-5), $"{tipo}: revisión de frenos",
-                "Téc. Ana Torres", "En proceso", "2 servicios"),
-            new("A-112", fechaBase.AddDays(-2), $"{tipo}: falla de arranque",
-                "Sin asignar", "Pendiente", "1 servicio")
-        ];
+        if (_documento is { } d) GraficoReporte.Dibujar(e.Graphics, Rectangle.Inflate(pnlGrafico.ClientRectangle, -12, -8), d);
     }
-
-    private void AplicarFiltros()
-    {
-        if (_configurando)
-            return;
-
-        string busqueda = txtBuscar.Text.Trim();
-        string estado = cboEstado.SelectedItem?.ToString() ?? "Todos";
-
-        IEnumerable<ReporteFila> consulta = _resultados.Where(fila =>
-            fila.Fecha.Date >= desde.Value.Date
-            && fila.Fecha.Date <= hasta.Value.Date);
-
-        if (!string.IsNullOrWhiteSpace(busqueda))
-        {
-            consulta = consulta.Where(fila =>
-                fila.Codigo.Contains(busqueda, StringComparison.OrdinalIgnoreCase)
-                || fila.Descripcion.Contains(busqueda, StringComparison.OrdinalIgnoreCase)
-                || fila.Responsable.Contains(busqueda, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (estado != "Todos")
-        {
-            consulta = consulta.Where(fila =>
-                fila.Estado.Equals(estado, StringComparison.OrdinalIgnoreCase));
-        }
-
-        List<ReporteFila> visibles = consulta.ToList();
-
-        dgvUsuarios.DataSource = null;
-        dgvUsuarios.DataSource = visibles;
-        dgvUsuarios.ClearSelection();
-        dgvUsuarios.CurrentCell = null;
-
-        lblCantidad.Text = visibles.Count == 1
-            ? "1 resultado encontrado"
-            : $"{visibles.Count} resultados encontrados";
-
-        ActualizarEstadoAcciones();
-    }
-
-    private ReporteFila? ObtenerFilaSeleccionada()
-    {
-        return dgvUsuarios.SelectedRows.Count == 1
-            ? dgvUsuarios.SelectedRows[0].DataBoundItem as ReporteFila
-            : null;
-    }
-
-    private void ActualizarEstadoAcciones()
-    {
-        bool hayResultados = dgvUsuarios.Rows.Count > 0;
-
-        btnNuevoUsuario.Enabled = ObtenerFilaSeleccionada() is not null;
-        btn_actualizar.Enabled = hayResultados;
-        button1.Enabled = hayResultados;
-    }
-
-    private void BtnVerDetalle_Click(object? sender, EventArgs e)
-    {
-        ReporteFila? fila = ObtenerFilaSeleccionada();
-        if (fila is null)
-            return;
-
-        using var formulario = new FrmDetalleReporte(
-            tipo_reporte.SelectedItem?.ToString() ?? "Reporte",
-            ObtenerRolActual(),
-            desde.Value.Date,
-            hasta.Value.Date,
-            fila.Codigo,
-            fila.Descripcion,
-            fila.Responsable,
-            fila.Estado,
-            fila.Valor);
-
-        formulario.ShowDialog(this);
-    }
-
     private void BtnLimpiar_Click(object? sender, EventArgs e)
     {
-        _configurando = true;
-        txtBuscar.Clear();
-        desde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        hasta.Value = DateTime.Today;
-        cboEstado.SelectedIndex = cboEstado.Items.Count > 0 ? 0 : -1;
-        _resultados.Clear();
-        dgvUsuarios.DataSource = null;
-        lblCantidad.Text = "0 resultados encontrados";
-        _configurando = false;
-        ActualizarEstadoAcciones();
+        _configurando = true; txtBuscar.Clear(); cboEstado.SelectedIndex = cboEstado.Items.Count > 0 ? 0 : -1; dtpDesde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1); dtpHasta.Value = DateTime.Today; _configurando = false; ConfigurarPeriodo(); Invalidar();
     }
-
+    private void Exportar(bool csv)
+    {
+        if (_documento is not { } d) return;
+        using var guardar = new SaveFileDialog { Filter = csv ? "Detalle CSV (*.csv)|*.csv" : "Documento HTML con gráfico (*.html)|*.html", FileName = $"SGTM-{d.Generado:yyyyMMdd-HHmmss}.{(csv ? "csv" : "html")}", AddExtension = true };
+        if (guardar.ShowDialog(this) != DialogResult.OK) return;
+        try { File.WriteAllText(guardar.FileName, csv ? DocumentoReporteExportador.Csv(d) : DocumentoReporteExportador.Html(d), new UTF8Encoding(csv)); MessageBox.Show(this, "Archivo guardado correctamente.", "Exportar reporte"); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Exportar reporte", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+    }
+    private void BtnExportar_Click(object? sender, EventArgs e) => Exportar(false);
+    private void BtnCsv_Click(object? sender, EventArgs e) => Exportar(true);
     private void BtnImprimir_Click(object? sender, EventArgs e)
     {
-        MessageBox.Show(
-            "Se abrirá la vista de impresión cuando se implemente la generación real del reporte.",
-            "Impresión simulada",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        if (_documento is not { } d) return;
+        try { ImpresionReporte.Mostrar(this, d); } catch (Exception ex) { MessageBox.Show(this, ex.Message, "Imprimir reporte"); }
     }
-
-    private void btn_actualizar_Click(object sender, EventArgs e)
-    {
-        if (!ValidarFechas() || dgvUsuarios.Rows.Count == 0)
-            return;
-
-        MessageBox.Show(
-            "El reporte se exportará a PDF o Excel cuando se implemente la funcionalidad definitiva.",
-            "Exportación simulada",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-    }
-
-    private void btn_generar_Click(object sender, EventArgs e) => GenerarReporte();
-
-    private void tipo_reporte_SelectedIndexChanged(object? sender, EventArgs e)
-    {
-        if (_configurando)
-            return;
-
-        ConfigurarEstadosSegunTipo();
-        _resultados.Clear();
-        dgvUsuarios.DataSource = null;
-        lblCantidad.Text = "0 resultados encontrados";
-        ActualizarEstadoAcciones();
-    }
-
-    private void desde_ValueChanged(object sender, EventArgs e)
-    {
-        if (!_configurando && _resultados.Count > 0)
-            AplicarFiltros();
-    }
-
-    private void hasta_ValueChanged(object sender, EventArgs e)
-    {
-        if (!_configurando && _resultados.Count > 0)
-            AplicarFiltros();
-    }
-
-    private void Filtro_Cambio(object? sender, EventArgs e)
-    {
-        if (_resultados.Count > 0)
-            AplicarFiltros();
-    }
-
-    private void DgvReportes_SelectionChanged(object? sender, EventArgs e) =>
-        ActualizarEstadoAcciones();
-
-    private void DgvReportes_CellDoubleClick(
-        object? sender,
-        DataGridViewCellEventArgs e)
-    {
-        if (e.RowIndex >= 0)
-            BtnVerDetalle_Click(sender, EventArgs.Empty);
-    }
-
-    private void pnlFiltros_Paint(object sender, PaintEventArgs e)
-    {
-    }
-
-    private sealed class ReporteFila
-    {
-        public ReporteFila(
-            string codigo,
-            DateTime fecha,
-            string descripcion,
-            string responsable,
-            string estado,
-            string valor)
-        {
-            Codigo = codigo;
-            Fecha = fecha;
-            Descripcion = descripcion;
-            Responsable = responsable;
-            Estado = estado;
-            Valor = valor;
-        }
-
-        public string Codigo { get; }
-        public DateTime Fecha { get; }
-        public string FechaTexto => Fecha.ToString("dd/MM/yyyy");
-        public string Descripcion { get; }
-        public string Responsable { get; }
-        public string Estado { get; }
-        public string Valor { get; }
-    }
+    private void FrmReportes_FormClosing(object? sender, FormClosingEventArgs e) { if (OperacionEnCurso) e.Cancel = true; }
 }

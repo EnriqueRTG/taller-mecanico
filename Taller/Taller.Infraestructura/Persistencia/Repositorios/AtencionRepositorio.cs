@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Taller.Aplicacion.Abstracciones.Persistencia;
@@ -31,7 +31,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// <param name="contexto">
     /// Contexto de Entity Framework Core utilizado para acceder a la base de datos.
     /// </param>
-    public AtencionRepositorio(TallerDbContext 
+    public AtencionRepositorio(TallerDbContext
         contexto)
     {
         _contexto = contexto
@@ -426,6 +426,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         int idCliente)
     {
         return ConsultaConRelaciones()
+            .Include(a => a.Diagnosticos)
             .Where(a => a.IdCliente == idCliente)
             .OrderByDescending(a => a.FechaApertura)
             .ThenByDescending(a => a.IdAtencion)
@@ -446,6 +447,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         int idVehiculo)
     {
         return ConsultaConRelaciones()
+            .Include(a => a.Diagnosticos)
             .Where(a => a.IdVehiculo == idVehiculo)
             .OrderByDescending(a => a.FechaApertura)
             .ThenByDescending(a => a.IdAtencion)
@@ -525,11 +527,11 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     private static bool EsDuplicadoDeVehiculoActivo(
         DbUpdateException excepcion)
     {
-       return excepcion.InnerException is SqlException sqlEx &&
-            sqlEx.Errors.Cast<SqlError>().Any(error =>
-                (error.Number == 2601 || error.Number == 2627) &&
-                error.Message.Contains(
-                    IndiceVehiculoActivo, StringComparison.OrdinalIgnoreCase));
+        return excepcion.InnerException is SqlException sqlEx &&
+             sqlEx.Errors.Cast<SqlError>().Any(error =>
+                 (error.Number == 2601 || error.Number == 2627) &&
+                 error.Message.Contains(
+                     IndiceVehiculoActivo, StringComparison.OrdinalIgnoreCase));
     }
 
 

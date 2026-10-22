@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Clientes
+namespace Taller.Presentacion.Formularios.Clientes
 {
     partial class FrmClientes
     {
@@ -67,10 +67,11 @@
             pnlFiltros.SuspendLayout();
             pnlAccionesUsuario.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
+            _btnVerHistorial = new Button();
             SuspendLayout();
-            // 
+            //
             // tlpPrincipal
-            // 
+            //
             tlpPrincipal.ColumnCount = 1;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpPrincipal.Controls.Add(pnlGrilla, 0, 3);
@@ -90,9 +91,9 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
             tlpPrincipal.Size = new Size(652, 298);
             tlpPrincipal.TabIndex = 1;
-            // 
+            //
             // pnlGrilla
-            // 
+            //
             pnlGrilla.BackColor = Color.White;
             pnlGrilla.Controls.Add(dgvUsuarios);
             pnlGrilla.Dock = DockStyle.Fill;
@@ -102,9 +103,9 @@
             pnlGrilla.Padding = new Padding(1);
             pnlGrilla.Size = new Size(652, 109);
             pnlGrilla.TabIndex = 5;
-            // 
+            //
             // dgvUsuarios
-            // 
+            //
             dgvUsuarios.AllowUserToAddRows = false;
             dgvUsuarios.AllowUserToDeleteRows = false;
             dgvUsuarios.AllowUserToResizeColumns = false;
@@ -152,9 +153,9 @@
             dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvUsuarios.Size = new Size(650, 107);
             dgvUsuarios.TabIndex = 5;
-            // 
+            //
             // colId
-            // 
+            //
             colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colId.DataPropertyName = "Id";
             colId.HeaderText = "ID";
@@ -162,57 +163,57 @@
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 60;
-            // 
+            //
             // dni
-            // 
+            //
             dni.DataPropertyName = "dni";
             dni.FillWeight = 110F;
             dni.HeaderText = "Documento";
             dni.MinimumWidth = 6;
             dni.Name = "dni";
             dni.ReadOnly = true;
-            // 
+            //
             // tipo_documento
-            // 
+            //
             tipo_documento.DataPropertyName = "tipo_documento";
             tipo_documento.FillWeight = 110F;
             tipo_documento.HeaderText = "Tipo documento";
             tipo_documento.MinimumWidth = 6;
             tipo_documento.Name = "tipo_documento";
             tipo_documento.ReadOnly = true;
-            // 
+            //
             // colNombreCompleto
-            // 
+            //
             colNombreCompleto.DataPropertyName = "NombreCompleto";
             colNombreCompleto.FillWeight = 170F;
             colNombreCompleto.HeaderText = "Nombre completo";
             colNombreCompleto.MinimumWidth = 6;
             colNombreCompleto.Name = "colNombreCompleto";
             colNombreCompleto.ReadOnly = true;
-            // 
+            //
             // telefono
-            // 
+            //
             telefono.HeaderText = "Teléfono";
             telefono.MinimumWidth = 6;
             telefono.Name = "telefono";
             telefono.ReadOnly = true;
-            // 
+            //
             // mail
-            // 
+            //
             mail.HeaderText = "Email";
             mail.MinimumWidth = 6;
             mail.Name = "mail";
             mail.ReadOnly = true;
-            // 
+            //
             // direccion
-            // 
+            //
             direccion.HeaderText = "Dirección";
             direccion.MinimumWidth = 6;
             direccion.Name = "direccion";
             direccion.ReadOnly = true;
-            // 
+            //
             // colEstado
-            // 
+            //
             colEstado.DataPropertyName = "Estado";
             dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             colEstado.DefaultCellStyle = dataGridViewCellStyle3;
@@ -221,9 +222,9 @@
             colEstado.MinimumWidth = 6;
             colEstado.Name = "colEstado";
             colEstado.ReadOnly = true;
-            // 
+            //
             // colFechaAlta
-            // 
+            //
             colFechaAlta.DataPropertyName = "FechaAlta";
             dataGridViewCellStyle4.Format = "d";
             dataGridViewCellStyle4.NullValue = null;
@@ -233,9 +234,9 @@
             colFechaAlta.MinimumWidth = 6;
             colFechaAlta.Name = "colFechaAlta";
             colFechaAlta.ReadOnly = true;
-            // 
+            //
             // pnlCabecera
-            // 
+            //
             pnlCabecera.BackColor = Color.White;
             pnlCabecera.Controls.Add(nuevo);
             pnlCabecera.Controls.Add(lblDescripcion);
@@ -247,9 +248,9 @@
             pnlCabecera.Padding = new Padding(18, 9, 18, 8);
             pnlCabecera.Size = new Size(652, 54);
             pnlCabecera.TabIndex = 0;
-            // 
+            //
             // nuevo
-            // 
+            //
             nuevo.Anchor = AnchorStyles.Right;
             nuevo.BackColor = Color.FromArgb(30, 64, 175);
             nuevo.Cursor = Cursors.Hand;
@@ -266,9 +267,9 @@
             nuevo.TabIndex = 2;
             nuevo.Text = "＋ Nuevo cliente";
             nuevo.UseVisualStyleBackColor = false;
-            // 
+            //
             // lblDescripcion
-            // 
+            //
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.5F);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
@@ -277,9 +278,9 @@
             lblDescripcion.Size = new Size(302, 17);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Consulta y administración de los clientes del taller.";
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
@@ -288,9 +289,9 @@
             lblTitulo.Size = new Size(198, 30);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión de clientes";
-            // 
+            //
             // pnlFiltros
-            // 
+            //
             pnlFiltros.BackColor = Color.White;
             pnlFiltros.Controls.Add(btnActualizar);
             pnlFiltros.Controls.Add(cboEstado);
@@ -304,9 +305,9 @@
             pnlFiltros.Padding = new Padding(16, 8, 16, 8);
             pnlFiltros.Size = new Size(652, 49);
             pnlFiltros.TabIndex = 1;
-            // 
+            //
             // btnActualizar
-            // 
+            //
             btnActualizar.Cursor = Cursors.Hand;
             btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
             btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
@@ -321,9 +322,9 @@
             btnActualizar.TabIndex = 3;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
-            // 
+            //
             // cboEstado
-            // 
+            //
             cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cboEstado.FormattingEnabled = true;
@@ -332,9 +333,9 @@
             cboEstado.Name = "cboEstado";
             cboEstado.Size = new Size(127, 25);
             cboEstado.TabIndex = 2;
-            // 
+            //
             // lblEstado
-            // 
+            //
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
@@ -343,9 +344,9 @@
             lblEstado.Size = new Size(43, 15);
             lblEstado.TabIndex = 2;
             lblEstado.Text = "Estado";
-            // 
+            //
             // txtBuscar
-            // 
+            //
             txtBuscar.BorderStyle = BorderStyle.FixedSingle;
             txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtBuscar.Location = new Point(16, 22);
@@ -354,9 +355,9 @@
             txtBuscar.PlaceholderText = "Nombre, apellido o cliente";
             txtBuscar.Size = new Size(245, 25);
             txtBuscar.TabIndex = 1;
-            // 
+            //
             // lblBuscar
-            // 
+            //
             lblBuscar.AutoSize = true;
             lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
@@ -365,9 +366,9 @@
             lblBuscar.Size = new Size(44, 15);
             lblBuscar.TabIndex = 0;
             lblBuscar.Text = "Buscar";
-            // 
+            //
             // lblCantidad
-            // 
+            //
             lblCantidad.AutoSize = true;
             lblCantidad.Dock = DockStyle.Fill;
             lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
@@ -378,9 +379,9 @@
             lblCantidad.TabIndex = 4;
             lblCantidad.Text = "0 usuarios encontrados";
             lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // pnlAccionesUsuario
-            // 
+            //
             pnlAccionesUsuario.Controls.Add(flowLayoutPanel1);
             pnlAccionesUsuario.Dock = DockStyle.Fill;
             pnlAccionesUsuario.Location = new Point(0, 119);
@@ -389,9 +390,9 @@
             pnlAccionesUsuario.Padding = new Padding(16, 5, 16, 5);
             pnlAccionesUsuario.Size = new Size(652, 36);
             pnlAccionesUsuario.TabIndex = 6;
-            // 
+            //
             // flowLayoutPanel1
-            // 
+            //
             flowLayoutPanel1.BackColor = Color.White;
             flowLayoutPanel1.Controls.Add(btnEditarUsuario);
             flowLayoutPanel1.Controls.Add(btnCambiarEstado);
@@ -402,9 +403,9 @@
             flowLayoutPanel1.Size = new Size(620, 26);
             flowLayoutPanel1.TabIndex = 0;
             flowLayoutPanel1.WrapContents = false;
-            // 
+            //
             // btnEditarUsuario
-            // 
+            //
             btnEditarUsuario.Cursor = Cursors.Hand;
             btnEditarUsuario.Enabled = false;
             btnEditarUsuario.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
@@ -420,9 +421,9 @@
             btnEditarUsuario.TabIndex = 0;
             btnEditarUsuario.Text = "Editar datos";
             btnEditarUsuario.UseVisualStyleBackColor = false;
-            // 
+            //
             // btnCambiarEstado
-            // 
+            //
             btnCambiarEstado.Cursor = Cursors.Hand;
             btnCambiarEstado.Enabled = false;
             btnCambiarEstado.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
@@ -438,9 +439,9 @@
             btnCambiarEstado.TabIndex = 2;
             btnCambiarEstado.Text = "Deshabilitar usuario";
             btnCambiarEstado.UseVisualStyleBackColor = false;
-            // 
+            //
             // FrmClientes
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
@@ -461,11 +462,38 @@
             pnlFiltros.PerformLayout();
             pnlAccionesUsuario.ResumeLayout(false);
             flowLayoutPanel1.ResumeLayout(false);
+
+        _btnVerHistorial.Name = "btnVerHistorial";
+        _btnVerHistorial.Text = "Ver historial";
+        _btnVerHistorial.Size = new Size(112, 26);
+        _btnVerHistorial.Margin = new Padding(0, 0, 7, 0);
+        _btnVerHistorial.Cursor = Cursors.Hand;
+        _btnVerHistorial.Enabled = false;
+        _btnVerHistorial.FlatStyle = FlatStyle.Flat;
+        _btnVerHistorial.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        _btnVerHistorial.ForeColor = Color.FromArgb(30, 64, 175);
+        _btnVerHistorial.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+
+        flowLayoutPanel1.Controls.Add(_btnVerHistorial);
+        flowLayoutPanel1.Controls.SetChildIndex(_btnVerHistorial, 1);
+
+        nuevo.Click += BtnNuevoCliente_Click;
+        btnEditarUsuario.Click += BtnEditarCliente_Click;
+        _btnVerHistorial.Click += BtnVerHistorial_Click;
+        btnCambiarEstado.Click += BtnCambiarEstado_Click;
+        btnActualizar.Click += BtnActualizar_Click;
+        txtBuscar.TextChanged += Filtro_Cambio;
+        cboEstado.SelectedIndexChanged += Filtro_Cambio;
+        dgvUsuarios.SelectionChanged += DgvClientes_SelectionChanged;
+        dgvUsuarios.CellDoubleClick += DgvClientes_CellDoubleClick;
+        dgvUsuarios.CellFormatting += DgvClientes_CellFormatting;
+            Load += Formulario_Load;
             ResumeLayout(false);
         }
 
         #endregion
 
+        private Button _btnVerHistorial;
         private TableLayoutPanel tlpPrincipal;
         private Panel pnlGrilla;
         private DataGridView dgvUsuarios;

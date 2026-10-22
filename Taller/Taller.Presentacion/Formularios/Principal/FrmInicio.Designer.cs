@@ -1,100 +1,35 @@
-﻿namespace Taller.Presentacion.Formularios.Principal
+#nullable enable
+namespace Taller.Presentacion.Formularios.Principal;
+partial class FrmInicio
 {
-    partial class FrmInicio
+    private System.ComponentModel.IContainer? components;
+    protected override void Dispose(bool disposing) { if (disposing) components?.Dispose(); base.Dispose(disposing); }
+    private void InitializeComponent()
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            lblBienvenida = new Label();
-            lblDescripcionInicio = new Label();
-            lblRolActual = new Label();
-            SuspendLayout();
-            // 
-            // lblBienvenida
-            // 
-            lblBienvenida.AutoSize = true;
-            lblBienvenida.BackColor = Color.Transparent;
-            lblBienvenida.ImageAlign = ContentAlignment.MiddleRight;
-            lblBienvenida.Location = new Point(32, 30);
-            lblBienvenida.Margin = new Padding(7, 0, 7, 0);
-            lblBienvenida.Name = "lblBienvenida";
-            lblBienvenida.Size = new Size(172, 40);
-            lblBienvenida.TabIndex = 0;
-            lblBienvenida.Text = "Bienvenido";
-            // 
-            // lblDescripcionInicio
-            // 
-            lblDescripcionInicio.AutoSize = true;
-            lblDescripcionInicio.BackColor = Color.Transparent;
-            lblDescripcionInicio.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblDescripcionInicio.ForeColor = Color.FromArgb(100, 116, 139);
-            lblDescripcionInicio.Location = new Point(35, 78);
-            lblDescripcionInicio.Name = "lblDescripcionInicio";
-            lblDescripcionInicio.Size = new Size(291, 17);
-            lblDescripcionInicio.TabIndex = 1;
-            lblDescripcionInicio.Text = "Seleccione una opción del menú para comenzar.";
-            // 
-            // lblRolActual
-            // 
-            lblRolActual.AutoSize = true;
-            lblRolActual.BackColor = Color.Transparent;
-            lblRolActual.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblRolActual.ForeColor = Color.FromArgb(46, 125, 222);
-            lblRolActual.Location = new Point(35, 108);
-            lblRolActual.Name = "lblRolActual";
-            lblRolActual.Size = new Size(61, 15);
-            lblRolActual.TabIndex = 2;
-            lblRolActual.Text = "Rol actual";
-            // 
-            // FrmInicio
-            // 
-            AutoScaleDimensions = new SizeF(17F, 40F);
-            AutoScaleMode = AutoScaleMode.Font;
-            AutoScroll = true;
-            AutoSize = true;
-            BackColor = Color.FromArgb(244, 247, 251);
-            ClientSize = new Size(1924, 1061);
-            Controls.Add(lblRolActual);
-            Controls.Add(lblDescripcionInicio);
-            Controls.Add(lblBienvenida);
-            Font = new Font("Segoe UI", 21.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            ForeColor = Color.FromArgb(23, 32, 51);
-            FormBorderStyle = FormBorderStyle.None;
-            Location = new Point(32, 30);
-            Margin = new Padding(7);
-            Name = "FrmInicio";
-            Text = "Inicio";
-            ResumeLayout(false);
-            PerformLayout();
-        }
-
-        #endregion
-
-        private Label lblBienvenida;
-        private Label lblDescripcionInicio;
-        private Label lblRolActual;
+        components=new System.ComponentModel.Container();
+        tlpPrincipal=new TableLayoutPanel(); lblBienvenida=new Label(); lblDescripcion=new Label(); txtIndicadores=new TextBox(); dgvActividad=new DataGridView(); lblEstado=new Label(); btnActualizar=new Button();
+        tlpPrincipal.Name="tlpPrincipal"; lblBienvenida.Name="lblBienvenida"; lblDescripcion.Name="lblDescripcion"; txtIndicadores.Name="txtIndicadores"; dgvActividad.Name="dgvActividad"; lblEstado.Name="lblEstado"; btnActualizar.Name="btnActualizar";
+        SuspendLayout(); AutoScaleDimensions=new SizeF(7F,15F); AutoScaleMode=AutoScaleMode.Font; Font=new Font("Segoe UI",9F); ClientSize=new Size(1020,620); MinimumSize=new Size(760,480); BackColor=Color.FromArgb(244,247,251); Text="Inicio";
+        tlpPrincipal.Dock=DockStyle.Fill; tlpPrincipal.Padding=new Padding(16); tlpPrincipal.ColumnCount=1; tlpPrincipal.RowCount=6; tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,42)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,42)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,170)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent,100)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,42)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,40));
+        Controls.Add(tlpPrincipal); tlpPrincipal.Controls.Add(lblBienvenida,0,0); tlpPrincipal.Controls.Add(lblDescripcion,0,1); tlpPrincipal.Controls.Add(txtIndicadores,0,2); tlpPrincipal.Controls.Add(dgvActividad,0,3); tlpPrincipal.Controls.Add(lblEstado,0,4); tlpPrincipal.Controls.Add(btnActualizar,0,5);
+        lblBienvenida.Dock=DockStyle.Fill; lblBienvenida.Font=new Font("Segoe UI",18,FontStyle.Bold); lblBienvenida.Text="Bienvenido";
+        lblDescripcion.Dock=DockStyle.Fill; lblDescripcion.Text="Resumen de datos reales según su rol. Últimos 20 registros de las consultas resumidas, según su fecha de referencia.";
+        txtIndicadores.Dock=DockStyle.Fill; txtIndicadores.Multiline=true; txtIndicadores.ReadOnly=true; txtIndicadores.ScrollBars=ScrollBars.Vertical; txtIndicadores.BackColor=Color.White;
+        dgvActividad.Dock=DockStyle.Fill; dgvActividad.AutoGenerateColumns=false; dgvActividad.ReadOnly=true; dgvActividad.AllowUserToAddRows=false; dgvActividad.AllowUserToDeleteRows=false; dgvActividad.AllowUserToResizeColumns=true; dgvActividad.RowHeadersVisible=false; dgvActividad.BackgroundColor=Color.White; dgvActividad.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;
+        colFecha=new DataGridViewTextBoxColumn { Name="colFecha",DataPropertyName="Fecha",HeaderText="Fecha",MinimumWidth=110,FillWeight=100 }; colFecha.DefaultCellStyle.Format="dd/MM/yyyy HH:mm";
+        colCodigo=new DataGridViewTextBoxColumn { Name="colCodigo",DataPropertyName="Codigo",HeaderText="Código",MinimumWidth=65,FillWeight=70 };
+        colReporte=new DataGridViewTextBoxColumn { Name="colReporte",DataPropertyName="Reporte",HeaderText="Consulta",MinimumWidth=100,FillWeight=150 };
+        colDescripcion=new DataGridViewTextBoxColumn { Name="colDescripcion",DataPropertyName="Descripcion",HeaderText="Descripción",MinimumWidth=180,FillWeight=280 };
+        colEstado=new DataGridViewTextBoxColumn { Name="colEstado",DataPropertyName="Estado",HeaderText="Estado / acción",MinimumWidth=100,FillWeight=120 };
+        dgvActividad.Columns.AddRange([colFecha,colCodigo,colReporte,colDescripcion,colEstado]);
+        lblEstado.Dock=DockStyle.Fill; btnActualizar.Text="Actualizar resumen"; btnActualizar.AutoSize=true; btnActualizar.Anchor=AnchorStyles.Left;
+        btnActualizar.Click+=BtnActualizar_Click; Load+=FrmInicio_Load; FormClosing+=FrmInicio_FormClosing; ResumeLayout(false);
     }
+    private TableLayoutPanel tlpPrincipal=null!;
+    private Label lblBienvenida=null!,lblDescripcion=null!,lblEstado=null!;
+    private TextBox txtIndicadores=null!;
+    private DataGridView dgvActividad=null!;
+    private DataGridViewTextBoxColumn colFecha=null!,colCodigo=null!,colReporte=null!,colDescripcion=null!,colEstado=null!;
+    private Button btnActualizar=null!;
 }

@@ -1,27 +1,21 @@
+using Taller.Aplicacion.Servicios;
+using Taller.Presentacion.Navegacion;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Taller.Presentacion.Formularios.Vehiculos;
 
 /// <summary>
-/// Simula la consulta y administración de vehículos y concentra
+/// Consulta y administra datos persistidos de vehículos y concentra
 /// la navegación hacia alta, edición e historial.
 /// </summary>
-public partial class FrmVehiculos : Form
+public partial class FrmVehiculos : Form, IFormularioConOperacion
 {
     private readonly IServiceProvider _proveedorServicios;
-    private readonly List<VehiculoFila> _vehiculos =
-    [
-        new(1, "AB345CD", "Honda Fit", 2020, "Gris", "Juan Pérez",
-            true, new DateTime(2025, 3, 12)),
-        new(2, "AC902LM", "Toyota Corolla", 2018, "Blanco", "Juan Pérez",
-            true, new DateTime(2025, 7, 9)),
-        new(3, "AA123BC", "Ford Fiesta", 2017, "Azul", "Laura Gómez",
-            false, new DateTime(2024, 10, 22)),
-        new(4, "AE778QP", "Volkswagen Amarok", 2022, "Negro", "Sofía Fernández",
-            true, new DateTime(2026, 1, 15))
-    ];
+    private readonly List<VehiculoFila> _vehiculos = [];
 
     private bool _configurando;
+    public bool OperacionEnCurso { get; private set; }
+    private VehiculoServicio Servicio => _proveedorServicios.GetRequiredService<VehiculoServicio>();
 
     public FrmVehiculos(IServiceProvider proveedorServicios)
     {
@@ -30,8 +24,24 @@ public partial class FrmVehiculos : Form
             ?? throw new ArgumentNullException(nameof(proveedorServicios));
 
         ConfigurarFormulario();
-        ConectarEventos();
-        AplicarFiltros();
+    }
+
+    private async void Formulario_Load(object? sender, EventArgs e) => await CargarAsync();
+
+    private async Task CargarAsync()
+    {
+        if (OperacionEnCurso) return;
+        try
+        {
+            OperacionEnCurso = true; Enabled = false;
+            var activos = await Servicio.ListarActivosAsync(); var inactivos = await Servicio.ListarInactivosAsync();
+            var atenciones = await _proveedorServicios.GetRequiredService<AtencionServicio>().ListarTodasAsync();
+            var clientes = atenciones.OrderByDescending(a => a.FechaApertura).GroupBy(a => a.IdVehiculo).ToDictionary(g => g.Key, g => g.First().Cliente.Apellido + ", " + g.First().Cliente.Nombre);
+            _vehiculos.Clear(); _vehiculos.AddRange(activos.Concat(inactivos).Select(v => new VehiculoFila(v.IdVehiculo, v.Dominio, v.Modelo.Marca.Nombre + " " + v.Modelo.Nombre, v.Anio, v.Color, clientes.GetValueOrDefault(v.IdVehiculo, "Sin atenciones"), v.Activo, v.FechaAlta)));
+            AplicarFiltros();
+        }
+        catch (Exception ex) { _vehiculos.Clear(); AplicarFiltros(); MessageBox.Show(this, ex.Message, "Cargar vehículos"); }
+        finally { OperacionEnCurso = false; Enabled = true; }
     }
 
     private void ConfigurarFormulario()
@@ -57,7 +67,7 @@ public partial class FrmVehiculos : Form
 
         label1.Text = "Consulta de vehículos y antecedentes asociados.";
         lblCantidad.Text = "0 vehículos encontrados";
-        txtBuscar.PlaceholderText = "Dominio, modelo o propietario";
+        txtBuscar.PlaceholderText = "Dominio, modelo o cliente de última atención";
 
         cboEstado.Items.Clear();
         cboEstado.Items.AddRange(["Todos", "Habilitados", "Deshabilitados"]);
@@ -66,19 +76,7 @@ public partial class FrmVehiculos : Form
         _configurando = false;
     }
 
-    private void ConectarEventos()
-    {
-        btnNuevoUsuario.Click += BtnNuevoVehiculo_Click;
-        btnEditarUsuario.Click += BtnEditarVehiculo_Click;
-        btnGestionarCredenciales.Click += BtnVerHistorial_Click;
-        btnCambiarEstado.Click += BtnCambiarEstado_Click;
-        btnActualizar.Click += BtnActualizar_Click;
-        txtBuscar.TextChanged += Filtro_Cambio;
-        cboEstado.SelectedIndexChanged += Filtro_Cambio;
-        dgvUsuarios.SelectionChanged += DgvVehiculos_SelectionChanged;
-        dgvUsuarios.CellDoubleClick += DgvVehiculos_CellDoubleClick;
-        dgvUsuarios.CellFormatting += DgvVehiculos_CellFormatting;
-    }
+
 
     private void AplicarFiltros()
     {
@@ -103,7 +101,7 @@ public partial class FrmVehiculos : Form
             _ => consulta
         };
 
-        List<VehiculoFila> resultado = consulta.ToList();
+        List<VehiculoFila> resultado = consulta.OrderByDescending(x => x.Activo).ThenByDescending(x => x.FechaAlta).ThenByDescending(x => x.Id).ToList();
 
         dgvUsuarios.DataSource = null;
         dgvUsuarios.DataSource = resultado;
@@ -143,15 +141,15 @@ public partial class FrmVehiculos : Form
         btnCambiarEstado.FlatAppearance.BorderColor = btnCambiarEstado.ForeColor;
     }
 
-    private void BtnNuevoVehiculo_Click(object? sender, EventArgs e)
+    private async void BtnNuevoVehiculo_Click(object? sender, EventArgs e)
     {
         using FrmAltaVehiculo formulario =
             _proveedorServicios.GetRequiredService<FrmAltaVehiculo>();
 
-        formulario.ShowDialog(this);
+        if (formulario.ShowDialog(this) == DialogResult.OK) await CargarAsync();
     }
 
-    private void BtnEditarVehiculo_Click(object? sender, EventArgs e)
+    private async void BtnEditarVehiculo_Click(object? sender, EventArgs e)
     {
         VehiculoFila? vehiculo = ObtenerSeleccionado();
         if (vehiculo is null)
@@ -173,7 +171,7 @@ public partial class FrmVehiculos : Form
             vehiculo.Activo,
             vehiculo.FechaAlta);
 
-        formulario.ShowDialog(this);
+        if (formulario.ShowDialog(this) == DialogResult.OK) await CargarAsync();
     }
 
     private void BtnVerHistorial_Click(object? sender, EventArgs e)
@@ -194,43 +192,18 @@ public partial class FrmVehiculos : Form
         formulario.ShowDialog(this);
     }
 
-    private void BtnCambiarEstado_Click(object? sender, EventArgs e)
+    private async void BtnCambiarEstado_Click(object? sender, EventArgs e)
     {
-        VehiculoFila? vehiculo = ObtenerSeleccionado();
-        if (vehiculo is null)
-            return;
-
-        string accion = vehiculo.Activo ? "deshabilitar" : "habilitar";
-
-        DialogResult respuesta = MessageBox.Show(
-            $"¿Está seguro de que desea {accion} el vehículo " +
-            $"\"{vehiculo.Dominio}\"?\n\n" +
-            "Esta operación es una simulación y no modificará la base de datos.",
-            "Confirmar cambio de estado",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button2);
-
-        if (respuesta != DialogResult.Yes)
-            return;
-
-        vehiculo.Activo = !vehiculo.Activo;
-        AplicarFiltros();
-
-        MessageBox.Show(
-            $"El vehículo fue {(vehiculo.Activo ? "habilitado" : "deshabilitado")} " +
-            "en la simulación.",
-            "Estado actualizado",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        var seleccionado = ObtenerSeleccionado(); if (seleccionado is null || OperacionEnCurso) return;
+        if (MessageBox.Show(this, "¿Confirma cambiar el estado del registro seleccionado?", "Cambiar estado", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        try { OperacionEnCurso = true; Enabled = false; if (seleccionado.Activo) await Servicio.DarDeBajaAsync(seleccionado.Id); else await Servicio.ReactivarAsync(seleccionado.Id); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Cambiar estado"); }
+        finally { OperacionEnCurso = false; Enabled = true; }
+        await CargarAsync();
     }
 
-    private void BtnActualizar_Click(object? sender, EventArgs e)
-    {
-        txtBuscar.Clear();
-        cboEstado.SelectedIndex = 0;
-        AplicarFiltros();
-    }
+    private async void BtnActualizar_Click(object? sender, EventArgs e)
+    { await CargarAsync(); }
 
     private void Filtro_Cambio(object? sender, EventArgs e) => AplicarFiltros();
 

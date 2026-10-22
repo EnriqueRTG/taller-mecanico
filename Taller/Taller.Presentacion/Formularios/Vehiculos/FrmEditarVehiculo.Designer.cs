@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Vehiculos
+namespace Taller.Presentacion.Formularios.Vehiculos
 {
     partial class FrmEditarVehiculo
     {
@@ -37,19 +37,19 @@
             lblTitulo = new Label();
             pnlDatos = new Panel();
             tlpDatos = new TableLayoutPanel();
-            textBox4 = new TextBox();
+            txtFechaAltaVehiculo = new TextBox();
             label1 = new Label();
-            textBox1 = new TextBox();
+            txtColor = new TextBox();
             lblId = new Label();
             lblNombreUsuario = new Label();
             txtId = new TextBox();
-            txtNombreUsuario = new TextBox();
-            txtFechaAlta = new TextBox();
-            txtEstado = new TextBox();
+            txtMarca = new TextBox();
+            txtModelo = new TextBox();
+            txtAnio = new TextBox();
             lblNombre = new Label();
             lblFechaAlta = new Label();
-            txtApellido = new TextBox();
-            textBox3 = new TextBox();
+            txtDominio = new TextBox();
+            txtEstadoVehiculo = new TextBox();
             lblApellido = new Label();
             lblEstado = new Label();
             lblRol = new Label();
@@ -61,9 +61,9 @@
             pnlDatos.SuspendLayout();
             tlpDatos.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // tlpPrincipal
-            // 
+            //
             tlpPrincipal.ColumnCount = 1;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpPrincipal.Controls.Add(flpAcciones, 0, 2);
@@ -79,9 +79,9 @@
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
             tlpPrincipal.Size = new Size(544, 526);
             tlpPrincipal.TabIndex = 1;
-            // 
+            //
             // flpAcciones
-            // 
+            //
             flpAcciones.Controls.Add(btnGuardar);
             flpAcciones.Controls.Add(btnCancelar);
             flpAcciones.Dock = DockStyle.Fill;
@@ -93,9 +93,9 @@
             flpAcciones.Size = new Size(488, 64);
             flpAcciones.TabIndex = 0;
             flpAcciones.WrapContents = false;
-            // 
+            //
             // btnGuardar
-            // 
+            //
             btnGuardar.BackColor = Color.FromArgb(30, 64, 175);
             btnGuardar.Cursor = Cursors.Hand;
             btnGuardar.FlatAppearance.BorderSize = 0;
@@ -111,9 +111,9 @@
             btnGuardar.TabIndex = 3;
             btnGuardar.Text = "Guardar cambios";
             btnGuardar.UseVisualStyleBackColor = false;
-            // 
+            //
             // btnCancelar
-            // 
+            //
             btnCancelar.BackColor = Color.White;
             btnCancelar.Cursor = Cursors.Hand;
             btnCancelar.DialogResult = DialogResult.Cancel;
@@ -130,9 +130,9 @@
             btnCancelar.TabIndex = 4;
             btnCancelar.Text = "Cancelar";
             btnCancelar.UseVisualStyleBackColor = false;
-            // 
+            //
             // pnlCabecera
-            // 
+            //
             pnlCabecera.Controls.Add(lblDescripcion);
             pnlCabecera.Controls.Add(lblTitulo);
             pnlCabecera.Dock = DockStyle.Fill;
@@ -141,9 +141,9 @@
             pnlCabecera.Name = "pnlCabecera";
             pnlCabecera.Size = new Size(488, 61);
             pnlCabecera.TabIndex = 0;
-            // 
+            //
             // lblDescripcion
-            // 
+            //
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.5F);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
@@ -152,9 +152,9 @@
             lblDescripcion.Size = new Size(260, 17);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Modifique los datos del vehículo asignado.";
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 17.25F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
@@ -163,9 +163,9 @@
             lblTitulo.Size = new Size(174, 31);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Editar vehículo";
-            // 
+            //
             // pnlDatos
-            // 
+            //
             pnlDatos.BackColor = Color.White;
             pnlDatos.Controls.Add(tlpDatos);
             pnlDatos.Dock = DockStyle.Fill;
@@ -175,25 +175,25 @@
             pnlDatos.Padding = new Padding(2);
             pnlDatos.Size = new Size(488, 357);
             pnlDatos.TabIndex = 1;
-            // 
+            //
             // tlpDatos
-            // 
+            //
             tlpDatos.ColumnCount = 2;
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tlpDatos.Controls.Add(textBox4, 1, 5);
+            tlpDatos.Controls.Add(txtFechaAltaVehiculo, 1, 5);
             tlpDatos.Controls.Add(label1, 0, 3);
-            tlpDatos.Controls.Add(textBox1, 1, 4);
+            tlpDatos.Controls.Add(txtColor, 1, 4);
             tlpDatos.Controls.Add(lblId, 0, 0);
             tlpDatos.Controls.Add(lblNombreUsuario, 0, 1);
             tlpDatos.Controls.Add(txtId, 1, 0);
-            tlpDatos.Controls.Add(txtNombreUsuario, 1, 1);
-            tlpDatos.Controls.Add(txtFechaAlta, 1, 2);
-            tlpDatos.Controls.Add(txtEstado, 1, 3);
+            tlpDatos.Controls.Add(txtMarca, 1, 1);
+            tlpDatos.Controls.Add(txtModelo, 1, 2);
+            tlpDatos.Controls.Add(txtAnio, 1, 3);
             tlpDatos.Controls.Add(lblNombre, 0, 2);
             tlpDatos.Controls.Add(lblFechaAlta, 0, 5);
-            tlpDatos.Controls.Add(txtApellido, 1, 7);
-            tlpDatos.Controls.Add(textBox3, 1, 6);
+            tlpDatos.Controls.Add(txtDominio, 1, 7);
+            tlpDatos.Controls.Add(txtEstadoVehiculo, 1, 6);
             tlpDatos.Controls.Add(lblApellido, 0, 7);
             tlpDatos.Controls.Add(lblEstado, 0, 6);
             tlpDatos.Controls.Add(lblRol, 0, 4);
@@ -215,24 +215,24 @@
             tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 37F));
             tlpDatos.Size = new Size(484, 353);
             tlpDatos.TabIndex = 0;
-            // 
-            // textBox4
-            // 
-            textBox4.Anchor = AnchorStyles.Left;
-            textBox4.BackColor = Color.FromArgb(241, 245, 249);
-            textBox4.BorderStyle = BorderStyle.FixedSingle;
-            textBox4.Font = new Font("Segoe UI", 9.75F);
-            textBox4.ForeColor = Color.FromArgb(71, 85, 105);
-            textBox4.Location = new Point(150, 193);
-            textBox4.Margin = new Padding(0, 8, 0, 8);
-            textBox4.Name = "textBox4";
-            textBox4.ReadOnly = true;
-            textBox4.Size = new Size(320, 25);
-            textBox4.TabIndex = 16;
-            textBox4.TabStop = false;
-            // 
+            //
+            // txtFechaAltaVehiculo
+            //
+            txtFechaAltaVehiculo.Anchor = AnchorStyles.Left;
+            txtFechaAltaVehiculo.BackColor = Color.FromArgb(241, 245, 249);
+            txtFechaAltaVehiculo.BorderStyle = BorderStyle.FixedSingle;
+            txtFechaAltaVehiculo.Font = new Font("Segoe UI", 9.75F);
+            txtFechaAltaVehiculo.ForeColor = Color.FromArgb(71, 85, 105);
+            txtFechaAltaVehiculo.Location = new Point(150, 193);
+            txtFechaAltaVehiculo.Margin = new Padding(0, 8, 0, 8);
+            txtFechaAltaVehiculo.Name = "txtFechaAltaVehiculo";
+            txtFechaAltaVehiculo.ReadOnly = true;
+            txtFechaAltaVehiculo.Size = new Size(320, 25);
+            txtFechaAltaVehiculo.TabIndex = 16;
+            txtFechaAltaVehiculo.TabStop = false;
+            //
             // label1
-            // 
+            //
             label1.Anchor = AnchorStyles.Left;
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -244,24 +244,24 @@
             label1.TabIndex = 14;
             label1.Text = "Año:";
             label1.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // textBox1
-            // 
-            textBox1.Anchor = AnchorStyles.Left;
-            textBox1.BackColor = Color.FromArgb(241, 245, 249);
-            textBox1.BorderStyle = BorderStyle.FixedSingle;
-            textBox1.Font = new Font("Segoe UI", 9.75F);
-            textBox1.ForeColor = Color.FromArgb(71, 85, 105);
-            textBox1.Location = new Point(150, 156);
-            textBox1.Margin = new Padding(0, 8, 0, 8);
-            textBox1.Name = "textBox1";
-            textBox1.ReadOnly = true;
-            textBox1.Size = new Size(320, 25);
-            textBox1.TabIndex = 11;
-            textBox1.TabStop = false;
-            // 
+            //
+            // txtColor
+            //
+            txtColor.Anchor = AnchorStyles.Left;
+            txtColor.BackColor = Color.FromArgb(241, 245, 249);
+            txtColor.BorderStyle = BorderStyle.FixedSingle;
+            txtColor.Font = new Font("Segoe UI", 9.75F);
+            txtColor.ForeColor = Color.FromArgb(71, 85, 105);
+            txtColor.Location = new Point(150, 156);
+            txtColor.Margin = new Padding(0, 8, 0, 8);
+            txtColor.Name = "txtColor";
+            txtColor.ReadOnly = true;
+            txtColor.Size = new Size(320, 25);
+            txtColor.TabIndex = 11;
+            txtColor.TabStop = false;
+            //
             // lblId
-            // 
+            //
             lblId.Anchor = AnchorStyles.Left;
             lblId.AutoSize = true;
             lblId.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -273,9 +273,9 @@
             lblId.TabIndex = 0;
             lblId.Text = "ID:";
             lblId.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblNombreUsuario
-            // 
+            //
             lblNombreUsuario.Anchor = AnchorStyles.Left;
             lblNombreUsuario.AutoSize = true;
             lblNombreUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -287,9 +287,9 @@
             lblNombreUsuario.TabIndex = 1;
             lblNombreUsuario.Text = "Marca:";
             lblNombreUsuario.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // txtId
-            // 
+            //
             txtId.Anchor = AnchorStyles.Left;
             txtId.BackColor = Color.FromArgb(241, 245, 249);
             txtId.BorderStyle = BorderStyle.FixedSingle;
@@ -302,54 +302,54 @@
             txtId.Size = new Size(320, 25);
             txtId.TabIndex = 7;
             txtId.TabStop = false;
-            // 
-            // txtNombreUsuario
-            // 
-            txtNombreUsuario.Anchor = AnchorStyles.Left;
-            txtNombreUsuario.BackColor = Color.FromArgb(241, 245, 249);
-            txtNombreUsuario.BorderStyle = BorderStyle.FixedSingle;
-            txtNombreUsuario.Font = new Font("Segoe UI", 9.75F);
-            txtNombreUsuario.ForeColor = Color.FromArgb(71, 85, 105);
-            txtNombreUsuario.Location = new Point(150, 45);
-            txtNombreUsuario.Margin = new Padding(0, 8, 0, 8);
-            txtNombreUsuario.Name = "txtNombreUsuario";
-            txtNombreUsuario.ReadOnly = true;
-            txtNombreUsuario.Size = new Size(320, 25);
-            txtNombreUsuario.TabIndex = 8;
-            txtNombreUsuario.TabStop = false;
-            // 
-            // txtFechaAlta
-            // 
-            txtFechaAlta.Anchor = AnchorStyles.Left;
-            txtFechaAlta.BackColor = Color.FromArgb(241, 245, 249);
-            txtFechaAlta.BorderStyle = BorderStyle.FixedSingle;
-            txtFechaAlta.Font = new Font("Segoe UI", 9.75F);
-            txtFechaAlta.ForeColor = Color.FromArgb(71, 85, 105);
-            txtFechaAlta.Location = new Point(150, 82);
-            txtFechaAlta.Margin = new Padding(0, 8, 0, 8);
-            txtFechaAlta.Name = "txtFechaAlta";
-            txtFechaAlta.ReadOnly = true;
-            txtFechaAlta.Size = new Size(320, 25);
-            txtFechaAlta.TabIndex = 9;
-            txtFechaAlta.TabStop = false;
-            // 
-            // txtEstado
-            // 
-            txtEstado.Anchor = AnchorStyles.Left;
-            txtEstado.BackColor = Color.FromArgb(241, 245, 249);
-            txtEstado.BorderStyle = BorderStyle.FixedSingle;
-            txtEstado.Font = new Font("Segoe UI", 9.75F);
-            txtEstado.ForeColor = Color.FromArgb(71, 85, 105);
-            txtEstado.Location = new Point(150, 119);
-            txtEstado.Margin = new Padding(0, 8, 0, 8);
-            txtEstado.Name = "txtEstado";
-            txtEstado.ReadOnly = true;
-            txtEstado.Size = new Size(320, 25);
-            txtEstado.TabIndex = 10;
-            txtEstado.TabStop = false;
-            // 
+            //
+            // txtMarca
+            //
+            txtMarca.Anchor = AnchorStyles.Left;
+            txtMarca.BackColor = Color.FromArgb(241, 245, 249);
+            txtMarca.BorderStyle = BorderStyle.FixedSingle;
+            txtMarca.Font = new Font("Segoe UI", 9.75F);
+            txtMarca.ForeColor = Color.FromArgb(71, 85, 105);
+            txtMarca.Location = new Point(150, 45);
+            txtMarca.Margin = new Padding(0, 8, 0, 8);
+            txtMarca.Name = "txtMarca";
+            txtMarca.ReadOnly = true;
+            txtMarca.Size = new Size(320, 25);
+            txtMarca.TabIndex = 8;
+            txtMarca.TabStop = false;
+            //
+            // txtModelo
+            //
+            txtModelo.Anchor = AnchorStyles.Left;
+            txtModelo.BackColor = Color.FromArgb(241, 245, 249);
+            txtModelo.BorderStyle = BorderStyle.FixedSingle;
+            txtModelo.Font = new Font("Segoe UI", 9.75F);
+            txtModelo.ForeColor = Color.FromArgb(71, 85, 105);
+            txtModelo.Location = new Point(150, 82);
+            txtModelo.Margin = new Padding(0, 8, 0, 8);
+            txtModelo.Name = "txtModelo";
+            txtModelo.ReadOnly = true;
+            txtModelo.Size = new Size(320, 25);
+            txtModelo.TabIndex = 9;
+            txtModelo.TabStop = false;
+            //
+            // txtAnio
+            //
+            txtAnio.Anchor = AnchorStyles.Left;
+            txtAnio.BackColor = Color.FromArgb(241, 245, 249);
+            txtAnio.BorderStyle = BorderStyle.FixedSingle;
+            txtAnio.Font = new Font("Segoe UI", 9.75F);
+            txtAnio.ForeColor = Color.FromArgb(71, 85, 105);
+            txtAnio.Location = new Point(150, 119);
+            txtAnio.Margin = new Padding(0, 8, 0, 8);
+            txtAnio.Name = "txtAnio";
+            txtAnio.ReadOnly = true;
+            txtAnio.Size = new Size(320, 25);
+            txtAnio.TabIndex = 10;
+            txtAnio.TabStop = false;
+            //
             // lblNombre
-            // 
+            //
             lblNombre.Anchor = AnchorStyles.Left;
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -361,9 +361,9 @@
             lblNombre.TabIndex = 4;
             lblNombre.Text = "Modelo:";
             lblNombre.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblFechaAlta
-            // 
+            //
             lblFechaAlta.Anchor = AnchorStyles.Left;
             lblFechaAlta.AutoSize = true;
             lblFechaAlta.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -375,39 +375,39 @@
             lblFechaAlta.TabIndex = 2;
             lblFechaAlta.Text = "Fecha de alta:";
             lblFechaAlta.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // txtApellido
-            // 
-            txtApellido.Anchor = AnchorStyles.Left;
-            txtApellido.BackColor = Color.White;
-            txtApellido.BorderStyle = BorderStyle.FixedSingle;
-            txtApellido.Font = new Font("Segoe UI", 9.75F);
-            txtApellido.ForeColor = Color.FromArgb(51, 65, 85);
-            txtApellido.Location = new Point(150, 267);
-            txtApellido.Margin = new Padding(0, 8, 0, 8);
-            txtApellido.MaxLength = 100;
-            txtApellido.Name = "txtApellido";
-            txtApellido.PlaceholderText = "Dominio";
-            txtApellido.Size = new Size(320, 25);
-            txtApellido.TabIndex = 1;
-            // 
-            // textBox3
-            // 
-            textBox3.Anchor = AnchorStyles.Left;
-            textBox3.BackColor = Color.FromArgb(241, 245, 249);
-            textBox3.BorderStyle = BorderStyle.FixedSingle;
-            textBox3.Font = new Font("Segoe UI", 9.75F);
-            textBox3.ForeColor = Color.FromArgb(71, 85, 105);
-            textBox3.Location = new Point(150, 230);
-            textBox3.Margin = new Padding(0, 8, 0, 8);
-            textBox3.Name = "textBox3";
-            textBox3.ReadOnly = true;
-            textBox3.Size = new Size(320, 25);
-            textBox3.TabIndex = 13;
-            textBox3.TabStop = false;
-            // 
+            //
+            // txtDominio
+            //
+            txtDominio.Anchor = AnchorStyles.Left;
+            txtDominio.BackColor = Color.White;
+            txtDominio.BorderStyle = BorderStyle.FixedSingle;
+            txtDominio.Font = new Font("Segoe UI", 9.75F);
+            txtDominio.ForeColor = Color.FromArgb(51, 65, 85);
+            txtDominio.Location = new Point(150, 267);
+            txtDominio.Margin = new Padding(0, 8, 0, 8);
+            txtDominio.MaxLength = 100;
+            txtDominio.Name = "txtDominio";
+            txtDominio.PlaceholderText = "Dominio";
+            txtDominio.Size = new Size(320, 25);
+            txtDominio.TabIndex = 1;
+            //
+            // txtEstadoVehiculo
+            //
+            txtEstadoVehiculo.Anchor = AnchorStyles.Left;
+            txtEstadoVehiculo.BackColor = Color.FromArgb(241, 245, 249);
+            txtEstadoVehiculo.BorderStyle = BorderStyle.FixedSingle;
+            txtEstadoVehiculo.Font = new Font("Segoe UI", 9.75F);
+            txtEstadoVehiculo.ForeColor = Color.FromArgb(71, 85, 105);
+            txtEstadoVehiculo.Location = new Point(150, 230);
+            txtEstadoVehiculo.Margin = new Padding(0, 8, 0, 8);
+            txtEstadoVehiculo.Name = "txtEstadoVehiculo";
+            txtEstadoVehiculo.ReadOnly = true;
+            txtEstadoVehiculo.Size = new Size(320, 25);
+            txtEstadoVehiculo.TabIndex = 13;
+            txtEstadoVehiculo.TabStop = false;
+            //
             // lblApellido
-            // 
+            //
             lblApellido.Anchor = AnchorStyles.Left;
             lblApellido.AutoSize = true;
             lblApellido.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -419,9 +419,9 @@
             lblApellido.TabIndex = 5;
             lblApellido.Text = "Dominio:";
             lblApellido.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblEstado
-            // 
+            //
             lblEstado.Anchor = AnchorStyles.Left;
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -433,9 +433,9 @@
             lblEstado.TabIndex = 3;
             lblEstado.Text = "Estado:";
             lblEstado.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // lblRol
-            // 
+            //
             lblRol.Anchor = AnchorStyles.Left;
             lblRol.AutoSize = true;
             lblRol.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -447,9 +447,9 @@
             lblRol.TabIndex = 6;
             lblRol.Text = "Color:";
             lblRol.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // label2
-            // 
+            //
             label2.Anchor = AnchorStyles.Left;
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -461,9 +461,9 @@
             label2.TabIndex = 15;
             label2.Text = "Nombre del cliente:";
             label2.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // textBox2
-            // 
+            //
             textBox2.Anchor = AnchorStyles.Left;
             textBox2.BackColor = Color.White;
             textBox2.BorderStyle = BorderStyle.FixedSingle;
@@ -476,9 +476,9 @@
             textBox2.PlaceholderText = "Nombre del cliente";
             textBox2.Size = new Size(320, 25);
             textBox2.TabIndex = 12;
-            // 
+            //
             // FrmEditarVehiculo
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(544, 526);
@@ -493,6 +493,10 @@
             pnlDatos.ResumeLayout(false);
             tlpDatos.ResumeLayout(false);
             tlpDatos.PerformLayout();
+            btnGuardar.DialogResult=DialogResult.None;
+            btnGuardar.Click += BtnGuardar_Click;
+            btnCancelar.Click += BtnCancelar_Click;
+            FormClosing += Formulario_FormClosing;
             ResumeLayout(false);
         }
 
@@ -515,15 +519,15 @@
         private Label lblApellido;
         private Label lblRol;
         private TextBox txtId;
-        private TextBox txtNombreUsuario;
-        private TextBox txtFechaAlta;
-        private TextBox txtEstado;
-        private TextBox txtApellido;
-        private TextBox textBox1;
+        private TextBox txtMarca;
+        private TextBox txtModelo;
+        private TextBox txtAnio;
+        private TextBox txtDominio;
+        private TextBox txtColor;
         private TextBox textBox2;
-        private TextBox textBox4;
+        private TextBox txtFechaAltaVehiculo;
         private Label label2;
         private Label label1;
-        private TextBox textBox3;
+        private TextBox txtEstadoVehiculo;
     }
 }

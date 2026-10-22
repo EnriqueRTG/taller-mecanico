@@ -1,3 +1,4 @@
+#nullable enable
 namespace Taller.Presentacion.Formularios.Sistema;
 
 partial class FrmRespaldoRestauracion
@@ -132,12 +133,12 @@ partial class FrmRespaldoRestauracion
     private static void ConfigurarTexto(TextBox c) { c.Dock = DockStyle.Fill; c.Font = new Font("Segoe UI", 9.5F); c.Margin = new Padding(3, 4, 3, 7); }
     private static void ConfigurarColumna(DataGridViewColumn c, string texto, int ancho) { c.HeaderText = texto; c.Width = ancho; }
 
-    private TableLayoutPanel tlpPrincipal; private Panel pnlCabecera; private Label lblUltimoRespaldo; private Label lblDescripcion; private Label lblTitulo;
-    private TabControl tabOperaciones; private TabPage tabRespaldo; private TableLayoutPanel tlpRespaldo; private Label lblBaseDatosTitulo; private TextBox txtBaseDatos;
-    private Label lblCarpetaTitulo; private Panel pnlCarpeta; private Button btnExaminarCarpeta; private TextBox txtCarpeta; private Label lblNombreTitulo; private TextBox txtNombreArchivo;
-    private Label lblAyudaRespaldo; private Panel pnlAccionRespaldo; private Button btnCrearRespaldo; private TabPage tabRestauracion; private TableLayoutPanel tlpRestauracion;
-    private Label lblArchivoTitulo; private Panel pnlArchivo; private Button btnExaminarArchivo; private TextBox txtArchivoRestaurar; private Label lblDetalleArchivoTitulo; private Label lblDetalleArchivo;
-    private Panel pnlAdvertencia; private Label lblAdvertencia; private Panel pnlAccionRestauracion; private Button btnValidarArchivo; private Button btnRestaurar;
-    private Panel pnlHistorial; private DataGridView dgvHistorial; private DataGridViewTextBoxColumn colFecha; private DataGridViewTextBoxColumn colTipo; private DataGridViewTextBoxColumn colArchivo;
-    private DataGridViewTextBoxColumn colUsuario; private DataGridViewTextBoxColumn colResultado; private Label lblHistorial; private Panel pnlPie; private Label lblEstado;
+    private TableLayoutPanel tlpPrincipal = null!; private Panel pnlCabecera = null!; private Label lblUltimoRespaldo = null!; private Label lblDescripcion = null!; private Label lblTitulo = null!;
+    private TabControl tabOperaciones = null!; private TabPage tabRespaldo = null!; private TableLayoutPanel tlpRespaldo = null!; private Label lblBaseDatosTitulo = null!; private TextBox txtBaseDatos = null!;
+    private Label lblCarpetaTitulo = null!; private Panel pnlCarpeta = null!; private Button btnExaminarCarpeta = null!; private TextBox txtCarpeta = null!; private Label lblNombreTitulo = null!; private TextBox txtNombreArchivo = null!;
+    private Label lblAyudaRespaldo = null!; private Panel pnlAccionRespaldo = null!; private Button btnCrearRespaldo = null!; private TabPage tabRestauracion = null!; private TableLayoutPanel tlpRestauracion = null!;
+    private Label lblArchivoTitulo = null!; private Panel pnlArchivo = null!; private Button btnExaminarArchivo = null!; private TextBox txtArchivoRestaurar = null!; private Label lblDetalleArchivoTitulo = null!; private Label lblDetalleArchivo = null!;
+    private Panel pnlAdvertencia = null!; private Label lblAdvertencia = null!; private Panel pnlAccionRestauracion = null!; private Button btnValidarArchivo = null!; private Button btnRestaurar = null!;
+    private Panel pnlHistorial = null!; private DataGridView dgvHistorial = null!; private DataGridViewTextBoxColumn colFecha = null!; private DataGridViewTextBoxColumn colTipo = null!; private DataGridViewTextBoxColumn colArchivo = null!;
+    private DataGridViewTextBoxColumn colUsuario = null!; private DataGridViewTextBoxColumn colResultado = null!; private Label lblHistorial = null!; private Panel pnlPie = null!; private Label lblEstado = null!;
 }

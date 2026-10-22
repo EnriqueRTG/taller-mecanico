@@ -59,4 +59,4 @@ Las pruebas usan servicios y repositorios reales con EF InMemory para validar el
 
 El alcance no incluye anticipos antes de liquidar, financiación, crédito con vehículo entregado, integración fiscal, devolución bancaria ni presupuestos adicionales después de haber iniciado trabajos. No se modificaron las funciones de catálogo de otra rama.
 
-Los indicadores de ejemplo del panel Inicio y los reportes generales no fueron conectados a este circuito en esta entrega. Para verificar importes use las bandejas y documentos económicos reales descritos arriba.
+Inicio y Reportes fueron conectados a datos reales en la continuación documentada en [Reportes por rol](reportes-por-rol.md). Los importes presupuestados, realizados, liquidados y cobrados conservan significados distintos.

@@ -1,32 +1,21 @@
+using Taller.Aplicacion.Servicios;
+using Taller.Presentacion.Navegacion;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Taller.Presentacion.Formularios.Clientes;
 
 /// <summary>
-/// Simula la consulta y administración de clientes y concentra
+/// Consulta y administra datos persistidos de clientes y concentra
 /// la navegación hacia sus formularios relacionados.
 /// </summary>
-public partial class FrmClientes : Form
+public partial class FrmClientes : Form, IFormularioConOperacion
 {
     private readonly IServiceProvider _proveedorServicios;
-    private readonly List<ClienteFila> _clientes =
-    [
-        new(1, "DNI", "28456321", "Pérez, Juan", "3794-552211",
-            "juan.perez@email.com", "Av. Independencia 1240", true,
-            new DateTime(2025, 3, 12)),
-        new(2, "DNI", "33654789", "Gómez, Laura", "3794-610287",
-            "laura.gomez@email.com", "San Martín 845", true,
-            new DateTime(2025, 8, 7)),
-        new(3, "CUIT", "20-24875136-4", "Acosta, Miguel", "3794-448912",
-            "miguel.acosta@email.com", "Belgrano 230", false,
-            new DateTime(2024, 11, 19)),
-        new(4, "DNI", "40125874", "Fernández, Sofía", "3794-702144",
-            "sofia.fernandez@email.com", "Junín 1578", true,
-            new DateTime(2026, 2, 3))
-    ];
+    private readonly List<ClienteFila> _clientes = [];
 
-    private readonly Button _btnVerHistorial = new();
     private bool _configurando;
+    public bool OperacionEnCurso { get; private set; }
+    private ClienteServicio Servicio => _proveedorServicios.GetRequiredService<ClienteServicio>();
 
     public FrmClientes(IServiceProvider proveedorServicios)
     {
@@ -35,8 +24,22 @@ public partial class FrmClientes : Form
             ?? throw new ArgumentNullException(nameof(proveedorServicios));
 
         ConfigurarFormulario();
-        ConectarEventos();
-        AplicarFiltros();
+    }
+
+    private async void Formulario_Load(object? sender, EventArgs e) => await CargarAsync();
+
+    private async Task CargarAsync()
+    {
+        if (OperacionEnCurso) return;
+        try
+        {
+            OperacionEnCurso = true; Enabled = false;
+            var activos = await Servicio.ListarActivosAsync(); var inactivos = await Servicio.ListarInactivosAsync();
+            _clientes.Clear(); _clientes.AddRange(activos.Concat(inactivos).Select(c => new ClienteFila(c.IdCliente, c.TipoDocumento, c.Documento, c.Apellido + ", " + c.Nombre, c.Telefono ?? "", c.Email ?? "", c.Direccion ?? "", c.Activo, c.FechaAlta)));
+            AplicarFiltros();
+        }
+        catch (Exception ex) { _clientes.Clear(); AplicarFiltros(); MessageBox.Show(this, ex.Message, "Cargar clientes"); }
+        finally { OperacionEnCurso = false; Enabled = true; }
     }
 
     private void ConfigurarFormulario()
@@ -66,40 +69,12 @@ public partial class FrmClientes : Form
         btnEditarUsuario.Text = "Editar cliente";
         btnCambiarEstado.Text = "Deshabilitar cliente";
 
-        ConfigurarBotonHistorial();
         _configurando = false;
     }
 
-    private void ConfigurarBotonHistorial()
-    {
-        _btnVerHistorial.Name = "btnVerHistorial";
-        _btnVerHistorial.Text = "Ver historial";
-        _btnVerHistorial.Size = new Size(112, 26);
-        _btnVerHistorial.Margin = new Padding(0, 0, 7, 0);
-        _btnVerHistorial.Cursor = Cursors.Hand;
-        _btnVerHistorial.Enabled = false;
-        _btnVerHistorial.FlatStyle = FlatStyle.Flat;
-        _btnVerHistorial.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        _btnVerHistorial.ForeColor = Color.FromArgb(30, 64, 175);
-        _btnVerHistorial.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
 
-        flowLayoutPanel1.Controls.Add(_btnVerHistorial);
-        flowLayoutPanel1.Controls.SetChildIndex(_btnVerHistorial, 1);
-    }
 
-    private void ConectarEventos()
-    {
-        nuevo.Click += BtnNuevoCliente_Click;
-        btnEditarUsuario.Click += BtnEditarCliente_Click;
-        _btnVerHistorial.Click += BtnVerHistorial_Click;
-        btnCambiarEstado.Click += BtnCambiarEstado_Click;
-        btnActualizar.Click += BtnActualizar_Click;
-        txtBuscar.TextChanged += Filtro_Cambio;
-        cboEstado.SelectedIndexChanged += Filtro_Cambio;
-        dgvUsuarios.SelectionChanged += DgvClientes_SelectionChanged;
-        dgvUsuarios.CellDoubleClick += DgvClientes_CellDoubleClick;
-        dgvUsuarios.CellFormatting += DgvClientes_CellFormatting;
-    }
+
 
     private void AplicarFiltros()
     {
@@ -125,7 +100,7 @@ public partial class FrmClientes : Form
             _ => consulta
         };
 
-        List<ClienteFila> resultado = consulta.ToList();
+        List<ClienteFila> resultado = consulta.OrderByDescending(x => x.Activo).ThenByDescending(x => x.FechaAlta).ThenByDescending(x => x.Id).ToList();
 
         dgvUsuarios.DataSource = null;
         dgvUsuarios.DataSource = resultado;
@@ -165,15 +140,15 @@ public partial class FrmClientes : Form
         btnCambiarEstado.FlatAppearance.BorderColor = btnCambiarEstado.ForeColor;
     }
 
-    private void BtnNuevoCliente_Click(object? sender, EventArgs e)
+    private async void BtnNuevoCliente_Click(object? sender, EventArgs e)
     {
         using FrmAltaCliente formulario =
             _proveedorServicios.GetRequiredService<FrmAltaCliente>();
 
-        formulario.ShowDialog(this);
+        if (formulario.ShowDialog(this) == DialogResult.OK) await CargarAsync();
     }
 
-    private void BtnEditarCliente_Click(object? sender, EventArgs e)
+    private async void BtnEditarCliente_Click(object? sender, EventArgs e)
     {
         ClienteFila? cliente = ObtenerSeleccionado();
         if (cliente is null)
@@ -193,7 +168,7 @@ public partial class FrmClientes : Form
             cliente.Activo,
             cliente.FechaAlta);
 
-        formulario.ShowDialog(this);
+        if (formulario.ShowDialog(this) == DialogResult.OK) await CargarAsync();
     }
 
     private void BtnVerHistorial_Click(object? sender, EventArgs e)
@@ -203,48 +178,23 @@ public partial class FrmClientes : Form
             return;
 
         using FrmHistorialCliente formulario =
-            new(cliente.NombreCompleto, cliente.Documento);
+            new(cliente.Id, cliente.NombreCompleto, cliente.Documento, _proveedorServicios.GetRequiredService<AtencionServicio>());
 
         formulario.ShowDialog(this);
     }
 
-    private void BtnCambiarEstado_Click(object? sender, EventArgs e)
+    private async void BtnCambiarEstado_Click(object? sender, EventArgs e)
     {
-        ClienteFila? cliente = ObtenerSeleccionado();
-        if (cliente is null)
-            return;
-
-        string accion = cliente.Activo ? "deshabilitar" : "habilitar";
-
-        DialogResult respuesta = MessageBox.Show(
-            $"¿Está seguro de que desea {accion} al cliente " +
-            $"\"{cliente.NombreCompleto}\"?\n\n" +
-            "Esta operación es una simulación y no modificará la base de datos.",
-            "Confirmar cambio de estado",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button2);
-
-        if (respuesta != DialogResult.Yes)
-            return;
-
-        cliente.Activo = !cliente.Activo;
-        AplicarFiltros();
-
-        MessageBox.Show(
-            $"El cliente fue {(cliente.Activo ? "habilitado" : "deshabilitado")} " +
-            "en la simulación.",
-            "Estado actualizado",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        var seleccionado = ObtenerSeleccionado(); if (seleccionado is null || OperacionEnCurso) return;
+        if (MessageBox.Show(this, "¿Confirma cambiar el estado del registro seleccionado?", "Cambiar estado", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        try { OperacionEnCurso = true; Enabled = false; if (seleccionado.Activo) await Servicio.DarDeBajaAsync(seleccionado.Id); else await Servicio.ReactivarAsync(seleccionado.Id); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Cambiar estado"); }
+        finally { OperacionEnCurso = false; Enabled = true; }
+        await CargarAsync();
     }
 
-    private void BtnActualizar_Click(object? sender, EventArgs e)
-    {
-        txtBuscar.Clear();
-        cboEstado.SelectedIndex = 0;
-        AplicarFiltros();
-    }
+    private async void BtnActualizar_Click(object? sender, EventArgs e)
+    { await CargarAsync(); }
 
     private void Filtro_Cambio(object? sender, EventArgs e) => AplicarFiltros();
 

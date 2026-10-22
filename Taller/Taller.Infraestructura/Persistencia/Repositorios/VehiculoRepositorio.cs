@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Dominio.Entidades;
 
@@ -27,8 +27,10 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
     /// </summary>
     public async Task ActualizarAsync(Vehiculo vehiculo)
     {
-        _contexto.Vehiculos.Update(vehiculo);
-        await _contexto.SaveChangesAsync();
+        var entrada = _contexto.Entry(vehiculo);
+        entrada.State = EntityState.Modified;
+        try { await _contexto.SaveChangesAsync(); }
+        finally { entrada.State = EntityState.Detached; }
     }
 
     /// <summary>
@@ -36,8 +38,10 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
     /// </summary>
     public async Task AgregarAsync(Vehiculo vehiculo)
     {
-        await _contexto.Vehiculos.AddAsync(vehiculo);
-        await _contexto.SaveChangesAsync();
+        var entrada = _contexto.Entry(vehiculo);
+        entrada.State = EntityState.Added;
+        try { await _contexto.SaveChangesAsync(); }
+        finally { entrada.State = EntityState.Detached; }
     }
 
     /// <summary>
@@ -59,7 +63,7 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
     /// <returns>Lista de vehículos</returns>
     public async Task<List<Vehiculo>> ListarActivosAsync()
     {
-        return await _contexto.Vehiculos
+        return await _contexto.Vehiculos.AsNoTracking()
             .Include(v => v.Modelo)
             .ThenInclude(m => m.Marca)
             .Where(v => v.Activo)
@@ -73,7 +77,7 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
     /// <returns>Lista de vehículos</returns>
     public async Task<List<Vehiculo>> ListarInactivosAsync()
     {
-        return await _contexto.Vehiculos
+        return await _contexto.Vehiculos.AsNoTracking()
             .Include(v => v.Modelo)
             .ThenInclude(m => m.Marca)
             .Where(v => !v.Activo)
@@ -88,7 +92,7 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
     /// <returns>Vehículo o null si no se encuentra</returns>
     public async Task<Vehiculo?> ObtenerPorDominioAsync(string dominio)
     {
-        return await _contexto.Vehiculos
+        return await _contexto.Vehiculos.AsNoTracking()
             .Include(v => v.Modelo)
             .ThenInclude(m => m.Marca)
             .FirstOrDefaultAsync(v => v.Dominio == dominio);
@@ -101,7 +105,7 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
     /// <returns>Vehículo o null si no se encuentra</returns>
     public async Task<Vehiculo?> ObtenerPorIdAsync(int idVehiculo)
     {
-        return await _contexto.Vehiculos
+        return await _contexto.Vehiculos.AsNoTracking()
             .Include(v => v.Modelo)
             .ThenInclude(m => m.Marca)
             .FirstOrDefaultAsync(v => v.IdVehiculo == idVehiculo);

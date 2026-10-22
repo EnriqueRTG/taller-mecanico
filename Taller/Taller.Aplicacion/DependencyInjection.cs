@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Servicios;
 
@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<PresupuestoServicio>();
         services.AddScoped<EjecucionServicio>();
         services.AddScoped<CobroServicio>();
+        services.AddScoped<ReporteServicio>();
 
         return services;
     }

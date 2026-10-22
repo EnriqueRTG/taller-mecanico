@@ -296,26 +296,43 @@ public sealed class CircuitoCobrosPruebas
     public async Task MotivoLargoDeRevision_CabeEnLasColumnasConfiguradasSinTruncarse()
     {
         using var c = new Caso(); var p = await c.AceptarAsync(); p = await c.Presupuestos.ObtenerAsync(p.IdPresupuesto);
-        var motivo = new string('x',1000);
-        var id = await c.Presupuestos.SolicitarRevisionAsync(p.IdPresupuesto,p.Version,motivo);
-        var nuevo = await c.Db.Presupuestos.AsNoTracking().SingleAsync(x=>x.IdPresupuesto==id);
-        Assert.Equal(motivo,nuevo.MotivoRevision);
+        var motivo = new string('x', 1000);
+        var id = await c.Presupuestos.SolicitarRevisionAsync(p.IdPresupuesto, p.Version, motivo);
+        var nuevo = await c.Db.Presupuestos.AsNoTracking().SingleAsync(x => x.IdPresupuesto == id);
+        Assert.Equal(motivo, nuevo.MotivoRevision);
         var maximo = c.Db.Model.FindEntityType(typeof(Presupuesto))!.FindProperty(nameof(Presupuesto.Observaciones))!.GetMaxLength()!.Value;
-        Assert.True(nuevo.Observaciones!.Length<=maximo);
+        Assert.True(nuevo.Observaciones!.Length <= maximo);
         var limiteHistorial = c.Db.Model.FindEntityType(typeof(HistorialAtencion))!.FindProperty(nameof(HistorialAtencion.Observaciones))!.GetMaxLength()!.Value;
-        Assert.All(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(),x=>Assert.True((x.Observaciones?.Length??0)<=limiteHistorial));
+        Assert.All(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(), x => Assert.True((x.Observaciones?.Length ?? 0) <= limiteHistorial));
     }
     [Fact]
     public async Task MotivoLargoDeAnulacion_ConservaTextoCompletoEnPagoEHistorial()
     {
-        using var c = new Caso(); await c.AceptarAsync(); await c.EjecutarAsync(); var d=await c.LiquidarAsync();
-        var id = await c.Cobros.RegistrarPagoAsync(Caso.Pago(d,50)); await c.VersionesAsync();d=(await c.Cobros.ObtenerAsync(1)).Comprobante!;
-        var motivo = new string('y',1000);await c.Cobros.AnularPagoAsync(d.IdComprobante,id,d.Version,motivo);
-        Assert.Equal(motivo,(await c.Db.Pagos.AsNoTracking().SingleAsync()).MotivoAnulacion);
-        var evento=await c.Db.HistorialAtenciones.AsNoTracking().SingleAsync(h=>h.Accion=="PagoAnulado");
-        Assert.EndsWith(motivo,evento.Observaciones);
-        var limite=c.Db.Model.FindEntityType(typeof(HistorialAtencion))!.FindProperty(nameof(HistorialAtencion.Observaciones))!.GetMaxLength()!.Value;
-        Assert.True(evento.Observaciones!.Length<=limite);
+        using var c = new Caso(); await c.AceptarAsync(); await c.EjecutarAsync(); var d = await c.LiquidarAsync();
+        var id = await c.Cobros.RegistrarPagoAsync(Caso.Pago(d, 50)); await c.VersionesAsync(); d = (await c.Cobros.ObtenerAsync(1)).Comprobante!;
+        var motivo = new string('y', 1000); await c.Cobros.AnularPagoAsync(d.IdComprobante, id, d.Version, motivo);
+        Assert.Equal(motivo, (await c.Db.Pagos.AsNoTracking().SingleAsync()).MotivoAnulacion);
+        var evento = await c.Db.HistorialAtenciones.AsNoTracking().SingleAsync(h => h.Accion == "PagoAnulado");
+        Assert.EndsWith(motivo, evento.Observaciones);
+        var limite = c.Db.Model.FindEntityType(typeof(HistorialAtencion))!.FindProperty(nameof(HistorialAtencion.Observaciones))!.GetMaxLength()!.Value;
+        Assert.True(evento.Observaciones!.Length <= limite);
     }
 
+    [Fact]
+    public async Task CancelarApertura_ConservaMotivoYCierreSinIngresarAlCircuitoTecnico()
+    {
+        using var c = new Caso(); var a = await c.Db.Atenciones.AsNoTracking().SingleAsync();
+        await c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "El cliente desiste antes de ingresar");
+        var actual = await c.Db.Atenciones.AsNoTracking().SingleAsync(); Assert.Equal(EstadoAtencion.Cancelada, actual.Estado); Assert.NotNull(actual.FechaCierre);
+        Assert.Equal("AperturaCancelada", (await c.Db.HistorialAtenciones.AsNoTracking().SingleAsync()).Accion);
+    }
+    [Fact]
+    public async Task CancelarApertura_NoPermiteTecnicoNiVersionObsoletaNiServiciosAutorizados()
+    {
+        using var c = new Caso(); var a = await c.Db.Atenciones.AsNoTracking().SingleAsync(); c.Entrar(1);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "Motivo")); c.Entrar(2);
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, Enumerable.Repeat((byte)255, 8).ToArray(), "Motivo"));
+        await c.PropuestaAsync(servicioInicial: true); a = await c.Db.Atenciones.AsNoTracking().SingleAsync(); c.Entrar(2);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "Motivo")); Assert.NotEqual(EstadoAtencion.Cancelada, (await c.Db.Atenciones.AsNoTracking().SingleAsync()).Estado);
+    }
 }

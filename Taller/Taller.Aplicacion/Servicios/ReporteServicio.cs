@@ -1,3 +1,4 @@
+using Taller.Aplicacion.Seguridad;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Taller.Aplicacion.Abstracciones.Persistencia;
@@ -5,6 +6,7 @@ using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
+
 namespace Taller.Aplicacion.Servicios;
 /// <summary>Autoriza reportes por rol y construye un documento coherente con los mismos registros filtrados.</summary>
 public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioRepositorio usuarios, SesionUsuario sesion)
@@ -19,8 +21,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         TipoReporte.SaldosPendientes => "Saldos pendientes actuales",
         TipoReporte.ActividadTecnica => "Actividad técnica registrada",
         TipoReporte.ConceptosRealizados => "Conceptos realizados registrados",
-        _ => throw new ValidacionException("Tipo de reporte inválido.")
-    };
+        _ => throw new ValidacionException("Tipo de reporte inválido.")};
     public static string Legible(string valor) => Regex.Replace(valor, "([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])", "$1 $2");
     public static IReadOnlyList<TipoReporte> TiposParaRol(int rol) => rol switch
     {
@@ -32,21 +33,26 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
     private async Task<Usuario> ExigirUsuarioAsync()
     {
         var u = sesion.UsuarioActual is { } actual ? await usuarios.ObtenerPorIdAsync(actual.Id) : null;
-        if (u is null || !u.Activo || TiposParaRol(u.RolId).Count == 0) throw new ValidacionException("Se requiere una sesión activa autorizada para consultar reportes.");
+        if (!UsuarioAutorizado.EstaHabilitado(u) || TiposParaRol(u.RolId).Count == 0)
+            throw new ValidacionException("Se requiere una sesión activa autorizada para consultar reportes.");
         return u;
     }
+
     public async Task<IReadOnlyList<TipoReporte>> ListarTiposAsync() => TiposParaRol((await ExigirUsuarioAsync()).RolId);
     public async Task<ReporteDocumentoDto> GenerarAsync(SolicitudReporteDto solicitud)
     {
         ArgumentNullException.ThrowIfNull(solicitud);
         var usuario = await ExigirUsuarioAsync();
-        if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo)) throw new ValidacionException("Su rol no permite consultar este reporte.");
+        if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo))
+            throw new ValidacionException("Su rol no permite consultar este reporte.");
         var hoy = DateTime.Today;
         if (solicitud.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica) && (solicitud.Desde.Date > solicitud.Hasta.Date || solicitud.Hasta.Date > hoy || solicitud.Hasta.Year >= 9999))
             throw new ValidacionException("Seleccione un período válido, sin fechas futuras.");
-        if ((solicitud.Busqueda?.Length ?? 0) > 150) throw new ValidacionException("La búsqueda admite hasta 150 caracteres.");
+        if ((solicitud.Busqueda?.Length ?? 0) > 150)
+            throw new ValidacionException("La búsqueda admite hasta 150 caracteres.");
         int? tecnico = usuario.RolId == RolesSistema.TecnicoId ? usuario.Id : null;
-        var desde = solicitud.Desde.Date; var hasta = (solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? hoy : solicitud.Hasta.Date).AddDays(1);
+        var desde = solicitud.Desde.Date;
+        var hasta = (solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? hoy : solicitud.Hasta.Date).AddDays(1);
         var registros = solicitud.Tipo switch
         {
             TipoReporte.CargaTecnica => await reportes.ListarCargaAsync(tecnico),
@@ -56,17 +62,21 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             TipoReporte.SaldosPendientes => await reportes.ListarSaldosAsync(),
             TipoReporte.ActividadTecnica => await reportes.ListarActividadAsync(desde, hasta, tecnico),
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
-            _ => throw new ValidacionException("Tipo de reporte inválido.")
-        };
+            _ => throw new ValidacionException("Tipo de reporte inválido.")};
         string texto = (solicitud.Busqueda ?? "").Trim();
-        registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase))
-            && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado))
-            .OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
-        if (solicitud.Tipo == TipoReporte.SaldosPendientes) registros = registros.OrderBy(x => x.Fecha).ThenByDescending(x => x.Importe).ToList();
-        if (solicitud.Tipo == TipoReporte.CargaTecnica) registros = registros.OrderByDescending(x => x.Estado == "Reservada").ThenBy(x => x.Fecha).ToList();
-        var indicadores = new List<IndicadorReporteDto> { new("Registros", registros.Count.ToString(Cultura)), new("Atenciones distintas", registros.Select(x => x.IdAtencion).Distinct().Count().ToString(Cultura)) };
+        registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
+        if (solicitud.Tipo == TipoReporte.SaldosPendientes)
+            registros = registros.OrderBy(x => x.Fecha).ThenByDescending(x => x.Importe).ToList();
+        if (solicitud.Tipo == TipoReporte.CargaTecnica)
+            registros = registros.OrderByDescending(x => x.Estado == "Reservada").ThenBy(x => x.Fecha).ToList();
+        var indicadores = new List<IndicadorReporteDto>
+        {
+            new("Registros", registros.Count.ToString(Cultura)),
+            new("Atenciones distintas", registros.Select(x => x.IdAtencion).Distinct().Count().ToString(Cultura))
+        };
         bool monetario = solicitud.Tipo is TipoReporte.MovimientosCobro or TipoReporte.SaldosPendientes;
-        string metodologia; string recomendacion;
+        string metodologia;
+        string recomendacion;
         if (solicitud.Tipo == TipoReporte.MovimientosCobro)
         {
             decimal cobros = registros.Where(x => x.Estado == "Cobro").Sum(x => x.Importe ?? 0), anulaciones = -registros.Where(x => x.Estado == "Anulación").Sum(x => x.Importe ?? 0);
@@ -113,9 +123,10 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             metodologia = "Atenciones recibidas durante el período, agrupadas por su estado actual. No reconstruye el estado que tenían al cierre del período ni incluye aperturas anteriores. El importe no se infiere del motivo ni del estado.";
             recomendacion = "Revisar las atenciones activas de mayor antigüedad y los casos pendientes de decisión; ampliar el período para incluir aperturas anteriores.";
         }
-        var grafico = registros.GroupBy(x => Legible(x.Grupo)).Select(g => new PuntoReporteDto(g.Key, monetario ? g.Sum(x => x.Importe ?? 0) : g.Count()))
-            .OrderByDescending(x => Math.Abs(x.Valor)).ThenBy(x => x.Etiqueta).ToList();
-        if (grafico.Count > 8) grafico = grafico.Take(7).Append(new PuntoReporteDto("Otras categorías", grafico.Skip(7).Sum(x => x.Valor))).ToList();
+
+        var grafico = registros.GroupBy(x => Legible(x.Grupo)).Select(g => new PuntoReporteDto(g.Key, monetario ? g.Sum(x => x.Importe ?? 0) : g.Count())).OrderByDescending(x => Math.Abs(x.Valor)).ThenBy(x => x.Etiqueta).ToList();
+        if (grafico.Count > 8)
+            grafico = grafico.Take(7).Append(new PuntoReporteDto("Otras categorías", grafico.Skip(7).Sum(x => x.Valor))).ToList();
         return new ReporteDocumentoDto
         {
             Titulo = Nombre(solicitud.Tipo),
@@ -131,5 +142,6 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             Registros = registros
         };
     }
+
     private static string Dinero(decimal valor) => valor.ToString("N2", Cultura);
 }

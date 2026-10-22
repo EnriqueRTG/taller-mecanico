@@ -60,8 +60,16 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         }
         catch (Exception ex)
         {
-            lblEstado.Text = "Operación no completada: " + ex.Message;
-            MessageBox.Show(this, ex.Message, "Respaldos y recuperación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (ex is Microsoft.Data.SqlClient.SqlException or Microsoft.EntityFrameworkCore.DbUpdateException)
+            {
+                lblEstado.Text = "No se completó la operación SQL. Consulte la referencia de asistencia y el estado de control antes de repetir una recuperación.";
+                Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this,ex,"Respaldos y recuperación");
+            }
+            else
+            {
+                lblEstado.Text = "Operación no completada: " + ex.Message;
+                MessageBox.Show(this,ex.Message,"Respaldos y recuperación",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+            }
         }
         finally
         {

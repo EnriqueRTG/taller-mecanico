@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Clientes
+namespace Taller.Presentacion.Formularios.Clientes
 {
     partial class FrmAltaCliente
     {
@@ -6,7 +6,6 @@
         /// Variable necesaria para el diseñador.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
         /// <summary>
         /// Libera los recursos utilizados.
         /// </summary>
@@ -20,8 +19,7 @@
             base.Dispose(disposing);
         }
 
-        #region Código generado por el Diseñador de Windows Forms
-
+#region Código generado por el Diseñador de Windows Forms
         private void InitializeComponent()
         {
             tlpPrincipal = new TableLayoutPanel();
@@ -580,6 +578,7 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Registrar cliente";
+            FormClosing += Guardado_FormClosing;
             Load += FrmAltaCliente_Load;
             tlpPrincipal.ResumeLayout(false);
             pnlEncabezado.ResumeLayout(false);
@@ -600,8 +599,7 @@
             ResumeLayout(false);
         }
 
-        #endregion
-
+#endregion
         private TableLayoutPanel tlpPrincipal;
         private Panel pnlEncabezado;
         private Panel pnlContenido;

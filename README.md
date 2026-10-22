@@ -83,3 +83,5 @@ La fábrica de contexto utiliza la configuración local o `SGTM_CONN`. Los datos
 - [Instalar y operar respaldos y restauración](docs/respaldos-restauracion.md).
 
 Esta rama continúa los cambios de los PR #30 y #31. Las revisiones de reportes/respaldos no agregan migraciones de negocio; requieren las migraciones previas del circuito. Respaldos agrega una base de control instalada explícitamente mediante el agente, según su guía.
+
+La integración compatible de catálogo, clientes y vehículos se describe en [la guía de integración](docs/integracion-catalogo-maestros.md). Incluye la migración no destructiva de versiones de clientes/vehículos; no aplicar la migración `AjustarCatalogoActual` de la rama paralela sobre el circuito vigente.

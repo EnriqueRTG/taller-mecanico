@@ -1,3 +1,4 @@
+using Taller.Aplicacion.Seguridad;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Atenciones;
 using Taller.Aplicacion.Excepciones;
@@ -6,51 +7,32 @@ using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Aplicacion.Servicios;
-
 /// <summary>Coordina recepción, reserva, avances e informe/propuesta sin confundir autorización, ejecución y pago.</summary>
-public sealed class EvaluacionServicio(
-    IEvaluacionRepositorio repositorio,
-    IUsuarioRepositorio usuarios,
-    IUnidadDeTrabajo unidad,
-    SesionUsuario sesion)
+public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsuarioRepositorio usuarios, IUnidadDeTrabajo unidad, SesionUsuario sesion)
 {
     private async Task<Usuario> AutorizarAsync(bool tecnico = false, bool recepcion = false)
     {
         var id = sesion.UsuarioActual?.Id ?? throw new ValidacionException("Debe iniciar sesión.");
         var usuario = await usuarios.ObtenerPorIdAsync(id);
-        if (usuario is null || !usuario.Activo
-            || (tecnico && usuario.RolId != RolesSistema.TecnicoId)
-            || (recepcion && usuario.RolId != RolesSistema.AdministrativoId)
-            || (!tecnico && !recepcion && usuario.RolId != RolesSistema.TecnicoId && usuario.RolId != RolesSistema.AdministrativoId))
+        if (!UsuarioAutorizado.EstaHabilitado(usuario) || (tecnico && usuario.RolId != RolesSistema.TecnicoId) || (recepcion && usuario.RolId != RolesSistema.AdministrativoId) || (!tecnico && !recepcion && usuario.RolId != RolesSistema.TecnicoId && usuario.RolId != RolesSistema.AdministrativoId))
             throw new ValidacionException("No tiene permisos para esta operación.");
         return usuario;
     }
 
     private async Task<Atencion> AtencionAsync(int id)
     {
-        if (id <= 0) throw new ValidacionException("Seleccione una atención válida.");
+        if (id <= 0)
+            throw new ValidacionException("Seleccione una atención válida.");
         return await repositorio.ObtenerAtencionAsync(id) ?? throw new ValidacionException("La atención no existe.");
     }
 
     private static void VerificarActividad(Atencion a, Usuario u)
     {
-        if (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.FechaCierre is not null
-            || a.IdTecnicoEnActividad != u.Id || a.ActividadTecnica is not (ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto))
+        if (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.FechaCierre is not null || a.IdTecnicoEnActividad != u.Id || a.ActividadTecnica is not (ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto))
             throw new ValidacionException("La evaluación debe estar reservada por usted. Actualice el listado.");
     }
 
-    private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string texto) =>
-        repositorio.AgregarHistorial(new HistorialAtencion
-        {
-            IdAtencion = a.IdAtencion,
-            IdUsuario = u.Id,
-            Fecha = DateTime.Now,
-            Accion = accion,
-            EstadoAnterior = anterior,
-            EstadoNuevo = a.Estado,
-            Observaciones = texto
-        });
-
+    private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string texto) => repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = DateTime.Now, Accion = accion, EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = texto });
     public async Task EnviarAEvaluacionAsync(int id, TipoSolicitudAtencion tipo, byte[] version)
     {
         try
@@ -63,11 +45,13 @@ public sealed class EvaluacionServicio(
                 throw new ValidacionException("Solo puede enviar una atención abierta con una solicitud válida.");
             a.TipoSolicitud = tipo;
             a.Estado = EstadoAtencion.EnEvaluacionTecnica;
-            Evento(a, usuario, "EvaluacionSolicitada", EstadoAtencion.Abierta,
-                "Se solicita revisión técnica y preparación de propuesta. No autoriza tareas cobrables ni reparaciones.");
+            Evento(a, usuario, "EvaluacionSolicitada", EstadoAtencion.Abierta, "Se solicita revisión técnica y preparación de propuesta. No autoriza tareas cobrables ni reparaciones.");
             await unidad.GuardarCambiosAsync();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     /// <summary>Cancela una apertura antes del ingreso técnico; conserva el motivo y el historial.</summary>
@@ -79,16 +63,18 @@ public sealed class EvaluacionServicio(
             var a = await AtencionAsync(id);
             Seguridad.AutorizacionOperativa.Version(version, a.Version);
             motivo = Seguridad.AutorizacionOperativa.Texto(motivo);
-            if (a.Estado != EstadoAtencion.Abierta || a.IdTecnicoEnActividad != null || a.FechaCierre != null
-                || await repositorio.ObtenerAvanceAsync(id) != null || (await repositorio.ObtenerPresupuestosAsync(id)).Count > 0
-                || (await repositorio.ObtenerDiagnosticosAsync(id)).Count > 0)
+            if (a.Estado != EstadoAtencion.Abierta || a.IdTecnicoEnActividad != null || a.FechaCierre != null || await repositorio.ObtenerAvanceAsync(id) != null || (await repositorio.ObtenerPresupuestosAsync(id)).Count > 0 || (await repositorio.ObtenerDiagnosticosAsync(id)).Count > 0)
                 throw new ValidacionException("Solo puede cancelar una apertura sin ingreso, evaluación ni servicios autorizados. Los trabajos iniciados requieren resolver la actividad técnica y liquidar lo realizado.");
-            a.Estado = EstadoAtencion.Cancelada; a.FechaCierre = DateTime.Now;
+            a.Estado = EstadoAtencion.Cancelada;
+            a.FechaCierre = DateTime.Now;
             repositorio.PrepararVersion(a, version);
             Evento(a, usuario, "AperturaCancelada", EstadoAtencion.Abierta, motivo);
             await unidad.GuardarCambiosAsync();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     public async Task TomarAsync(int id)
@@ -103,7 +89,8 @@ public sealed class EvaluacionServicio(
                 throw new ValidacionException("La evaluación ya está finalizada.");
             if ((await repositorio.ObtenerPresupuestosAsync(id)).Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
                 throw new ValidacionException("La propuesta ya está preparada. Consúltela en Presupuestos.");
-            if (a.IdTecnicoEnActividad is not null) throw new ValidacionException("La actividad ya fue tomada. Actualice el listado.");
+            if (a.IdTecnicoEnActividad is not null)
+                throw new ValidacionException("La actividad ya fue tomada. Actualice el listado.");
             var anterior = a.Estado;
             a.Estado = EstadoAtencion.EnEvaluacionTecnica;
             a.IdTecnicoEnActividad = usuario.Id;
@@ -111,7 +98,10 @@ public sealed class EvaluacionServicio(
             Evento(a, usuario, "EvaluacionTomada", anterior, "El técnico tomó la evaluación y preparación de propuesta.");
             await unidad.GuardarCambiosAsync();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     public async Task LiberarAsync(int id)
@@ -126,13 +116,23 @@ public sealed class EvaluacionServicio(
             Evento(a, usuario, "EvaluacionLiberada", a.Estado, "Se liberó la actividad conservando todos los avances guardados.");
             await unidad.GuardarCambiosAsync();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     public async Task<List<EvaluacionBandejaDto>> ListarAsync()
     {
-        try { await AutorizarAsync(); return await repositorio.ListarAsync(); }
-        finally { unidad.DescartarCambios(); }
+        try
+        {
+            await AutorizarAsync();
+            return await repositorio.ListarAsync();
+        }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     public async Task<List<ConceptoPropuestaDto>> ListarCatalogoAsync()
@@ -140,17 +140,12 @@ public sealed class EvaluacionServicio(
         try
         {
             await AutorizarAsync(tecnico: true);
-            return (await repositorio.ListarCatalogoAsync()).Select(c => new ConceptoPropuestaDto
-            {
-                IdConcepto = c.IdConcepto,
-                Nombre = c.Nombre,
-                Categoria = c.Categoria.Nombre,
-                Descripcion = c.Descripcion,
-                Tipo = c.Tipo,
-                PrecioReferencia = c.PrecioReferencia
-            }).ToList();
+            return (await repositorio.ListarCatalogoAsync()).Select(c => new ConceptoPropuestaDto { IdConcepto = c.IdConcepto, Nombre = c.Nombre, Categoria = c.Categoria.Nombre, Descripcion = c.Descripcion, Tipo = c.Tipo, PrecioReferencia = c.PrecioReferencia }).ToList();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     public async Task<EvaluacionAtencionDto> ObtenerAsync(int id)
@@ -161,7 +156,8 @@ public sealed class EvaluacionServicio(
             var a = await AtencionAsync(id);
             VerificarActividad(a, usuario);
             var avance = await repositorio.ObtenerAvanceAsync(id);
-            if (avance?.Finalizada == true) throw new ValidacionException("La evaluación ya se finalizó.");
+            if (avance?.Finalizada == true)
+                throw new ValidacionException("La evaluación ya se finalizó.");
             var presupuestos = await repositorio.ObtenerPresupuestosAsync(id);
             var informe = (await repositorio.ObtenerDiagnosticosAsync(id)).FirstOrDefault(d => d.Tipo == TipoDiagnostico.Inicial);
             var borrador = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
@@ -182,19 +178,13 @@ public sealed class EvaluacionServicio(
                 Observaciones = avance?.Observaciones ?? informe?.Observaciones,
                 SoloEvaluacion = avance?.SoloEvaluacion ?? false,
                 Items = borrador?.Detalles.Select(d => new ItemPropuestaDto { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList() ?? [],
-                ServiciosIniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico && p.Estado == EstadoPresupuesto.Aceptado)
-                    .SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto
-                    {
-                        IdDetalle = d.IdPresupuestoDetalle,
-                        Descripcion = d.Descripcion,
-                        Cantidad = d.Cantidad,
-                        PrecioUnitario = d.PrecioUnitario,
-                        Estado = d.EstadoEjecucion,
-                        Observaciones = d.ObservacionesEjecucion
-                    }).ToList()
+                ServiciosIniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto { IdDetalle = d.IdPresupuestoDetalle, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList()
             };
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     /// <summary>Guarda un avance o finaliza el informe y la propuesta en una única transacción.</summary>
@@ -211,9 +201,13 @@ public sealed class EvaluacionServicio(
             if (datos.VersionAtencion is null || datos.VersionAtencion.Length != 8 || !datos.VersionAtencion.SequenceEqual(a.Version))
                 throw new ConflictoConcurrenciaException("La atención cambió. Cierre y vuelva a abrir la evaluación.");
             var avance = await repositorio.ObtenerAvanceAsync(a.IdAtencion);
-            if (avance?.Finalizada == true) throw new ValidacionException("La evaluación ya está finalizada.");
-            ValidarTexto(datos.FallaDetectada); ValidarTexto(datos.TrabajoRecomendado); ValidarTexto(datos.Observaciones);
-            if (datos.Kilometraje is < 0) throw new ValidacionException("El kilometraje no puede ser negativo.");
+            if (avance?.Finalizada == true)
+                throw new ValidacionException("La evaluación ya está finalizada.");
+            ValidarTexto(datos.FallaDetectada);
+            ValidarTexto(datos.TrabajoRecomendado);
+            ValidarTexto(datos.Observaciones);
+            if (datos.Kilometraje is < 0)
+                throw new ValidacionException("El kilometraje no puede ser negativo.");
             if (finalizar && a.TipoSolicitud != TipoSolicitudAtencion.ServicioDefinido && !datos.IncluyeDiagnostico)
                 throw new ValidacionException("Una solicitud por problema requiere registrar el resultado de la evaluación.");
             if (finalizar && datos.IncluyeDiagnostico && (string.IsNullOrWhiteSpace(datos.FallaDetectada) || string.IsNullOrWhiteSpace(datos.TrabajoRecomendado)))
@@ -226,29 +220,29 @@ public sealed class EvaluacionServicio(
             if (presupuestos.Any(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado != EstadoPresupuesto.Borrador))
                 throw new ValidacionException("Ya existe una propuesta confirmada. Su revisión requiere un nuevo circuito.");
             var catalogo = (await repositorio.ListarCatalogoAsync()).ToDictionary(c => c.IdConcepto);
-            if (datos.Items.GroupBy(i => i.IdConcepto).Any(g => g.Count() > 1)) throw new ValidacionException("No repita conceptos en la propuesta.");
+            if (datos.Items.GroupBy(i => i.IdConcepto).Any(g => g.Count() > 1))
+                throw new ValidacionException("No repita conceptos en la propuesta.");
             decimal total = 0;
             const decimal maximo = 9999999999999999.99m;
             foreach (var item in datos.Items)
             {
-                if (!catalogo.ContainsKey(item.IdConcepto)) throw new ValidacionException("Un concepto ya no está activo. Actualice el catálogo.");
+                if (!catalogo.ContainsKey(item.IdConcepto))
+                    throw new ValidacionException("Un concepto ya no está activo. Actualice el catálogo.");
                 if (string.IsNullOrWhiteSpace(item.Descripcion) || item.Descripcion.Trim().Length > 500)
                     throw new ValidacionException("Cada ítem requiere una descripción de hasta 500 caracteres.");
-                if (item.Cantidad <= 0 || item.Cantidad > 999999999999999.999m || decimal.Round(item.Cantidad, 3) != item.Cantidad
-                    || item.PrecioUnitario < 0 || item.PrecioUnitario > maximo || decimal.Round(item.PrecioUnitario, 2) != item.PrecioUnitario
-                    || item.PrecioUnitario > maximo / item.Cantidad)
+                if (item.Cantidad <= 0 || item.Cantidad > 999999999999999.999m || decimal.Round(item.Cantidad, 3) != item.Cantidad || item.PrecioUnitario < 0 || item.PrecioUnitario > maximo || decimal.Round(item.PrecioUnitario, 2) != item.PrecioUnitario || item.PrecioUnitario > maximo / item.Cantidad)
                     throw new ValidacionException("Revise cantidades y precios: hasta tres y dos decimales respectivamente.");
-                if (item.Subtotal > maximo - total) throw new ValidacionException("El total supera el importe permitido.");
+                if (item.Subtotal > maximo - total)
+                    throw new ValidacionException("El total supera el importe permitido.");
                 total += item.Subtotal;
             }
+
             var iniciales = presupuestos.Where(p => p.Tipo == TipoPresupuesto.Diagnostico).SelectMany(p => p.Detalles).ToList();
-            if (datos.ServiciosIniciales.Select(d => d.IdDetalle).Distinct().Count() != iniciales.Count
-                || datos.ServiciosIniciales.Count != iniciales.Count)
+            if (datos.ServiciosIniciales.Select(d => d.IdDetalle).Distinct().Count() != iniciales.Count || datos.ServiciosIniciales.Count != iniciales.Count)
                 throw new ValidacionException("Los servicios iniciales cambiaron. Vuelva a abrir la evaluación.");
             foreach (var registro in datos.ServiciosIniciales)
             {
-                var detalle = iniciales.SingleOrDefault(d => d.IdPresupuestoDetalle == registro.IdDetalle)
-                    ?? throw new ValidacionException("Servicio inicial inválido.");
+                var detalle = iniciales.SingleOrDefault(d => d.IdPresupuestoDetalle == registro.IdDetalle) ?? throw new ValidacionException("Servicio inicial inválido.");
                 if (registro.Estado != EstadoEjecucionDetalle.NoIniciado && registro.Estado != EstadoEjecucionDetalle.Completado && registro.Estado != EstadoEjecucionDetalle.Omitido)
                     throw new ValidacionException("Indique pendiente, completado u omitido para los servicios iniciales.");
                 if (detalle.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado && (detalle.EstadoEjecucion != registro.Estado || detalle.ObservacionesEjecucion != registro.Observaciones?.Trim()))
@@ -267,16 +261,25 @@ public sealed class EvaluacionServicio(
                     detalle.ObservacionesEjecucion = registro.Observaciones?.Trim();
                 }
             }
+
             if (avance is null)
             {
-                avance = new EvaluacionAtencion { IdAtencion = a.IdAtencion };
+                avance = new EvaluacionAtencion
+                {
+                    IdAtencion = a.IdAtencion
+                };
                 repositorio.AgregarAvance(avance);
             }
+
             avance.IncluyeDiagnostico = datos.IncluyeDiagnostico;
-            avance.FallaDetectada = (datos.FallaDetectada ?? "").Trim(); avance.TrabajoRecomendado = (datos.TrabajoRecomendado ?? "").Trim();
-            avance.Observaciones = datos.Observaciones?.Trim(); avance.Kilometraje = datos.Kilometraje;
-            avance.SoloEvaluacion = datos.SoloEvaluacion; avance.Finalizada = finalizar;
-            avance.IdTecnicoUltimaEdicion = usuario.Id; avance.FechaActualizacion = DateTime.Now;
+            avance.FallaDetectada = (datos.FallaDetectada ?? "").Trim();
+            avance.TrabajoRecomendado = (datos.TrabajoRecomendado ?? "").Trim();
+            avance.Observaciones = datos.Observaciones?.Trim();
+            avance.Kilometraje = datos.Kilometraje;
+            avance.SoloEvaluacion = datos.SoloEvaluacion;
+            avance.Finalizada = finalizar;
+            avance.IdTecnicoUltimaEdicion = usuario.Id;
+            avance.FechaActualizacion = DateTime.Now;
             var propuesta = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
             if (datos.Items.Count > 0 || propuesta is not null)
             {
@@ -292,21 +295,16 @@ public sealed class EvaluacionServicio(
                     };
                     repositorio.AgregarPresupuesto(propuesta);
                 }
-                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle
-                {
-                    IdConcepto = i.IdConcepto,
-                    Descripcion = i.Descripcion.Trim(),
-                    Cantidad = i.Cantidad,
-                    PrecioUnitario = i.PrecioUnitario
-                }));
+
+                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle { IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario }));
                 propuesta.Observaciones = avance.Observaciones;
             }
+
             var anterior = a.Estado;
             if (finalizar)
             {
                 var informe = (await repositorio.ObtenerDiagnosticosAsync(a.IdAtencion)).FirstOrDefault(d => d.Tipo == TipoDiagnostico.Inicial);
-                if (informe is not null && (!datos.IncluyeDiagnostico || informe.FallaDetectada != avance.FallaDetectada || informe.TrabajoRecomendado != avance.TrabajoRecomendado
-                    || informe.Kilometraje != avance.Kilometraje))
+                if (informe is not null && (!datos.IncluyeDiagnostico || informe.FallaDetectada != avance.FallaDetectada || informe.TrabajoRecomendado != avance.TrabajoRecomendado || informe.Kilometraje != avance.Kilometraje))
                     throw new ValidacionException("El informe inicial existente es histórico. Consérvelo sin modificar; use las observaciones de la propuesta para aclaraciones.");
                 if (datos.IncluyeDiagnostico && informe is null)
                 {
@@ -323,35 +321,49 @@ public sealed class EvaluacionServicio(
                     };
                     repositorio.AgregarDiagnostico(informe);
                 }
+
                 if (!datos.SoloEvaluacion && propuesta is not null)
                 {
                     propuesta.Diagnostico = informe;
                     propuesta.Estado = EstadoPresupuesto.PendientePresentacion;
                 }
+
                 if (datos.SoloEvaluacion && propuesta is not null)
                     repositorio.EliminarBorrador(propuesta);
                 a.Estado = datos.SoloEvaluacion ? EstadoAtencion.PendienteLiquidacion : EstadoAtencion.EnEvaluacionTecnica;
-                a.IdTecnicoEnActividad = null; a.ActividadTecnica = null;
+                a.IdTecnicoEnActividad = null;
+                a.ActividadTecnica = null;
             }
-            Evento(a, usuario, finalizar ? "EvaluacionFinalizada" : "EvaluacionAvanceGuardado", anterior,
-                finalizar ? "Evaluación finalizada. La propuesta, si existe, espera presentación; no se autorizó reparar." : "Avance guardado; se conserva la reserva técnica.");
+
+            Evento(a, usuario, finalizar ? "EvaluacionFinalizada" : "EvaluacionAvanceGuardado", anterior, finalizar ? "Evaluación finalizada. La propuesta, si existe, espera presentación; no se autorizó reparar." : "Avance guardado; se conserva la reserva técnica.");
             // El historial y todos los cambios comparten el token de concurrencia de Atención.
             // Forzamos su actualización aun cuando permanece en la misma etapa.
             repositorio.PrepararVersion(a, datos.VersionAtencion);
             await unidad.GuardarCambiosAsync();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     private static void ValidarTexto(string? texto)
     {
-        if (texto?.Length > 1000) throw new ValidacionException("Los textos no pueden superar 1000 caracteres.");
+        if (texto?.Length > 1000)
+            throw new ValidacionException("Los textos no pueden superar 1000 caracteres.");
     }
 
     public async Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync()
     {
-        try { await AutorizarAsync(); return await repositorio.ListarPresupuestosAsync(); }
-        finally { unidad.DescartarCambios(); }
+        try
+        {
+            await AutorizarAsync();
+            return await repositorio.ListarPresupuestosAsync();
+        }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 
     public async Task PresentarAsync(int idPresupuesto, byte[] version)
@@ -359,19 +371,23 @@ public sealed class EvaluacionServicio(
         try
         {
             var usuario = await AutorizarAsync(recepcion: true);
-            var datos = (await repositorio.ListarPresupuestosAsync()).SingleOrDefault(p => p.IdPresupuesto == idPresupuesto)
-                ?? throw new ValidacionException("El presupuesto no existe.");
+            var datos = (await repositorio.ListarPresupuestosAsync()).SingleOrDefault(p => p.IdPresupuesto == idPresupuesto) ?? throw new ValidacionException("El presupuesto no existe.");
             var a = await AtencionAsync(datos.IdAtencion);
             var p = (await repositorio.ObtenerPresupuestosAsync(a.IdAtencion)).Single(p => p.IdPresupuesto == idPresupuesto);
             if ((!p.Vigente || p.Estado != EstadoPresupuesto.PendientePresentacion) || p.Tipo != TipoPresupuesto.Reparacion || version is null || version.Length != 8 || !p.Version.SequenceEqual(version))
                 throw new ValidacionException("La propuesta cambió o ya fue presentada. Actualice el listado.");
             if (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.IdTecnicoEnActividad is not null)
                 throw new ValidacionException("La atención no está disponible para presentar esta propuesta.");
-            p.Estado = EstadoPresupuesto.PendienteDecision; p.FechaPresentacion = DateTime.Now;
-            var anterior = a.Estado; a.Estado = EstadoAtencion.PendienteDecision;
+            p.Estado = EstadoPresupuesto.PendienteDecision;
+            p.FechaPresentacion = DateTime.Now;
+            var anterior = a.Estado;
+            a.Estado = EstadoAtencion.PendienteDecision;
             Evento(a, usuario, "PresupuestoPresentado", anterior, "Recepción registró que comunicó la propuesta al cliente. Decisión pendiente.");
             await unidad.GuardarCambiosAsync();
         }
-        finally { unidad.DescartarCambios(); }
+        finally
+        {
+            unidad.DescartarCambios();
+        }
     }
 }

@@ -1,378 +1,122 @@
-﻿using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Excepciones;
+using Taller.Aplicacion.Seguridad;
+using Taller.Aplicacion.Validaciones;
+using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Servicios;
-
-/// <summary>
-/// Proporciona operaciones de negocio relacionadas con la gestión de vehículos.
-/// </summary>
-public sealed class VehiculoServicio
+/// <summary>Gestiona vehículos reales; conserva fecha de alta e historial y exige versión para editar o cambiar disponibilidad.</summary>
+public sealed class VehiculoServicio(IVehiculoRepositorio vehiculos, IModeloRepositorio modelos, AutorizacionOperativa acceso)
 {
-    // Repositorio de vehículos utilizado para acceder a la persistencia de datos.
-    private readonly IVehiculoRepositorio _vehiculoRepositorio;
-    // Repositorio de modelos utilizado para validar la existencia y estado de los modelos.
-    private readonly IModeloRepositorio _modeloRepositorio;
-
-    /// <summary>
-    /// Inicializa el servicio de vehículos con los repositorios necesarios.
-    /// </summary>
-    /// <param name="vehiculoRepositorio"></param>
-    /// <param name="modeloRepositorio"></param>
-    public VehiculoServicio(
-        IVehiculoRepositorio vehiculoRepositorio, 
-        IModeloRepositorio modeloRepositorio)
+    private Task<Usuario> RecepcionAsync() => acceso.ExigirRolesAsync(RolesSistema.AdministrativoId);
+    /// <summary>Consulta un conjunto coherente de registros activos e inactivos para la bandeja.</summary>
+    public async Task<List<Vehiculo>> ListarAsync()
     {
-        _vehiculoRepositorio = vehiculoRepositorio;
-        _modeloRepositorio = modeloRepositorio;
+        await RecepcionAsync();
+        return await vehiculos.ListarTodosAsync();
     }
 
-    /// <summary>
-    /// Lista todos los vehículos activos.
-    /// </summary>
-    /// <returns>Una lista de vehículos activos.</returns>
     public async Task<List<Vehiculo>> ListarActivosAsync()
     {
-        return await _vehiculoRepositorio.ListarActivosAsync();
+        await RecepcionAsync();
+        return await vehiculos.ListarActivosAsync();
     }
 
-    /// <summary>
-    /// Lista todos los vehículos inactivos.
-    /// </summary>
-    /// <returns>Una lista de vehículos inactivos.</returns>
     public async Task<List<Vehiculo>> ListarInactivosAsync()
     {
-        return await _vehiculoRepositorio.ListarInactivosAsync();
+        await RecepcionAsync();
+        return await vehiculos.ListarInactivosAsync();
     }
 
-    /// <summary>
-    /// Obtiene un vehículo por su identificador.
-    /// </summary>
-    /// <param name="idVehiculo"></param>
-    /// <returns>El vehículo encontrado o null si no se encuentra.</returns>
-    public async Task<Vehiculo?> ObtenerPorIdAsync(
-        int idVehiculo)
+    public async Task<Vehiculo?> ObtenerPorIdAsync(int id)
     {
-        ValidarId(idVehiculo);
-
-        return await _vehiculoRepositorio.ObtenerPorIdAsync(idVehiculo);
+        await acceso.ExigirAsync();
+        DatosMaestros.Id(id);
+        return await vehiculos.ObtenerPorIdAsync(id);
     }
 
-    /// <summary>
-    /// Obtiene un vehículo por su dominio.
-    /// </summary>
-    /// <param name="dominio"></param>
-    /// <returns>El vehículo encontrado o null si no se encuentra.</returns>
-    public async Task<Vehiculo?> ObtenerPorDominioAsync(
-        string dominio)
+    public async Task<Vehiculo?> ObtenerPorDominioAsync(string dominio)
     {
-        dominio = NormalizarDominio(dominio);
-
-        return await _vehiculoRepositorio.ObtenerPorDominioAsync(dominio);
+        await acceso.ExigirAsync();
+        return await vehiculos.ObtenerPorDominioAsync(DatosMaestros.Dominio(dominio));
     }
 
-    /// <summary>
-    /// Registra un nuevo vehículo en el sistema.
-    /// </summary>
-    /// <param name="dominio"></param>
-    /// <param name="anio"></param>
-    /// <param name="color"></param>
-    /// <param name="idModelo"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task<Vehiculo> RegistrarAsync(
-        string dominio, 
-        int anio, 
-        string color, 
-        int idModelo)
+    public async Task<Taller.Aplicacion.DTOs.Vehiculos.VehiculoEdicionDto> ObtenerEdicionAsync(int id)
     {
-        dominio = NormalizarDominio(dominio);
-
-        ValidarAnio(anio);
-
-        color = NormalizarColor(color);
-
-        ValidarIdModelo(idModelo);
-
-        await ValidarModeloAsync(idModelo);
-
-        if (await _vehiculoRepositorio.ExisteDominioAsync(dominio))
-        {
-            throw new InvalidOperationException($"Ya existe un vehículo con el dominio '{dominio}'.");
-        }
-
-        var vehiculo = new Vehiculo
-        {
-            Dominio = dominio,
-            Anio = anio,
-            Color = color,
-            IdModelo = idModelo,
-            Activo = true,
-            FechaAlta = DateTime.Now
-        };
-
-        await _vehiculoRepositorio.AgregarAsync(vehiculo);
-
-        return vehiculo;
+        await RecepcionAsync();
+        var v = await ObtenerPorIdAsync(id) ?? throw new ValidacionException("El vehículo ya no existe.");
+        return new(v.IdVehiculo, v.Dominio, v.Anio, v.Color, v.IdModelo, v.Modelo.Marca.Nombre, v.Modelo.Nombre, v.Activo, v.FechaAlta, v.Version.ToArray());
     }
 
-    /// <summary>
-    /// Modifica los datos de un vehículo existente.
-    /// </summary>
-    /// <param name="idVehiculo"></param>
-    /// <param name="dominio"></param>
-    /// <param name="anio"></param>
-    /// <param name="color"></param>
-    /// <param name="idModelo"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task<Vehiculo> ModificarAsync(
-        int idVehiculo, 
-        string dominio, 
-        int anio, 
-        string color, 
-        int idModelo)
+    public async Task<List<Taller.Aplicacion.DTOs.Vehiculos.ModeloOpcionDto>> ListarModelosAsync(int actual)
     {
-        ValidarId(idVehiculo);
-
-        var vehiculo = await _vehiculoRepositorio.ObtenerPorIdAsync(idVehiculo);
-
-        if (vehiculo is null)
-        {
-            throw new InvalidOperationException($"No se encontró un vehículo con ID '{idVehiculo}'.");
-        }
-
-        dominio = NormalizarDominio(dominio);
-
-        ValidarAnio(anio);
-
-        color = NormalizarColor(color);
-
-        ValidarIdModelo(idModelo);
-
-        await ValidarModeloAsync(idModelo);
-
-        if (await _vehiculoRepositorio.ExisteDominioAsync(dominio, idVehiculo))
-        {
-            throw new InvalidOperationException($"Ya existe otro vehículo con el dominio '{dominio}'.");
-        }
-
-        vehiculo.Dominio = dominio;
-        vehiculo.Anio = anio;
-        vehiculo.Color = color;
-        vehiculo.IdModelo = idModelo;
-
-        await _vehiculoRepositorio.ActualizarAsync(vehiculo);
-
-        return vehiculo;
+        await RecepcionAsync();
+        return (await modelos.ListarParaEdicionAsync(actual)).Select(m => new Taller.Aplicacion.DTOs.Vehiculos.ModeloOpcionDto(m.IdModelo, m.Marca.Nombre, m.Nombre, m.Activo && m.Marca.Activo)).ToList();
     }
 
-    /// <summary>
-    /// Da de baja un vehículo, marcándolo como inactivo.
-    /// </summary>
-    /// <param name="idVehiculo"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task DarDeBajaAsync(
-        int idVehiculo)
+    public async Task<List<Marca>> ListarMarcasAsync()
     {
-        ValidarId(idVehiculo);
-
-        var vehiculo = await _vehiculoRepositorio.ObtenerPorIdAsync(idVehiculo);
-
-        if (vehiculo is null)
-        {
-            throw new InvalidOperationException($"No se encontró un vehículo con ID '{idVehiculo}'.");
-        }
-
-        if (!vehiculo.Activo)
-        {
-            throw new InvalidOperationException($"El vehículo con ID '{idVehiculo}' ya se encuentra dado de baja.");
-        }
-
-        vehiculo.Activo = false;
-
-        await _vehiculoRepositorio.ActualizarAsync(vehiculo);
+        await RecepcionAsync();
+        return (await modelos.ListarParaEdicionAsync(0)).Select(m => m.Marca).DistinctBy(m => m.IdMarca).OrderBy(m => m.Nombre).ToList();
     }
 
-    /// <summary>
-    /// Reactiva un vehículo, marcándolo como activo.
-    /// </summary>
-    /// <param name="idVehiculo"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task ReactivarAsync(
-        int idVehiculo)
+    public async Task<List<Modelo>> ListarModelosPorMarcaAsync(int idMarca)
     {
-        ValidarId(idVehiculo);
-
-        var vehiculo = await _vehiculoRepositorio.ObtenerPorIdAsync(idVehiculo);
-
-        if (vehiculo is null)
-        {
-            throw new InvalidOperationException($"No se encontró un vehículo con ID '{idVehiculo}'.");
-        }
-
-        if (vehiculo.Activo)
-        {
-            throw new InvalidOperationException($"El vehículo con ID '{idVehiculo}' ya se encuentra activo.");
-        }
-
-        vehiculo.Activo = true;
-
-        await _vehiculoRepositorio.ActualizarAsync(vehiculo);
+        await RecepcionAsync();
+        DatosMaestros.Id(idMarca);
+        return (await modelos.ListarParaEdicionAsync(0)).Where(m => m.IdMarca == idMarca).ToList();
     }
 
-    /// <summary>
-    /// Valida que el identificador del vehículo sea válido.
-    /// </summary>
-    /// <param name="idVehiculo"></param>
-    /// <exception cref="ArgumentException"></exception>
-    private static void ValidarId(
-        int idVehiculo)
+    private async Task AsignarAsync(Vehiculo v, string dominio, int anio, string color, int idModelo)
     {
-        if (idVehiculo <= 0)
-        {
-            throw new ArgumentException(
-                "El identificador del vehículo no es válido.",
-                nameof(idVehiculo));
-        }
+        v.Dominio = DatosMaestros.Dominio(dominio);
+        v.Color = DatosMaestros.Texto(color, 50, "Color");
+        if (anio < 1900 || anio > DateTime.Today.Year + 1)
+            throw new ValidacionException($"El año debe estar entre 1900 y {DateTime.Today.Year + 1}.");
+        v.Anio = anio;
+        DatosMaestros.Id(idModelo);
+        var m = await modelos.ObtenerPorIdAsync(idModelo) ?? throw new ValidacionException("El modelo no existe.");
+        if ((v.IdVehiculo == 0 || v.IdModelo != idModelo) && (!m.Activo || !m.Marca.Activo))
+            throw new ValidacionException("Seleccione un modelo y marca activos.");
+        v.IdModelo = idModelo;
     }
 
-    /// <summary>
-    /// Valida que el identificador del modelo sea válido.
-    /// </summary>
-    /// <param name="idModelo"></param>
-    /// <exception cref="ArgumentException"></exception>
-    private static void ValidarIdModelo(
-        int idModelo)
+    public async Task<Vehiculo> RegistrarAsync(string dominio, int anio, string color, int idModelo)
     {
-        if (idModelo <= 0)
-        {
-            throw new ArgumentException(
-                "El modelo seleccionado no es válido.",
-                nameof(idModelo));
-        }
+        await RecepcionAsync();
+        var v = new Vehiculo();
+        await AsignarAsync(v, dominio, anio, color, idModelo);
+        if (await vehiculos.ExisteDominioAsync(v.Dominio))
+            throw new ValidacionException("Ya existe un vehículo con ese dominio, incluso si está deshabilitado.");
+        await vehiculos.AgregarAsync(v);
+        return v;
     }
 
-    /// <summary>
-    /// Valida que el modelo exista y esté activo, así como su marca asociada.
-    /// </summary>
-    /// <param name="idModelo"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    private async Task ValidarModeloAsync(
-        int idModelo)
+    public async Task<Vehiculo> ModificarAsync(int idVehiculo, string dominio, int anio, string color, int idModelo, byte[] version)
     {
-        var modelo = await _modeloRepositorio.ObtenerPorIdAsync(idModelo);
-
-        if (modelo is null)
-        {
-            throw new InvalidOperationException("El modelo seleccionado no existe.");
-        }
-
-        if (!modelo.Activo)
-        {
-            throw new InvalidOperationException("El modelo seleccionado se encuentra inactivo.");
-        }
-
-        if (!modelo.Marca.Activo)
-        {
-            throw new InvalidOperationException("La marca asociada al modelo se encuentra inactiva.");
-        }
+        await RecepcionAsync();
+        DatosMaestros.Id(idVehiculo);
+        var v = await vehiculos.ObtenerPorIdAsync(idVehiculo) ?? throw new ValidacionException("El vehículo ya no existe.");
+        AutorizacionOperativa.Version(version, v.Version);
+        await AsignarAsync(v, dominio, anio, color, idModelo);
+        if (await vehiculos.ExisteDominioAsync(v.Dominio, idVehiculo))
+            throw new ValidacionException("Otro vehículo tiene ese dominio, incluso si está deshabilitado.");
+        await vehiculos.ActualizarAsync(v);
+        return v;
     }
 
-    /// <summary>
-    /// Valida que el año del vehículo esté dentro de un rango válido (1900 hasta el año actual + 1).
-    /// </summary>
-    /// <param name="anio"></param>
-    /// <exception cref="ArgumentException"></exception>
-    private static void ValidarAnio(
-        int anio)
+    public Task DarDeBajaAsync(int id, byte[] version) => CambiarEstadoAsync(id, version, false);
+    public Task ReactivarAsync(int id, byte[] version) => CambiarEstadoAsync(id, version, true);
+    private async Task CambiarEstadoAsync(int id, byte[] version, bool activo)
     {
-        int anioMaximo = DateTime.Now.Year + 1;
-
-        if (anio < 1900 || anio > anioMaximo)
-        {
-            throw new ArgumentException(
-                $"El año del vehículo debe estar comprendido entre 1900 y {anioMaximo}.",
-                nameof(anio));
-        }
-    }
-
-    /// <summary>
-    /// Normaliza el dominio del vehículo, asegurando que no esté vacío, que no supere los 10 caracteres y que esté en mayúsculas.
-    /// </summary>
-    /// <param name="dominio"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
-    private static string NormalizarDominio(
-        string? dominio)
-    {
-        if (string.IsNullOrWhiteSpace(dominio))
-        {
-            throw new ArgumentException(
-                "El dominio del vehículo es obligatorio.",
-                nameof(dominio));
-        }
-
-        dominio = dominio
-            .Trim()
-            .ToUpperInvariant();
-
-        if (dominio.Length > 10)
-        {
-            throw new ArgumentException(
-                "El dominio no puede superar los 10 caracteres.",
-                nameof(dominio));
-        }
-
-        return dominio;
-    }
-
-    /// <summary>
-    /// Normaliza el color del vehículo, asegurando que no esté vacío y que no supere los 50 caracteres.
-    /// </summary>
-    /// <param name="color"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
-    private static string NormalizarColor(
-        string? color)
-    {
-        color = NormalizarObligatorio(
-            color, 
-            nameof(color), 
-            "El color es obligatorio.");
-
-        if (color.Length > 50)
-        {
-            throw new ArgumentException(
-                "El color no puede superar los 50 caracteres.", 
-                nameof(color));
-        }
-
-        return color;
-    }
-
-    /// <summary>
-    /// Normaliza un valor obligatorio, asegurando que no esté vacío ni contenga solo espacios en blanco.
-    /// </summary>
-    /// <param name="valor"></param>
-    /// <param name="nombreParametro"></param>
-    /// <param name="mensaje"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
-    private static string NormalizarObligatorio(
-        string? valor, 
-        string nombreParametro, 
-        string mensaje)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
-        {
-            throw new ArgumentException(
-                mensaje, 
-                nombreParametro);
-        }
-
-        return valor.Trim();
+        await RecepcionAsync();
+        DatosMaestros.Id(id);
+        var v = await vehiculos.ObtenerPorIdAsync(id) ?? throw new ValidacionException("El vehículo ya no existe.");
+        AutorizacionOperativa.Version(version, v.Version);
+        if (v.Activo == activo)
+            throw new ValidacionException("El estado ya fue modificado. Actualice el listado.");
+        v.Activo = activo;
+        await vehiculos.ActualizarAsync(v);
     }
 }

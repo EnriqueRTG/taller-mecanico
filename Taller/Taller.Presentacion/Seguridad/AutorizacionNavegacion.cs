@@ -1,8 +1,6 @@
-﻿
 using Taller.Dominio.Constantes;
 
 namespace Taller.Presentacion.Seguridad;
-
 /// <summary>
 /// Determina las funciones de navegación permitidas
 /// para cada rol del sistema.
@@ -17,40 +15,13 @@ public sealed class AutorizacionNavegacion
         return rolId switch
         {
             RolesSistema.AdministradorId => PermisoAdministrador.Contains(permiso),
-
             RolesSistema.AdministrativoId => PermisoAdministrativo.Contains(permiso),
-
             RolesSistema.TecnicoId => PermisoTecnico.Contains(permiso),
-
             _ => false
         };
     }
 
-    private static readonly HashSet<PermisoAplicacion> PermisoAdministrador = 
-        [
-            PermisoAplicacion.GestionarUsuarios,
-            PermisoAplicacion.ConsultarReportesGenerales,
-            PermisoAplicacion.GestionarRespaldo
-        ];
-
-    private static readonly HashSet<PermisoAplicacion> PermisoAdministrativo =
-        [
-            PermisoAplicacion.GestionarClientes,
-            PermisoAplicacion.GestionarVehiculos,
-            PermisoAplicacion.GestionarAtenciones,
-            PermisoAplicacion.ConsultarDiagnosticos,
-            PermisoAplicacion.GestionarDecisionPresupuesto,
-            PermisoAplicacion.GestionarComprobantesPagos,
-            PermisoAplicacion.ConsultarReportesOperativos
-        ];
-
-    private static readonly HashSet<PermisoAplicacion> PermisoTecnico =
-        [
-            PermisoAplicacion.ConsultarAtencionesAsignadas,
-            PermisoAplicacion.GestionarDiagnosticos,
-            PermisoAplicacion.GestionarPresupuestosTecnicos,
-            PermisoAplicacion.RegistrarFinalizacionTecnica,
-            PermisoAplicacion.ConsultarHistorialVehiculo,
-            PermisoAplicacion.ConsultarReportesTecnicos
-        ];
+    private static readonly HashSet<PermisoAplicacion> PermisoAdministrador = [PermisoAplicacion.GestionarUsuarios, PermisoAplicacion.ConsultarReportesGenerales, PermisoAplicacion.GestionarRespaldo];
+    private static readonly HashSet<PermisoAplicacion> PermisoAdministrativo = [PermisoAplicacion.ConsultarCatalogo, PermisoAplicacion.GestionarClientes, PermisoAplicacion.GestionarVehiculos, PermisoAplicacion.GestionarAtenciones, PermisoAplicacion.ConsultarDiagnosticos, PermisoAplicacion.GestionarDecisionPresupuesto, PermisoAplicacion.GestionarComprobantesPagos, PermisoAplicacion.ConsultarReportesOperativos];
+    private static readonly HashSet<PermisoAplicacion> PermisoTecnico = [PermisoAplicacion.ConsultarCatalogo, PermisoAplicacion.ConsultarAtencionesAsignadas, PermisoAplicacion.GestionarDiagnosticos, PermisoAplicacion.GestionarPresupuestosTecnicos, PermisoAplicacion.RegistrarFinalizacionTecnica, PermisoAplicacion.ConsultarHistorialVehiculo, PermisoAplicacion.ConsultarReportesTecnicos];
 }

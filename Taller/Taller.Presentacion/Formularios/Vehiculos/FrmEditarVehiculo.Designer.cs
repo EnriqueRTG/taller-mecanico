@@ -6,22 +6,21 @@ namespace Taller.Presentacion.Formularios.Vehiculos
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name = "disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
+#region Windows Form Designer generated code
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
@@ -44,7 +43,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             lblNombreUsuario = new Label();
             txtId = new TextBox();
             txtMarca = new TextBox();
-            txtModelo = new TextBox();
+            cboModeloEdicion = new ComboBox();
             txtAnio = new TextBox();
             lblNombre = new Label();
             lblFechaAlta = new Label();
@@ -188,7 +187,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             tlpDatos.Controls.Add(lblNombreUsuario, 0, 1);
             tlpDatos.Controls.Add(txtId, 1, 0);
             tlpDatos.Controls.Add(txtMarca, 1, 1);
-            tlpDatos.Controls.Add(txtModelo, 1, 2);
+            tlpDatos.Controls.Add(cboModeloEdicion, 1, 2);
             tlpDatos.Controls.Add(txtAnio, 1, 3);
             tlpDatos.Controls.Add(lblNombre, 0, 2);
             tlpDatos.Controls.Add(lblFechaAlta, 0, 5);
@@ -318,20 +317,18 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             txtMarca.TabIndex = 8;
             txtMarca.TabStop = false;
             //
-            // txtModelo
+            // cboModeloEdicion
             //
-            txtModelo.Anchor = AnchorStyles.Left;
-            txtModelo.BackColor = Color.FromArgb(241, 245, 249);
-            txtModelo.BorderStyle = BorderStyle.FixedSingle;
-            txtModelo.Font = new Font("Segoe UI", 9.75F);
-            txtModelo.ForeColor = Color.FromArgb(71, 85, 105);
-            txtModelo.Location = new Point(150, 82);
-            txtModelo.Margin = new Padding(0, 8, 0, 8);
-            txtModelo.Name = "txtModelo";
-            txtModelo.ReadOnly = true;
-            txtModelo.Size = new Size(320, 25);
-            txtModelo.TabIndex = 9;
-            txtModelo.TabStop = false;
+            cboModeloEdicion.Anchor = AnchorStyles.Left;
+            cboModeloEdicion.BackColor = Color.FromArgb(241, 245, 249);
+            cboModeloEdicion.Font = new Font("Segoe UI", 9.75F);
+            cboModeloEdicion.ForeColor = Color.FromArgb(71, 85, 105);
+            cboModeloEdicion.Location = new Point(150, 82);
+            cboModeloEdicion.Margin = new Padding(0, 8, 0, 8);
+            cboModeloEdicion.Name = "cboModeloEdicion";
+            cboModeloEdicion.Size = new Size(320, 25);
+            cboModeloEdicion.TabIndex = 9;
+            cboModeloEdicion.TabStop = false;
             //
             // txtAnio
             //
@@ -493,15 +490,16 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             pnlDatos.ResumeLayout(false);
             tlpDatos.ResumeLayout(false);
             tlpDatos.PerformLayout();
-            btnGuardar.DialogResult=DialogResult.None;
+            btnGuardar.DialogResult = DialogResult.None;
+            cboModeloEdicion.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboModeloEdicion.SelectedIndexChanged += Modelo_Cambio;
             btnGuardar.Click += BtnGuardar_Click;
             btnCancelar.Click += BtnCancelar_Click;
             FormClosing += Formulario_FormClosing;
             ResumeLayout(false);
         }
 
-        #endregion
-
+#endregion
         private TableLayoutPanel tlpPrincipal;
         private FlowLayoutPanel flpAcciones;
         private Button btnGuardar;
@@ -520,7 +518,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
         private Label lblRol;
         private TextBox txtId;
         private TextBox txtMarca;
-        private TextBox txtModelo;
+        private ComboBox cboModeloEdicion;
         private TextBox txtAnio;
         private TextBox txtDominio;
         private TextBox txtColor;

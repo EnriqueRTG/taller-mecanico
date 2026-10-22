@@ -1,3 +1,4 @@
+using Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +14,8 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        var carpetaLog = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SGTM", "Logs");
+        Serilog.Log.Logger = new Serilog.LoggerConfiguration().WriteTo.File(Path.Combine(carpetaLog, "sgtm-.log"), rollingInterval: Serilog.RollingInterval.Day, retainedFileCountLimit: 7, fileSizeLimitBytes: 2_000_000, rollOnFileSizeLimit: true).CreateLogger();
         ApplicationConfiguration.Initialize();
         try
         {
@@ -21,6 +24,10 @@ internal static class Program
         catch (Exception ex)
         {
             MessageBox.Show("SGTM no pudo iniciar. Revise la configuración de conexión y mantenimiento con el personal técnico.\n\n" + ex.Message, "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        finally
+        {
+            Serilog.Log.CloseAndFlush();
         }
     }
 

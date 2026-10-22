@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Principal
+namespace Taller.Presentacion.Formularios.Principal
 {
     partial class FrmPrincipal
     {
@@ -6,22 +6,21 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name = "disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
+#region Windows Form Designer generated code
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
@@ -31,6 +30,7 @@
             pnlMenu = new Panel();
             pnlOpciones = new Panel();
             btnRespaldo = new Button();
+            btnCatalogo = new Button();
             btnReportes = new Button();
             btnComprobantes = new Button();
             btnPresupuestos = new Button();
@@ -76,6 +76,7 @@
             // 
             pnlOpciones.AutoScroll = true;
             pnlOpciones.Controls.Add(btnRespaldo);
+            pnlOpciones.Controls.Add(btnCatalogo);
             pnlOpciones.Controls.Add(btnReportes);
             pnlOpciones.Controls.Add(btnComprobantes);
             pnlOpciones.Controls.Add(btnPresupuestos);
@@ -110,6 +111,18 @@
             btnRespaldo.TextAlign = ContentAlignment.MiddleLeft;
             btnRespaldo.UseVisualStyleBackColor = false;
             btnRespaldo.Click += btnRespaldo_Click;
+            btnCatalogo.Name = "btnCatalogo";
+            btnCatalogo.Text = "Catálogo";
+            btnCatalogo.Dock = DockStyle.Top;
+            btnCatalogo.Height = 48;
+            btnCatalogo.Padding = new Padding(20, 0, 0, 0);
+            btnCatalogo.TextAlign = ContentAlignment.MiddleLeft;
+            btnCatalogo.FlatStyle = FlatStyle.Flat;
+            btnCatalogo.FlatAppearance.BorderSize = 0;
+            btnCatalogo.ForeColor = Color.FromArgb(220, 231, 245);
+            btnCatalogo.Font = new Font("Segoe UI", 9.5F);
+            btnCatalogo.Cursor = Cursors.Hand;
+            btnCatalogo.Click += btnCatalogo_Click;
             // 
             // btnReportes
             // 
@@ -466,8 +479,7 @@
             ResumeLayout(false);
         }
 
-        #endregion
-
+#endregion
         private Panel pnlMenu;
         private Panel pnlEncabezado;
         private Panel pnlContenido;
@@ -490,6 +502,7 @@
         private Button btnUsuarios;
         private Button btnInicio;
         private Button btnRespaldo;
+        private Button btnCatalogo;
         private Button btnReportes;
         private Button btnComprobantes;
     }

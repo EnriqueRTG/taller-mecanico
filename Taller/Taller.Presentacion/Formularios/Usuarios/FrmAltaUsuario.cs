@@ -1,10 +1,9 @@
-﻿using Taller.Aplicacion.Excepciones;
+using Taller.Aplicacion.Excepciones;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Presentacion.Formularios.Usuarios;
-
 /// <summary>
 /// Permite ingresar los datos necesarios para registrar
 /// un nuevo usuario en el sistema.
@@ -15,12 +14,11 @@ namespace Taller.Presentacion.Formularios.Usuarios;
 /// y verificar que se haya seleccionado una opción.
 ///
 /// Las reglas indispensables del alta se encuentran en
-/// <see cref="UsuarioServicio"/>.
+/// <see cref = "UsuarioServicio"/>.
 /// </remarks>
 public partial class FrmAltaUsuario : Form
 {
     private readonly UsuarioServicio _usuarioServicio;
-
     /// <summary>
     /// Obtiene el usuario creado correctamente desde
     /// el formulario.
@@ -35,34 +33,26 @@ public partial class FrmAltaUsuario : Form
     /// Inicializa una nueva instancia del formulario
     /// de alta de usuarios.
     /// </summary>
-    /// <param name="usuarioServicio">
+    /// <param name = "usuarioServicio">
     /// Servicio de aplicación encargado de consultar roles
     /// disponibles y registrar usuarios.
     /// </param>
-    /// <exception cref="ArgumentNullException">
+    /// <exception cref = "ArgumentNullException">
     /// Se produce cuando el servicio recibido es nulo.
     /// </exception>
-    public FrmAltaUsuario(
-        UsuarioServicio usuarioServicio)
+    public FrmAltaUsuario(UsuarioServicio usuarioServicio)
     {
         InitializeComponent();
-
-        _usuarioServicio =
-            usuarioServicio
-            ?? throw new ArgumentNullException(
-                nameof(usuarioServicio));
+        _usuarioServicio = usuarioServicio ?? throw new ArgumentNullException(nameof(usuarioServicio));
     }
 
     /// <summary>
     /// Configura los controles y carga los roles disponibles
     /// cuando se abre el formulario.
     /// </summary>
-    private async void FrmAltaUsuario_Load(
-        object? sender,
-        EventArgs e)
+    private async void FrmAltaUsuario_Load(object? sender, EventArgs e)
     {
         ConfigurarFormulario();
-
         await CargarRolesAsync();
     }
 
@@ -72,34 +62,18 @@ public partial class FrmAltaUsuario : Form
     /// </summary>
     private void ConfigurarFormulario()
     {
-        txtNombre.MaxLength =
-            UsuarioRestricciones.NombreMaximo;
-
-        txtApellido.MaxLength =
-            UsuarioRestricciones.ApellidoMaximo;
-
-        txtNombreUsuario.MaxLength =
-            UsuarioRestricciones.NombreUsuarioMaximo;
-
-        txtPassword.MaxLength =
-            UsuarioRestricciones.PasswordMaximo;
-
-        txtConfirmarPassword.MaxLength =
-            UsuarioRestricciones.PasswordMaximo;
-
+        txtNombre.MaxLength = UsuarioRestricciones.NombreMaximo;
+        txtApellido.MaxLength = UsuarioRestricciones.ApellidoMaximo;
+        txtNombreUsuario.MaxLength = UsuarioRestricciones.NombreUsuarioMaximo;
+        txtPassword.MaxLength = UsuarioRestricciones.PasswordMaximo;
+        txtConfirmarPassword.MaxLength = UsuarioRestricciones.PasswordMaximo;
         txtPassword.UseSystemPasswordChar = true;
         txtConfirmarPassword.UseSystemPasswordChar = true;
-
         chkMostrarPassword.Checked = false;
-
-        cmbRol.DropDownStyle =
-            ComboBoxStyle.DropDownList;
-
+        cmbRol.DropDownStyle = ComboBoxStyle.DropDownList;
         AcceptButton = btnGuardar;
         CancelButton = btnCancelar;
-
-        btnCancelar.DialogResult =
-            DialogResult.Cancel;
+        btnCancelar.DialogResult = DialogResult.Cancel;
     }
 
     /// <summary>
@@ -111,25 +85,14 @@ public partial class FrmAltaUsuario : Form
         try
         {
             CambiarEstadoFormulario(false);
-
-            List<Rol> rolesDisponibles =
-                await _usuarioServicio
-                    .ListarRolesDisponiblesAsync();
-
+            List<Rol> rolesDisponibles = await _usuarioServicio.ListarRolesDisponiblesAsync();
             cmbRol.DataSource = rolesDisponibles;
             cmbRol.DisplayMember = nameof(Rol.Nombre);
             cmbRol.ValueMember = nameof(Rol.Id);
             cmbRol.SelectedIndex = -1;
-
             if (rolesDisponibles.Count == 0)
             {
-                MessageBox.Show(
-                    "No existen roles disponibles para " +
-                    "registrar nuevos usuarios.",
-                    "Roles no disponibles",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
+                MessageBox.Show("No existen roles disponibles para " + "registrar nuevos usuarios.", "Roles no disponibles", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -138,13 +101,7 @@ public partial class FrmAltaUsuario : Form
         catch (Exception)
         {
             cmbRol.DataSource = null;
-
-            MessageBox.Show(
-                "No fue posible cargar los roles disponibles. " +
-                "Verifique la conexión e inténtelo nuevamente.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show("No fue posible cargar los roles disponibles. " + "Verifique la conexión e inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -159,16 +116,10 @@ public partial class FrmAltaUsuario : Form
     private bool ValidarFormulario(out int idRol)
     {
         idRol = 0;
-
         // Validar Nombre
         if (string.IsNullOrWhiteSpace(txtNombre.Text) || !EsTextoValido(txtNombre.Text))
         {
-            MessageBox.Show(
-                "El campo Nombre es obligatorio y solo debe contener letras.",
-                "Datos inválidos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("El campo Nombre es obligatorio y solo debe contener letras.", "Datos inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             txtNombre.SelectAll();
             txtNombre.Focus();
             return false;
@@ -177,12 +128,7 @@ public partial class FrmAltaUsuario : Form
         // Validar Apellido
         if (string.IsNullOrWhiteSpace(txtApellido.Text) || !EsTextoValido(txtApellido.Text))
         {
-            MessageBox.Show(
-                "El campo Apellido es obligatorio y solo debe contener letras.",
-                "Datos inválidos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("El campo Apellido es obligatorio y solo debe contener letras.", "Datos inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             txtApellido.SelectAll();
             txtApellido.Focus();
             return false;
@@ -190,28 +136,16 @@ public partial class FrmAltaUsuario : Form
 
         if (txtPassword.Text != txtConfirmarPassword.Text)
         {
-            MessageBox.Show(
-                "Las contraseñas no coinciden.",
-                "Datos inválidos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("Las contraseñas no coinciden.", "Datos inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             txtConfirmarPassword.SelectAll();
             txtConfirmarPassword.Focus();
-
             return false;
         }
 
         if (cmbRol.SelectedValue is not int rolSeleccionado)
         {
-            MessageBox.Show(
-                "Debe seleccionar un rol.",
-                "Datos incompletos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-
+            MessageBox.Show("Debe seleccionar un rol.", "Datos incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             cmbRol.Focus();
-
             return false;
         }
 
@@ -231,6 +165,7 @@ public partial class FrmAltaUsuario : Form
                 return false;
             }
         }
+
         return true;
     }
 
@@ -238,9 +173,7 @@ public partial class FrmAltaUsuario : Form
     /// Solicita a la capa de aplicación el registro del
     /// nuevo usuario.
     /// </summary>
-    private async void btnGuardar_Click(
-        object? sender,
-        EventArgs e)
+    private async void btnGuardar_Click(object? sender, EventArgs e)
     {
         if (!ValidarFormulario(out int idRol))
         {
@@ -250,49 +183,22 @@ public partial class FrmAltaUsuario : Form
         try
         {
             CambiarEstadoGuardado(true);
-
-            UsuarioCreado =
-                await _usuarioServicio.CrearAsync(
-                    txtNombreUsuario.Text,
-                    txtPassword.Text,
-                    txtNombre.Text,
-                    txtApellido.Text,
-                    idRol);
-
-            MessageBox.Show(
-                $"Usuario '{UsuarioCreado.NombreUsuario}' " +
-                "registrado correctamente.",
-                "Nuevo usuario",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
+            UsuarioCreado = await _usuarioServicio.CrearAsync(txtNombreUsuario.Text, txtPassword.Text, txtNombre.Text, txtApellido.Text, idRol);
+            MessageBox.Show($"Usuario '{UsuarioCreado.NombreUsuario}' " + "registrado correctamente.", "Nuevo usuario", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }
         catch (ValidacionException ex)
         {
-            MessageBox.Show(
-                ex.Message,
-                "Datos inválidos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Datos inválidos");
         }
         catch (InvalidOperationException ex)
         {
-            MessageBox.Show(
-                ex.Message,
-                "No se pudo registrar el usuario",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo registrar el usuario");
         }
         catch (Exception)
         {
-            MessageBox.Show(
-                "Ocurrió un error inesperado al registrar " +
-                "el usuario. Inténtelo nuevamente.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show("Ocurrió un error inesperado al registrar " + "el usuario. Inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
@@ -306,9 +212,7 @@ public partial class FrmAltaUsuario : Form
     /// <summary>
     /// Cancela el alta y cierra el formulario.
     /// </summary>
-    private void btnCancelar_Click(
-        object? sender,
-        EventArgs e)
+    private void btnCancelar_Click(object? sender, EventArgs e)
     {
         DialogResult = DialogResult.Cancel;
         Close();
@@ -318,28 +222,19 @@ public partial class FrmAltaUsuario : Form
     /// Alterna la visualización de la contraseña y
     /// de su confirmación.
     /// </summary>
-    private void chkMostrarPassword_CheckedChanged(
-        object? sender,
-        EventArgs e)
+    private void chkMostrarPassword_CheckedChanged(object? sender, EventArgs e)
     {
-        bool ocultar =
-            !chkMostrarPassword.Checked;
-
-        txtPassword.UseSystemPasswordChar =
-            ocultar;
-
-        txtConfirmarPassword.UseSystemPasswordChar =
-            ocultar;
+        bool ocultar = !chkMostrarPassword.Checked;
+        txtPassword.UseSystemPasswordChar = ocultar;
+        txtConfirmarPassword.UseSystemPasswordChar = ocultar;
     }
 
     /// <summary>
     /// Coloca el foco inicial en el nombre de la persona.
     /// </summary>
-    protected override void OnShown(
-        EventArgs e)
+    protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
-
         txtNombre.Focus();
     }
 
@@ -347,8 +242,7 @@ public partial class FrmAltaUsuario : Form
     /// Habilita o bloquea todo el formulario dependiendo
     /// de si los datos auxiliares están disponibles.
     /// </summary>
-    private void CambiarEstadoFormulario(
-        bool habilitado)
+    private void CambiarEstadoFormulario(bool habilitado)
     {
         txtNombre.Enabled = habilitado;
         txtApellido.Enabled = habilitado;
@@ -358,7 +252,6 @@ public partial class FrmAltaUsuario : Form
         chkMostrarPassword.Enabled = habilitado;
         cmbRol.Enabled = habilitado;
         btnGuardar.Enabled = habilitado;
-
         btnCancelar.Enabled = true;
     }
 
@@ -366,8 +259,7 @@ public partial class FrmAltaUsuario : Form
     /// Habilita o bloquea los controles mientras se registra
     /// el usuario.
     /// </summary>
-    private void CambiarEstadoGuardado(
-        bool guardando)
+    private void CambiarEstadoGuardado(bool guardando)
     {
         txtNombre.Enabled = !guardando;
         txtApellido.Enabled = !guardando;
@@ -378,12 +270,7 @@ public partial class FrmAltaUsuario : Form
         cmbRol.Enabled = !guardando;
         btnGuardar.Enabled = !guardando;
         btnCancelar.Enabled = !guardando;
-
-        btnGuardar.Text =
-            guardando
-                ? "Guardando..."
-                : "Guardar usuario";
-
+        btnGuardar.Text = guardando ? "Guardando..." : "Guardar usuario";
         UseWaitCursor = guardando;
     }
 

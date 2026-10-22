@@ -1,5 +1,4 @@
-﻿namespace Taller.Dominio.Entidades;
-
+namespace Taller.Dominio.Entidades;
 /// <summary>
 /// Representa un cliente en el sistema.
 /// </summary>
@@ -14,8 +13,9 @@ public sealed class Cliente
     public string? Email { get; set; }
     public string? Direccion { get; set; }
     public bool Activo { get; set; } = true;
+    /// <summary>Versión de SQL Server que debe conservarse desde que se abre una edición.</summary>
+    public byte[] Version { get; set; } = [];
     public DateTime FechaAlta { get; set; } = DateTime.Now;
-
     /// <summary>
     /// Representa la coleccion de atenciones asociadas a este cliente.
     /// </summary>

@@ -1,13 +1,13 @@
-﻿using Taller.Dominio.Entidades;
+using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Abstracciones.Persistencia;
-
 /// <summary>
 /// Define las operaciones de persistencia necesarias
 /// para trabajar con clientes dentro de la aplicación.
 /// </summary>
 public interface IClienteRepositorio
 {
+    Task<List<Cliente>> ListarTodosAsync();
     Task<Cliente?> ObtenerPorIdAsync(int id);
     Task<Cliente?> ObtenerPorDocumentoAsync(string tipoDocumento, string documento);
     Task<List<Cliente>> ListarActivosAsync();

@@ -38,9 +38,9 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Preparar carpeta de copias en el contenedor aislado
         run: docker exec ${{ job.services.sqlserver.id }} mkdir -p /var/opt/mssql/backup
-      - name: Probar copias y restauraciones reales solo en bases temporales
+      - name: Probar circuito, migraciones y recuperación solo en bases temporales
         env:
           SGTM_SQL_PRUEBAS: 'Server=localhost,1433;Database=master;User ID=sa;Password=SGTM_CI_Aislado_2026!SoloPruebas;Encrypt=True;TrustServerCertificate=True'
           SGTM_PERMITIR_PRUEBAS_SQL: '1'
           SGTM_SQL_CARPETA_PRUEBAS: /var/opt/mssql/backup
-        run: dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj --configuration Release --nologo --filter FullyQualifiedName~RespaldosSqlPruebas -m:1
+        run: dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj --configuration Release --nologo --filter FullyQualifiedName~SqlPruebas -m:1

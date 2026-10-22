@@ -178,6 +178,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.HasKey("IdCliente");
 
                     b.HasIndex("TipoDocumento", "Documento")
@@ -1076,6 +1082,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.Property<int>("IdModelo")
                         .HasColumnType("int");
+
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.HasKey("IdVehiculo");
 

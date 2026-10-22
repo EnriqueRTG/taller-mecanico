@@ -100,6 +100,8 @@ Los horarios inexistentes por un salto de cambio horario se omiten para ese día
 8. Pasar a SINGLE_USER sin espera forzada, aplicar la completa y su diferencial si corresponde, comprobar integridad/esquema y volver a MULTI_USER. No se reparan errores con pérdida de datos automática.
 9. Confirmar auditoría y salida de mantenimiento en una transacción de control, con identificador idempotente: un reintento de confirmación no duplica el evento ni la generación de sesiones. **Cerrar y reiniciar todas las sesiones.** Las credenciales son las existentes en el punto recuperado.
 
+Con la coordinación habilitada, las conexiones de negocio no usan pooling: al terminar la operación se cierra también la sesión física. Esto evita que sesiones dormidas del pool impidan el mantenimiento sin tener que desconectarlas a la fuerza.
+
 Los bloqueos compartidos de los clientes duran toda la conexión/operación de negocio; el exclusivo de restauración evita que se reemplace mientras hay una transacción activa. El protocolo protege clientes de esta versión. No sustituye el aislamiento administrativo de herramientas externas, versiones anteriores o un DBA que tenga permisos para saltarse el flujo; se deben cerrar/coordinar esas herramientas.
 
 La restauración completa requiere interrupción temporal del trabajo. SGTM no ofrece recuperación en caliente sin ventana, alta disponibilidad, reemplazo parcial de tablas, FILESTREAM, archivos de otra estructura, ni cadenas de log. Las copias de otra versión y recuperación tras un fallo total de SQL/control deben tratarse con personal especializado.
@@ -123,6 +125,8 @@ Requiere la configuración y permisos SQL técnicos; muestra estado/catálogo/au
 Las copias auxiliares de control también deben conservarse fuera del servidor. Si se pierden control y catálogos, la recuperación técnica puede usar los backups nativos disponibles; la importación automática de archivos externos no es parte de la interfaz operativa de esta versión.
 
 ## Validación
+
+Validación del 22/10/2026: solución Release sin errores ni advertencias; 77 pruebas generales aprobadas y 12 pruebas nativas aprobadas sobre SQL Server 2025 Developer desechable. Se comprobó también que no hay cambios de modelo pendientes. La ejecución Windows/SQL Server 2022 de CI y la inspección visual del despliegue deben comprobarse antes de fusionar.
 
 - Pruebas de aplicación: administrador activo, dos identidades distintas, roles admitidos, claves erróneas y revocadas, plan ligado al solicitante/expiración/un solo uso, motivo, reconocimiento, rutas SQL seguras y calendario con zona.
 - Pruebas con SQL Server aislado en GitHub Actions: completa/diferencial, ensayo temporal y CHECKDB, recuperación real, copia protectora, auditoría externa, conexiones activas, generaciones de sesión, archivo reemplazado, esquema distinto y ejecución del agente.

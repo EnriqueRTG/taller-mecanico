@@ -127,20 +127,23 @@ public partial class FrmClientes : Form, IFormularioConOperacion
     private async void BtnEditarCliente_Click(object? sender, EventArgs e)
     {
         ClienteFila? cliente = ObtenerSeleccionado();
-        if (cliente is null)
+        if (cliente is null || OperacionEnCurso)
             return;
         using FrmEditarCliente formulario = _proveedorServicios.GetRequiredService<FrmEditarCliente>();
+        bool guardado=false;
         try
         {
+            OperacionEnCurso=true;Enabled=false;
             var datos = await Servicio.ObtenerEdicionAsync(cliente.Id);
             formulario.PrepararEdicion(datos);
-            if (formulario.ShowDialog(this) == DialogResult.OK)
-                await CargarAsync();
+            guardado=formulario.ShowDialog(this)==DialogResult.OK;
         }
         catch (Exception ex)
         {
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Abrir edición");
         }
+        finally {OperacionEnCurso=false;Enabled=true;}
+        if(guardado)await CargarAsync();
     }
 
     private void BtnVerHistorial_Click(object? sender, EventArgs e)

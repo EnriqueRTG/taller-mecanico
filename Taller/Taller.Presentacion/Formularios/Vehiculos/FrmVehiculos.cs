@@ -131,21 +131,24 @@ public partial class FrmVehiculos : Form, IFormularioConOperacion
     private async void BtnEditarVehiculo_Click(object? sender, EventArgs e)
     {
         VehiculoFila? vehiculo = ObtenerSeleccionado();
-        if (vehiculo is null)
+        if (vehiculo is null || OperacionEnCurso)
             return;
         using FrmEditarVehiculo formulario = _proveedorServicios.GetRequiredService<FrmEditarVehiculo>();
+        bool guardado=false;
         try
         {
+            OperacionEnCurso=true;Enabled=false;
             var datos = await Servicio.ObtenerEdicionAsync(vehiculo.Id);
             formulario.PrepararEdicion(datos);
             formulario.CargarModelos(await Servicio.ListarModelosAsync(datos.IdModelo));
-            if (formulario.ShowDialog(this) == DialogResult.OK)
-                await CargarAsync();
+            guardado=formulario.ShowDialog(this)==DialogResult.OK;
         }
         catch (Exception ex)
         {
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Abrir edición");
         }
+        finally {OperacionEnCurso=false;Enabled=true;}
+        if(guardado)await CargarAsync();
     }
 
     private void BtnVerHistorial_Click(object? sender, EventArgs e)

@@ -8,7 +8,7 @@ public partial class FrmAltaVehiculo : Form
     private bool _guardando;
     private void Guardado_FormClosing(object? sender, FormClosingEventArgs e)
     {
-        if (_guardando && DialogResult != DialogResult.OK)
+        if ((_guardando || _cargandoDatos) && DialogResult != DialogResult.OK)
             e.Cancel = true;
     }
 

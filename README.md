@@ -14,13 +14,13 @@ Aplicación de escritorio para gestionar la atención de vehículos en un taller
 
 Los listados, ediciones e historiales de clientes y vehículos utilizan persistencia real. Inicio muestra indicadores reales. Reportes genera documentos con indicadores, gráficos y detalle, según los permisos del rol.
 
-La implementación compila y tiene **57 pruebas automatizadas**. Todavía requiere validación manual de Windows Forms, impresión y consultas/migraciones en una copia de SQL Server antes de fusionar como versión estable. Las pruebas con EF InMemory no sustituyen las restricciones, transacciones ni rowversion de SQL Server.
+La implementación dispone de pruebas automatizadas del circuito, reportes y recuperación, incluyendo pruebas nativas en SQL Server aislado. Todavía requiere validación manual de Windows Forms, impresión y consultas/migraciones en una copia de SQL Server antes de fusionar como versión estable. Las pruebas con EF InMemory no sustituyen las restricciones, transacciones ni rowversion de SQL Server.
 
 ## Roles
 
 | Rol | Responsabilidades |
 | --- | --- |
-| Administrador | Usuarios y reportes de gestión del taller; acceso informativo al módulo de respaldo pendiente de integración. |
+| Administrador | Usuarios, reportes de gestión, copias completas/diferenciales manuales o programadas y recuperación con doble aprobación. |
 | Administrativo | Clientes, vehículos, recepción, comunicación y decisión de presupuestos, liquidación, cobros, entrega y reportes operativos/económicos. |
 | Técnico | Reserva de actividades, evaluación/informe, propuestas, ejecución y reportes propios; consulta de actividades disponibles. |
 
@@ -52,7 +52,7 @@ Se requiere Windows para ejecutar la interfaz, SDK .NET compatible con `global.j
 
 1. Guardar los cambios locales y descargar la rama que se quiere probar.
 2. Configurar `ConnectionStrings:Default` en `Taller/Taller.Presentacion/appsettings.Local.json` o la variable `SGTM_CONN`. No publicar credenciales ni copiar una conexión ajena.
-3. Realizar y verificar un respaldo mediante SQL Server Management Studio. **El módulo de respaldo de SGTM todavía no crea ni restaura copias.**
+3. Realizar y verificar un respaldo mediante SQL Server Management Studio. Si el módulo SGTM todavía no está instalado y validado, realizar esta copia mediante SQL Server Management Studio.
 4. Aplicar las migraciones sobre una copia de la base para validar la actualización.
 
 Desde la raíz:
@@ -71,7 +71,7 @@ La fábrica de contexto utiliza la configuración local o `SGTM_CONN`. Los datos
 - Documentos económicos internos en ARS, sin integración ni validez fiscal.
 - Cobros después de liquidar; no incluye anticipos, financiación ni devolución bancaria automática.
 - Las revisiones formales del presupuesto se realizan antes de comenzar sus trabajos. Los presupuestos adicionales después de iniciar ejecución quedan pendientes de ampliar.
-- Respaldo/restauración está deshabilitado y señalado como pendiente; no informa éxitos ficticios.
+- Respaldos/restauración requiere instalación técnica explícita de control, permisos y agente. Está deshabilitado por defecto hasta completar esa preparación. La recuperación usa mantenimiento y dos identidades; no ofrece recuperación sin ventana ni backups de log.
 - Los reportes muestran estados actuales o movimientos según su fecha explícita; no reconstruyen una situación histórica completa ni calculan costos/rentabilidad.
 
 ## Documentación del circuito
@@ -80,5 +80,6 @@ La fábrica de contexto utiliza la configuración local o `SGTM_CONN`. Los datos
 - [Adenda de presupuestos, ejecución y cobros](docs/ERS/ADENDA-v1.0-presupuestos-cobros.md).
 - [Probar decisiones, ejecución, cobros y entrega](docs/probar-decision-ejecucion-cobros.md).
 - [Reportes por rol y revisión de consistencia](docs/reportes-por-rol.md).
+- [Instalar y operar respaldos y restauración](docs/respaldos-restauracion.md).
 
-Esta rama continúa los cambios de los PR #30 y #31. La revisión de reportes no agrega migraciones; requiere las migraciones previas del circuito.
+Esta rama continúa los cambios de los PR #30 y #31. Las revisiones de reportes/respaldos no agregan migraciones de negocio; requieren las migraciones previas del circuito. Respaldos agrega una base de control instalada explícitamente mediante el agente, según su guía.

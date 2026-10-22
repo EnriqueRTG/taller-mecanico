@@ -40,11 +40,11 @@ El documento contiene datos de clientes y del taller; quien exporta es responsab
 - Las consultas de clientes y vehículos no conservan entidades rastreadas entre operaciones. Guardar un vehículo modifica solo el vehículo, no el grafo de marca/modelo.
 - Las ediciones preservan identificador, fecha de alta y estado; estos últimos se gestionan desde su acción específica. En vehículo, marca y modelo se conservan como catálogo de consulta en esta edición; no se pretende cambiar su identidad escribiendo texto libre.
 - Cancelar apertura es una operación real para Recepción: requiere motivo, versión vigente, estado Abierta y ausencia de evaluación/diagnóstico/presupuestos. Conserva fecha y evento de cancelación. Después del ingreso técnico se resuelve el circuito, no se descartan cargos mediante este botón.
-- Respaldo/restauración deja de simular operaciones exitosas e historial ficticio. La integración sigue pendiente y sus acciones están deshabilitadas; la interfaz indica realizar y verificar el respaldo mediante SQL Server Management Studio.
+- Respaldo/restauración dejó de simular operaciones exitosas. Su implementación posterior requiere instalación técnica y queda documentada en [Respaldos y restauración](respaldos-restauracion.md).
 
 ## Instalación y pruebas
 
-Esta rama continúa `feature/decision-ejecucion-cobros` (PR #31), que a su vez depende del circuito del PR #30. **No agrega migraciones**; requiere aplicar las de esas ramas si la base todavía no está actualizada. Realizar una copia real antes, desde SQL Server; el módulo de respaldo de SGTM no crea esa copia.
+Esta rama continúa `feature/decision-ejecucion-cobros` (PR #31), que a su vez depende del circuito del PR #30. **No agrega migraciones**; requiere aplicar las de esas ramas si la base todavía no está actualizada. Realizar una copia real antes, desde SQL Server; si el módulo de respaldo de SGTM todavía no está instalado, realizar esa copia mediante SQL Server Management Studio.
 
 ```powershell
 dotnet build Taller/Taller.sln --configuration Release

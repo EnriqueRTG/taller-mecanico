@@ -3,7 +3,6 @@ using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Servicios;
 
 namespace Taller.Aplicacion;
-
 /// <summary>
 /// Clase de extensión para registrar los servicios de la capa de aplicación en el contenedor de dependencias.
 /// </summary>
@@ -12,7 +11,7 @@ public static class DependencyInjection
     /// <summary>
     /// Registra los servicios de la capa de aplicación en el contenedor de dependencias.
     /// </summary>
-    /// <param name="services"></param>
+    /// <param name = "services"></param>
     /// <returns>El contenedor de dependencias con los servicios registrados.</returns>
     public static IServiceCollection AddAplicacion(this IServiceCollection services)
     {
@@ -30,8 +29,9 @@ public static class DependencyInjection
         services.AddScoped<EjecucionServicio>();
         services.AddScoped<CobroServicio>();
         services.AddScoped<ReporteServicio>();
-
+        services.AddSingleton<TimeProvider>(TimeProvider.System);
+        services.AddSingleton<Taller.Aplicacion.Respaldos.PlanesRestauracion>();
+        services.AddScoped<RespaldoServicio>();
         return services;
     }
-
 }

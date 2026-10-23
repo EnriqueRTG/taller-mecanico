@@ -97,22 +97,13 @@ public partial class FrmInicio : Form, IFormularioConOperacion
         int indice = 0;
         foreach (var documento in documentos)
         {
-            var tarjeta = new Panel { Width = 300, Height = 225, BackColor = Color.White, Margin = new Padding(0, 0, 12, 12), Padding = new Padding(14) };
-            var titulo = new Label { Dock = DockStyle.Top, Height = 48, Text = documento.Titulo, Font = new Font("Segoe UI", 12F, FontStyle.Bold), ForeColor = colores[indice++ % colores.Length] };
+            var tarjeta = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Margin = new Padding(0, 0, 12, 12), Padding = new Padding(14) };
+            var titulo = new Label { Dock = DockStyle.Top, Height = 48, Text = documento.Titulo, Font = new Font("Segoe UI", 12F, FontStyle.Bold), ForeColor = colores[indice % colores.Length] };
             var contenido = new Label { Dock = DockStyle.Fill, AutoEllipsis = true, Font = new Font("Segoe UI", 11F), Text = string.Join(Environment.NewLine, documento.Indicadores.Select(i => $"{i.Nombre}: {i.Valor}")) };
             tarjeta.Controls.Add(contenido);
             tarjeta.Controls.Add(titulo);
-            pnlTarjetas.Controls.Add(tarjeta);
+            pnlTarjetas.Controls.Add(tarjeta, indice++, 0);
         }
-        AjustarTarjetas();
-    }
-
-    private void PnlTarjetas_SizeChanged(object? sender, EventArgs e) => AjustarTarjetas();
-    private void AjustarTarjetas()
-    {
-        int ancho = Math.Max(220, (pnlTarjetas.ClientSize.Width - 42) / 3);
-        foreach (Control tarjeta in pnlTarjetas.Controls)
-            tarjeta.Width = ancho;
     }
 
     private void FrmInicio_FormClosing(object? sender, FormClosingEventArgs e)

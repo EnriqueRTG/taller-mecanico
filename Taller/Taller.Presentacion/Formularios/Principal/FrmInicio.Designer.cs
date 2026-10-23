@@ -16,7 +16,7 @@ partial class FrmInicio
         tlpPrincipal = new TableLayoutPanel();
         lblBienvenida = new Label();
         lblDescripcion = new Label();
-        pnlTarjetas = new FlowLayoutPanel();
+        pnlTarjetas = new TableLayoutPanel();
         lblSinPendientes = new Label();
         pnlActividad = new Panel();
         dgvActividad = new DataGridView();
@@ -109,8 +109,14 @@ partial class FrmInicio
         lblDescripcion.Text = "Resumen de datos reales según su rol. Últimos 20 registros de las consultas resumidas, según su fecha de referencia.";
         pnlTarjetas.Dock = DockStyle.Fill;
         pnlTarjetas.AutoScroll = true;
-        pnlTarjetas.SizeChanged += PnlTarjetas_SizeChanged;
-        pnlTarjetas.WrapContents = true;
+
+        pnlTarjetas.ColumnCount = 3;
+        pnlTarjetas.RowCount = 1;
+        pnlTarjetas.GrowStyle = TableLayoutPanelGrowStyle.FixedSize;
+        pnlTarjetas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
+        pnlTarjetas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
+        pnlTarjetas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33334F));
+        pnlTarjetas.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         pnlTarjetas.Padding = new Padding(0, 0, 8, 0);
         dgvActividad.Dock = DockStyle.Fill;
         dgvActividad.AutoGenerateColumns = false;
@@ -180,7 +186,7 @@ partial class FrmInicio
     private Panel pnlCalendario = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblBienvenida = null!, lblDescripcion = null!, lblEstado = null!;
-    private FlowLayoutPanel pnlTarjetas = null!;
+    private TableLayoutPanel pnlTarjetas = null!;
     private Label lblSinPendientes = null!;
     private Panel pnlActividad = null!;
     private DataGridView dgvActividad = null!;

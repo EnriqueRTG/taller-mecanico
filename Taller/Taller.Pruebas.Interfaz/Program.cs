@@ -1,3 +1,5 @@
+using System.Reflection;
+using Taller.Aplicacion.DTOs.Reportes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion;
@@ -36,10 +38,50 @@ internal static class Program
             {
                 using var formulario=(Form)scope.ServiceProvider.GetRequiredService(tipo);
                 formulario.PerformLayout();
+                if (formulario is FrmInicio)
+                    VerificarTarjetasInicio(formulario);
                 if(formulario.Controls.Count==0)throw new InvalidOperationException("Formulario sin controles: "+tipo.Name);
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
         return 0;
     }
+    private static void VerificarTarjetasInicio(Form formulario)
+    {
+        // Reproduce la regresión de la tercera tarjeta recortada, sin abrir una conexión SQL.
+        var documentos = Enumerable.Range(1, 3).Select(i => new ReporteDocumentoDto
+        {
+            Titulo = "Indicador " + i,
+            Indicadores = [new IndicadorReporteDto("Registros", "10")]
+        }).ToList();
+        typeof(FrmInicio).GetMethod("MostrarTarjetas", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, [documentos]);
+        var tarjetas = (TableLayoutPanel)formulario.Controls.Find("pnlTarjetas", true).Single();
+        foreach (int ancho in new[] { 1020, 1366, 1690 })
+        {
+            formulario.ClientSize = new Size(ancho, 650);
+            Disponer(formulario);
+            if (tarjetas.Controls.Count != 3)
+                throw new InvalidOperationException("Deben mostrarse las tres tarjetas del inicio.");
+            Rectangle anterior = Rectangle.Empty;
+            foreach (Control tarjeta in tarjetas.Controls)
+            {
+                if (tarjeta.Width <= 0 || tarjeta.Height <= 0 || tarjeta.Bottom > tarjetas.ClientSize.Height || tarjeta.Right > tarjetas.ClientSize.Width)
+                    throw new InvalidOperationException("Tarjeta recortada para ancho " + ancho);
+                if (!anterior.IsEmpty && tarjeta.Top != anterior.Top)
+                    throw new InvalidOperationException("Una tarjeta saltó a otra fila.");
+                if (!anterior.IsEmpty && tarjeta.Bounds.IntersectsWith(anterior))
+                    throw new InvalidOperationException("Tarjetas superpuestas.");
+                anterior = tarjeta.Bounds;
+            }
+            Console.WriteLine("Tres tarjetas visibles sin superposición: " + ancho);
+        }
+    }
+
+    private static void Disponer(Control control)
+    {
+        control.PerformLayout();
+        foreach (Control hijo in control.Controls)
+            Disponer(hijo);
+    }
+
 }

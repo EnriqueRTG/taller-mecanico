@@ -7,7 +7,7 @@ using Taller.Infraestructura.Respaldos;
 using Taller.Respaldos;
 
 var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = args.Where(a => a != "--instalar-control" && a != "--estado-control").ToArray(), ContentRootPath = AppContext.BaseDirectory });
-builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false).AddEnvironmentVariables();
 builder.Services.AddAplicacion();
 builder.Services.AddInfraestructura(builder.Configuration);
 if (args.Contains("--instalar-control", StringComparer.Ordinal))

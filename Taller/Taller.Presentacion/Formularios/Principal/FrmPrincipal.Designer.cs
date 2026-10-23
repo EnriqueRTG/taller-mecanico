@@ -30,7 +30,27 @@ namespace Taller.Presentacion.Formularios.Principal
             pnlMenu = new Panel();
             pnlOpciones = new Panel();
             btnRespaldo = new Button();
+            relojSesion = new System.Windows.Forms.Timer(components)
+            {
+                Interval = 5000
+            };
+            relojSesion.Tick += RelojSesion_Tick;
             btnCatalogo = new Button();
+            btnAuditoria = new Button
+            {
+                Name = "btnAuditoria",
+                Text = "Auditoría de accesos",
+                Dock = DockStyle.Top,
+                Height = 48,
+                Padding = new Padding(20, 0, 0, 0),
+                TextAlign = ContentAlignment.MiddleLeft,
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.FromArgb(220, 231, 245),
+                Font = new Font("Segoe UI", 9.5F),
+                Cursor = Cursors.Hand
+            };
+            btnAuditoria.FlatAppearance.BorderSize = 0;
+            btnAuditoria.Click += btnAuditoria_Click;
             btnReportes = new Button();
             btnComprobantes = new Button();
             btnPresupuestos = new Button();
@@ -76,12 +96,13 @@ namespace Taller.Presentacion.Formularios.Principal
             // 
             pnlOpciones.AutoScroll = true;
             pnlOpciones.Controls.Add(btnRespaldo);
-            pnlOpciones.Controls.Add(btnCatalogo);
+            pnlOpciones.Controls.Add(btnAuditoria);
             pnlOpciones.Controls.Add(btnReportes);
             pnlOpciones.Controls.Add(btnComprobantes);
             pnlOpciones.Controls.Add(btnPresupuestos);
             pnlOpciones.Controls.Add(btnDiagnosticos);
             pnlOpciones.Controls.Add(btnAtenciones);
+            pnlOpciones.Controls.Add(btnCatalogo);
             pnlOpciones.Controls.Add(btnVehiculos);
             pnlOpciones.Controls.Add(btnClientes);
             pnlOpciones.Controls.Add(btnUsuarios);
@@ -502,6 +523,8 @@ namespace Taller.Presentacion.Formularios.Principal
         private Button btnUsuarios;
         private Button btnInicio;
         private Button btnRespaldo;
+        private Button btnAuditoria;
+        private System.Windows.Forms.Timer relojSesion;
         private Button btnCatalogo;
         private Button btnReportes;
         private Button btnComprobantes;

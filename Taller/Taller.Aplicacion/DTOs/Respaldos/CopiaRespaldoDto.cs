@@ -2,6 +2,15 @@ namespace Taller.Aplicacion.DTOs.Respaldos;
 /// <summary>Catálogo externo a la base recuperable; rutas pertenecen al servidor SQL, no al equipo cliente.</summary>
 public sealed record CopiaRespaldoDto
 {
+    public DateTimeOffset? UltimoIntentoAzureUtc { get; init; }
+    public bool AzureSolicitado { get; init; }
+    public string EstadoAzure { get; init; } = "No solicitado";
+    public string ContenedorAzure { get; init; } = "";
+    public string BlobAzure { get; init; } = "";
+    public string Sha256 { get; init; } = "";
+    public string ETagAzure { get; init; } = "";
+    public long Longitud { get; init; }
+    public DateTimeOffset? VerificadaAzureUtc { get; init; }
     public Guid Id { get; init; }
     public Guid BackupSetGuid { get; init; }
     public Guid? BaseId { get; init; }

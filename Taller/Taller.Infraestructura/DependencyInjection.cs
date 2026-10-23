@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddSingleton<Taller.Infraestructura.Respaldos.GeneracionMantenimiento>();
         services.AddSingleton<Taller.Infraestructura.Respaldos.IntercepcionMantenimiento>();
         services.AddSingleton<Taller.Infraestructura.Respaldos.RegistroRespaldosSql>();
+        services.AddSingleton<IArchivoRespaldoNube, Taller.Infraestructura.Respaldos.ArchivoRespaldoAzure>();
         services.AddSingleton<IRespaldoMotor, Taller.Infraestructura.Respaldos.RespaldoSqlServer>();
         services.AddDbContext<TallerDbContext>((proveedor, options) =>
         {
@@ -57,6 +58,7 @@ public static class DependencyInjection
         // Registra el servicio encargado de generar
         // y verificar hashes de contraseñas.
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IProteccionAcceso, ProteccionAccesoSql>();
         // Registra el servicio concreto utilizado para las operaciones de persistencia de clientes.
         services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
         // Registra el servicio concreto utilizado para las operaciones de persistencia de marcas.
@@ -80,6 +82,8 @@ public static class DependencyInjection
         services.AddScoped<IEvaluacionRepositorio, EvaluacionRepositorio>();
         services.AddScoped<ICircuitoRepositorio, CircuitoRepositorio>();
         services.AddScoped<IReporteRepositorio, ReporteRepositorio>();
+        services.AddScoped<IInicioRepositorio, InicioRepositorio>();
+        services.AddScoped<IAuditoriaAccesoRepositorio, AuditoriaAccesoRepositorio>();
         // Registra el servicio responsable de crear los datos
         // mínimos necesarios para el primer inicio del sistema.
         services.AddScoped<InicializadorDatos>();

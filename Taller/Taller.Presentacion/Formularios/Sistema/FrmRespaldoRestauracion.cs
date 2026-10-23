@@ -63,12 +63,17 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
             if (ex is Microsoft.Data.SqlClient.SqlException or Microsoft.EntityFrameworkCore.DbUpdateException)
             {
                 lblEstado.Text = "No se completó la operación SQL. Consulte la referencia de asistencia y el estado de control antes de repetir una recuperación.";
-                Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this,ex,"Respaldos y recuperación");
+                Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Respaldos y recuperación");
             }
             else
             {
-                lblEstado.Text = "Operación no completada: " + ex.Message;
-                MessageBox.Show(this,ex.Message,"Respaldos y recuperación",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                if (ex is InvalidOperationException)
+                {
+                    lblEstado.Text = "Operación no completada: " + ex.Message;
+                    MessageBox.Show(this, ex.Message, "Respaldos y recuperación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                    Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Respaldos y recuperación");
             }
         }
         finally
@@ -93,6 +98,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         dgvHistorial.DataSource = estado.Historial.ToList();
         dgvCopias.ClearSelection();
         dgvHistorial.ClearSelection();
+        chkAzureAuto.Checked = _programa.CopiarAzure;
         chkProgramado.Checked = _programa.Activo;
         chkDiferenciales.Checked = _programa.Diferenciales;
         txtCarpetaAuto.Text = _programa.CarpetaServidor;
@@ -133,9 +139,20 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
     {
         await EjecutarAsync(async () =>
         {
-            var copia = await _servicio.CrearAsync((TipoRespaldo)cboTipo.SelectedItem!, txtCarpetaManual.Text, Progreso());
+            var copia = await _servicio.CrearAsync((TipoRespaldo)cboTipo.SelectedItem!, txtCarpetaManual.Text, Progreso(), chkAzureManual.Checked);
             await CargarDatosAsync();
             MessageBox.Show(this, "Copia principal creada y verificada.\n" + copia.RutaServidor + "\n" + copia.Advertencia, "Respaldo", MessageBoxButtons.OK, copia.Advertencia.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+        });
+    }
+
+    private async void BtnReintentarAzure_Click(object? sender, EventArgs e)
+    {
+        if (dgvCopias.SelectedRows.Count != 1 || dgvCopias.SelectedRows[0].DataBoundItem is not CopiaRespaldoDto copia)
+            return;
+        await EjecutarAsync(async () =>
+        {
+            await _servicio.ReintentarAzureAsync(copia.Id);
+            await CargarDatosAsync();
         });
     }
 
@@ -145,6 +162,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         {
             var p = _programa with
             {
+                CopiarAzure = chkAzureAuto.Checked,
                 Activo = chkProgramado.Checked,
                 Diferenciales = chkDiferenciales.Checked,
                 DiaCompleta = (DayOfWeek)cboDia.SelectedValue!,

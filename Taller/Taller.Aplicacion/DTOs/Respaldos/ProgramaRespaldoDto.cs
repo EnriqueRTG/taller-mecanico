@@ -2,6 +2,8 @@ namespace Taller.Aplicacion.DTOs.Respaldos;
 /// <summary>Plan diario en una zona explícita. Permite completas diarias o completa semanal con diferenciales diarias.</summary>
 public sealed record ProgramaRespaldoDto
 {
+    /// <summary>Replica cada respaldo local verificado al contenedor privado instalado por el técnico.</summary>
+    public bool CopiarAzure { get; init; }
     public bool Activo { get; init; }
     public bool Diferenciales { get; init; } = true;
     public DayOfWeek DiaCompleta { get; init; } = DayOfWeek.Sunday;

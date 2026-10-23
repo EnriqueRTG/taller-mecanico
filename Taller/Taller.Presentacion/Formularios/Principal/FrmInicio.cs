@@ -8,17 +8,27 @@ namespace Taller.Presentacion.Formularios.Principal;
 public partial class FrmInicio : Form, IFormularioConOperacion
 {
     private readonly ReporteServicio _reportes;
+    private readonly InicioServicio _inicio;
     private readonly SesionUsuario _sesion;
     public bool OperacionEnCurso { get; private set; }
 
-    public FrmInicio(ReporteServicio reportes, SesionUsuario sesion)
+    public FrmInicio(ReporteServicio reportes, SesionUsuario sesion, InicioServicio inicio)
     {
         InitializeComponent();
         _reportes = reportes;
+        _inicio = inicio;
         _sesion = sesion;
     }
 
-    private async void FrmInicio_Load(object? sender, EventArgs e) => await CargarAsync();
+    private async void FrmInicio_Load(object? sender, EventArgs e)
+    {
+        ActualizarReloj();
+        reloj.Start();
+        await CargarAsync();
+    }
+
+    private void Reloj_Tick(object? sender, EventArgs e) => ActualizarReloj();
+    private void ActualizarReloj() => lblReloj.Text = DateTime.Now.ToString("dddd dd 'de' MMMM 'de' yyyy · HH:mm:ss", System.Globalization.CultureInfo.GetCultureInfo("es-AR"));
     private async void BtnActualizar_Click(object? sender, EventArgs e) => await CargarAsync();
     private async Task CargarAsync()
     {
@@ -32,7 +42,8 @@ public partial class FrmInicio : Form, IFormularioConOperacion
             dgvActividad.DataSource = null;
             var tipos = await _reportes.ListarTiposAsync();
             var usuario = _sesion.UsuarioActual;
-            lblBienvenida.Text = $"Bienvenido, {usuario?.Nombre}";
+            lblBienvenida.Text = $"Bienvenido, {usuario?.Nombre} {usuario?.Apellido}";
+            lblDescripcion.Text = $"Perfil: {usuario?.Rol?.Nombre} · Usuario: {usuario?.NombreUsuario}. Pendientes priorizados según su intervención.";
             var seleccion = tipos.Contains(TipoReporte.MovimientosCobro) ? new[]
             {
                 TipoReporte.Atenciones,
@@ -50,9 +61,9 @@ public partial class FrmInicio : Form, IFormularioConOperacion
             foreach (var tipo in seleccion)
                 documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), Hasta = DateTime.Today }));
             txtIndicadores.Text = string.Join(Environment.NewLine + Environment.NewLine, documentos.Select(d => d.Titulo + Environment.NewLine + string.Join("   |   ", d.Indicadores.Select(i => i.Nombre + ": " + i.Valor))));
-            dgvActividad.DataSource = documentos.SelectMany(d => d.Registros.Select(x => new { Reporte = d.Titulo, x.Fecha, x.Codigo, x.Descripcion, Estado = ReporteServicio.Legible(x.Estado) })).OrderByDescending(x => x.Fecha).Take(20).ToList();
+            dgvActividad.DataSource = await _inicio.ListarPendientesAsync();
             dgvActividad.ClearSelection();
-            lblEstado.Text = $"Actualizado {DateTime.Now:dd/MM/yyyy HH:mm:ss} · Mes actual, excepto saldos y carga técnica (situación actual). Detalle y documentos en Reportes.";
+            lblEstado.Text = $"Actualizado {DateTime.Now:dd/MM/yyyy HH:mm:ss} · Indicadores: mes actual; saldos y carga: situación actual. Pendientes sin filtro de fecha. Detalle en Reportes.";
         }
         catch (Exception ex)
         {

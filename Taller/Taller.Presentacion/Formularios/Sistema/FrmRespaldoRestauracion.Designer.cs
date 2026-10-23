@@ -92,6 +92,25 @@ partial class FrmRespaldoRestauracion
         dgvHistorial.Name = "dgvHistorial";
         btnActualizar = new Button();
         btnActualizar.Name = "btnActualizar";
+        chkAzureManual = new CheckBox
+        {
+            Name = "chkAzureManual",
+            Text = "Replicar también en Azure privado",
+            AutoSize = true
+        };
+        chkAzureAuto = new CheckBox
+        {
+            Name = "chkAzureAuto",
+            Text = "Replicar también en Azure privado",
+            AutoSize = true
+        };
+        btnReintentarAzure = new Button
+        {
+            Name = "btnReintentarAzure",
+            Text = "Reintentar Azure de la copia seleccionada",
+            AutoSize = true
+        };
+        btnReintentarAzure.Click += BtnReintentarAzure_Click;
         SuspendLayout();
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -132,7 +151,7 @@ partial class FrmRespaldoRestauracion
         tlpCopias.RowCount = 3;
         tlpCopias.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpCopias.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
-        tlpCopias.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
+        tlpCopias.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
         tlpCopias.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tabCopias.Controls.Add(tlpCopias);
         lblManual.Dock = DockStyle.Fill;
@@ -150,7 +169,7 @@ partial class FrmRespaldoRestauracion
         cboTipo.Width = 135;
         btnCrear.Text = "Crear y verificar copia";
         btnCrear.AutoSize = true;
-        flpManual.Controls.AddRange([txtCarpetaManual, cboTipo, btnCrear]);
+        flpManual.Controls.AddRange([txtCarpetaManual, cboTipo, chkAzureManual, btnCrear, btnReintentarAzure]);
         dgvCopias.Dock = DockStyle.Fill;
         dgvCopias.ReadOnly = true;
         dgvCopias.AutoGenerateColumns = false;
@@ -226,10 +245,12 @@ partial class FrmRespaldoRestauracion
             FillWeight = 180
         };
         dgvCopias.Columns.Add(colAdvertencia);
+        dgvCopias.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAzure", DataPropertyName = "EstadoAzure", HeaderText = "Azure", MinimumWidth = 120 });
         tlpPrograma.Dock = DockStyle.Fill;
         tlpPrograma.Padding = new Padding(10);
         tlpPrograma.ColumnCount = 1;
-        tlpPrograma.RowCount = 7;
+        tlpPrograma.RowCount = 8;
+        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPrograma.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 66));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
@@ -274,7 +295,8 @@ partial class FrmRespaldoRestauracion
         tlpPrograma.Controls.Add(txtCarpetaAuto, 0, 3);
         tlpPrograma.Controls.Add(flpHorario, 0, 4);
         tlpPrograma.Controls.Add(btnGuardarPrograma, 0, 5);
-        tlpPrograma.Controls.Add(txtEstadoPrograma, 0, 6);
+        tlpPrograma.Controls.Add(chkAzureAuto, 0, 6);
+        tlpPrograma.Controls.Add(txtEstadoPrograma, 0, 7);
         tlpRestaurar.Dock = DockStyle.Fill;
         tlpRestaurar.Padding = new Padding(10);
         tlpRestaurar.ColumnCount = 1;
@@ -383,6 +405,8 @@ partial class FrmRespaldoRestauracion
         ResumeLayout(false);
     }
 
+    private CheckBox chkAzureManual = null!, chkAzureAuto = null!;
+    private Button btnReintentarAzure = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblTitulo = null!;
     private Label lblEstado = null!;

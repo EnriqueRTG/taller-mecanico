@@ -87,3 +87,11 @@ Esta rama continúa los cambios de los PR #30 y #31. Las revisiones de reportes/
 La integración compatible de catálogo, clientes y vehículos se describe en [la guía de integración](docs/integracion-catalogo-maestros.md). Incluye la migración no destructiva de versiones de clientes/vehículos; no aplicar la migración `AjustarCatalogoActual` de la rama paralela sobre el circuito vigente.
 
 - [Hallazgos, adicionales, aceptación parcial y materiales del cliente](docs/hallazgos-adicionales-materiales.md): circuito operativo, responsabilidades, migración y pruebas de aceptación.
+
+## Instalación segura, nube y demostración
+
+- [Seguridad e instalación](docs/seguridad-instalacion.md)
+- [Respaldos en Azure](docs/azure-respaldos.md)
+- [Lote y guion de coloquio](docs/coloquio-demostracion.md)
+
+El lote se carga explícitamente con `scripts/Cargar-Demostracion.ps1`; no se ejecuta al iniciar Windows Forms. Las instalaciones nuevas requieren una contraseña inicial suministrada por el instalador.

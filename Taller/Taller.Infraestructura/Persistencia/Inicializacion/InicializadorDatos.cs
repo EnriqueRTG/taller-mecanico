@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Seguridad;
 using Taller.Dominio.Entidades;
+using Microsoft.Extensions.Configuration;
+using Taller.Dominio.Constantes;
 
 namespace Taller.Infraestructura.Persistencia.Inicializacion;
-
 /// <summary>
 /// Representa un inicializador de datos que se encarga de crear los datos mínimos requeridos por el sistema, incluyendo la creación del usuario administrador y la inicialización del catálogo de vehículos.
 /// </summary>
@@ -11,17 +12,17 @@ public sealed class InicializadorDatos
 {
     // Variable para el contexto de la base de datos
     private readonly TallerDbContext _contexto;
-
     // Variable para el servicio de hash de contraseñas
     private readonly IPasswordHasher _passwordHasher;
-
+    private readonly IConfiguration _configuracion;
     /// <summary>
-    /// Inicializa una nueva instancia de la clase <see cref="InicializadorDatos"/> con el contexto de la base de datos y el servicio de hash de contraseñas proporcionados.
+    /// Inicializa una nueva instancia de la clase <see cref = "InicializadorDatos"/> con el contexto de la base de datos y el servicio de hash de contraseñas proporcionados.
     /// </summary>
-    /// <param name="contexto"></param>
-    /// <param name="passwordHasher"></param>
-    public InicializadorDatos(TallerDbContext contexto, IPasswordHasher passwordHasher)
+    /// <param name = "contexto"></param>
+    /// <param name = "passwordHasher"></param>
+    public InicializadorDatos(TallerDbContext contexto, IPasswordHasher passwordHasher, IConfiguration configuracion)
     {
+        _configuracion = configuracion;
         _contexto = contexto;
         _passwordHasher = passwordHasher;
     }
@@ -37,26 +38,28 @@ public sealed class InicializadorDatos
     }
 
     /// <summary>
-    /// Inicializa el usuario administrador si no existe en la base de datos. Crea un usuario con nombre de usuario "admin", contraseña "Admin123!", y asigna el rol de administrador.
+    /// Inicializa el usuario administrador si no existe en la base de datos. Crea el administrador con una credencial suministrada durante la instalación.
     /// </summary>
     /// <returns></returns>
     private async Task InicializarAdministradorAsync()
     {
-        var existeAdministrador = await _contexto.Usuarios.AnyAsync(u => u.NombreUsuario == "admin");
-
-        if (existeAdministrador)
+        if (await _contexto.Usuarios.AnyAsync(u => u.RolId == RolesSistema.AdministradorId && u.Activo))
             return;
-
+        // No recupera automáticamente cuentas deshabilitadas ni cambia contraseñas existentes.
+        if (await _contexto.Usuarios.AnyAsync())
+            throw new InvalidOperationException("No existe un administrador activo. Solicite recuperación de acceso al responsable técnico.");
+        string clave = Environment.GetEnvironmentVariable("SGTM_ADMIN_INICIAL_PASSWORD") ?? _configuracion["Instalacion:ClaveAdministrador"] ?? "";
+        if (clave.Length < 12 || clave.Length > UsuarioRestricciones.PasswordMaximo || !clave.Any(char.IsUpper) || !clave.Any(char.IsLower) || !clave.Any(char.IsDigit) || !clave.Any(c => !char.IsLetterOrDigit(c)))
+            throw new InvalidOperationException("Defina SGTM_ADMIN_INICIAL_PASSWORD para la primera instalación: al menos 12 caracteres con mayúsculas, minúsculas, números y un símbolo. Retire la configuración después del alta.");
         var administrador = new Usuario
         {
             NombreUsuario = "admin",
-            PasswordHash = _passwordHasher.Hash("Admin123!"),
+            PasswordHash = _passwordHasher.Hash(clave),
             Nombre = "Administrador",
             Apellido = "Sistema",
-            RolId = 1,
+            RolId = RolesSistema.AdministradorId,
             Activo = true
         };
-
         await _contexto.Usuarios.AddAsync(administrador);
         await _contexto.SaveChangesAsync();
     }
@@ -78,34 +81,24 @@ public sealed class InicializadorDatos
         var renault = await ObtenerOCrearMarcaAsync("Renault");
         var nissan = await ObtenerOCrearMarcaAsync("Nissan");
         var volkswagen = await ObtenerOCrearMarcaAsync("Volkswagen");
-
         await ObtenerOCrearModeloAsync(chevrolet.IdMarca, "Onix");
         await ObtenerOCrearModeloAsync(chevrolet.IdMarca, "S10");
-
         await ObtenerOCrearModeloAsync(ford.IdMarca, "Ranger");
         await ObtenerOCrearModeloAsync(ford.IdMarca, "Maverick");
-
         await ObtenerOCrearModeloAsync(toyota.IdMarca, "Corolla");
         await ObtenerOCrearModeloAsync(toyota.IdMarca, "Hilux");
-
         await ObtenerOCrearModeloAsync(honda.IdMarca, "Civic");
         await ObtenerOCrearModeloAsync(honda.IdMarca, "HR-V");
-
         await ObtenerOCrearModeloAsync(fiat.IdMarca, "Cronos");
         await ObtenerOCrearModeloAsync(fiat.IdMarca, "Pulse");
-
         await ObtenerOCrearModeloAsync(peugeot.IdMarca, "208");
         await ObtenerOCrearModeloAsync(peugeot.IdMarca, "Partner");
-
         await ObtenerOCrearModeloAsync(citroen.IdMarca, "C4");
         await ObtenerOCrearModeloAsync(citroen.IdMarca, "Jumper");
-
         await ObtenerOCrearModeloAsync(renault.IdMarca, "Duster");
         await ObtenerOCrearModeloAsync(renault.IdMarca, "Kwid");
-
         await ObtenerOCrearModeloAsync(nissan.IdMarca, "Kicks");
         await ObtenerOCrearModeloAsync(nissan.IdMarca, "Sentra");
-
         await ObtenerOCrearModeloAsync(volkswagen.IdMarca, "Polo");
         await ObtenerOCrearModeloAsync(volkswagen.IdMarca, "Amarok");
     }
@@ -113,14 +106,11 @@ public sealed class InicializadorDatos
     /// <summary>
     /// Obtiene una marca existente por nombre o la crea si no existe.
     /// </summary>
-    /// <param name="nombre">Nombre de la marca.</param>
+    /// <param name = "nombre">Nombre de la marca.</param>
     /// <returns>La marca existente o recién creada.</returns>
     private async Task<Marca> ObtenerOCrearMarcaAsync(string nombre)
     {
-        var marca = await _contexto.Marcas
-            .FirstOrDefaultAsync(m =>
-            m.Nombre == nombre);
-
+        var marca = await _contexto.Marcas.FirstOrDefaultAsync(m => m.Nombre == nombre);
         if (marca is not null)
         {
             return marca;
@@ -131,10 +121,8 @@ public sealed class InicializadorDatos
             Nombre = nombre,
             Activo = true
         };
-
         await _contexto.Marcas.AddAsync(marca);
         await _contexto.SaveChangesAsync();
-
         return marca;
     }
 
@@ -142,16 +130,12 @@ public sealed class InicializadorDatos
     /// Obtiene un modelo existente dentro de una marca
     /// o lo crea si no existe.
     /// </summary>
-    /// <param name="idMarca">Identificador de la marca asociada.</param>
-    /// <param name="nombreModelo">Nombre del modelo.</param>
+    /// <param name = "idMarca">Identificador de la marca asociada.</param>
+    /// <param name = "nombreModelo">Nombre del modelo.</param>
     /// <returns>El modelo existente o recién creado.</returns>
     private async Task<Modelo> ObtenerOCrearModeloAsync(int idMarca, string nombreModelo)
     {
-        var modelo = await _contexto.Modelos
-            .FirstOrDefaultAsync(m =>
-            m.IdMarca == idMarca &&
-            m.Nombre == nombreModelo);
-
+        var modelo = await _contexto.Modelos.FirstOrDefaultAsync(m => m.IdMarca == idMarca && m.Nombre == nombreModelo);
         if (modelo is not null)
         {
             return modelo;
@@ -163,10 +147,8 @@ public sealed class InicializadorDatos
             Nombre = nombreModelo,
             Activo = true
         };
-
         await _contexto.Modelos.AddAsync(modelo);
         await _contexto.SaveChangesAsync();
-
         return modelo;
     }
 }

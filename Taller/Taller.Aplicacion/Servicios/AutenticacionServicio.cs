@@ -1,10 +1,9 @@
-﻿using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Abstracciones.Seguridad;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Servicios;
-
 /// <summary>
 /// Proporciona las operaciones necesarias para autenticar
 /// usuarios dentro del sistema.
@@ -22,43 +21,35 @@ public sealed class AutenticacionServicio
 {
     private readonly IUsuarioRepositorio _usuarioRepositorio;
     private readonly IPasswordHasher _passwordHasher;
-
+    private readonly IProteccionAcceso _proteccion;
     /// <summary>
     /// Inicializa una nueva instancia del servicio de autenticación.
     /// </summary>
-    /// <param name="usuarioRepositorio">
+    /// <param name = "usuarioRepositorio">
     /// Repositorio utilizado para obtener los usuarios registrados.
     /// </param>
-    /// <param name="passwordHasher">
+    /// <param name = "passwordHasher">
     /// Componente encargado de verificar las contraseñas
     /// almacenadas mediante hash.
     /// </param>
-    /// <exception cref="ArgumentNullException">
+    /// <exception cref = "ArgumentNullException">
     /// Se produce cuando alguna dependencia requerida es nula.
     /// </exception>
-    public AutenticacionServicio(
-        IUsuarioRepositorio usuarioRepositorio,
-        IPasswordHasher passwordHasher)
+    public AutenticacionServicio(IUsuarioRepositorio usuarioRepositorio, IPasswordHasher passwordHasher, IProteccionAcceso proteccion)
     {
-        _usuarioRepositorio =
-            usuarioRepositorio
-            ?? throw new ArgumentNullException(
-                nameof(usuarioRepositorio));
-
-        _passwordHasher =
-            passwordHasher
-            ?? throw new ArgumentNullException(
-                nameof(passwordHasher));
+        _proteccion = proteccion ?? throw new ArgumentNullException(nameof(proteccion));
+        _usuarioRepositorio = usuarioRepositorio ?? throw new ArgumentNullException(nameof(usuarioRepositorio));
+        _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
     }
 
     /// <summary>
     /// Intenta autenticar un usuario mediante su nombre
     /// de acceso y contraseña.
     /// </summary>
-    /// <param name="nombreUsuario">
+    /// <param name = "nombreUsuario">
     /// Nombre utilizado por el usuario para acceder al sistema.
     /// </param>
-    /// <param name="password">
+    /// <param name = "password">
     /// Contraseña ingresada en texto sin transformar.
     /// </param>
     /// <returns>
@@ -77,92 +68,51 @@ public sealed class AutenticacionServicio
     /// propagarse hasta la capa de presentación, que mostrará
     /// un mensaje apropiado sin exponer detalles internos.
     /// </remarks>
-    public async Task<Usuario?> AutenticarAsync(
-        string? nombreUsuario,
-        string? password)
+    public async Task<Usuario?> AutenticarAsync(string? nombreUsuario, string? password)
     {
-        if (!SonCredencialesAdmisibles(
-            nombreUsuario,
-            password))
+        if (!SonCredencialesAdmisibles(nombreUsuario, password))
         {
             return null;
         }
 
-        string nombreUsuarioNormalizado =
-            nombreUsuario!.Trim();
-
-        Usuario? usuario =
-            await _usuarioRepositorio
-                .ObtenerPorNombreUsuarioAsync(
-                    nombreUsuarioNormalizado);
-
-        if (!EsUsuarioHabilitado(usuario)
-            || !string.Equals(
-            usuario!.NombreUsuario,
-             nombreUsuarioNormalizado,
-            StringComparison.Ordinal))
-        {
+        string nombreUsuarioNormalizado = nombreUsuario!.Trim();
+        if (await _proteccion.EstaBloqueadoAsync(nombreUsuarioNormalizado))
             return null;
-        }
-
-        if (!EsRolHabilitado(usuario!))
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(
-            usuario!.PasswordHash))
-        {
-            return null;
-        }
-
-        bool passwordValido =
-            _passwordHasher.Verificar(
-                password!,
-                usuario.PasswordHash);
-
-        return passwordValido
-            ? usuario
-            : null;
+        Usuario? usuario = await _usuarioRepositorio.ObtenerPorNombreUsuarioAsync(nombreUsuarioNormalizado);
+        bool habilitado = EsUsuarioHabilitado(usuario) && string.Equals(usuario!.NombreUsuario, nombreUsuarioNormalizado, StringComparison.Ordinal) && EsRolHabilitado(usuario) && !string.IsNullOrWhiteSpace(usuario.PasswordHash);
+        bool passwordValido = habilitado && _passwordHasher.Verificar(password!, usuario!.PasswordHash);
+        await _proteccion.RegistrarAsync(nombreUsuarioNormalizado, usuario?.Id, passwordValido);
+        return passwordValido ? usuario : null;
     }
 
     /// <summary>
     /// Comprueba que las credenciales posean contenido y respeten
     /// las restricciones admitidas por el sistema.
     /// </summary>
-    /// <param name="nombreUsuario">
+    /// <param name = "nombreUsuario">
     /// Nombre de usuario recibido.
     /// </param>
-    /// <param name="password">
+    /// <param name = "password">
     /// Contraseña recibida.
     /// </param>
     /// <returns>
     /// <see langword="true"/> cuando las credenciales pueden
     /// procesarse; de lo contrario, <see langword="false"/>.
     /// </returns>
-    private static bool SonCredencialesAdmisibles(
-        string? nombreUsuario,
-        string? password)
+    private static bool SonCredencialesAdmisibles(string? nombreUsuario, string? password)
     {
-        if (string.IsNullOrWhiteSpace(nombreUsuario)
-            || string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(nombreUsuario) || string.IsNullOrWhiteSpace(password))
         {
             return false;
         }
 
-        string nombreUsuarioNormalizado =
-            nombreUsuario.Trim();
-
-        if (nombreUsuarioNormalizado.Length >
-            UsuarioRestricciones.NombreUsuarioMaximo)
+        string nombreUsuarioNormalizado = nombreUsuario.Trim();
+        if (nombreUsuarioNormalizado.Length > UsuarioRestricciones.NombreUsuarioMaximo)
         {
             return false;
         }
 
-        if (password.Length <
-                UsuarioRestricciones.PasswordMinimo
-            || password.Length >
-                UsuarioRestricciones.PasswordMaximo)
+        if (password.Length < UsuarioRestricciones.PasswordMinimo || password.Length > UsuarioRestricciones.PasswordMaximo)
         {
             return false;
         }
@@ -174,25 +124,23 @@ public sealed class AutenticacionServicio
     /// Comprueba que el usuario exista y que su cuenta
     /// se encuentre activa.
     /// </summary>
-    /// <param name="usuario">
+    /// <param name = "usuario">
     /// Usuario recuperado desde la persistencia.
     /// </param>
     /// <returns>
     /// <see langword="true"/> cuando el usuario existe y está
     /// habilitado; de lo contrario, <see langword="false"/>.
     /// </returns>
-    private static bool EsUsuarioHabilitado(
-        Usuario? usuario)
+    private static bool EsUsuarioHabilitado(Usuario? usuario)
     {
-        return usuario is not null
-            && usuario.Activo;
+        return usuario is not null && usuario.Activo;
     }
 
     /// <summary>
     /// Comprueba que el usuario tenga asignado uno de los roles
     /// admitidos por la aplicación y que su configuración sea válida.
     /// </summary>
-    /// <param name="usuario">
+    /// <param name = "usuario">
     /// Usuario cuyo rol debe comprobarse.
     /// </param>
     /// <returns>
@@ -200,34 +148,24 @@ public sealed class AutenticacionServicio
     /// y coincide con la configuración esperada; de lo contrario,
     /// <see langword="false"/>.
     /// </returns>
-    private static bool EsRolHabilitado(
-        Usuario usuario)
+    private static bool EsRolHabilitado(Usuario usuario)
     {
         if (!RolesSistema.EsRolValido(usuario.RolId))
         {
             return false;
         }
 
-        if (usuario.Rol is null
-            || !usuario.Rol.Activo)
+        if (usuario.Rol is null || !usuario.Rol.Activo)
         {
             return false;
         }
 
-        string? nombreRolEsperado =
-            RolesSistema.ObtenerNombreEsperado(
-                usuario.RolId);
-
-        if (nombreRolEsperado is null
-            || string.IsNullOrWhiteSpace(
-                usuario.Rol.Nombre))
+        string? nombreRolEsperado = RolesSistema.ObtenerNombreEsperado(usuario.RolId);
+        if (nombreRolEsperado is null || string.IsNullOrWhiteSpace(usuario.Rol.Nombre))
         {
             return false;
         }
 
-        return string.Equals(
-            usuario.Rol.Nombre,
-            nombreRolEsperado,
-            StringComparison.Ordinal);
+        return string.Equals(usuario.Rol.Nombre, nombreRolEsperado, StringComparison.Ordinal);
     }
 }

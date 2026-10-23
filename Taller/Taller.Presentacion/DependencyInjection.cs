@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddTransient<FrmComprobantes>();
         services.AddTransient<FrmReportes>();
         services.AddTransient<FrmRespaldoRestauracion>();
+        services.AddTransient<FrmAuditoriaAccesos>();
         services.AddSingleton<AutorizacionNavegacion>();
         services.AddTransient<AplicacionContexto>();
         return services;

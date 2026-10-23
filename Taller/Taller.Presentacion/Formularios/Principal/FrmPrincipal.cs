@@ -50,9 +50,20 @@ public partial class FrmPrincipal : Form
             return;
         }
 
+        relojSesion.Start();
         ConfigurarMenuSegunRol();
         AbrirFormulario<FrmInicio>("Inicio");
         MarcarBotonActivo(btnInicio);
+    }
+
+    private void RelojSesion_Tick(object? sender, EventArgs e)
+    {
+        if (_sesionUsuario.EstaAutenticado || _formularioActivo is IFormularioConOperacion { OperacionEnCurso: true })
+            return;
+        relojSesion.Stop();
+        pnlContenido.Enabled = pnlOpciones.Enabled = false;
+        lblTituloSeccion.Text = "Sesión vencida · cierre sesión para volver a ingresar";
+        MessageBox.Show(this, "La sesión venció por inactividad o duración máxima. No se realizarán nuevas operaciones. Use Cerrar sesión y vuelva a ingresar. Los datos ya guardados se conservan.", "Sesión vencida", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     /// <summary>
@@ -168,6 +179,7 @@ public partial class FrmPrincipal : Form
         btnComprobantes.Visible = TienePermiso(rolId, PermisoAplicacion.GestionarComprobantesPagos);
         btnReportes.Visible = TienePermiso(rolId, PermisoAplicacion.ConsultarReportesGenerales) || TienePermiso(rolId, PermisoAplicacion.ConsultarReportesOperativos) || TienePermiso(rolId, PermisoAplicacion.ConsultarReportesTecnicos);
         btnCatalogo.Visible = TienePermiso(rolId, PermisoAplicacion.ConsultarCatalogo);
+        btnAuditoria.Visible = rolId == Taller.Dominio.Constantes.RolesSistema.AdministradorId;
         btnRespaldo.Visible = TienePermiso(rolId, PermisoAplicacion.GestionarRespaldo);
     }
 
@@ -194,6 +206,7 @@ public partial class FrmPrincipal : Form
         btnReportes.Visible = false;
         btnCatalogo.Visible = false;
         btnRespaldo.Visible = false;
+        btnAuditoria.Visible = false;
     }
 
     private void btnInicio_Click(object sender, EventArgs e)
@@ -245,6 +258,11 @@ public partial class FrmPrincipal : Form
     private void btnCatalogo_Click(object? sender, EventArgs e)
     {
         AbrirFormularioAutorizado<Taller.Presentacion.Formularios.Catalogo.FrmCatalogo>("Catálogo", btnCatalogo, "No tiene permisos para consultar el catálogo.", PermisoAplicacion.ConsultarCatalogo);
+    }
+
+    private void btnAuditoria_Click(object? sender, EventArgs e)
+    {
+        AbrirFormularioAutorizado<FrmAuditoriaAccesos>("Auditoría de accesos", btnAuditoria, "Solo el administrador puede consultar auditoría.", PermisoAplicacion.GestionarUsuarios);
     }
 
     private void btnRespaldo_Click(object sender, EventArgs e)

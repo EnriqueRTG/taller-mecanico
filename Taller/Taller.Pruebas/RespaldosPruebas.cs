@@ -15,6 +15,12 @@ using Xunit;
 namespace Taller.Pruebas;
 public sealed class RespaldosPruebas
 {
+    private sealed class ProteccionPrueba : Taller.Aplicacion.Abstracciones.Seguridad.IProteccionAcceso
+    {
+        public Task<bool> EstaBloqueadoAsync(string n) => Task.FromResult(false);
+        public Task RegistrarAsync(string n, int? id, bool correcto) => Task.CompletedTask;
+    }
+
     private sealed class Reloj : TimeProvider
     {
         public DateTimeOffset Ahora = new(2026, 10, 22, 12, 0, 0, TimeSpan.Zero);
@@ -72,7 +78,7 @@ public sealed class RespaldosPruebas
             Db.ChangeTracker.Clear();
             Sesion.Iniciar(new Usuario { Id = 1 });
             var usuarios = new UsuarioRepositorio(Db);
-            Servicio = new RespaldoServicio(Motor, usuarios, new AutenticacionServicio(usuarios, hasher), Sesion, new PlanesRestauracion(Reloj), Reloj);
+            Servicio = new RespaldoServicio(Motor, usuarios, new AutenticacionServicio(usuarios, hasher, new ProteccionPrueba()), Sesion, new PlanesRestauracion(Reloj), Reloj);
         }
 
         public void Dispose() => Db.Dispose();

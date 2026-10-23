@@ -142,7 +142,13 @@ public partial class FrmGestionarCredenciales : Form
         }
         catch (ValidacionException ex)
         {
+            CambiarEstadoGuardado(false);
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Datos inválidos");
+            if (string.Equals(ex.Campo, "nombreUsuario", StringComparison.OrdinalIgnoreCase))
+            {
+                txtNombreUsuario.Focus();
+                txtNombreUsuario.SelectAll();
+            }
         }
         catch (InvalidOperationException ex)
         {

@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Taller.Aplicacion.Abstracciones.Persistencia;
@@ -229,7 +229,7 @@ public sealed class UsuarioRepositorio : IUsuarioRepositorio
             when (excepcion.Number == 51001)
         {
             throw new ValidacionException(
-                "El nombre de usuario ya está registrado.");
+                "Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", nameof(Usuario.NombreUsuario));
         }
     }
 
@@ -390,7 +390,7 @@ public sealed class UsuarioRepositorio : IUsuarioRepositorio
             when (excepcion.Number == 51001)
         {
             throw new ValidacionException(
-                 "El nombre de usuario ya está registrado.");
+                 "Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", nameof(Usuario.NombreUsuario));
         }
         catch (SqlException excepcion)
             when (excepcion.Number == 51002)

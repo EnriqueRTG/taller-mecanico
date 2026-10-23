@@ -25,7 +25,7 @@ public sealed class DemostracionSqlPruebas
         string nombre = "SGTM_Pruebas_" + Guid.NewGuid().ToString("N") + "_Demo";
         cadena.InitialCatalog = nombre;
         cadena.Pooling = false;
-        const string clave = "PruebaAislada2026!Demo";
+        string clave = "A1!" + Guid.NewGuid().ToString("N");
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["ConnectionStrings:Default"] = cadena.ConnectionString, ["Respaldos:Habilitado"] = "false", ["Instalacion:ClaveAdministrador"] = clave }).Build();
         // El runner de CI no debe heredar una conexión de negocio real.
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SGTM_CONN")))
@@ -58,6 +58,20 @@ public sealed class DemostracionSqlPruebas
             Assert.True(await db.Pagos.AnyAsync());
             Assert.False(await db.Comprobantes.AnyAsync(x => x.TotalPagado > x.Total));
             Assert.False(await db.Atenciones.Where(x => x.Estado == EstadoAtencion.Cerrada).AnyAsync(a => db.Comprobantes.Any(c => c.IdAtencion == a.IdAtencion && c.Total != c.TotalPagado)));
+            // La bandeja nueva debe ejecutar consultas SQL reales, incluir pendientes antiguos y respetar permisos.
+            foreach (int rol in new[] { 1, 2, 3 })
+            {
+                var usuario = await db.Usuarios.Include(u => u.Rol).AsNoTracking().FirstAsync(u => u.RolId == rol && u.Activo);
+                sp.GetRequiredService<SesionUsuario>().Iniciar(usuario);
+                var pendientes = await sp.GetRequiredService<InicioServicio>().ListarPendientesAsync();
+                Assert.True(pendientes.Count <= 30);
+                if (rol != 1)
+                {
+                    Assert.NotEmpty(pendientes);
+                    Assert.Contains(pendientes, x => x.Fecha < DateTime.Today.AddDays(-30));
+                    await Assert.ThrowsAsync<Taller.Aplicacion.Excepciones.ValidacionException>(() => sp.GetRequiredService<AuditoriaAccesoServicio>().ConsultarAsync(DateTime.Today.AddDays(-7), DateTime.Today, null));
+                }
+            }
             var proteccion = sp.GetRequiredService<IProteccionAcceso>();
             for (int i = 0; i < 5; i++)
                 await proteccion.RegistrarAsync("demo.tecnico", null, false);

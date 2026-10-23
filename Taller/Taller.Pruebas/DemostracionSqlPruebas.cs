@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -68,8 +69,8 @@ public sealed class DemostracionSqlPruebas
                 if (rol != 1)
                 {
                     Assert.NotEmpty(pendientes);
-                    Assert.Contains(pendientes, x => x.Fecha < DateTime.Today.AddDays(-30));
-                    await Assert.ThrowsAsync<Taller.Aplicacion.Excepciones.ValidacionException>(() => sp.GetRequiredService<AuditoriaAccesoServicio>().ConsultarAsync(DateTime.Today.AddDays(-7), DateTime.Today, null));
+                    Assert.Contains(pendientes, x => x.Fecha < FechaHoraTaller.Hoy.AddDays(-30));
+                    await Assert.ThrowsAsync<Taller.Aplicacion.Excepciones.ValidacionException>(() => sp.GetRequiredService<AuditoriaAccesoServicio>().ConsultarAsync(FechaHoraTaller.Hoy.AddDays(-7), FechaHoraTaller.Hoy, null));
                 }
             }
             var proteccion = sp.GetRequiredService<IProteccionAcceso>();

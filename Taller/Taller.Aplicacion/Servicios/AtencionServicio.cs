@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Seguridad;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Excepciones;
@@ -128,7 +129,7 @@ public sealed class AtencionServicio
             IdVehiculo = idVehiculo,
             IdUsuarioRecepcion = idUsuarioRecepcion,
             TipoSolicitud = tipoSolicitud,
-            FechaApertura = DateTime.Now,
+            FechaApertura = FechaHoraTaller.Ahora,
             MotivoConsulta = motivoConsulta,
             Estado = EstadoAtencion.Abierta,
             FechaCierre = null
@@ -185,7 +186,7 @@ public sealed class AtencionServicio
         {
             IdAtencion = atencion.IdAtencion,
             IdUsuario = administrativo.Id,
-            Fecha = DateTime.Now,
+            Fecha = FechaHoraTaller.Ahora,
             Accion = "DatosRecepcionModificados",
             EstadoAnterior = atencion.Estado,
             EstadoNuevo = atencion.Estado,
@@ -292,7 +293,7 @@ public sealed class AtencionServicio
             detalles.Add(new PresupuestoDetalle { IdConcepto = concepto.IdConcepto, AceptadoPorCliente = true, Descripcion = descripcion, Cantidad = servicio.Cantidad, PrecioUnitario = servicio.PrecioUnitario, EstadoEjecucion = EstadoEjecucionDetalle.NoIniciado, CantidadEjecutada = 0m });
         }
 
-        var fecha = DateTime.Now;
+        var fecha = FechaHoraTaller.Ahora;
         var presupuesto = new Presupuesto
         {
             Tipo = TipoPresupuesto.Diagnostico,

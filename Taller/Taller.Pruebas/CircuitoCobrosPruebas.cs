@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.DTOs.Atenciones;
 using Taller.Aplicacion.DTOs.Cobros;
@@ -54,7 +55,7 @@ public sealed class CircuitoCobrosPruebas
                 Nombre = "Modelo",
                 Activo = true
             };
-            Db.Add(new Atencion { IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = new Vehiculo { IdVehiculo = 1, Dominio = "AB123CD", Color = "Gris", IdModelo = 1, Modelo = modelo }, IdUsuarioRecepcion = 2, TipoSolicitud = TipoSolicitudAtencion.Problema, MotivoConsulta = "Ruido al frenar", Estado = EstadoAtencion.Abierta, FechaApertura = DateTime.Now, Version = new byte[8] });
+            Db.Add(new Atencion { IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = new Vehiculo { IdVehiculo = 1, Dominio = "AB123CD", Color = "Gris", IdModelo = 1, Modelo = modelo }, IdUsuarioRecepcion = 2, TipoSolicitud = TipoSolicitudAtencion.Problema, MotivoConsulta = "Ruido al frenar", Estado = EstadoAtencion.Abierta, FechaApertura = FechaHoraTaller.Ahora, Version = new byte[8] });
             Db.AddRange(new Usuario { Id = 1, RolId = RolesSistema.TecnicoId, Nombre = "Técnico", Apellido = "Uno", Activo = true }, new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId, Nombre = "Recepción", Apellido = "Uno", Activo = true }, new Usuario { Id = 3, RolId = RolesSistema.TecnicoId, Nombre = "Técnico", Apellido = "Dos", Activo = true });
             var categoria = new Categoria
             {

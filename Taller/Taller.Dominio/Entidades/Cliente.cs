@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 namespace Taller.Dominio.Entidades;
 /// <summary>
 /// Representa un cliente en el sistema.
@@ -15,7 +16,7 @@ public sealed class Cliente
     public bool Activo { get; set; } = true;
     /// <summary>Versión de SQL Server que debe conservarse desde que se abre una edición.</summary>
     public byte[] Version { get; set; } = [];
-    public DateTime FechaAlta { get; set; } = DateTime.Now;
+    public DateTime FechaAlta { get; set; } = FechaHoraTaller.Ahora;
     /// <summary>
     /// Representa la coleccion de atenciones asociadas a este cliente.
     /// </summary>

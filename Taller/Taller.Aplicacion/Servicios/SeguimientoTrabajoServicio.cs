@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Atenciones;
 using Taller.Aplicacion.DTOs.Ejecuciones;
@@ -39,7 +40,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
     private async Task GuardarAsync(Atencion a, Usuario u, string accion, string nota)
     {
         repositorio.PrepararVersion(a, a.Version);
-        repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = DateTime.Now, Accion = accion, EstadoAnterior = a.Estado, EstadoNuevo = a.Estado, Observaciones = nota.Length > 2000 ? nota[..2000] : nota });
+        repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Accion = accion, EstadoAnterior = a.Estado, EstadoNuevo = a.Estado, Observaciones = nota.Length > 2000 ? nota[..2000] : nota });
         await unidad.GuardarCambiosAsync();
     }
 
@@ -87,9 +88,9 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var recomendacion = AutorizacionOperativa.Texto(datos.Recomendacion);
             if (datos.IdDetalle is int id)
                 await DetalleAsync(a.IdAtencion, id);
-            a.Hallazgos.Add(new HallazgoAtencion { IdAtencion = a.IdAtencion, IdTecnico = u.Id, Fecha = DateTime.Now, Descripcion = texto, Recomendacion = recomendacion, ImpideContinuar = datos.ImpideContinuar, IdDetalleAfectado = datos.IdDetalle });
+            a.Hallazgos.Add(new HallazgoAtencion { IdAtencion = a.IdAtencion, IdTecnico = u.Id, Fecha = FechaHoraTaller.Ahora, Descripcion = texto, Recomendacion = recomendacion, ImpideContinuar = datos.ImpideContinuar, IdDetalleAfectado = datos.IdDetalle });
             if (datos.ImpideContinuar)
-                a.Pausas.Add(new PausaTrabajo { IdAtencion = a.IdAtencion, IdDetalle = datos.IdDetalle, IdUsuario = u.Id, Fecha = DateTime.Now, Motivo = ("Hallazgo que impide continuar: " + texto).Substring(0, Math.Min(1000, ("Hallazgo que impide continuar: " + texto).Length)) });
+                a.Pausas.Add(new PausaTrabajo { IdAtencion = a.IdAtencion, IdDetalle = datos.IdDetalle, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Motivo = ("Hallazgo que impide continuar: " + texto).Substring(0, Math.Min(1000, ("Hallazgo que impide continuar: " + texto).Length)) });
             await GuardarAsync(a, u, "HallazgoRegistrado", $"{texto}. Recomendación: {recomendacion}. Bloquea: {datos.ImpideContinuar}.");
         }
         finally
@@ -112,7 +113,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 await DetalleAsync(id, d);
             if (a.Pausas.Any(p => p.FechaResolucion == null && p.IdDetalle == idDetalle))
                 throw new ValidacionException("Ya existe una pausa activa para ese alcance.");
-            a.Pausas.Add(new PausaTrabajo { IdAtencion = id, IdDetalle = idDetalle, IdUsuario = u.Id, Fecha = DateTime.Now, Motivo = motivo });
+            a.Pausas.Add(new PausaTrabajo { IdAtencion = id, IdDetalle = idDetalle, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Motivo = motivo });
             await GuardarAsync(a, u, "TrabajoPausado", motivo);
         }
         finally
@@ -132,7 +133,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var p = a.Pausas.SingleOrDefault(x => x.IdPausaTrabajo == pausa && x.FechaResolucion == null) ?? throw new ValidacionException("La pausa ya fue resuelta o no pertenece a esta atención.");
             p.Resolucion = AutorizacionOperativa.Texto(resolucion);
             p.IdTecnicoResolucion = u.Id;
-            p.FechaResolucion = DateTime.Now;
+            p.FechaResolucion = FechaHoraTaller.Ahora;
             await GuardarAsync(a, u, "PausaResuelta", p.Resolucion);
         }
         finally
@@ -157,7 +158,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             d.MaterialClienteConforme = conforme;
             d.ObservacionesMaterial = nota;
             d.IdTecnicoMaterial = u.Id;
-            d.FechaRecepcionMaterial = DateTime.Now;
+            d.FechaRecepcionMaterial = FechaHoraTaller.Ahora;
             await GuardarAsync(a, u, "MaterialClienteRevisado", $"Ítem {detalle}: recibidos {cantidad:N3}; conformidad técnica {conforme}. {nota}");
         }
         finally
@@ -215,7 +216,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 IdHallazgoAtencion = h?.IdHallazgoAtencion,
                 Estado = EstadoPresupuesto.PendientePresentacion,
                 Tipo = TipoPresupuesto.Reparacion,
-                FechaCreacion = DateTime.Now,
+                FechaCreacion = FechaHoraTaller.Ahora,
                 IdUsuarioCreacion = u.Id,
                 Observaciones = motivo,
                 Detalles = PrepararItems(datos.Items, await repositorio.ListarCatalogoAsync())
@@ -257,7 +258,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 IdPresupuestoAnterior = id,
                 Tipo = TipoPresupuesto.Reparacion,
                 Estado = EstadoPresupuesto.PendientePresentacion,
-                FechaCreacion = DateTime.Now,
+                FechaCreacion = FechaHoraTaller.Ahora,
                 IdUsuarioCreacion = u.Id,
                 MotivoRevision = justificacion,
                 Observaciones = justificacion,

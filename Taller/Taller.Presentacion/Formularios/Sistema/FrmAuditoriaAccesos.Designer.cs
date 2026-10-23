@@ -74,7 +74,7 @@ partial class FrmAuditoriaAccesos
             RowHeadersVisible = false,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
-        grilla.Columns.AddRange([new DataGridViewTextBoxColumn { Name = "colId", DataPropertyName = "Id", HeaderText = "Evento" }, new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "FechaUtc", HeaderText = "Fecha UTC", DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm:ss" } }, new DataGridViewTextBoxColumn { Name = "colUsuario", DataPropertyName = "Usuario", HeaderText = "Cuenta" }, new DataGridViewCheckBoxColumn { Name = "colCorrecto", DataPropertyName = "Correcto", HeaderText = "Acceso correcto" }]);
+        grilla.Columns.AddRange([new DataGridViewTextBoxColumn { Name = "colId", DataPropertyName = "Id", HeaderText = "Evento" }, new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "FechaLocal", HeaderText = "Fecha y hora — Argentina", DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm:ss" } }, new DataGridViewTextBoxColumn { Name = "colUsuario", DataPropertyName = "Usuario", HeaderText = "Cuenta" }, new DataGridViewCheckBoxColumn { Name = "colCorrecto", DataPropertyName = "Correcto", HeaderText = "Acceso correcto" }]);
         estado = new Label
         {
             Name = "estado",

@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -21,7 +22,7 @@ public sealed class ReportesPruebas
         public SesionUsuario Sesion { get; } = new();
         public ReporteServicio Servicio { get; }
         public ReporteRepositorio Repo { get; }
-        public DateTime Hoy => DateTime.Today;
+        public DateTime Hoy => FechaHoraTaller.Hoy;
         public Caso()
         {
             Db.Database.EnsureCreated();
@@ -109,7 +110,7 @@ public sealed class ReportesPruebas
     public async Task ConsultasSeTraducenASqlServerSinAbrirBase(int tipo)
     {
         using var db = new TallerDbContext(new DbContextOptionsBuilder<TallerDbContext>().UseSqlServer("Server=localhost;Database=NoSeConecta;Trusted_Connection=True;TrustServerCertificate=True").AddInterceptors(new DetenerConexion()).Options);
-        var repo = new ReporteRepositorio(db); var fecha = DateTime.Today;
+        var repo = new ReporteRepositorio(db); var fecha = FechaHoraTaller.Hoy;
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => tipo switch { 0 => repo.ListarAtencionesAsync(fecha, fecha.AddDays(1)), 1 => repo.ListarPresupuestosAsync(fecha, fecha.AddDays(1), 3), 2 => repo.ListarMovimientosAsync(fecha, fecha.AddDays(1)), 3 => repo.ListarSaldosAsync(), 4 => repo.ListarActividadAsync(fecha, fecha.AddDays(1), 3), 5 => repo.ListarConceptosAsync(fecha, fecha.AddDays(1), 3), _ => repo.ListarCargaAsync(3) });
         Assert.Equal("SQL traducido; conexión evitada", ex.Message);
     }

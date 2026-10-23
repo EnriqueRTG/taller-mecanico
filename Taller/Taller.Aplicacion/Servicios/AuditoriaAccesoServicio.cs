@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Seguridad;
 using Taller.Aplicacion.Excepciones;
@@ -10,8 +11,8 @@ public sealed class AuditoriaAccesoServicio(IAuditoriaAccesoRepositorio reposito
     public async Task<List<AccesoAuditoriaDto>> ConsultarAsync(DateTime desde, DateTime hasta, bool? correcto)
     {
         await acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
-        if (desde.Date > hasta.Date || hasta.Date > DateTime.Today || (hasta.Date - desde.Date).TotalDays > 366)
+        if (desde.Date > hasta.Date || hasta.Date > FechaHoraTaller.Hoy || (hasta.Date - desde.Date).TotalDays > 366)
             throw new ValidacionException("Seleccione hasta un año de fechas, sin fechas futuras.");
-        return await repositorio.ConsultarAsync(new DateTimeOffset(desde.Date), new DateTimeOffset(hasta.Date.AddDays(1)), correcto);
+        return await repositorio.ConsultarAsync(FechaHoraTaller.AUTC(desde.Date), FechaHoraTaller.AUTC(hasta.Date.AddDays(1)), correcto);
     }
 }

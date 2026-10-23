@@ -340,8 +340,8 @@ partial class FrmRespaldoRestauracion
         colEventoFechaUtc = new DataGridViewTextBoxColumn
         {
             Name = "colEventoFechaUtc",
-            DataPropertyName = "FechaUtc",
-            HeaderText = "Fecha UTC",
+            DataPropertyName = "FechaLocal",
+            HeaderText = "Fecha y hora — Argentina",
             MinimumWidth = 90,
             FillWeight = 130
         };

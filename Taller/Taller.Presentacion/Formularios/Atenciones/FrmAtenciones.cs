@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
@@ -118,8 +119,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 cboEstado.Items.Add(ObtenerNombreEstado(estado));
             }
 
-            dtpDesde.Value = DateTime.Today.AddMonths(-1);
-            dtpHasta.Value = DateTime.Today;
+            dtpDesde.Value = FechaHoraTaller.Hoy.AddMonths(-1);
+            dtpHasta.Value = FechaHoraTaller.Hoy;
             dtpDesde.Checked = false;
             dtpHasta.Checked = false;
             cboEstado.SelectedItem = esTecnico ? "En curso" : "Todas";

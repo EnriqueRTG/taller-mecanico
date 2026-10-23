@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Seguridad;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -45,7 +46,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         var usuario = await ExigirUsuarioAsync();
         if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo))
             throw new ValidacionException("Su rol no permite consultar este reporte.");
-        var hoy = DateTime.Today;
+        var hoy = FechaHoraTaller.Hoy;
         if (solicitud.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica) && (solicitud.Desde.Date > solicitud.Hasta.Date || solicitud.Hasta.Date > hoy || solicitud.Hasta.Year >= 9999))
             throw new ValidacionException("Seleccione un período válido, sin fechas futuras.");
         if ((solicitud.Busqueda?.Length ?? 0) > 150)
@@ -130,7 +131,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         return new ReporteDocumentoDto
         {
             Titulo = Nombre(solicitud.Tipo),
-            Generado = DateTime.Now,
+            Generado = FechaHoraTaller.Ahora,
             EmitidoPor = $"{usuario.Apellido}, {usuario.Nombre}",
             Alcance = tecnico.HasValue ? (solicitud.Tipo == TipoReporte.CargaTecnica ? "Reservas propias y actividades disponibles" : "Solo registros propios del técnico autenticado") : "Taller completo · " + RolesSistema.ObtenerNombreEsperado(usuario.RolId),
             Filtros = solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? $"Situación actual · Estado: {solicitud.Estado} · Búsqueda: {texto}" : $"Desde {desde:dd/MM/yyyy} hasta {solicitud.Hasta:dd/MM/yyyy} inclusive · Estado: {solicitud.Estado} · Búsqueda: {texto}",

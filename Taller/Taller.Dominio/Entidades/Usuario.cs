@@ -1,4 +1,5 @@
-﻿namespace Taller.Dominio.Entidades;
+using Taller.Dominio.Tiempo;
+namespace Taller.Dominio.Entidades;
 
 /// <summary>
 /// Representa un usuario en el sistema.
@@ -11,7 +12,7 @@ public sealed class Usuario
     public string Nombre { get; set; } = string.Empty;
     public string Apellido { get; set; } = string.Empty;
     public bool Activo { get; set; } = true;
-    public DateTime FechaAlta {  get; set; } = DateTime.Now;
+    public DateTime FechaAlta {  get; set; } = FechaHoraTaller.Ahora;
     public int RolId { get; set; }
 
     /// <summary>

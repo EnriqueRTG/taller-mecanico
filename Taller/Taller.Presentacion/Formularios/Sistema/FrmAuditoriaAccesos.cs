@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Servicios;
 using Taller.Presentacion.Navegacion;
 
@@ -16,8 +17,8 @@ public partial class FrmAuditoriaAccesos : Form, IFormularioConOperacion
 
     private async void Formulario_Load(object? sender, EventArgs e)
     {
-        desde.Value = DateTime.Today.AddDays(-7);
-        hasta.Value = DateTime.Today;
+        desde.Value = FechaHoraTaller.Hoy.AddDays(-7);
+        hasta.Value = FechaHoraTaller.Hoy;
         resultado.SelectedIndex = 0;
         await CargarAsync();
     }
@@ -32,8 +33,8 @@ public partial class FrmAuditoriaAccesos : Form, IFormularioConOperacion
             OperacionEnCurso = true;
             consultar.Enabled = false;
             var datos = await _servicio.ConsultarAsync(desde.Value, hasta.Value, resultado.SelectedIndex == 0 ? null : resultado.SelectedIndex == 1);
-            grilla.DataSource = datos;
-            estado.Text = $"{datos.Count} accesos. Máximo 500 por consulta; acote el período si alcanza ese límite. Fechas de eventos en UTC. No se registran contraseñas.";
+            grilla.DataSource = datos.Select(x => new { x.Id, FechaLocal = FechaHoraTaller.DesdeUtc(x.FechaUtc).DateTime, x.Usuario, x.Correcto }).ToList();
+            estado.Text = $"{datos.Count} accesos. Máximo 500 por consulta; acote el período si alcanza ese límite. Fechas en hora de Argentina; se almacenan en UTC. No se registran contraseñas.";
         }
         catch (Exception ex)
         {

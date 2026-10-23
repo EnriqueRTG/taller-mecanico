@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
@@ -22,13 +23,18 @@ public partial class FrmInicio : Form, IFormularioConOperacion
 
     private async void FrmInicio_Load(object? sender, EventArgs e)
     {
+        calendario.SetDate(FechaHoraTaller.Hoy);
         ActualizarReloj();
         reloj.Start();
         await CargarAsync();
     }
 
     private void Reloj_Tick(object? sender, EventArgs e) => ActualizarReloj();
-    private void ActualizarReloj() => lblReloj.Text = DateTime.Now.ToString("dddd dd 'de' MMMM 'de' yyyy\nHH:mm:ss", System.Globalization.CultureInfo.GetCultureInfo("es-AR"));
+    private void ActualizarReloj()
+    {
+        lblReloj.Text = FechaHoraTaller.Ahora.ToString("dddd dd 'de' MMMM 'de' yyyy\nHH:mm:ss", System.Globalization.CultureInfo.GetCultureInfo("es-AR"));
+        calendario.TodayDate = FechaHoraTaller.Hoy;
+    }
     private async void BtnActualizar_Click(object? sender, EventArgs e) => await CargarAsync();
     private async Task CargarAsync()
     {
@@ -59,7 +65,7 @@ public partial class FrmInicio : Form, IFormularioConOperacion
             };
             var documentos = new List<ReporteDocumentoDto>();
             foreach (var tipo in seleccion)
-                documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), Hasta = DateTime.Today }));
+                documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1), Hasta = FechaHoraTaller.Hoy }));
             MostrarTarjetas(documentos);
             var pendientes = await _inicio.ListarPendientesAsync();
             dgvActividad.DataSource = pendientes;
@@ -69,7 +75,7 @@ public partial class FrmInicio : Form, IFormularioConOperacion
                 ? "Sin accesos rechazados en los últimos 7 días. Los accesos correctos pueden consultarse en Auditoría de accesos."
                 : "No hay tareas pendientes para su perfil. Actualice el resumen después de registrar operaciones.";
             dgvActividad.ClearSelection();
-            lblEstado.Text = $"Actualizado {DateTime.Now:dd/MM/yyyy HH:mm:ss} · Indicadores: mes actual; saldos y carga: situación actual. Pendientes sin filtro de fecha. Detalle en Reportes.";
+            lblEstado.Text = $"Actualizado {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm:ss} · Indicadores: mes actual; saldos y carga: situación actual. Pendientes sin filtro de fecha. Detalle en Reportes.";
         }
         catch (Exception ex)
         {

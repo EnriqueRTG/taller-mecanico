@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.DTOs.Atenciones;
@@ -59,7 +60,7 @@ public static class CargadorDemostracion
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
         // Los maestros y autores deben existir antes que las atenciones históricas del lote.
-        var altaHistorica = DateTime.Today.AddDays(-200);
+        var altaHistorica = FechaHoraTaller.Hoy.AddDays(-200);
         foreach(var u in await db.Usuarios.ToListAsync()) u.FechaAlta=altaHistorica;
         foreach(var c in await db.Clientes.ToListAsync()) c.FechaAlta=altaHistorica;
         foreach(var v in await db.Vehiculos.ToListAsync()) v.FechaAlta=altaHistorica;

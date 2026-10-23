@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using System.Text;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Reportes;
@@ -27,9 +28,9 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             OperacionEnCurso = true;
             pnlFiltros.Enabled = flpAcciones.Enabled = false;
             _configurando = true;
-            dtpHasta.MaxDate = dtpDesde.MaxDate = DateTime.Today;
-            dtpDesde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            dtpHasta.Value = DateTime.Today;
+            dtpHasta.MaxDate = dtpDesde.MaxDate = FechaHoraTaller.Hoy;
+            dtpDesde.Value = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1);
+            dtpHasta.Value = FechaHoraTaller.Hoy;
             cboTipo.DisplayMember = "Nombre";
             cboTipo.ValueMember = "Tipo";
             cboEstado.Items.Add("Todos");
@@ -161,8 +162,8 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         _configurando = true;
         txtBuscar.Clear();
         cboEstado.SelectedIndex = cboEstado.Items.Count > 0 ? 0 : -1;
-        dtpDesde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        dtpHasta.Value = DateTime.Today;
+        dtpDesde.Value = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1);
+        dtpHasta.Value = FechaHoraTaller.Hoy;
         _configurando = false;
         ConfigurarPeriodo();
         Invalidar();

@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Ejecuciones;
 using Taller.Aplicacion.Excepciones;
@@ -19,7 +20,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
         return ps;
     }
 
-    private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string motivo) => repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = DateTime.Now, Accion = accion, EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = motivo });
+    private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string motivo) => repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Accion = accion, EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = motivo });
     public async Task<EjecucionAtencionDto> ObtenerAsync(int id)
     {
         try
@@ -136,7 +137,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
                     d.EstadoEjecucion = estado;
                     d.ObservacionesEjecucion = nota;
                     d.IdTecnicoRegistro = u.Id;
-                    d.FechaRegistroEjecucion = DateTime.Now;
+                    d.FechaRegistroEjecucion = FechaHoraTaller.Ahora;
                 }
             }
 

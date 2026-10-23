@@ -13,7 +13,7 @@ public sealed class InicioRepositorio(TallerDbContext db) : IInicioRepositorio
         {
             var desde = DateTimeOffset.UtcNow.AddDays(-7);
             var fallos = await db.Set<Taller.Dominio.Entidades.EventoAcceso>().AsNoTracking().Where(x => !x.Correcto && x.FechaUtc >= desde).OrderByDescending(x => x.FechaUtc).Take(20).ToListAsync();
-            return fallos.Select(x => new PendienteInicioDto("ACC-" + x.Id, x.FechaUtc.LocalDateTime, "Revisar acceso rechazado · " + (x.IdUsuario.HasValue ? "Usuario " + x.IdUsuario : "Identidad no reconocida"), "Consultar auditoría de accesos", 1)).ToList();
+            return fallos.Select(x => new PendienteInicioDto("ACC-" + x.Id, Taller.Dominio.Tiempo.FechaHoraTaller.DesdeUtc(x.FechaUtc).DateTime, "Revisar acceso rechazado · " + (x.IdUsuario.HasValue ? "Usuario " + x.IdUsuario : "Identidad no reconocida"), "Consultar auditoría de accesos", 1)).ToList();
         }
 
         var q = db.Atenciones.AsNoTracking().Where(a => a.Estado != EstadoAtencion.Cerrada && a.Estado != EstadoAtencion.Cancelada);

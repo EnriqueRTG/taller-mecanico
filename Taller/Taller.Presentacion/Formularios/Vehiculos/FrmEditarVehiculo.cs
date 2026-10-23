@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Servicios;
 
 namespace Taller.Presentacion.Formularios.Vehiculos;
@@ -96,9 +97,9 @@ public partial class FrmEditarVehiculo : Form
             return false;
         }
 
-        if (!int.TryParse(txtAnio.Text, out int anio) || anio < 1900 || anio > DateTime.Today.Year + 1)
+        if (!int.TryParse(txtAnio.Text, out int anio) || anio < 1900 || anio > FechaHoraTaller.Hoy.Year + 1)
         {
-            MessageBox.Show($"Ingrese un año entre 1900 y {DateTime.Today.Year + 1}.", "Año inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show($"Ingrese un año entre 1900 y {FechaHoraTaller.Hoy.Year + 1}.", "Año inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             txtAnio.Focus();
             return false;
         }

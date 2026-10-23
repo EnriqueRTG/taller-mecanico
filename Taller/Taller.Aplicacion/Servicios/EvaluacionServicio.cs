@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Seguridad;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Atenciones;
@@ -32,7 +33,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             throw new ValidacionException("La evaluación debe estar reservada por usted. Actualice el listado.");
     }
 
-    private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string texto) => repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = DateTime.Now, Accion = accion, EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = texto });
+    private void Evento(Atencion a, Usuario u, string accion, EstadoAtencion anterior, string texto) => repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Accion = accion, EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = texto });
     public async Task EnviarAEvaluacionAsync(int id, TipoSolicitudAtencion tipo, byte[] version)
     {
         try
@@ -66,7 +67,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             if (a.Estado != EstadoAtencion.Abierta || a.IdTecnicoEnActividad != null || a.FechaCierre != null || await repositorio.ObtenerAvanceAsync(id) != null || (await repositorio.ObtenerPresupuestosAsync(id)).Count > 0 || (await repositorio.ObtenerDiagnosticosAsync(id)).Count > 0)
                 throw new ValidacionException("Solo puede cancelar una apertura sin ingreso, evaluación ni servicios autorizados. Los trabajos iniciados requieren resolver la actividad técnica y liquidar lo realizado.");
             a.Estado = EstadoAtencion.Cancelada;
-            a.FechaCierre = DateTime.Now;
+            a.FechaCierre = FechaHoraTaller.Ahora;
             repositorio.PrepararVersion(a, version);
             Evento(a, usuario, "AperturaCancelada", EstadoAtencion.Abierta, motivo);
             await unidad.GuardarCambiosAsync();
@@ -263,7 +264,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                     detalle.EstadoEjecucion = registro.Estado;
                     detalle.CantidadEjecutada = registro.Estado == EstadoEjecucionDetalle.Completado ? detalle.Cantidad : 0;
                     detalle.IdTecnicoRegistro = registro.Estado == EstadoEjecucionDetalle.NoIniciado ? null : usuario.Id;
-                    detalle.FechaRegistroEjecucion = registro.Estado == EstadoEjecucionDetalle.NoIniciado ? null : DateTime.Now;
+                    detalle.FechaRegistroEjecucion = registro.Estado == EstadoEjecucionDetalle.NoIniciado ? null : FechaHoraTaller.Ahora;
                     detalle.ObservacionesEjecucion = registro.Observaciones?.Trim();
                 }
             }
@@ -285,7 +286,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             avance.SoloEvaluacion = datos.SoloEvaluacion;
             avance.Finalizada = finalizar;
             avance.IdTecnicoUltimaEdicion = usuario.Id;
-            avance.FechaActualizacion = DateTime.Now;
+            avance.FechaActualizacion = FechaHoraTaller.Ahora;
             var propuesta = presupuestos.SingleOrDefault(p => p.Tipo == TipoPresupuesto.Reparacion && !p.EsAdicional && p.Vigente && p.Estado == EstadoPresupuesto.Borrador);
             if (datos.Items.Count > 0 || propuesta is not null)
             {
@@ -297,7 +298,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                         Tipo = TipoPresupuesto.Reparacion,
                         Estado = EstadoPresupuesto.Borrador,
                         IdUsuarioCreacion = usuario.Id,
-                        FechaCreacion = DateTime.Now
+                        FechaCreacion = FechaHoraTaller.Ahora
                     };
                     repositorio.AgregarPresupuesto(propuesta);
                 }
@@ -318,7 +319,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                     {
                         IdAtencion = a.IdAtencion,
                         IdTecnicoAutor = usuario.Id,
-                        FechaDiagnostico = DateTime.Now,
+                        FechaDiagnostico = FechaHoraTaller.Ahora,
                         Tipo = TipoDiagnostico.Inicial,
                         FallaDetectada = avance.FallaDetectada,
                         TrabajoRecomendado = avance.TrabajoRecomendado,
@@ -385,7 +386,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             if ((!p.EsAdicional && (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.IdTecnicoEnActividad is not null)) || (p.EsAdicional && a.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))
                 throw new ValidacionException("La atención no está disponible para presentar esta propuesta.");
             p.Estado = EstadoPresupuesto.PendienteDecision;
-            p.FechaPresentacion = DateTime.Now;
+            p.FechaPresentacion = FechaHoraTaller.Ahora;
             var anterior = a.Estado;
             if (!p.EsAdicional)
                 a.Estado = EstadoAtencion.PendienteDecision;

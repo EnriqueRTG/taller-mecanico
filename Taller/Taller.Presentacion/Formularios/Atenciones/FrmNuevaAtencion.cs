@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Entidades;
@@ -89,7 +90,7 @@ public partial class FrmNuevaAtencion : Form
         lblVehiculoSeleccionado.Text = "Primero seleccione un cliente.";
         lblVehiculoSeleccionado.ForeColor = Color.FromArgb(100, 116, 139);
         lblContadorMotivo.Text = "0 / 500";
-        lblFechaIngreso.Text = $"Fecha de ingreso: {DateTime.Now:dd/MM/yyyy HH:mm}";
+        lblFechaIngreso.Text = $"Fecha de ingreso: {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm}";
     }
 
     /// <summary>

@@ -95,3 +95,5 @@ La integración compatible de catálogo, clientes y vehículos se describe en [l
 - [Lote y guion de coloquio](docs/coloquio-demostracion.md)
 
 El lote se carga explícitamente con `scripts/Cargar-Demostracion.ps1`; no se ejecuta al iniciar Windows Forms. Las instalaciones nuevas requieren una contraseña inicial suministrada por el instalador.
+
+- [Criterio de fechas y zona horaria del taller](docs/fechas-y-zona-horaria.md).

@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Seguridad;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Abstracciones.Seguridad;
@@ -320,7 +321,7 @@ public sealed class UsuarioServicio
             Apellido = apellidoNormalizado,
             RolId = rolId,
             Activo = true,
-            FechaAlta = DateTime.Now
+            FechaAlta = FechaHoraTaller.Ahora
         };
         await _usuarioRepositorio.AgregarAsync(usuario);
         return usuario;

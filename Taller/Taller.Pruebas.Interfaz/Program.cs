@@ -8,6 +8,8 @@ using Taller.Infraestructura;
 using Taller.Presentacion;
 using Taller.Presentacion.Formularios.Principal;
 using Taller.Presentacion.Formularios.Sistema;
+using Taller.Presentacion.Formularios.Usuarios;
+using Taller.Presentacion.Formularios.Reportes;
 
 namespace Taller.Pruebas.Interfaz;
 /// <summary>Prueba de construcción WinForms en STA. No abre conexión SQL ni sustituye aceptación visual.</summary>
@@ -30,7 +32,7 @@ internal static class Program
         {
             using var scope=proveedor.CreateScope();
             scope.ServiceProvider.GetRequiredService<SesionUsuario>().Iniciar(new Usuario { Id=rol,Nombre="Prueba",Apellido="Interfaz",RolId=rol,Rol=new Rol { Id=rol,Nombre=RolesSistema.ObtenerNombreEsperado(rol)!,Activo=true } });
-            foreach(var tipo in new[]{typeof(FrmPrincipal),typeof(FrmInicio),typeof(FrmAuditoriaAccesos),typeof(FrmRespaldoRestauracion)})
+            foreach(var tipo in new[]{typeof(FrmPrincipal),typeof(FrmInicio),typeof(FrmAuditoriaAccesos),typeof(FrmRespaldoRestauracion),typeof(FrmAltaUsuario),typeof(FrmReportes)})
             {
                 using var formulario=(Form)scope.ServiceProvider.GetRequiredService(tipo);
                 formulario.PerformLayout();

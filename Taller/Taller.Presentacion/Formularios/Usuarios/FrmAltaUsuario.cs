@@ -222,6 +222,15 @@ public partial class FrmAltaUsuario : Form
     /// Alterna la visualización de la contraseña y
     /// de su confirmación.
     /// </summary>
+    private void BtnGenerarPassword_Click(object? sender, EventArgs e)
+    {
+        txtPassword.Text = Taller.Presentacion.Seguridad.GeneradorContrasenas.Generar();
+        txtConfirmarPassword.Text = txtPassword.Text;
+        chkMostrarPassword.Checked = true;
+        txtPassword.Focus();
+        txtPassword.SelectAll();
+    }
+
     private void chkMostrarPassword_CheckedChanged(object? sender, EventArgs e)
     {
         bool ocultar = !chkMostrarPassword.Checked;
@@ -250,6 +259,7 @@ public partial class FrmAltaUsuario : Form
         txtPassword.Enabled = habilitado;
         txtConfirmarPassword.Enabled = habilitado;
         chkMostrarPassword.Enabled = habilitado;
+        btnGenerarPassword.Enabled = habilitado;
         cmbRol.Enabled = habilitado;
         btnGuardar.Enabled = habilitado;
         btnCancelar.Enabled = true;
@@ -267,6 +277,7 @@ public partial class FrmAltaUsuario : Form
         txtPassword.Enabled = !guardando;
         txtConfirmarPassword.Enabled = !guardando;
         chkMostrarPassword.Enabled = !guardando;
+        btnGenerarPassword.Enabled = !guardando;
         cmbRol.Enabled = !guardando;
         btnGuardar.Enabled = !guardando;
         btnCancelar.Enabled = !guardando;

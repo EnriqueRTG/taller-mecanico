@@ -30,6 +30,11 @@ partial class FrmReportes
         lblDesde = new Label(); lblDesde.Name = "lblDesde";
         lblHasta = new Label(); lblHasta.Name = "lblHasta";
         lblEstado = new Label(); lblEstado.Name = "lblEstado";
+        cboGrafico = new ComboBox { Name = "cboGrafico", Width = 120, DropDownStyle = ComboBoxStyle.DropDownList };
+        cboGrafico.Items.AddRange(["Barras", "Columnas", "Torta"]);
+        cboGrafico.SelectedIndex = 0;
+        cboGrafico.SelectedIndexChanged += CboGrafico_SelectedIndexChanged;
+        lblGrafico = new Label { Name = "lblGrafico", Text = "Gráfico", AutoSize = true, Margin = new Padding(3, 8, 3, 0) };
         SuspendLayout();
         AutoScaleDimensions = new SizeF(7F, 15F); AutoScaleMode = AutoScaleMode.Font; Font = new Font("Segoe UI", 9F);
         ClientSize = new Size(1060, 650); MinimumSize = new Size(780, 520); BackColor = Color.FromArgb(244,247,251); Text = "Reportes de gestión";
@@ -52,7 +57,7 @@ partial class FrmReportes
         cboTipo.Width=310; cboEstado.Width=190; cboTipo.DropDownStyle=cboEstado.DropDownStyle=ComboBoxStyle.DropDownList;
         dtpDesde.Format=dtpHasta.Format=DateTimePickerFormat.Short; dtpDesde.Width=dtpHasta.Width=110;
         txtBuscar.Width=245; txtBuscar.MaxLength=150; txtBuscar.PlaceholderText="Código, atención, dominio o responsable";
-        pnlFiltros.Controls.AddRange([lblTipo,cboTipo,lblDesde,dtpDesde,lblHasta,dtpHasta,lblEstado,cboEstado,txtBuscar]);
+        pnlFiltros.Controls.AddRange([lblTipo,cboTipo,lblDesde,dtpDesde,lblHasta,dtpHasta,lblEstado,cboEstado,txtBuscar,lblGrafico,cboGrafico]);
         tlpPrincipal.Controls.Add(lblMetodo,0,2); lblMetodo.Dock=DockStyle.Fill; lblMetodo.ForeColor=Color.FromArgb(71,85,105);
         tlpPrincipal.Controls.Add(txtResumen,0,3); txtResumen.Dock=DockStyle.Fill; txtResumen.Multiline=true; txtResumen.ReadOnly=true; txtResumen.ScrollBars=ScrollBars.Vertical; txtResumen.BackColor=Color.White;
         tlpPrincipal.Controls.Add(pnlGrafico,0,4); pnlGrafico.Dock=DockStyle.Fill; pnlGrafico.BackColor=Color.White;
@@ -101,6 +106,8 @@ partial class FrmReportes
     private Label lblTitulo = null!;
     private Label lblMetodo = null!;
     private Label lblCantidad = null!;
+    private Label lblGrafico = null!;
+    private ComboBox cboGrafico = null!;
     private ComboBox cboTipo = null!;
     private ComboBox cboEstado = null!;
     private DateTimePicker dtpDesde = null!;

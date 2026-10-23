@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Taller.Aplicacion.Excepciones;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
@@ -99,17 +98,7 @@ public partial class FrmGestionarCredenciales : Form
 
     private void btnGenerarPassword_Click(object? sender, EventArgs e)
     {
-        // Incluye letras, números y símbolos sin caracteres
-        // visualmente fáciles de confundir, como O/0 o l/1.
-        const string caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ" + "abcdefghijkmnopqrstuvwxyz" + "23456789" + "!@#$%";
-        int longitud = Math.Clamp(16, UsuarioRestricciones.PasswordMinimo, UsuarioRestricciones.PasswordMaximo);
-        var caracteresGenerados = new char[longitud];
-        for (int i = 0; i < caracteresGenerados.Length; i++)
-        {
-            caracteresGenerados[i] = caracteres[RandomNumberGenerator.GetInt32(caracteres.Length)];
-        }
-
-        string password = new(caracteresGenerados);
+        string password = Taller.Presentacion.Seguridad.GeneradorContrasenas.Generar();
         txtNuevaPassword.Text = password;
         txtConfirmarPassword.Text = password;
         chkMostrarPassword.Checked = true;

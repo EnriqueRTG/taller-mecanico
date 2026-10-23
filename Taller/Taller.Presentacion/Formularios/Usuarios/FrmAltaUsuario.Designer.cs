@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Usuarios
+namespace Taller.Presentacion.Formularios.Usuarios
 {
     partial class FrmAltaUsuario
     {
@@ -39,6 +39,8 @@
             lblConfirmarPassword = new Label();
             txtConfirmarPassword = new TextBox();
             chkMostrarPassword = new CheckBox();
+            btnGenerarPassword = new Button();
+            flpPassword = new FlowLayoutPanel();
             lblRol = new Label();
             cmbRol = new ComboBox();
             tlpPrincipal = new TableLayoutPanel();
@@ -353,7 +355,18 @@
             tlpDatos.Controls.Add(lblPassword, 0, 3);
             tlpDatos.Controls.Add(lblConfirmarPassword, 0, 4);
             tlpDatos.Controls.Add(lblRol, 0, 6);
-            tlpDatos.Controls.Add(chkMostrarPassword, 1, 5);
+            tlpDatos.Controls.Add(flpPassword, 1, 5);
+            flpPassword.Name = "flpPassword";
+            flpPassword.Dock = DockStyle.Fill;
+            flpPassword.AutoScroll = true;
+            flpPassword.WrapContents = false;
+            flpPassword.Controls.Add(chkMostrarPassword);
+            flpPassword.Controls.Add(btnGenerarPassword);
+            btnGenerarPassword.Name = "btnGenerarPassword";
+            btnGenerarPassword.Text = "Generar contraseña";
+            btnGenerarPassword.AutoSize = true;
+            btnGenerarPassword.TabIndex = 6;
+            btnGenerarPassword.Click += BtnGenerarPassword_Click;
             tlpDatos.Dock = DockStyle.Fill;
             tlpDatos.Location = new Point(2, 3);
             tlpDatos.Margin = new Padding(3, 4, 3, 4);
@@ -428,6 +441,8 @@
         private TextBox txtPassword;
         private Label lblConfirmarPassword;
         private TextBox txtConfirmarPassword;
+        private Button btnGenerarPassword;
+        private FlowLayoutPanel flpPassword;
         private CheckBox chkMostrarPassword;
         private Label lblRol;
         private ComboBox cmbRol;

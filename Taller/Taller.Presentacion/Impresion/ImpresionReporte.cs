@@ -6,7 +6,7 @@ namespace Taller.Presentacion.Impresion;
 /// <summary>Documento paginado con gráfico vectorial, indicadores, metodología y todos los registros.</summary>
 internal static class ImpresionReporte
 {
-    public static void Mostrar(Form propietario, ReporteDocumentoDto d)
+    public static void Mostrar(Form propietario, ReporteDocumentoDto d, TipoGraficoReporte tipo = TipoGraficoReporte.Barras)
     {
         if (PrinterSettings.InstalledPrinters.Count == 0) { MessageBox.Show(propietario, "No hay impresora instalada. Puede exportar el documento HTML con su gráfico.", "Imprimir reporte"); return; }
         var b = new StringBuilder();
@@ -24,7 +24,7 @@ internal static class ImpresionReporte
             var a = e.MarginBounds; g.DrawString(d.Titulo, titulo, Brushes.Black, new RectangleF(a.X, a.Y, a.Width, 28));
             g.DrawString($"{d.Generado:dd/MM/yyyy HH:mm} · {d.EmitidoPor} · {d.Alcance}\n{d.Filtros}", fuente, Brushes.Black, new RectangleF(a.X, a.Y + 30, a.Width, 52));
             int top = a.Y + 86;
-            if (pagina == 1) { int alto = Math.Min(250, Math.Max(55, d.Grafico.Count * 26)); GraficoReporte.Dibujar(g, new Rectangle(a.X, top, a.Width, alto), d); top += alto + 12; }
+            if (pagina == 1) { int alto = Math.Min(250, Math.Max(55, d.Grafico.Count * 26)); GraficoReporte.Dibujar(g, new Rectangle(a.X, top, a.Width, alto), d, tipo); top += alto + 12; }
             var contenido = new RectangleF(a.X, top, a.Width, a.Bottom - top - 28); string restante = texto[inicio..];
             g.MeasureString(restante, fuente, contenido.Size, formato, out int caracteres, out _);
             if (caracteres == 0) throw new InvalidOperationException("El área de impresión es insuficiente. Use papel A4 horizontal y márgenes normales.");

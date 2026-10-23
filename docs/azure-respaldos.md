@@ -57,3 +57,18 @@ Una pérdida total del servidor y de la base de control requiere intervención t
 La configuración y pruebas con una suscripción real deben realizarse en el equipo del usuario. Las pruebas automatizadas de coordinación usan un proveedor de transferencia controlado; no afirman haber comprobado sus credenciales Azure.
 
 Referencias: https://learn.microsoft.com/azure/storage/blobs/storage-quickstart-blobs-dotnet y https://learn.microsoft.com/azure/storage/blobs/storage-blob-upload
+
+## Recorrido guiado para la PC de demostración
+
+Antes de habilitar el módulo, mantener la ejecución conectada a `SGTM_DB_Demo`. Los datos de prueba no crean la base auxiliar ni instalan el agente.
+
+1. En el portal Azure, crear un grupo de recursos para pruebas. Crear una cuenta de almacenamiento **StorageV2**, rendimiento **Standard**, redundancia **LRS** para esta prueba y nivel **Hot**. Revisar el costo estimado de la región antes de confirmar. Esta elección de prueba no equivale a una estrategia de redundancia de producción.
+2. En Seguridad/Configuración, deshabilitar acceso anónimo a blobs y exigir HTTPS/TLS 1.2 o superior. Crear en Almacenamiento de datos → Contenedores uno llamado `sgtm-respaldos`, acceso privado.
+3. En el contenedor, Control de acceso (IAM) → Agregar asignación de rol, conceder **Storage Blob Data Contributor** a la cuenta Microsoft Entra que se utilizará desde Visual Studio. No es suficiente el rol Contributor de administración de recursos. La asignación puede tardar en propagarse.
+4. Iniciar sesión en Visual Studio con esa misma cuenta. Copiar solamente la URL del contenedor, sin claves ni SAS. En una instalación permanente, configurar por separado la identidad del servicio de Windows; no hereda esta sesión.
+5. Publicar `Taller.Respaldos` y crear la base de control siguiendo `respaldos-restauracion.md`, pasos 3 a 6. Usar como base de negocio `SGTM_DB_Demo` y como `Respaldos:BaseControl` **SGTM_DB_Demo_Control**. Crear una carpeta exclusiva de pruebas en el servidor SQL y asignar permisos a la cuenta del servicio SQL. El proceso que replica en Azure también necesita leer los archivos.
+6. En el perfil de inicio de Presentación, conservar las dos conexiones Demo y agregar `Respaldos__BaseControl=SGTM_DB_Demo_Control`, `Respaldos__Azure__ContenedorUri=https://SUCUENTA.blob.core.windows.net/sgtm-respaldos`. Solo después de instalar/verificar el control, cambiar `Respaldos__Habilitado=true`. Una variable de entorno prevalece sobre JSON: dejarla en false mantiene bloqueados los botones aunque JSON diga true.
+7. Reiniciar SGTM, ingresar como administrador y crear una completa con réplica Azure. Confirmar local verificada, Azure verificada y objeto visible en el contenedor. Conservar completa y diferencial: no subir solamente una diferencial aislada.
+8. Probar primero **Ensayar restauración** en Demo. La restauración real exige doble aprobación, afecta toda la base y se prueba aparte. Azure aporta el archivo; SQL Server realiza la recuperación. No se restaura directamente sobre una base alojada en Blob Storage.
+
+No habilitar planes automáticos hasta publicar/configurar el agente y comprobar su identidad SQL y Azure. Una copia manual exitosa desde Visual Studio no demuestra que el servicio pueda subirla sin sesión interactiva.

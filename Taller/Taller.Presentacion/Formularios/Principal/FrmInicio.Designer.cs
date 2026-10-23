@@ -16,14 +16,16 @@ partial class FrmInicio
         tlpPrincipal = new TableLayoutPanel();
         lblBienvenida = new Label();
         lblDescripcion = new Label();
-        txtIndicadores = new TextBox();
+        pnlTarjetas = new FlowLayoutPanel();
+        lblSinPendientes = new Label();
+        pnlActividad = new Panel();
         dgvActividad = new DataGridView();
         lblEstado = new Label();
         btnActualizar = new Button();
         tlpPrincipal.Name = "tlpPrincipal";
         lblBienvenida.Name = "lblBienvenida";
         lblDescripcion.Name = "lblDescripcion";
-        txtIndicadores.Name = "txtIndicadores";
+        pnlTarjetas.Name = "pnlTarjetas";
         dgvActividad.Name = "dgvActividad";
         lblEstado.Name = "lblEstado";
         btnActualizar.Name = "btnActualizar";
@@ -36,7 +38,8 @@ partial class FrmInicio
         {
             Name = "lblReloj",
             Dock = DockStyle.Top,
-            Height = 26,
+            Height = 76,
+            Font = new Font("Segoe UI", 15F, FontStyle.Bold),
             TextAlign = ContentAlignment.MiddleLeft
         };
         calendario = new MonthCalendar
@@ -53,7 +56,7 @@ partial class FrmInicio
             RowCount = 1
         };
         pnlResumen.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        pnlResumen.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260));
+        pnlResumen.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 310));
         pnlCalendario = new Panel
         {
             Name = "pnlCalendario",
@@ -61,7 +64,7 @@ partial class FrmInicio
         };
         pnlCalendario.Controls.Add(calendario);
         pnlCalendario.Controls.Add(lblReloj);
-        pnlResumen.Controls.Add(txtIndicadores, 0, 0);
+        pnlResumen.Controls.Add(pnlTarjetas, 0, 0);
         pnlResumen.Controls.Add(pnlCalendario, 1, 0);
         SuspendLayout();
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -78,7 +81,7 @@ partial class FrmInicio
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 210));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 265));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
@@ -86,7 +89,17 @@ partial class FrmInicio
         tlpPrincipal.Controls.Add(lblBienvenida, 0, 0);
         tlpPrincipal.Controls.Add(lblDescripcion, 0, 1);
         tlpPrincipal.Controls.Add(pnlResumen, 0, 2);
-        tlpPrincipal.Controls.Add(dgvActividad, 0, 3);
+        tlpPrincipal.Controls.Add(pnlActividad, 0, 3);
+        pnlActividad.Dock = DockStyle.Fill;
+        pnlActividad.Controls.Add(dgvActividad);
+        pnlActividad.Controls.Add(lblSinPendientes);
+        lblSinPendientes.Name = "lblSinPendientes";
+        lblSinPendientes.Dock = DockStyle.Top;
+        lblSinPendientes.Height = 68;
+        lblSinPendientes.Font = new Font("Segoe UI", 12F);
+        lblSinPendientes.Padding = new Padding(12);
+        lblSinPendientes.BackColor = Color.FromArgb(239, 246, 255);
+        lblSinPendientes.Visible = false;
         tlpPrincipal.Controls.Add(lblEstado, 0, 4);
         tlpPrincipal.Controls.Add(btnActualizar, 0, 5);
         lblBienvenida.Dock = DockStyle.Fill;
@@ -94,11 +107,11 @@ partial class FrmInicio
         lblBienvenida.Text = "Bienvenido";
         lblDescripcion.Dock = DockStyle.Fill;
         lblDescripcion.Text = "Resumen de datos reales según su rol. Últimos 20 registros de las consultas resumidas, según su fecha de referencia.";
-        txtIndicadores.Dock = DockStyle.Fill;
-        txtIndicadores.Multiline = true;
-        txtIndicadores.ReadOnly = true;
-        txtIndicadores.ScrollBars = ScrollBars.Vertical;
-        txtIndicadores.BackColor = Color.White;
+        pnlTarjetas.Dock = DockStyle.Fill;
+        pnlTarjetas.AutoScroll = true;
+        pnlTarjetas.SizeChanged += PnlTarjetas_SizeChanged;
+        pnlTarjetas.WrapContents = true;
+        pnlTarjetas.Padding = new Padding(0, 0, 8, 0);
         dgvActividad.Dock = DockStyle.Fill;
         dgvActividad.AutoGenerateColumns = false;
         dgvActividad.ReadOnly = true;
@@ -167,7 +180,9 @@ partial class FrmInicio
     private Panel pnlCalendario = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblBienvenida = null!, lblDescripcion = null!, lblEstado = null!;
-    private TextBox txtIndicadores = null!;
+    private FlowLayoutPanel pnlTarjetas = null!;
+    private Label lblSinPendientes = null!;
+    private Panel pnlActividad = null!;
     private DataGridView dgvActividad = null!;
     private DataGridViewTextBoxColumn colFecha = null!, colCodigo = null!, colReporte = null!, colDescripcion = null!, colEstado = null!;
     private Button btnActualizar = null!;

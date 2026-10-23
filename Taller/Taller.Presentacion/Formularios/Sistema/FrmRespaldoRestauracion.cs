@@ -141,7 +141,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         {
             var copia = await _servicio.CrearAsync((TipoRespaldo)cboTipo.SelectedItem!, txtCarpetaManual.Text, Progreso(), chkAzureManual.Checked);
             await CargarDatosAsync();
-            MessageBox.Show(this, "Copia principal creada y verificada.\n" + copia.RutaServidor + "\n" + copia.Advertencia, "Respaldo", MessageBoxButtons.OK, copia.Advertencia.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+            MessageBox.Show(this, "Copia principal creada y verificada.\n" + copia.RutaServidor + "\n" + copia.Advertencia + "\n" + copia.AdvertenciaAzure, "Respaldo", MessageBoxButtons.OK, copia.Advertencia.Length == 0 && copia.AdvertenciaAzure.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
         });
     }
 

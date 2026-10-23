@@ -62,6 +62,7 @@ public sealed class ArchivoRespaldoAzure(IConfiguration configuracion) : IArchiv
         {
             AzureSolicitado = true,
             EstadoAzure = "Verificada",
+            AdvertenciaAzure = "",
             ContenedorAzure = uri.AbsoluteUri.TrimEnd('/'),
             BlobAzure = nombre,
             Sha256 = hash,

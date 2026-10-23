@@ -250,7 +250,7 @@ partial class FrmRespaldoRestauracion
         tlpPrograma.Padding = new Padding(10);
         tlpPrograma.ColumnCount = 1;
         tlpPrograma.RowCount = 8;
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+        tlpPrograma.AutoScroll = true;
         tlpPrograma.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 66));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
@@ -258,6 +258,7 @@ partial class FrmRespaldoRestauracion
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tabPrograma.Controls.Add(tlpPrograma);
         lblAyudaPrograma.Text = "El agente SGTMRespaldos debe estar instalado en un equipo encendido con acceso al servidor. El plan corre una vez por día al horario indicado; no depende de una sesión abierta. Si falta una completa base, el agente crea una. Los fallos reintentan a los 15 minutos y quedan registrados.";

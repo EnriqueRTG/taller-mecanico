@@ -37,7 +37,7 @@ public sealed partial class RespaldoSqlServer
             copia = copia with
             {
                 EstadoAzure = "Pendiente de reintento",
-                Advertencia = "La copia local está verificada; la réplica Azure no se completó. Revise conexión, identidad y acceso a la carpeta, y reintente desde Copias."
+                AdvertenciaAzure = "La copia local está verificada; la réplica Azure no se completó. Revise conexión, identidad y acceso a la carpeta, y reintente desde Copias."
             };
             await ActualizarCopiaAsync(c, copia, CancellationToken.None);
             // No persistir excepciones del SDK: pueden contener URLs y datos de autenticación.

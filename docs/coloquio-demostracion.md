@@ -26,13 +26,13 @@ El cargador debe terminar indicando `Lote DEMO completo`. Si falla, no continúe
 - Siete usuarios: `admin`, `demo.admin`, `demo.recepcion`, `demo.recepciondos`, `demo.tecnico`, `demo.tecnicodos`, `demo.tecnicotres`.
 - 45 clientes ficticios (cinco inactivos), 100 vehículos, marcas/modelos y conceptos de distintas categorías y tipos.
 - 100 atenciones de problema o servicio definido, con fechas distribuidas en seis meses. Cada una tiene un marcador buscable `DEMO-001` a `DEMO-100` en el motivo.
-- Evaluaciones, diagnósticos cuando corresponden, propuestas, decisiones, selección parcial, ejecución, hallazgos, adicionales, pausas por material del cliente, liquidaciones, pagos y entregas.
+- Evaluaciones, diagnósticos cuando corresponden, propuestas, decisiones, selección parcial y nuevas versiones aceptadas, ejecución, hallazgos, adicionales, pausas por material del cliente, recepciones conformes, liquidaciones, pagos mixtos por los cinco medios, anulaciones justificadas y entregas.
 - Los precios son académicos, no una lista de precios real. Los datos de nombres/documentos/dominios son ficticios. La retrodatación es exclusiva de los fixtures y conserva la secuencia de eventos de cada atención; no existe esa operación en la interfaz normal.
 - Auditoría de acceso y de respaldos NO se inventa: se genera al iniciar sesión y al ejecutar respaldos reales. El historial comercial sí procede de las operaciones invocadas durante la carga.
 
 ## Casos preparados
 
-Los primeros 16 marcadores se repiten en grupos posteriores, con diferentes usuarios, vehículos, fechas e importes. Busque por el marcador, no dependa del ID SQL:
+Los primeros 16 marcadores se repiten en grupos posteriores, con diferentes usuarios, vehículos, fechas e importes. Desde el tercer grupo hay además selecciones parciales ya revisadas y aceptadas nuevamente, materiales del cliente ya recibidos y cobros anulados y registrados correctamente. Busque por el marcador, no dependa del ID SQL:
 
 | Motivo | Punto de partida | Qué demostrar |
 |---|---|---|

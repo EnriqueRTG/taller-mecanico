@@ -157,6 +157,18 @@ public static class CargadorDemostracion
 
             var gestion = await Actual(propuesta.IdPresupuesto);
             await presupuestos.DecidirAsync(new() { IdPresupuesto = gestion.IdPresupuesto, Version = gestion.Version, ItemsAceptados = etapa == 5 ? [] : etapa == 6 ? [gestion.Items[0].IdDetalle] : gestion.Items.Select(x => x.IdDetalle).ToList(), Observaciones = etapa == 5 ? "Cliente rechaza la propuesta y solicita coordinar el retiro." : etapa == 6 ? "Cliente solicita solo una parte; requiere revisión técnica." : "Cliente acepta el alcance y sus importes." });
+            if (etapa == 6 && i >= 32)
+            {
+                await Entrar(tecnico);
+                var original = await presupuestos.ObtenerAsync(gestion.IdPresupuesto);
+                int revisado = await seguimiento.RevisarSeleccionAsync(original.IdPresupuesto, original.Version, [new() { IdConcepto = original.Items[0].IdConcepto, Descripcion = original.Items[0].Descripcion, Cantidad = original.Items[0].Cantidad, PrecioUnitario = original.Items[0].PrecioUnitario }], "Se revisan las dependencias: el alcance seleccionado es viable por separado.");
+                await Entrar(recepcion.Id);
+                var revision = await Actual(revisado);
+                await evaluacion.PresentarAsync(revisado, revision.Version);
+                revision = await Actual(revisado);
+                await presupuestos.DecidirAsync(new() { IdPresupuesto = revisado, Version = revision.Version, ItemsAceptados = revision.Items.Select(x => x.IdDetalle).ToList(), Observaciones = "Acepta la nueva versión revisada por el técnico." });
+            }
+
             if (etapa is 5 or 6 or 7)
             {
                 await FecharAsync(db, id, i);
@@ -189,6 +201,15 @@ public static class CargadorDemostracion
             if (etapa == 10)
             {
                 await seguimiento.PausarAsync(id, await Version(id), null, "Esperando el repuesto que aporta el cliente.");
+                if (i >= 32)
+                {
+                    var estadoMaterial = await seguimiento.ObtenerAsync(id);
+                    var materialCliente = estadoMaterial.Items.Single(x => x.Origen == OrigenMaterial.Cliente);
+                    await seguimiento.RecibirMaterialAsync(id, estadoMaterial.Version, materialCliente.IdDetalle, materialCliente.Cantidad, true, "Pieza recibida del cliente y revisada por el técnico; conforme.");
+                    estadoMaterial = await seguimiento.ObtenerAsync(id);
+                    await seguimiento.ResolverPausaAsync(id, estadoMaterial.Version, estadoMaterial.Pausas.Single(x => x.FechaResolucion == null).Id, "Se recibió y verificó el material. Puede continuar la tarea autorizada.");
+                }
+
                 await FecharAsync(db, id, i);
                 continue;
             }
@@ -215,7 +236,16 @@ public static class CargadorDemostracion
             if (etapa >= 13)
             {
                 decimal parcial = decimal.Round(comprobante.Total / 3, 2);
-                await cobros.RegistrarPagoAsync(new() { IdComprobante = comprobante.IdComprobante, Version = comprobante.Version, Medios = [new() { IdMedioPago = 1, Importe = parcial }] });
+                var primerImporte = decimal.Round(parcial / 2, 2);
+                int recibo = await cobros.RegistrarPagoAsync(new() { IdComprobante = comprobante.IdComprobante, Version = comprobante.Version, Medios = [new() { IdMedioPago = 1 + i % 5, Importe = primerImporte, Referencia = $"DEMO-A-{i}" }, new() { IdMedioPago = 1 + (i + 1) % 5, Importe = parcial - primerImporte, Referencia = $"DEMO-B-{i}" }] });
+                if (etapa == 13 && i >= 32)
+                {
+                    comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
+                    await cobros.AnularPagoAsync(comprobante.IdComprobante, recibo, comprobante.Version, "Se anula el cobro registrado por medio equivocado; se conserva la evidencia.");
+                    comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
+                    await cobros.RegistrarPagoAsync(new() { IdComprobante = comprobante.IdComprobante, Version = comprobante.Version, Medios = [new() { IdMedioPago = 2, Importe = parcial, Referencia = $"DEMO-CORREGIDO-{i}" }] });
+                }
+
                 comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
                 if (etapa == 14)
                 {

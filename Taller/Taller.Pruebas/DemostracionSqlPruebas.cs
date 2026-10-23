@@ -49,6 +49,10 @@ public sealed class DemostracionSqlPruebas
             Assert.True(await db.Atenciones.AnyAsync(x => x.Estado == EstadoAtencion.Cerrada));
             Assert.True(await db.Presupuestos.AnyAsync(x => x.Estado == EstadoPresupuesto.PendienteRevisionTecnica));
             Assert.True(await db.Presupuestos.AnyAsync(x => x.EsAdicional));
+            Assert.True(await db.Pagos.AnyAsync(p => p.Anulado));
+            Assert.True(await db.Presupuestos.AnyAsync(p => p.IdPresupuestoAnterior != null));
+            Assert.True(await db.PresupuestoDetalles.AnyAsync(p => p.OrigenMaterial == OrigenMaterial.Cliente && p.MaterialClienteConforme));
+            Assert.Equal(5, await db.PagoMedios.Select(p => p.IdMedioPago).Distinct().CountAsync());
             Assert.True(await db.Pagos.AnyAsync());
             Assert.False(await db.Comprobantes.AnyAsync(x => x.TotalPagado > x.Total));
             Assert.False(await db.Atenciones.Where(x => x.Estado == EstadoAtencion.Cerrada).AnyAsync(a => db.Comprobantes.Any(c => c.IdAtencion == a.IdAtencion && c.Total != c.TotalPagado)));

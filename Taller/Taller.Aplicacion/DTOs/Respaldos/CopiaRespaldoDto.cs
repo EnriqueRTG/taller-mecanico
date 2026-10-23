@@ -4,6 +4,7 @@ public sealed record CopiaRespaldoDto
 {
     public DateTimeOffset? UltimoIntentoAzureUtc { get; init; }
     public bool AzureSolicitado { get; init; }
+    public string AdvertenciaAzure { get; init; } = "";
     public string EstadoAzure { get; init; } = "No solicitado";
     public string ContenedorAzure { get; init; } = "";
     public string BlobAzure { get; init; } = "";

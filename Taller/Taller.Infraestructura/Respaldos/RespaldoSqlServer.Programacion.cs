@@ -40,7 +40,7 @@ public sealed partial class RespaldoSqlServer
                 copia = await ReplicarAsync(control, copia, cancelacion);
             var proxima = PoliticaRespaldos.Proxima(p, reloj.GetUtcNow());
             await _registro.GuardarProgramaAsync(control, p with { ProximaUtc = proxima }, cancelacion);
-            await SqlRespaldos.EjecutarAsync(control, "UPDATE dbo.ProgramaSGTM SET Resultado=@resultado WHERE Id=1", cancelacion, ("@resultado", $"{tipo} verificada: {copia.FechaServidor:dd/MM/yyyy HH:mm:ss} (servidor SQL). {copia.Advertencia}"));
+            await SqlRespaldos.EjecutarAsync(control, "UPDATE dbo.ProgramaSGTM SET Resultado=@resultado WHERE Id=1", cancelacion, ("@resultado", $"{tipo} verificada: {copia.FechaServidor:dd/MM/yyyy HH:mm:ss} (servidor SQL). {copia.Advertencia} {copia.AdvertenciaAzure}"));
         }
         catch (Exception e)when (e is not OperationCanceledException)
         {

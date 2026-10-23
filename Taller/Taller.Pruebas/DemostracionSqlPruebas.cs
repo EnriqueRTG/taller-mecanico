@@ -46,6 +46,8 @@ public sealed class DemostracionSqlPruebas
             Assert.Equal(100, await db.Atenciones.CountAsync());
             Assert.Equal(45, await db.Clientes.CountAsync());
             Assert.Equal(5, await db.Clientes.CountAsync(x => !x.Activo));
+            Assert.Equal(5, await db.Vehiculos.CountAsync(x => !x.Activo));
+            Assert.False(await db.Atenciones.AnyAsync(a=>a.FechaApertura<a.Cliente.FechaAlta||a.FechaApertura<a.Vehiculo.FechaAlta));
             Assert.True(await db.Atenciones.AnyAsync(x => x.Estado == EstadoAtencion.Cerrada));
             Assert.True(await db.Presupuestos.AnyAsync(x => x.Estado == EstadoPresupuesto.PendienteRevisionTecnica));
             Assert.True(await db.Presupuestos.AnyAsync(x => x.EsAdicional));

@@ -27,6 +27,8 @@ public static class CargadorDemostracion
         await Entrar(admin.Id);
         var usuarios = sp.GetRequiredService<UsuarioServicio>();
         await usuarios.CrearAsync("demo.admin", clave, "Laura", "Gómez", 1);
+        var inactivo = await usuarios.CrearAsync("demo.inactivo", clave, "Mario", "Giménez", 3);
+        await usuarios.CambiarEstadoAsync(inactivo.Id, false, admin.Id);
         var recepcion = await usuarios.CrearAsync("demo.recepcion", clave, "Ana", "Pérez", 2);
         var recepcionDos = await usuarios.CrearAsync("demo.recepciondos", clave, "Martín", "López", 2);
         var tecnicos = new List<int>();
@@ -56,6 +58,12 @@ public static class CargadorDemostracion
             concepto.PrecioReferencia = concepto.Tipo == TipoConcepto.Servicio ? 15000 + concepto.IdConcepto * 350 : 5000 + concepto.IdConcepto * 180;
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
+        // Los maestros y autores deben existir antes que las atenciones históricas del lote.
+        var altaHistorica = DateTime.Today.AddDays(-200);
+        foreach(var u in await db.Usuarios.ToListAsync()) u.FechaAlta=altaHistorica;
+        foreach(var c in await db.Clientes.ToListAsync()) c.FechaAlta=altaHistorica;
+        foreach(var v in await db.Vehiculos.ToListAsync()) v.FechaAlta=altaHistorica;
+        await db.SaveChangesAsync(); db.ChangeTracker.Clear();
         var catalogo = await db.Conceptos.AsNoTracking().Where(c => c.Activo).ToListAsync();
         var servicios = catalogo.Where(c => c.Tipo == TipoConcepto.Servicio && !c.DisponibleParaIngreso).ToList();
         var repuestos = catalogo.Where(c => c.Tipo == TipoConcepto.Repuesto).ToList();
@@ -258,6 +266,11 @@ public static class CargadorDemostracion
         }
 
         await Entrar(recepcion.Id);
+        foreach(var idVehiculo in await db.Atenciones.Where(a=>a.Estado==EstadoAtencion.Cerrada).OrderBy(a=>a.IdAtencion).Select(a=>a.IdVehiculo).Take(5).ToListAsync())
+        {
+            var v=await vehiculos.ObtenerPorIdAsync(idVehiculo);
+            await vehiculos.DarDeBajaAsync(idVehiculo,v!.Version);
+        }
         // Registros inactivos para filtros. Solo maestros sin atenciones asociadas.
         for (int i = 0; i < 5; i++)
         {

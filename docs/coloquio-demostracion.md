@@ -23,8 +23,8 @@ El cargador debe terminar indicando `Lote DEMO completo`. Si falla, no continúe
 ## Contenido
 
 - Roles y catálogos de referencia del modelo.
-- Siete usuarios: `admin`, `demo.admin`, `demo.recepcion`, `demo.recepciondos`, `demo.tecnico`, `demo.tecnicodos`, `demo.tecnicotres`.
-- 45 clientes ficticios (cinco inactivos), 100 vehículos, marcas/modelos y conceptos de distintas categorías y tipos.
+- Ocho usuarios: `admin`, `demo.admin`, `demo.recepcion`, `demo.recepciondos`, `demo.tecnico`, `demo.tecnicodos`, `demo.tecnicotres` y `demo.inactivo` (deshabilitado, para probar filtros y rechazo de acceso).
+- 45 clientes ficticios (cinco inactivos), 100 vehículos (cinco inactivos con atenciones históricas cerradas), marcas/modelos y conceptos de distintas categorías y tipos.
 - 100 atenciones de problema o servicio definido, con fechas distribuidas en seis meses. Cada una tiene un marcador buscable `DEMO-001` a `DEMO-100` en el motivo.
 - Evaluaciones, diagnósticos cuando corresponden, propuestas, decisiones, selección parcial y nuevas versiones aceptadas, ejecución, hallazgos, adicionales, pausas por material del cliente, recepciones conformes, liquidaciones, pagos mixtos por los cinco medios, anulaciones justificadas y entregas.
 - Los precios son académicos, no una lista de precios real. Los datos de nombres/documentos/dominios son ficticios. La retrodatación es exclusiva de los fixtures y conserva la secuencia de eventos de cada atención; no existe esa operación en la interfaz normal.

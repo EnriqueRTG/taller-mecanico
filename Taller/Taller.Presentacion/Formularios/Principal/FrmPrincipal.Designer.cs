@@ -27,6 +27,7 @@ namespace Taller.Presentacion.Formularios.Principal
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             pnlMenu = new Panel();
             pnlOpciones = new Panel();
             btnRespaldo = new Button();

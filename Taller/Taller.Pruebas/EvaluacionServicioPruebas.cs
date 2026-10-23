@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.DTOs.Atenciones;
 using Taller.Aplicacion.Excepciones;
@@ -34,7 +35,7 @@ public sealed class EvaluacionServicioPruebas
                 new Usuario { Id = 3, RolId = RolesSistema.TecnicoId, Activo = true });
             Db.Add(new Atencion { IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = vehiculo,
                 IdUsuarioRecepcion = 2, MotivoConsulta = "Solicitud del cliente", TipoSolicitud = tipo,
-                FechaApertura = DateTime.Now, Estado = EstadoAtencion.Abierta, Version = new byte[8] });
+                FechaApertura = FechaHoraTaller.Ahora, Estado = EstadoAtencion.Abierta, Version = new byte[8] });
             Db.Add(new Concepto { IdConcepto = 1, IdCategoria = 1, Categoria = new Categoria { IdCategoria = 1, Nombre = "Mantenimiento", Activo = true },
                 Nombre = "Servicio", Tipo = TipoConcepto.Servicio, Activo = true, DisponibleParaIngreso = true });
             Db.SaveChanges(); Db.ChangeTracker.Clear();

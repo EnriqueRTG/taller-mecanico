@@ -364,6 +364,27 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("Taller.Dominio.Entidades.ControlAcceso", b =>
+                {
+                    b.Property<string>("Clave")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<DateTimeOffset?>("BloqueadoHastaUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Intentos")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("VentanaUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Clave");
+
+                    b.ToTable("ControlesAcceso", (string)null);
+                });
+
             modelBuilder.Entity("Taller.Dominio.Entidades.Diagnostico", b =>
                 {
                     b.Property<int>("IdDiagnostico")
@@ -482,6 +503,36 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         {
                             t.HasCheckConstraint("CK_EvaluacionesAtencion_Kilometraje", "[Kilometraje] IS NULL OR [Kilometraje] >= 0");
                         });
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.EventoAcceso", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Clave")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<bool>("Correcto")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("FechaUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FechaUtc");
+
+                    b.ToTable("EventosAcceso", (string)null);
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.HallazgoAtencion", b =>

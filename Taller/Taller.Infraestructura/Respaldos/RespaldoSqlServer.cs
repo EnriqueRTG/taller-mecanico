@@ -5,7 +5,7 @@ using Taller.Aplicacion.Respaldos;
 
 namespace Taller.Infraestructura.Respaldos;
 /// <summary>Coordina copias verificadas y recuperación nativa; usa conexiones dedicadas a master/control, nunca el contexto de negocio.</summary>
-public sealed partial class RespaldoSqlServer(OpcionesRespaldos opciones, TimeProvider reloj) : IRespaldoMotor
+public sealed partial class RespaldoSqlServer(OpcionesRespaldos opciones, TimeProvider reloj, IArchivoRespaldoNube? nube = null) : IRespaldoMotor
 {
     private readonly RegistroRespaldosSql _registro = new(opciones);
     public bool Habilitado => opciones.Habilitado;
@@ -59,6 +59,8 @@ public sealed partial class RespaldoSqlServer(OpcionesRespaldos opciones, TimePr
     public async Task GuardarProgramaAsync(ProgramaRespaldoDto p, CancellationToken cancelacion = default)
     {
         PoliticaRespaldos.Zona(p);
+        if (p.CopiarAzure)
+            ExigirNube().ValidarConfiguracion();
         await using var c = await ControlAsync(cancelacion);
         await using var bloqueo = await SqlRespaldos.BloquearAsync(opciones, opciones.RecursoCopias, "Exclusive", 0, cancelacion);
         if ((await _registro.ComprobarAsync(c, cancelacion)).Mantenimiento)

@@ -12,5 +12,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.11" />
     <ProjectReference Include="../Taller.Infraestructura/Taller.Infraestructura.csproj" />
+    <ProjectReference Include="../Taller.Demostracion/Taller.Demostracion.csproj" />
   </ItemGroup>
 </Project>

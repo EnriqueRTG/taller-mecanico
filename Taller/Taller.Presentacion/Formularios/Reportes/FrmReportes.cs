@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using System.Text;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Reportes;
@@ -27,9 +28,9 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             OperacionEnCurso = true;
             pnlFiltros.Enabled = flpAcciones.Enabled = false;
             _configurando = true;
-            dtpHasta.MaxDate = dtpDesde.MaxDate = DateTime.Today;
-            dtpDesde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            dtpHasta.Value = DateTime.Today;
+            dtpHasta.MaxDate = dtpDesde.MaxDate = FechaHoraTaller.Hoy;
+            dtpDesde.Value = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1);
+            dtpHasta.Value = FechaHoraTaller.Hoy;
             cboTipo.DisplayMember = "Nombre";
             cboTipo.ValueMember = "Tipo";
             cboEstado.Items.Add("Todos");
@@ -114,7 +115,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             lblMetodo.Text = _documento.Alcance + " · " + _documento.Filtros;
             lblCantidad.Text = $"{_documento.Registros.Count} registros · generado {_documento.Generado:dd/MM/yyyy HH:mm:ss} · gráfico en {_documento.UnidadGrafico}";
             btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = true;
-            pnlGrafico.Invalidate();
+            CboGrafico_SelectedIndexChanged(null, EventArgs.Empty);
         }
         catch (Exception ex)
         {
@@ -138,10 +139,22 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         dtpDesde.Enabled = dtpHasta.Enabled = p;
     }
 
+    private TipoGraficoReporte GraficoElegido => (TipoGraficoReporte)Math.Max(0, cboGrafico.SelectedIndex);
+
+    private void CboGrafico_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (_documento is { } d && GraficoElegido == TipoGraficoReporte.Torta && (d.Grafico.Any(p => p.Valor < 0) || d.Grafico.Sum(p => p.Valor) <= 0))
+        {
+            cboGrafico.SelectedIndex = 0;
+            MessageBox.Show(this, "La torta requiere valores no negativos y un total mayor que cero. Se utilizarán barras.", "Tipo de gráfico");
+        }
+        pnlGrafico.Invalidate();
+    }
+
     private void PnlGrafico_Paint(object? sender, PaintEventArgs e)
     {
         if (_documento is { } d)
-            GraficoReporte.Dibujar(e.Graphics, Rectangle.Inflate(pnlGrafico.ClientRectangle, -12, -8), d);
+            GraficoReporte.Dibujar(e.Graphics, Rectangle.Inflate(pnlGrafico.ClientRectangle, -12, -8), d, GraficoElegido);
     }
 
     private void BtnLimpiar_Click(object? sender, EventArgs e)
@@ -149,8 +162,8 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         _configurando = true;
         txtBuscar.Clear();
         cboEstado.SelectedIndex = cboEstado.Items.Count > 0 ? 0 : -1;
-        dtpDesde.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        dtpHasta.Value = DateTime.Today;
+        dtpDesde.Value = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1);
+        dtpHasta.Value = FechaHoraTaller.Hoy;
         _configurando = false;
         ConfigurarPeriodo();
         Invalidar();
@@ -170,7 +183,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             return;
         try
         {
-            File.WriteAllText(guardar.FileName, csv ? DocumentoReporteExportador.Csv(d) : DocumentoReporteExportador.Html(d), new UTF8Encoding(csv));
+            File.WriteAllText(guardar.FileName, csv ? DocumentoReporteExportador.Csv(d) : DocumentoReporteExportador.Html(d, GraficoElegido), new UTF8Encoding(csv));
             MessageBox.Show(this, "Archivo guardado correctamente.", "Exportar reporte");
         }
         catch (Exception ex)
@@ -187,7 +200,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             return;
         try
         {
-            ImpresionReporte.Mostrar(this, d);
+            ImpresionReporte.Mostrar(this, d, GraficoElegido);
         }
         catch (Exception ex)
         {

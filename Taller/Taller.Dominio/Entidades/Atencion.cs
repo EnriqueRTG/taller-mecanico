@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Dominio.Entidades;
@@ -22,7 +23,7 @@ public sealed class Atencion
     /// Es null cuando no existe una reserva.
     /// </summary>
     public ActividadTecnica? ActividadTecnica { get; set; }
-    public DateTime FechaApertura { get; set; } = DateTime.Now;
+    public DateTime FechaApertura { get; set; } = FechaHoraTaller.Ahora;
     public TipoSolicitudAtencion TipoSolicitud { get; set; } = TipoSolicitudAtencion.Problema;
     public string MotivoConsulta { get; set; } = null!;
     public EstadoAtencion Estado { get; set; } = EstadoAtencion.Abierta;

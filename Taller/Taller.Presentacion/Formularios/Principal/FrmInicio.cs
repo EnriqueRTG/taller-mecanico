@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
@@ -8,17 +9,32 @@ namespace Taller.Presentacion.Formularios.Principal;
 public partial class FrmInicio : Form, IFormularioConOperacion
 {
     private readonly ReporteServicio _reportes;
+    private readonly InicioServicio _inicio;
     private readonly SesionUsuario _sesion;
     public bool OperacionEnCurso { get; private set; }
 
-    public FrmInicio(ReporteServicio reportes, SesionUsuario sesion)
+    public FrmInicio(ReporteServicio reportes, SesionUsuario sesion, InicioServicio inicio)
     {
         InitializeComponent();
         _reportes = reportes;
+        _inicio = inicio;
         _sesion = sesion;
     }
 
-    private async void FrmInicio_Load(object? sender, EventArgs e) => await CargarAsync();
+    private async void FrmInicio_Load(object? sender, EventArgs e)
+    {
+        calendario.SetDate(FechaHoraTaller.Hoy);
+        ActualizarReloj();
+        reloj.Start();
+        await CargarAsync();
+    }
+
+    private void Reloj_Tick(object? sender, EventArgs e) => ActualizarReloj();
+    private void ActualizarReloj()
+    {
+        lblReloj.Text = FechaHoraTaller.Ahora.ToString("dddd dd 'de' MMMM 'de' yyyy\nHH:mm:ss", System.Globalization.CultureInfo.GetCultureInfo("es-AR"));
+        calendario.TodayDate = FechaHoraTaller.Hoy;
+    }
     private async void BtnActualizar_Click(object? sender, EventArgs e) => await CargarAsync();
     private async Task CargarAsync()
     {
@@ -28,11 +44,12 @@ public partial class FrmInicio : Form, IFormularioConOperacion
         {
             OperacionEnCurso = true;
             btnActualizar.Enabled = false;
-            txtIndicadores.Clear();
+            LimpiarTarjetas();
             dgvActividad.DataSource = null;
             var tipos = await _reportes.ListarTiposAsync();
             var usuario = _sesion.UsuarioActual;
-            lblBienvenida.Text = $"Bienvenido, {usuario?.Nombre}";
+            lblBienvenida.Text = $"Bienvenido, {usuario?.Nombre} {usuario?.Apellido}";
+            lblDescripcion.Text = $"Perfil: {usuario?.Rol?.Nombre} · Usuario: {usuario?.NombreUsuario}. Pendientes priorizados según su intervención.";
             var seleccion = tipos.Contains(TipoReporte.MovimientosCobro) ? new[]
             {
                 TipoReporte.Atenciones,
@@ -48,15 +65,21 @@ public partial class FrmInicio : Form, IFormularioConOperacion
             };
             var documentos = new List<ReporteDocumentoDto>();
             foreach (var tipo in seleccion)
-                documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), Hasta = DateTime.Today }));
-            txtIndicadores.Text = string.Join(Environment.NewLine + Environment.NewLine, documentos.Select(d => d.Titulo + Environment.NewLine + string.Join("   |   ", d.Indicadores.Select(i => i.Nombre + ": " + i.Valor))));
-            dgvActividad.DataSource = documentos.SelectMany(d => d.Registros.Select(x => new { Reporte = d.Titulo, x.Fecha, x.Codigo, x.Descripcion, Estado = ReporteServicio.Legible(x.Estado) })).OrderByDescending(x => x.Fecha).Take(20).ToList();
+                documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1), Hasta = FechaHoraTaller.Hoy }));
+            MostrarTarjetas(documentos);
+            var pendientes = await _inicio.ListarPendientesAsync();
+            dgvActividad.DataSource = pendientes;
+            dgvActividad.Visible = pendientes.Count > 0;
+            lblSinPendientes.Visible = pendientes.Count == 0;
+            lblSinPendientes.Text = usuario?.RolId == RolesSistema.AdministradorId
+                ? "Sin accesos rechazados en los últimos 7 días. Los accesos correctos pueden consultarse en Auditoría de accesos."
+                : "No hay tareas pendientes para su perfil. Actualice el resumen después de registrar operaciones.";
             dgvActividad.ClearSelection();
-            lblEstado.Text = $"Actualizado {DateTime.Now:dd/MM/yyyy HH:mm:ss} · Mes actual, excepto saldos y carga técnica (situación actual). Detalle y documentos en Reportes.";
+            lblEstado.Text = $"Actualizado {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm:ss} · Indicadores: mes actual; saldos y carga: situación actual. Pendientes sin filtro de fecha. Detalle en Reportes.";
         }
         catch (Exception ex)
         {
-            txtIndicadores.Clear();
+            LimpiarTarjetas();
             dgvActividad.DataSource = null;
             lblEstado.Text = "No se pudieron actualizar los datos. Presione Actualizar para reintentar.";
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Inicio");
@@ -65,6 +88,27 @@ public partial class FrmInicio : Form, IFormularioConOperacion
         {
             OperacionEnCurso = false;
             btnActualizar.Enabled = true;
+        }
+    }
+
+    private void LimpiarTarjetas()
+    {
+        while (pnlTarjetas.Controls.Count > 0)
+            pnlTarjetas.Controls[0].Dispose();
+    }
+
+    private void MostrarTarjetas(IEnumerable<ReporteDocumentoDto> documentos)
+    {
+        Color[] colores = [Color.FromArgb(30, 64, 175), Color.FromArgb(4, 120, 87), Color.FromArgb(146, 64, 14)];
+        int indice = 0;
+        foreach (var documento in documentos)
+        {
+            var tarjeta = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Margin = new Padding(0, 0, 12, 12), Padding = new Padding(14) };
+            var titulo = new Label { Dock = DockStyle.Top, Height = 48, Text = documento.Titulo, Font = new Font("Segoe UI", 12F, FontStyle.Bold), ForeColor = colores[indice % colores.Length] };
+            var contenido = new Label { Dock = DockStyle.Fill, AutoEllipsis = true, Font = new Font("Segoe UI", 11F), Text = string.Join(Environment.NewLine, documento.Indicadores.Select(i => $"{i.Nombre}: {i.Valor}")) };
+            tarjeta.Controls.Add(contenido);
+            tarjeta.Controls.Add(titulo);
+            pnlTarjetas.Controls.Add(tarjeta, indice++, 0);
         }
     }
 

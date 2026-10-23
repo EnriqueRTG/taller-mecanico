@@ -6,6 +6,8 @@ public interface IRespaldoMotor
 {
     bool Habilitado { get; }
 
+    Task<CopiaRespaldoDto> CrearConDestinoAsync(TipoRespaldo tipo, string carpeta, string autor, bool azure, IProgress<string>? progreso = null, CancellationToken ct = default) => azure ? throw new InvalidOperationException("El motor no admite Azure.") : CrearAsync(tipo, carpeta, autor, progreso, ct);
+    Task ReintentarAzureAsync(Guid id, string autor, CancellationToken ct = default) => throw new InvalidOperationException("El motor no admite Azure.");
     Task<EstadoRespaldosDto> ConsultarAsync(CancellationToken cancelacion = default);
     Task<ProgramaRespaldoDto> ObtenerProgramaAsync(CancellationToken cancelacion = default);
     Task GuardarProgramaAsync(ProgramaRespaldoDto programa, CancellationToken cancelacion = default);

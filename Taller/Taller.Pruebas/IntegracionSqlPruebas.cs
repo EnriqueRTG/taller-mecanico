@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -354,8 +355,8 @@ public sealed class IntegracionSqlPruebas
             Tipo = TipoPresupuesto.Reparacion,
             Estado = EstadoPresupuesto.PendienteDecision,
             IdUsuarioCreacion = ids.Tecnico,
-            FechaCreacion = DateTime.Now,
-            FechaPresentacion = DateTime.Now,
+            FechaCreacion = FechaHoraTaller.Ahora,
+            FechaPresentacion = FechaHoraTaller.Ahora,
             Detalles = [new()
             {
                 IdConcepto = ids.Concepto,

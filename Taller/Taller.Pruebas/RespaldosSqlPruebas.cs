@@ -20,6 +20,37 @@ public sealed class SqlRespaldoFactAttribute : FactAttribute
 
 public sealed class RespaldosSqlPruebas
 {
+    private sealed class NubePrueba : Taller.Aplicacion.Abstracciones.Persistencia.IArchivoRespaldoNube
+    {
+        public bool Fallar { get; set; }
+
+        public void ValidarConfiguracion()
+        {
+        }
+
+        public Task<CopiaRespaldoDto> SubirAsync(CopiaRespaldoDto copia, CancellationToken ct = default) => Fallar ? throw new IOException("Fallo controlado de transferencia") : Task.FromResult(copia with { EstadoAzure = "Verificada", VerificadaAzureUtc = DateTimeOffset.UtcNow, BlobAzure = "objeto-de-prueba" });
+        public Task RecuperarArchivoAsync(CopiaRespaldoDto copia, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    [SqlRespaldoFact]
+    public async Task Azure_FalloDeReplica_ConservaCopiaVerificadaYPermiteReintentar()
+    {
+        await using var c = await Caso.CrearAsync();
+        var nube = new NubePrueba
+        {
+            Fallar = true
+        };
+        var motor = new RespaldoSqlServer(c.Opciones, TimeProvider.System, nube);
+        var copia = await motor.CrearConDestinoAsync(TipoRespaldo.Completa, c.Carpeta, "Administrador CI", true);
+        Assert.Equal("Pendiente de reintento", copia.EstadoAzure);
+        Assert.Single((await motor.ConsultarAsync()).Copias, x => x.Id == copia.Id);
+        // El ensayo lee y verifica el respaldo SQL real, independientemente de la réplica fallida.
+        await motor.ProbarRestauracionAsync(copia.Id, 1);
+        nube.Fallar = false;
+        await motor.ReintentarAzureAsync(copia.Id, "Administrador CI");
+        Assert.Equal("Verificada", (await motor.ConsultarAsync()).Copias.Single(x => x.Id == copia.Id).EstadoAzure);
+    }
+
     private sealed class Caso : IAsyncDisposable
     {
         public string Nombre { get; } = "SGTM_Pruebas_" + Guid.NewGuid().ToString("N");

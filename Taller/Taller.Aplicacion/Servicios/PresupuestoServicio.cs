@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Presupuestos;
 using Taller.Aplicacion.Excepciones;
@@ -58,7 +59,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             var parcial = datos.ItemsAceptados.Count > 0 && datos.ItemsAceptados.Count < p.Detalles.Count;
             p.Estado = parcial ? EstadoPresupuesto.PendienteRevisionTecnica : datos.ItemsAceptados.Count > 0 ? EstadoPresupuesto.Aceptado : EstadoPresupuesto.Rechazado;
             p.AlcanceValidado = !parcial;
-            p.FechaDecision = DateTime.Now;
+            p.FechaDecision = FechaHoraTaller.Ahora;
             p.IdUsuarioDecision = usuario.Id;
             p.ObservacionesDecision = motivo;
             var a = p.Atencion;
@@ -66,7 +67,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             if (!p.EsAdicional)
                 a.Estado = parcial ? EstadoAtencion.PendienteDecision : p.Estado == EstadoPresupuesto.Aceptado ? EstadoAtencion.EnEjecucion : EstadoAtencion.PendienteLiquidacion;
             evaluacion.PrepararVersion(a, a.Version);
-            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = DateTime.Now, Accion = "DecisionPresupuestoRegistrada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Presupuesto {p.IdPresupuesto}: {datos.ItemsAceptados.Count}/{p.Detalles.Count} ítems aceptados. {motivo}" });
+            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "DecisionPresupuestoRegistrada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Presupuesto {p.IdPresupuesto}: {datos.ItemsAceptados.Count}/{p.Detalles.Count} ítems aceptados. {motivo}" });
             await unidad.GuardarCambiosAsync();
         }
         finally
@@ -100,9 +101,9 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                     Tipo = TipoPresupuesto.Reparacion,
                     Estado = EstadoPresupuesto.PendienteRevisionTecnica,
                     IdUsuarioCreacion = usuario.Id,
-                    FechaCreacion = DateTime.Now,
-                    FechaPresentacion = DateTime.Now,
-                    FechaDecision = DateTime.Now,
+                    FechaCreacion = FechaHoraTaller.Ahora,
+                    FechaPresentacion = FechaHoraTaller.Ahora,
+                    FechaDecision = FechaHoraTaller.Ahora,
                     IdUsuarioDecision = usuario.Id,
                     MotivoRevision = motivo,
                     ObservacionesDecision = motivo,
@@ -110,7 +111,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 };
                 evaluacion.AgregarPresupuesto(revision);
                 evaluacion.PrepararVersion(p.Atencion, p.Atencion.Version);
-                evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = p.IdAtencion, IdUsuario = usuario.Id, Fecha = DateTime.Now, Accion = "RevisionAdicionalSolicitada", EstadoAnterior = p.Atencion.Estado, EstadoNuevo = p.Atencion.Estado, Observaciones = motivo });
+                evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = p.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "RevisionAdicionalSolicitada", EstadoAnterior = p.Atencion.Estado, EstadoNuevo = p.Atencion.Estado, Observaciones = motivo });
                 await unidad.GuardarCambiosAsync();
                 return revision.IdPresupuesto;
             }
@@ -126,7 +127,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 Tipo = TipoPresupuesto.Reparacion,
                 Estado = EstadoPresupuesto.Borrador,
                 IdUsuarioCreacion = usuario.Id,
-                FechaCreacion = DateTime.Now,
+                FechaCreacion = FechaHoraTaller.Ahora,
                 MotivoRevision = motivo,
                 Observaciones = motivo,
                 Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList()
@@ -140,11 +141,11 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             {
                 avance.Finalizada = false;
                 avance.SoloEvaluacion = false;
-                avance.FechaActualizacion = DateTime.Now;
+                avance.FechaActualizacion = FechaHoraTaller.Ahora;
             }
 
             evaluacion.PrepararVersion(a, a.Version);
-            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = DateTime.Now, Accion = "RevisionPresupuestoSolicitada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Se conserva presupuesto {id}. {motivo}" });
+            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "RevisionPresupuestoSolicitada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Se conserva presupuesto {id}. {motivo}" });
             await unidad.GuardarCambiosAsync();
             return nueva.IdPresupuesto;
         }

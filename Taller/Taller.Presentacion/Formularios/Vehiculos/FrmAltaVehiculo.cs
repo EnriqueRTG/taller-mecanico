@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Entidades;
 using Taller.Presentacion.Estilos;
@@ -86,8 +87,8 @@ public partial class FrmAltaVehiculo : Form
         txtDominio.CharacterCasing = CharacterCasing.Upper;
         txtColor.MaxLength = 50;
         nudAnio.Minimum = 1900;
-        nudAnio.Maximum = DateTime.Today.Year + 1;
-        nudAnio.Value = DateTime.Today.Year;
+        nudAnio.Maximum = FechaHoraTaller.Hoy.Year + 1;
+        nudAnio.Value = FechaHoraTaller.Hoy.Year;
         cboMarca.DropDownStyle = ComboBoxStyle.DropDownList;
         cboModelo.DropDownStyle = ComboBoxStyle.DropDownList;
         cboModelo.DataSource = null;

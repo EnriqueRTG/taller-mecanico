@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Excepciones;
 using Taller.Aplicacion.Seguridad;
@@ -72,8 +73,8 @@ public sealed class VehiculoServicio(IVehiculoRepositorio vehiculos, IModeloRepo
     {
         v.Dominio = DatosMaestros.Dominio(dominio);
         v.Color = DatosMaestros.Texto(color, 50, "Color");
-        if (anio < 1900 || anio > DateTime.Today.Year + 1)
-            throw new ValidacionException($"El año debe estar entre 1900 y {DateTime.Today.Year + 1}.");
+        if (anio < 1900 || anio > FechaHoraTaller.Hoy.Year + 1)
+            throw new ValidacionException($"El año debe estar entre 1900 y {FechaHoraTaller.Hoy.Year + 1}.");
         v.Anio = anio;
         DatosMaestros.Id(idModelo);
         var m = await modelos.ObtenerPorIdAsync(idModelo) ?? throw new ValidacionException("El modelo no existe.");

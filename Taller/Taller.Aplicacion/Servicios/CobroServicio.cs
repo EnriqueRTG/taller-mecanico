@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Cobros;
 using Taller.Aplicacion.Excepciones;
@@ -12,7 +13,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
 {
     private const decimal Maximo = 9999999999999999.99m;
     private async Task<Atencion> AtencionAsync(int id) => await evaluacion.ObtenerAtencionAsync(id) ?? throw new ValidacionException("La atención no existe.");
-    private void Evento(Atencion a, Usuario u, string accion, string texto, EstadoAtencion? anterior = null) => evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = DateTime.Now, Accion = accion, EstadoAnterior = anterior ?? a.Estado, EstadoNuevo = a.Estado, Observaciones = texto });
+    private void Evento(Atencion a, Usuario u, string accion, string texto, EstadoAtencion? anterior = null) => evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Accion = accion, EstadoAnterior = anterior ?? a.Estado, EstadoNuevo = a.Estado, Observaciones = texto });
     private static void AbiertaParaCobros(Atencion a)
     {
         if (a.Estado is not (EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion) || a.IdTecnicoEnActividad != null)
@@ -131,7 +132,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
             {
                 IdAtencion = idAtencion,
                 IdUsuarioEmision = usuario.Id,
-                FechaEmision = DateTime.Now,
+                FechaEmision = FechaHoraTaller.Ahora,
                 Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
                 DocumentoCliente = a.Cliente.TipoDocumento + " " + a.Cliente.Documento,
                 Dominio = a.Vehiculo.Dominio,
@@ -210,7 +211,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                 IdComprobante = d.IdComprobante,
                 IdUsuarioRegistro = u.Id,
                 UsuarioRegistroNombre = u.Apellido + ", " + u.Nombre,
-                Fecha = DateTime.Now,
+                Fecha = FechaHoraTaller.Ahora,
                 Importe = total,
                 SaldoPosterior = d.Total - d.TotalPagado - total,
                 Medios = datos.Medios.Select((m, i) => new PagoMedio { Orden = i, IdMedioPago = m.IdMedioPago, NombreMedio = medios[m.IdMedioPago].Nombre, Importe = m.Importe, Referencia = m.Referencia?.Trim() }).ToList()
@@ -254,7 +255,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                 throw new ValidacionException("El saldo no coincide con los pagos registrados. Revise los datos antes de anular.");
             p.Anulado = true;
             p.MotivoAnulacion = motivo;
-            p.FechaAnulacion = DateTime.Now;
+            p.FechaAnulacion = FechaHoraTaller.Ahora;
             p.IdUsuarioAnulacion = u.Id;
             d.TotalPagado -= p.Importe;
             repositorio.PrepararVersion(d, version);
@@ -282,7 +283,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                 throw new ValidacionException("La entrega exige saldo exactamente cero y pagos consistentes.");
             var anterior = a.Estado;
             a.Estado = EstadoAtencion.Cerrada;
-            a.FechaCierre = DateTime.Now;
+            a.FechaCierre = FechaHoraTaller.Ahora;
             evaluacion.PrepararVersion(a, version);
             Evento(a, u, "VehiculoEntregado", condicion, anterior);
             await unidad.GuardarCambiosAsync();

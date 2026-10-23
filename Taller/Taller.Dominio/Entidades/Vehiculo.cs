@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 namespace Taller.Dominio.Entidades;
 /// <summary>
 /// Representa un vehículo en el sistema.
@@ -11,7 +12,7 @@ public sealed class Vehiculo
     public bool Activo { get; set; } = true;
     /// <summary>Versión de SQL Server que debe conservarse desde que se abre una edición.</summary>
     public byte[] Version { get; set; } = [];
-    public DateTime FechaAlta { get; set; } = DateTime.Now;
+    public DateTime FechaAlta { get; set; } = FechaHoraTaller.Ahora;
     public int IdModelo { get; set; }
     /// <summary>
     /// Representa el modelo asociado a este vehículo.

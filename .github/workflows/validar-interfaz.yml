@@ -1,0 +1,19 @@
+name: Verificar construcción WinForms
+on:
+  pull_request:
+    paths: ['Taller/**', '.github/workflows/validar-interfaz.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formularios:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Construir solución
+        run: dotnet build Taller/Taller.sln --configuration Release --nologo
+      - name: Construir formularios reales en STA sin conectar a SQL
+        run: dotnet run --project Taller/Taller.Pruebas.Interfaz --configuration Release --no-build

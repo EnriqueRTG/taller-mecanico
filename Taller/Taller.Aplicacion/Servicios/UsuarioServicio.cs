@@ -1,3 +1,4 @@
+using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Seguridad;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Abstracciones.Seguridad;
@@ -202,7 +203,7 @@ public sealed class UsuarioServicio
                 bool nombreUsuarioExistente = await _usuarioRepositorio.ExisteNombreUsuarioAsync(nombreUsuarioNormalizado);
                 if (nombreUsuarioExistente)
                 {
-                    throw new InvalidOperationException("El nombre de usuario ya se encuentra registrado.");
+                    throw new ValidacionException("Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", nameof(nombreUsuario));
                 }
             }
         }
@@ -303,7 +304,7 @@ public sealed class UsuarioServicio
         bool nombreUsuarioExistente = await _usuarioRepositorio.ExisteNombreUsuarioAsync(nombreUsuarioNormalizado);
         if (nombreUsuarioExistente)
         {
-            throw new InvalidOperationException("El nombre de usuario ya se encuentra registrado.");
+            throw new ValidacionException("Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", nameof(nombreUsuario));
         }
 
         string passwordHash = _passwordHasher.Hash(passwordValidado);
@@ -320,7 +321,7 @@ public sealed class UsuarioServicio
             Apellido = apellidoNormalizado,
             RolId = rolId,
             Activo = true,
-            FechaAlta = DateTime.Now
+            FechaAlta = FechaHoraTaller.Ahora
         };
         await _usuarioRepositorio.AgregarAsync(usuario);
         return usuario;

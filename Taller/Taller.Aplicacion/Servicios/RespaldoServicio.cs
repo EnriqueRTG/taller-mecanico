@@ -31,12 +31,18 @@ public sealed class RespaldoServicio(IRespaldoMotor motor, IUsuarioRepositorio u
         return await motor.ObtenerProgramaAsync();
     }
 
-    public async Task<CopiaRespaldoDto> CrearAsync(TipoRespaldo tipo, string carpeta, IProgress<string>? progreso = null)
+    public async Task<CopiaRespaldoDto> CrearAsync(TipoRespaldo tipo, string carpeta, IProgress<string>? progreso = null, bool copiarAzure = false)
     {
         var u = await AdministradorAsync();
         PoliticaRespaldos.Tipo(tipo);
         carpeta = PoliticaRespaldos.Carpeta(carpeta);
-        return await motor.CrearAsync(tipo, carpeta, $"{u.Id} · {u.Apellido}, {u.Nombre}", progreso);
+        return await motor.CrearConDestinoAsync(tipo, carpeta, $"{u.Id} · {u.Apellido}, {u.Nombre}", copiarAzure, progreso);
+    }
+
+    public async Task ReintentarAzureAsync(Guid id)
+    {
+        var u = await AdministradorAsync();
+        await motor.ReintentarAzureAsync(id, $"{u.Id} · {u.Apellido}, {u.Nombre}");
     }
 
     public async Task GuardarProgramaAsync(ProgramaRespaldoDto p)

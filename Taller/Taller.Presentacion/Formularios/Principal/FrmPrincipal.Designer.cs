@@ -27,10 +27,32 @@ namespace Taller.Presentacion.Formularios.Principal
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             pnlMenu = new Panel();
             pnlOpciones = new Panel();
             btnRespaldo = new Button();
+            relojSesion = new System.Windows.Forms.Timer(components)
+            {
+                Interval = 5000
+            };
+            relojSesion.Tick += RelojSesion_Tick;
             btnCatalogo = new Button();
+            btnAuditoria = new Button
+            {
+                Name = "btnAuditoria",
+                Text = "Auditoría de accesos",
+                Dock = DockStyle.Top,
+                Height = 48,
+                Padding = new Padding(20, 0, 0, 0),
+                TextAlign = ContentAlignment.MiddleLeft,
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.FromArgb(220, 231, 245),
+                Font = new Font("Segoe UI", 9.5F),
+                Cursor = Cursors.Hand
+            };
+            btnAuditoria.FlatAppearance.BorderSize = 0;
+            btnAuditoria.TabIndex = 10;
+            btnAuditoria.Click += btnAuditoria_Click;
             btnReportes = new Button();
             btnComprobantes = new Button();
             btnPresupuestos = new Button();
@@ -76,12 +98,13 @@ namespace Taller.Presentacion.Formularios.Principal
             // 
             pnlOpciones.AutoScroll = true;
             pnlOpciones.Controls.Add(btnRespaldo);
-            pnlOpciones.Controls.Add(btnCatalogo);
+            pnlOpciones.Controls.Add(btnAuditoria);
             pnlOpciones.Controls.Add(btnReportes);
             pnlOpciones.Controls.Add(btnComprobantes);
             pnlOpciones.Controls.Add(btnPresupuestos);
             pnlOpciones.Controls.Add(btnDiagnosticos);
             pnlOpciones.Controls.Add(btnAtenciones);
+            pnlOpciones.Controls.Add(btnCatalogo);
             pnlOpciones.Controls.Add(btnVehiculos);
             pnlOpciones.Controls.Add(btnClientes);
             pnlOpciones.Controls.Add(btnUsuarios);
@@ -106,7 +129,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnRespaldo.Name = "btnRespaldo";
             btnRespaldo.Padding = new Padding(20, 0, 0, 0);
             btnRespaldo.Size = new Size(213, 48);
-            btnRespaldo.TabIndex = 15;
+            btnRespaldo.TabIndex = 11;
             btnRespaldo.Text = "Respaldo y restauración";
             btnRespaldo.TextAlign = ContentAlignment.MiddleLeft;
             btnRespaldo.UseVisualStyleBackColor = false;
@@ -122,6 +145,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnCatalogo.ForeColor = Color.FromArgb(220, 231, 245);
             btnCatalogo.Font = new Font("Segoe UI", 9.5F);
             btnCatalogo.Cursor = Cursors.Hand;
+            btnCatalogo.TabIndex = 4;
             btnCatalogo.Click += btnCatalogo_Click;
             // 
             // btnReportes
@@ -138,7 +162,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnReportes.Name = "btnReportes";
             btnReportes.Padding = new Padding(20, 0, 0, 0);
             btnReportes.Size = new Size(213, 48);
-            btnReportes.TabIndex = 14;
+            btnReportes.TabIndex = 9;
             btnReportes.TabStop = false;
             btnReportes.Text = "Reportes";
             btnReportes.TextAlign = ContentAlignment.MiddleLeft;
@@ -158,7 +182,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnComprobantes.Name = "btnComprobantes";
             btnComprobantes.Padding = new Padding(20, 0, 0, 0);
             btnComprobantes.Size = new Size(213, 48);
-            btnComprobantes.TabIndex = 12;
+            btnComprobantes.TabIndex = 8;
             btnComprobantes.TabStop = false;
             btnComprobantes.Text = "Comprobantes y pagos";
             btnComprobantes.TextAlign = ContentAlignment.MiddleLeft;
@@ -179,7 +203,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnPresupuestos.Name = "btnPresupuestos";
             btnPresupuestos.Padding = new Padding(20, 0, 0, 0);
             btnPresupuestos.Size = new Size(213, 48);
-            btnPresupuestos.TabIndex = 10;
+            btnPresupuestos.TabIndex = 7;
             btnPresupuestos.TabStop = false;
             btnPresupuestos.Text = "Presupuestos";
             btnPresupuestos.TextAlign = ContentAlignment.MiddleLeft;
@@ -200,7 +224,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnDiagnosticos.Name = "btnDiagnosticos";
             btnDiagnosticos.Padding = new Padding(20, 0, 0, 0);
             btnDiagnosticos.Size = new Size(213, 48);
-            btnDiagnosticos.TabIndex = 9;
+            btnDiagnosticos.TabIndex = 6;
             btnDiagnosticos.TabStop = false;
             btnDiagnosticos.Text = "Evaluaciones técnicas";
             btnDiagnosticos.TextAlign = ContentAlignment.MiddleLeft;
@@ -221,7 +245,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnAtenciones.Name = "btnAtenciones";
             btnAtenciones.Padding = new Padding(20, 0, 0, 0);
             btnAtenciones.Size = new Size(213, 48);
-            btnAtenciones.TabIndex = 8;
+            btnAtenciones.TabIndex = 5;
             btnAtenciones.TabStop = false;
             btnAtenciones.Text = "Atenciones";
             btnAtenciones.TextAlign = ContentAlignment.MiddleLeft;
@@ -242,7 +266,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnVehiculos.Name = "btnVehiculos";
             btnVehiculos.Padding = new Padding(20, 0, 0, 0);
             btnVehiculos.Size = new Size(213, 48);
-            btnVehiculos.TabIndex = 7;
+            btnVehiculos.TabIndex = 3;
             btnVehiculos.TabStop = false;
             btnVehiculos.Text = "Vehículos";
             btnVehiculos.TextAlign = ContentAlignment.MiddleLeft;
@@ -263,7 +287,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnClientes.Name = "btnClientes";
             btnClientes.Padding = new Padding(20, 0, 0, 0);
             btnClientes.Size = new Size(213, 48);
-            btnClientes.TabIndex = 6;
+            btnClientes.TabIndex = 2;
             btnClientes.TabStop = false;
             btnClientes.Text = "Clientes";
             btnClientes.TextAlign = ContentAlignment.MiddleLeft;
@@ -284,7 +308,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnUsuarios.Name = "btnUsuarios";
             btnUsuarios.Padding = new Padding(20, 0, 0, 0);
             btnUsuarios.Size = new Size(213, 48);
-            btnUsuarios.TabIndex = 5;
+            btnUsuarios.TabIndex = 1;
             btnUsuarios.TabStop = false;
             btnUsuarios.Text = "Usuarios";
             btnUsuarios.TextAlign = ContentAlignment.MiddleLeft;
@@ -306,7 +330,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnInicio.Name = "btnInicio";
             btnInicio.Padding = new Padding(20, 0, 0, 0);
             btnInicio.Size = new Size(213, 50);
-            btnInicio.TabIndex = 4;
+            btnInicio.TabIndex = 0;
             btnInicio.TabStop = false;
             btnInicio.Text = "Inicio";
             btnInicio.TextAlign = ContentAlignment.MiddleLeft;
@@ -502,6 +526,8 @@ namespace Taller.Presentacion.Formularios.Principal
         private Button btnUsuarios;
         private Button btnInicio;
         private Button btnRespaldo;
+        private Button btnAuditoria;
+        private System.Windows.Forms.Timer relojSesion;
         private Button btnCatalogo;
         private Button btnReportes;
         private Button btnComprobantes;

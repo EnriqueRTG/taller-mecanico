@@ -50,6 +50,11 @@ namespace Taller.Presentacion.Formularios.Clientes
             lblDescripcion = new Label();
             lblTitulo = new Label();
             pnlFiltros = new Panel();
+            tlpFiltros = new TableLayoutPanel();
+            pnlBusqueda = new Panel();
+            pnlEstado = new Panel();
+            flpBotonesFiltros = new FlowLayoutPanel();
+            btnLimpiarFiltros = new Button();
             btnActualizar = new Button();
             cboEstado = new ComboBox();
             lblEstado = new Label();
@@ -85,7 +90,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.RowCount = 5;
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 62F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 57F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
@@ -163,6 +168,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 60;
+            colId.Visible = false;
             //
             // dni
             //
@@ -293,11 +299,59 @@ namespace Taller.Presentacion.Formularios.Clientes
             // pnlFiltros
             //
             pnlFiltros.BackColor = Color.White;
-            pnlFiltros.Controls.Add(btnActualizar);
-            pnlFiltros.Controls.Add(cboEstado);
-            pnlFiltros.Controls.Add(lblEstado);
-            pnlFiltros.Controls.Add(txtBuscar);
-            pnlFiltros.Controls.Add(lblBuscar);
+            pnlFiltros.AutoSize = true;
+            pnlFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            pnlFiltros.Controls.Add(tlpFiltros);
+            tlpFiltros.AutoSize = true;
+            tlpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tlpFiltros.Dock = DockStyle.Top;
+            tlpFiltros.ColumnCount = 3;
+            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160F));
+            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tlpFiltros.RowCount = 2;
+            tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlpFiltros.Name = "tlpFiltros";
+            tlpFiltros.Margin = new Padding(0);
+            tlpFiltros.Controls.Add(pnlBusqueda, 0, 0);
+            tlpFiltros.Controls.Add(pnlEstado, 1, 0);
+            tlpFiltros.Controls.Add(flpBotonesFiltros, 0, 1);
+            tlpFiltros.SetColumnSpan(flpBotonesFiltros, 3);
+            tlpFiltros.SizeChanged += Filtros_SizeChanged;
+            pnlBusqueda.Name = "pnlBusqueda";
+            pnlBusqueda.Dock = DockStyle.Fill;
+            pnlBusqueda.Size = new Size(400, 52);
+            pnlBusqueda.MinimumSize = new Size(0, 52);
+            pnlBusqueda.Margin = new Padding(0, 0, 16, 0);
+            pnlBusqueda.Controls.Add(lblBuscar);
+            pnlBusqueda.Controls.Add(txtBuscar);
+            pnlEstado.Name = "pnlEstado";
+            pnlEstado.Dock = DockStyle.Fill;
+            pnlEstado.Size = new Size(148, 52);
+            pnlEstado.MinimumSize = new Size(0, 52);
+            pnlEstado.Margin = new Padding(0, 0, 12, 0);
+            pnlEstado.Controls.Add(lblEstado);
+            pnlEstado.Controls.Add(cboEstado);
+            flpBotonesFiltros.Name = "flpBotonesFiltros";
+            flpBotonesFiltros.AutoSize = true;
+            flpBotonesFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flpBotonesFiltros.WrapContents = false;
+            flpBotonesFiltros.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            flpBotonesFiltros.Margin = new Padding(0, 0, 0, 2);
+            flpBotonesFiltros.Controls.Add(btnLimpiarFiltros);
+            flpBotonesFiltros.Controls.Add(btnActualizar);
+            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+            btnLimpiarFiltros.Text = "Limpiar filtros";
+            btnLimpiarFiltros.AutoSize = true;
+            btnLimpiarFiltros.MinimumSize = new Size(120, 30);
+            btnLimpiarFiltros.Margin = new Padding(0, 0, 8, 0);
+            btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
+            btnLimpiarFiltros.ForeColor = Color.FromArgb(30, 64, 175);
+            btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+            btnLimpiarFiltros.Cursor = Cursors.Hand;
+            btnLimpiarFiltros.TabIndex = 0;
+            btnLimpiarFiltros.Click += BtnLimpiarFiltros_Click;
             pnlFiltros.Dock = DockStyle.Fill;
             pnlFiltros.Location = new Point(0, 62);
             pnlFiltros.Margin = new Padding(0, 0, 0, 8);
@@ -316,10 +370,11 @@ namespace Taller.Presentacion.Formularios.Clientes
             btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
             btnActualizar.Location = new Point(420, 20);
-            btnActualizar.Margin = new Padding(3, 2, 3, 2);
+            btnActualizar.Margin = new Padding(0);
             btnActualizar.Name = "btnActualizar";
-            btnActualizar.Size = new Size(96, 24);
-            btnActualizar.TabIndex = 3;
+            btnActualizar.AutoSize = true;
+            btnActualizar.MinimumSize = new Size(104, 30);
+            btnActualizar.TabIndex = 1;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
             //
@@ -328,10 +383,11 @@ namespace Taller.Presentacion.Formularios.Clientes
             cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cboEstado.FormattingEnabled = true;
-            cboEstado.Location = new Point(279, 22);
+            cboEstado.Location = new Point(0, 22);
+            cboEstado.Dock = DockStyle.Bottom;
             cboEstado.Margin = new Padding(3, 2, 3, 2);
             cboEstado.Name = "cboEstado";
-            cboEstado.Size = new Size(127, 25);
+            cboEstado.Size = new Size(148, 25);
             cboEstado.TabIndex = 2;
             //
             // lblEstado
@@ -339,7 +395,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblEstado.ForeColor = Color.FromArgb(51, 65, 85);
-            lblEstado.Location = new Point(279, 8);
+            lblEstado.Location = new Point(0, 0);
             lblEstado.Name = "lblEstado";
             lblEstado.Size = new Size(43, 15);
             lblEstado.TabIndex = 2;
@@ -349,11 +405,12 @@ namespace Taller.Presentacion.Formularios.Clientes
             //
             txtBuscar.BorderStyle = BorderStyle.FixedSingle;
             txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtBuscar.Location = new Point(16, 22);
+            txtBuscar.Location = new Point(0, 22);
+            txtBuscar.Dock = DockStyle.Bottom;
             txtBuscar.Margin = new Padding(3, 2, 3, 2);
             txtBuscar.Name = "txtBuscar";
             txtBuscar.PlaceholderText = "Nombre, apellido o cliente";
-            txtBuscar.Size = new Size(245, 25);
+            txtBuscar.Size = new Size(384, 25);
             txtBuscar.TabIndex = 1;
             //
             // lblBuscar
@@ -361,7 +418,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             lblBuscar.AutoSize = true;
             lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblBuscar.ForeColor = Color.FromArgb(51, 65, 85);
-            lblBuscar.Location = new Point(18, 8);
+            lblBuscar.Location = new Point(0, 0);
             lblBuscar.Name = "lblBuscar";
             lblBuscar.Size = new Size(44, 15);
             lblBuscar.TabIndex = 0;
@@ -501,6 +558,11 @@ namespace Taller.Presentacion.Formularios.Clientes
         private Label lblDescripcion;
         private Label lblTitulo;
         private Panel pnlFiltros;
+        private TableLayoutPanel tlpFiltros;
+        private Panel pnlBusqueda;
+        private Panel pnlEstado;
+        private FlowLayoutPanel flpBotonesFiltros;
+        private Button btnLimpiarFiltros;
         private Button btnActualizar;
         private ComboBox cboEstado;
         private Label lblEstado;

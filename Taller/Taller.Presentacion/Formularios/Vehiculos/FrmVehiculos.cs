@@ -75,6 +75,8 @@ public partial class FrmVehiculos : Form, IFormularioConOperacion
         cboEstado.Items.AddRange(["Todos", "Habilitados", "Deshabilitados"]);
         cboEstado.SelectedIndex = 0;
         _configurando = false;
+        ActualizarAcciones();
+        Filtros_SizeChanged(this, EventArgs.Empty);
     }
 
     private void AplicarFiltros()
@@ -193,6 +195,49 @@ public partial class FrmVehiculos : Form, IFormularioConOperacion
     private async void BtnActualizar_Click(object? sender, EventArgs e)
     {
         await CargarAsync();
+    }
+
+    /// <summary>Restablece los criterios sobre los datos cargados, sin una consulta adicional.</summary>
+    private void BtnLimpiarFiltros_Click(object? sender, EventArgs e)
+    {
+        if (OperacionEnCurso)
+            return;
+        _configurando = true;
+        try
+        {
+            txtBuscar.Clear();
+            cboEstado.SelectedIndex = 0;
+        }
+        finally
+        {
+            _configurando = false;
+        }
+        AplicarFiltros();
+        txtBuscar.Focus();
+    }
+
+    /// <summary>Distribuye los botones en otra fila cuando el ancho disponible es reducido.</summary>
+    private void Filtros_SizeChanged(object? sender, EventArgs e)
+    {
+        bool compacto = tlpFiltros.ClientSize.Width < 760 * DeviceDpi / 96;
+        int fila = compacto ? 1 : 0;
+        int columna = compacto ? 0 : 2;
+        int extension = compacto ? 3 : 1;
+        if (tlpFiltros.GetRow(flpBotonesFiltros) == fila &&
+            tlpFiltros.GetColumn(flpBotonesFiltros) == columna &&
+            tlpFiltros.GetColumnSpan(flpBotonesFiltros) == extension)
+            return;
+        tlpFiltros.SuspendLayout();
+        try
+        {
+            tlpFiltros.SetColumnSpan(flpBotonesFiltros, 1);
+            tlpFiltros.SetCellPosition(flpBotonesFiltros, new TableLayoutPanelCellPosition(columna, fila));
+            tlpFiltros.SetColumnSpan(flpBotonesFiltros, extension);
+        }
+        finally
+        {
+            tlpFiltros.ResumeLayout(true);
+        }
     }
 
     private void Filtro_Cambio(object? sender, EventArgs e) => AplicarFiltros();

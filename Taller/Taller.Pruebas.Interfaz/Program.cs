@@ -44,9 +44,53 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        VerificarFiltrosListados(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
+    private static void VerificarFiltrosListados(IServiceProvider proveedor)
+    {
+        foreach (Type tipo in new[] {
+            typeof(Taller.Presentacion.Formularios.Clientes.FrmClientes),
+            typeof(Taller.Presentacion.Formularios.Vehiculos.FrmVehiculos) })
+        {
+            using var scope = proveedor.CreateScope();
+            using var formulario = (Form)scope.ServiceProvider.GetRequiredService(tipo);
+            var grilla = (DataGridView)formulario.Controls.Find("dgvUsuarios", true).Single();
+            var buscar = (TextBox)formulario.Controls.Find("txtBuscar", true).Single();
+            var estado = (ComboBox)formulario.Controls.Find("cboEstado", true).Single();
+            var limpiar = (Button)formulario.Controls.Find("btnLimpiarFiltros", true).Single();
+            if (grilla.Columns["colId"].Visible)
+                throw new InvalidOperationException("El identificador interno no debe mostrarse.");
+            foreach (int ancho in new[] { 700, 1020, 1366, 1690 })
+            {
+                formulario.ClientSize = new Size(ancho, 650);
+                Disponer(formulario);
+                Control tabla = formulario.Controls.Find("tlpFiltros", true).Single();
+                foreach (Control control in new Control[] { buscar, estado, limpiar,
+                    formulario.Controls.Find("btnActualizar", true).Single() })
+                {
+                    Rectangle bounds = control.Bounds;
+                    for (Control? padre = control.Parent; padre is not null && padre != tabla; padre = padre.Parent)
+                        bounds.Offset(padre.Location);
+                    if (bounds.Left < 0 || bounds.Top < 0 || bounds.Right > tabla.Width || bounds.Bottom > tabla.Height)
+                        throw new InvalidOperationException($"Filtro recortado: {tipo.Name}, {control.Name}, ancho {ancho}: control {bounds}, tabla {tabla.ClientSize}, contenedor {control.Parent!.Bounds}.");
+                }
+            }
+            buscar.Text = "ZZZ-INEXISTENTE";
+            estado.SelectedIndex = 2;
+            // Invoca el evento sin mostrar el formulario ni disparar Load/conexiones SQL.
+            tipo.GetMethod("BtnLimpiarFiltros_Click", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(formulario, new object?[] { limpiar, EventArgs.Empty });
+            if (buscar.Text.Length != 0 || estado.SelectedIndex != 0 || grilla.CurrentCell is not null)
+                throw new InvalidOperationException("Limpiar debe restablecer criterios y selección.");
+            foreach (string nombre in new[] { "btnEditarUsuario", "btnCambiarEstado" })
+                if (formulario.Controls.Find(nombre, true).Single().Enabled)
+                    throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
+            Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
+        }
+    }
+
     private static void VerificarNavegacionDocumento()
     {
         using var documento = new System.Drawing.Printing.PrintDocument();

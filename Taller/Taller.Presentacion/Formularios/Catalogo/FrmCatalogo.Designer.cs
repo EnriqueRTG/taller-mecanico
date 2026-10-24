@@ -42,7 +42,7 @@ partial class FrmCatalogo
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
@@ -62,7 +62,11 @@ partial class FrmCatalogo
         lblDescripcion.Text = "Oferta del negocio y precios de referencia en ARS. Disponible significa habilitado en catálogo; no confirma existencias de stock. Seleccione una fila para leer su descripción.";
         flpFiltros.Name = "flpFiltros";
         flpFiltros.Dock = DockStyle.Fill;
-        flpFiltros.AutoScroll = true;
+        flpFiltros.AutoScroll = false;
+        flpFiltros.AutoSize = true;
+        flpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        flpFiltros.BackColor = Color.White;
+        flpFiltros.Padding = new Padding(8);
         flpFiltros.WrapContents = true;
         txtBuscar.Name = "txtBuscar";
         txtBuscar.Width = 270;
@@ -84,7 +88,7 @@ partial class FrmCatalogo
         btnLimpiar.Name = "btnLimpiar";
         btnLimpiar.Text = "Limpiar filtros";
         btnLimpiar.AutoSize = true;
-        flpFiltros.Controls.AddRange([txtBuscar, cmbCategorias, cmbTiposConcepto, cboDisponibilidad, btnActualizar, btnLimpiar]);
+        flpFiltros.Controls.AddRange([txtBuscar, cmbCategorias, cmbTiposConcepto, cboDisponibilidad, btnLimpiar, btnActualizar]);
         dgvConceptos.Name = "dgvConceptos";
         dgvConceptos.Dock = DockStyle.Fill;
         dgvConceptos.ColumnHeadersHeightSizeMode=DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -170,6 +174,32 @@ partial class FrmCatalogo
         dgvConceptos.SelectionChanged += Seleccion_Cambio;
         btnActualizar.Click += Actualizar_Click;
         btnLimpiar.Click += Limpiar_Click;
+        btnActualizar.FlatStyle = FlatStyle.Flat;
+        btnActualizar.BackColor = Color.White;
+        btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderSize = 1;
+        btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnActualizar.UseVisualStyleBackColor = false;
+        btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnActualizar.Cursor = Cursors.Hand;
+        btnActualizar.AutoSize = true;
+        btnActualizar.MinimumSize = new Size(110, 32);
+        btnActualizar.Margin = new Padding(0, 0, 8, 4);
+        btnLimpiar.FlatStyle = FlatStyle.Flat;
+        btnLimpiar.BackColor = Color.White;
+        btnLimpiar.ForeColor = Color.FromArgb(30, 64, 175);
+        btnLimpiar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnLimpiar.FlatAppearance.BorderSize = 1;
+        btnLimpiar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnLimpiar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnLimpiar.UseVisualStyleBackColor = false;
+        btnLimpiar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnLimpiar.Cursor = Cursors.Hand;
+        btnLimpiar.AutoSize = true;
+        btnLimpiar.MinimumSize = new Size(110, 32);
+        btnLimpiar.Margin = new Padding(0, 0, 8, 4);
         ResumeLayout(false);
     }
 

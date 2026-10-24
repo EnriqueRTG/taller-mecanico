@@ -232,6 +232,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dtpDesde.Enabled = !cargando;
             dtpHasta.Enabled = !cargando;
             btnActualizar.Enabled = !cargando;
+            btnLimpiarFiltros.Enabled = !cargando;
             btnNuevaAtencion.Enabled = !cargando && btnNuevaAtencion.Visible;
             dgvAtenciones.Enabled = !cargando;
             if (cargando)
@@ -428,6 +429,15 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private void FiltroFecha_ValueChanged(object? sender, EventArgs e)
         {
             AplicarFiltros();
+        }
+
+        private void LimpiarFiltros_Click(object? sender, EventArgs e)
+        {
+            if (btnActualizar.Enabled == false) return;
+            txtBuscar.Clear();
+            ConfigurarFiltros();
+            AplicarFiltros();
+            txtBuscar.Focus();
         }
 
         private async void BtnActualizar_Click(object? sender, EventArgs e)

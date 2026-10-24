@@ -26,6 +26,18 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
     }
 
     public void PrepararAperturaDiagnostico(int idAtencion) => _abrir = idAtencion;
+    private void Filtros_SizeChanged(object? sender, EventArgs e) =>
+        Taller.Presentacion.Estilos.DisposicionFiltros.Ajustar(tlpFiltros, flpFiltrosAcciones, DeviceDpi);
+
+    private void LimpiarFiltros_Click(object? sender, EventArgs e)
+    {
+        if (OperacionEnCurso) return;
+        txtBuscar.Clear();
+        cboEstado.SelectedIndex = 0;
+        Filtrar(null, EventArgs.Empty);
+        txtBuscar.Focus();
+    }
+
     private async void Cargar(object? s, EventArgs e)
     {
         cboEstado.SelectedIndex = 0;

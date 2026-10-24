@@ -85,11 +85,13 @@ public partial class FrmCatalogo : Form, IFormularioConOperacion
     private async void Actualizar_Click(object? sender, EventArgs e) => await CargarAsync();
     private void Limpiar_Click(object? sender, EventArgs e)
     {
+        if (OperacionEnCurso) return;
         _configurando = true;
         txtBuscar.Clear();
         cmbCategorias.SelectedIndex = cmbTiposConcepto.SelectedIndex = cboDisponibilidad.SelectedIndex = 0;
         _configurando = false;
         AplicarFiltros();
+        txtBuscar.Focus();
     }
 
     private void Formulario_FormClosing(object? sender, FormClosingEventArgs e)

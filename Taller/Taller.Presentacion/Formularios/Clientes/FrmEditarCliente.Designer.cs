@@ -66,6 +66,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             //
             // tlpPrincipal
             //
+            tlpPrincipal.Dock = DockStyle.Fill;
             tlpPrincipal.BackColor = Color.FromArgb(245, 247, 250);
             tlpPrincipal.ColumnCount = 1;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -77,9 +78,9 @@ namespace Taller.Presentacion.Formularios.Clientes
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.Padding = new Padding(32, 29, 32, 29);
             tlpPrincipal.RowCount = 3;
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 84F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 87F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
             tlpPrincipal.Size = new Size(622, 701);
             tlpPrincipal.TabIndex = 1;
             //
@@ -92,7 +93,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             flpAcciones.Location = new Point(32, 585);
             flpAcciones.Margin = new Padding(0);
             flpAcciones.Name = "flpAcciones";
-            flpAcciones.Padding = new Padding(0, 19, 0, 0);
+            flpAcciones.Padding = new Padding(0, 8, 0, 0);
             flpAcciones.Size = new Size(558, 87);
             flpAcciones.TabIndex = 0;
             flpAcciones.WrapContents = false;
@@ -110,7 +111,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             btnGuardar.Location = new Point(409, 19);
             btnGuardar.Margin = new Padding(9, 0, 0, 0);
             btnGuardar.Name = "btnGuardar";
-            btnGuardar.Size = new Size(149, 51);
+            btnGuardar.Size = new Size(149, 38);
             btnGuardar.TabIndex = 3;
             btnGuardar.Text = "Guardar cambios";
             btnGuardar.UseVisualStyleBackColor = false;
@@ -129,7 +130,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             btnCancelar.Location = new Point(263, 19);
             btnCancelar.Margin = new Padding(9, 0, 0, 0);
             btnCancelar.Name = "btnCancelar";
-            btnCancelar.Size = new Size(137, 51);
+            btnCancelar.Size = new Size(137, 38);
             btnCancelar.TabIndex = 4;
             btnCancelar.Text = "Cancelar";
             btnCancelar.UseVisualStyleBackColor = false;
@@ -181,7 +182,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             //
             // tlpDatos
             //
-            tlpDatos.AutoScroll = true;
+            tlpDatos.AutoScroll = false;
             tlpDatos.ColumnCount = 2;
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 171F));
             tlpDatos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -205,22 +206,22 @@ namespace Taller.Presentacion.Formularios.Clientes
             tlpDatos.Controls.Add(txtFechaAltaCliente, 1, 9);
             tlpDatos.Controls.Add(txtEstadoCliente, 1, 8);
             tlpDatos.Controls.Add(txtDireccion, 1, 7);
-            tlpDatos.Dock = DockStyle.Fill;
+            tlpDatos.Dock = DockStyle.Top;
             tlpDatos.Location = new Point(2, 3);
             tlpDatos.Margin = new Padding(0);
             tlpDatos.Name = "tlpDatos";
             tlpDatos.RowCount = 10;
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            tlpDatos.Size = new Size(554, 450);
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 0F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            tlpDatos.Size = new Size(554, 432);
             tlpDatos.TabIndex = 0;
             //
             // label3
@@ -517,9 +518,11 @@ namespace Taller.Presentacion.Formularios.Clientes
             //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(650, 620);
+            ClientSize = new Size(720, 680);
+            MinimumSize = new Size(600, 460);
+            lblId.Visible = txtId.Visible = false;
             pnlDatos.AutoScroll = true;
-            tlpDatos.MinimumSize = new Size(0, 500);
+            tlpDatos.MinimumSize = new Size(0, 432);
             Controls.Add(tlpPrincipal);
             Name = "FrmEditarCliente";
             ShowIcon = false;
@@ -535,6 +538,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             btnGuardar.Click += BtnGuardar_Click;
             btnCancelar.Click += BtnCancelar_Click;
             FormClosing += Formulario_FormClosing;
+            Shown += Formulario_Shown;
             ResumeLayout(false);
         }
 

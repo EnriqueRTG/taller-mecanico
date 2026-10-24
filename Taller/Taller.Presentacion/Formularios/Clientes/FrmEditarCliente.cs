@@ -16,6 +16,9 @@ public partial class FrmEditarCliente : Form
         ConfigurarFormulario();
     }
 
+    private void Formulario_Shown(object? sender, EventArgs e) =>
+        Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
+
     private byte[] _version = [];
     public void PrepararEdicion(Taller.Aplicacion.DTOs.Clientes.ClienteEdicionDto c)
     {

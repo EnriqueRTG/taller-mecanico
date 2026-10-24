@@ -47,6 +47,9 @@
             lblDescripcion = new Label();
             lblTitulo = new Label();
             pnlFiltros = new Panel();
+            tlpFiltros = new TableLayoutPanel();
+            flpFiltrosAcciones = new FlowLayoutPanel();
+            btnLimpiarFiltros = new Button();
             btnActualizar = new Button();
             cboEstado = new ComboBox();
             lblEstado = new Label();
@@ -82,7 +85,7 @@
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.RowCount = 5;
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 82F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 58F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
@@ -159,6 +162,7 @@
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 60;
+            colId.Visible = false;
             // 
             // colNombreUsuario
             // 
@@ -268,11 +272,9 @@
             // pnlFiltros
             // 
             pnlFiltros.BackColor = Color.White;
-            pnlFiltros.Controls.Add(btnActualizar);
-            pnlFiltros.Controls.Add(cboEstado);
-            pnlFiltros.Controls.Add(lblEstado);
-            pnlFiltros.Controls.Add(txtBuscar);
-            pnlFiltros.Controls.Add(lblBuscar);
+            pnlFiltros.AutoSize = true;
+            pnlFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            pnlFiltros.Controls.Add(tlpFiltros);
             pnlFiltros.Dock = DockStyle.Fill;
             pnlFiltros.Location = new Point(0, 82);
             pnlFiltros.Margin = new Padding(0, 0, 0, 10);
@@ -297,6 +299,7 @@
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
             btnActualizar.Click += btnActualizar_Click;
+            dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
             // 
             // cboEstado
             // 
@@ -460,6 +463,69 @@
             pnlFiltros.PerformLayout();
             pnlAccionesUsuario.ResumeLayout(false);
             flowLayoutPanel1.ResumeLayout(false);
+        tlpFiltros.Name = "tlpFiltros";
+        tlpFiltros.Dock = DockStyle.Top;
+        tlpFiltros.AutoSize = true;
+        tlpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        tlpFiltros.BackColor = Color.White;
+        tlpFiltros.Padding = new Padding(12, 8, 12, 8);
+        tlpFiltros.ColumnCount = 3;
+        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F));
+        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        tlpFiltros.RowCount = 2;
+        tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        var grupoBuscar = new Panel { Name = "grupoBuscar", Size = new Size(400, 52), MinimumSize = new Size(0, 52), Dock = DockStyle.Fill, Margin = new Padding(0, 0, 16, 0) };
+        var grupoEstado = new Panel { Name = "grupoEstado", Size = new Size(248, 52), MinimumSize = new Size(0, 52), Dock = DockStyle.Fill, Margin = new Padding(0, 0, 12, 0) };
+        grupoBuscar.Controls.Add(new Label { Text = "Buscar", AutoSize = true, Location = new Point(0, 0), ForeColor = Color.FromArgb(51, 65, 85) });
+        grupoBuscar.Controls.Add(txtBuscar);
+        txtBuscar.Dock = DockStyle.Bottom;
+        grupoEstado.Controls.Add(new Label { Text = "Estado", AutoSize = true, Location = new Point(0, 0), ForeColor = Color.FromArgb(51, 65, 85) });
+        grupoEstado.Controls.Add(cboEstado);
+        cboEstado.Dock = DockStyle.Bottom;
+        flpFiltrosAcciones.Name = "flpFiltrosAcciones";
+        flpFiltrosAcciones.AutoSize = true;
+        flpFiltrosAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        flpFiltrosAcciones.WrapContents = false;
+        flpFiltrosAcciones.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+        flpFiltrosAcciones.Margin = new Padding(0);
+        flpFiltrosAcciones.Controls.Add(btnLimpiarFiltros);
+        flpFiltrosAcciones.Controls.Add(btnActualizar);
+        tlpFiltros.Controls.Add(grupoBuscar, 0, 0);
+        tlpFiltros.Controls.Add(grupoEstado, 1, 0);
+        tlpFiltros.Controls.Add(flpFiltrosAcciones, 0, 1);
+        tlpFiltros.SetColumnSpan(flpFiltrosAcciones, 3);
+        tlpFiltros.SizeChanged += Filtros_SizeChanged;
+        btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+        btnLimpiarFiltros.Text = "Limpiar filtros";
+        btnLimpiarFiltros.Click += LimpiarFiltros_Click;
+        btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
+        btnLimpiarFiltros.BackColor = Color.White;
+        btnLimpiarFiltros.ForeColor = Color.FromArgb(30, 64, 175);
+        btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnLimpiarFiltros.FlatAppearance.BorderSize = 1;
+        btnLimpiarFiltros.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnLimpiarFiltros.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnLimpiarFiltros.UseVisualStyleBackColor = false;
+        btnLimpiarFiltros.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnLimpiarFiltros.Cursor = Cursors.Hand;
+        btnLimpiarFiltros.AutoSize = true;
+        btnLimpiarFiltros.MinimumSize = new Size(110, 32);
+        btnLimpiarFiltros.Margin = new Padding(0, 0, 8, 4);
+        btnActualizar.FlatStyle = FlatStyle.Flat;
+        btnActualizar.BackColor = Color.White;
+        btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderSize = 1;
+        btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnActualizar.UseVisualStyleBackColor = false;
+        btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnActualizar.Cursor = Cursors.Hand;
+        btnActualizar.AutoSize = true;
+        btnActualizar.MinimumSize = new Size(110, 32);
+        btnActualizar.Margin = new Padding(0, 0, 8, 4);
             ResumeLayout(false);
         }
 
@@ -469,6 +535,9 @@
         private Label lblTitulo;
         private Label lblDescripcion;
         private Button btnNuevoUsuario;
+            private TableLayoutPanel tlpFiltros = null!;
+    private FlowLayoutPanel flpFiltrosAcciones = null!;
+    private Button btnLimpiarFiltros = null!;
         private Panel pnlFiltros;
         private Label lblBuscar;
         private TextBox txtBuscar;

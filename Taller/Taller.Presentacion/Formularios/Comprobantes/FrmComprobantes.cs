@@ -8,14 +8,16 @@ namespace Taller.Presentacion.Formularios.Comprobantes;
 public partial class FrmComprobantes : Form, IFormularioConOperacion
 {
     private readonly CobroServicio _servicio;
+    private readonly Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto _empresa;
     private List<AtencionCobroDto> _datos = [];
     private bool _cargando;
     public bool OperacionEnCurso => _cargando;
 
-    public FrmComprobantes(CobroServicio servicio)
+    public FrmComprobantes(CobroServicio servicio, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
         _servicio = servicio;
+        _empresa = empresa;
     }
 
     private async void Cargar(object? s, EventArgs e)
@@ -63,7 +65,7 @@ public partial class FrmComprobantes : Form, IFormularioConOperacion
     {
         if (_cargando || dgvDatos.CurrentRow?.DataBoundItem is not AtencionCobroDto d)
             return;
-        using var f = new FrmComprobantePagos(d.IdAtencion, _servicio);
+        using var f = new FrmComprobantePagos(d.IdAtencion, _servicio, _empresa);
         f.ShowDialog(this);
         await RecargarAsync();
     }

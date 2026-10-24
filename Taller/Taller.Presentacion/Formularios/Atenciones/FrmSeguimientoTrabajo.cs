@@ -10,15 +10,17 @@ namespace Taller.Presentacion.Formularios.Atenciones;
 public partial class FrmSeguimientoTrabajo : Form
 {
     private readonly int _id;
+    private readonly Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto _empresa;
     private readonly SeguimientoTrabajoServicio _servicio;
     private readonly EvaluacionServicio _evaluacion;
     private readonly PresupuestoServicio _presupuestos;
     private SeguimientoTrabajoDto? _datos;
     private bool _ocupado;
-    public FrmSeguimientoTrabajo(int id, SeguimientoTrabajoServicio servicio, EvaluacionServicio evaluacion, PresupuestoServicio presupuestos)
+    public FrmSeguimientoTrabajo(int id, SeguimientoTrabajoServicio servicio, EvaluacionServicio evaluacion, PresupuestoServicio presupuestos, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
         _id = id;
+        _empresa = empresa;
         _servicio = servicio;
         _evaluacion = evaluacion;
         _presupuestos = presupuestos;
@@ -165,7 +167,7 @@ public partial class FrmSeguimientoTrabajo : Form
             return;
         try
         {
-            Taller.Presentacion.Impresion.ImpresionDocumento.Mostrar(this, Taller.Presentacion.Impresion.TextoIntervencion.Generar(_datos));
+            Taller.Presentacion.Impresion.ImpresionDocumento.Mostrar(this, Taller.Presentacion.Impresion.TextoIntervencion.Generar(_datos), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Intervencion-A-" + _id, Taller.Dominio.Tiempo.FechaHoraTaller.Ahora));
         }
         catch (Exception ex)
         {

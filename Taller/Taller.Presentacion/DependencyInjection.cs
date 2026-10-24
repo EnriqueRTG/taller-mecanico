@@ -25,6 +25,7 @@ public static class DependencyInjection
     /// </summary>
     public static IServiceCollection AddPresentacion(this IServiceCollection services)
     {
+        services.AddSingleton(proveedor => Impresion.EncabezadoEmpresa.Cargar(proveedor.GetService<Microsoft.Extensions.Configuration.IConfiguration>()));
         services.AddTransient<FrmLogin>();
         services.AddTransient<FrmPrincipal>();
         services.AddTransient<FrmInicio>();

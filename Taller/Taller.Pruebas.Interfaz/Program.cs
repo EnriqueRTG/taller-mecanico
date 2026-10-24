@@ -45,6 +45,7 @@ internal static class Program
             }
         }
         VerificarFiltrosListados(proveedor);
+        VerificarUniformidadListados(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -60,7 +61,7 @@ internal static class Program
             var buscar = (TextBox)formulario.Controls.Find("txtBuscar", true).Single();
             var estado = (ComboBox)formulario.Controls.Find("cboEstado", true).Single();
             var limpiar = (Button)formulario.Controls.Find("btnLimpiarFiltros", true).Single();
-            if (grilla.Columns["colId"].Visible)
+            if (grilla.Columns["colId"]!.Visible)
                 throw new InvalidOperationException("El identificador interno no debe mostrarse.");
             foreach (int ancho in new[] { 700, 1020, 1366, 1690 })
             {
@@ -89,6 +90,81 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarUniformidadListados(IServiceProvider proveedor)
+    {
+        Type[] tipos = [
+            typeof(Taller.Presentacion.Formularios.Diagnosticos.FrmDiagnosticos),
+            typeof(Taller.Presentacion.Formularios.Presupuestos.FrmPresupuestos),
+            typeof(Taller.Presentacion.Formularios.Comprobantes.FrmComprobantes),
+            typeof(FrmUsuarios),
+            typeof(Taller.Presentacion.Formularios.Atenciones.FrmAtenciones),
+            typeof(Taller.Presentacion.Formularios.Catalogo.FrmCatalogo),
+            typeof(FrmAuditoriaAccesos) ];
+        foreach (Type tipo in tipos)
+        {
+            using var scope = proveedor.CreateScope();
+            scope.ServiceProvider.GetRequiredService<SesionUsuario>().Iniciar(new Usuario {
+                Id = 2, Nombre = "Prueba", Apellido = "Recepción", RolId = 2,
+                Rol = new Rol { Id = 2, Nombre = RolesSistema.ObtenerNombreEsperado(2)!, Activo = true } });
+            using var formulario = (Form)scope.ServiceProvider.GetRequiredService(tipo);
+            string limpiarNombre = tipo.Name == "FrmCatalogo" ? "btnLimpiar" : "btnLimpiarFiltros";
+            var limpiar = (Button)formulario.Controls.Find(limpiarNombre, true).Single();
+            var actualizar = (Button)formulario.Controls.Find(tipo == typeof(FrmAuditoriaAccesos) ? "consultar" : "btnActualizar", true).Single();
+            if (limpiar.FlatStyle != FlatStyle.Flat || actualizar.FlatStyle != FlatStyle.Flat ||
+                limpiar.ForeColor != Color.FromArgb(30, 64, 175))
+                throw new InvalidOperationException("Estilos de filtros incoherentes: " + tipo.Name);
+            foreach (int ancho in new[] { 820, 1020, 1366 })
+            {
+                formulario.ClientSize = new Size(ancho, 650);
+                Disponer(formulario);
+                VerificarDentroDelFormulario(formulario, limpiar);
+                VerificarDentroDelFormulario(formulario, actualizar);
+                if (limpiar.Bounds.IntersectsWith(actualizar.Bounds) && limpiar.Parent == actualizar.Parent)
+                    throw new InvalidOperationException("Botones de filtros superpuestos: " + tipo.Name);
+            }
+            if (tipo != typeof(FrmAuditoriaAccesos) && tipo.Name != "FrmCatalogo")
+            {
+                var buscar = (TextBox)formulario.Controls.Find("txtBuscar", true).Single();
+                var combo = (ComboBox)formulario.Controls.Find("cboEstado", true).Single();
+                if (combo.Items.Count == 0) combo.Items.AddRange(["Todos", "Otro"]);
+                buscar.Text = "ZZZ-INEXISTENTE";
+                combo.SelectedIndex = 1;
+                string metodo = "LimpiarFiltros_Click";
+                tipo.GetMethod(metodo, BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .Invoke(formulario, new object?[] { limpiar, EventArgs.Empty });
+                if (buscar.Text != "" || combo.SelectedIndex != 0)
+                    throw new InvalidOperationException("No se restablecen los filtros: " + tipo.Name);
+                if (tipo.Name == "FrmAtenciones")
+                    foreach (string nombre in new[] { "dtpDesde", "dtpHasta" })
+                        if (((DateTimePicker)formulario.Controls.Find(nombre, true).Single()).Checked)
+                            throw new InvalidOperationException("Limpiar no debe restringir por fecha.");
+            }
+            Console.WriteLine("Uniformidad, filtros y acciones visibles: " + tipo.Name);
+        }
+        using var editar = proveedor.GetRequiredService<Taller.Presentacion.Formularios.Clientes.FrmEditarCliente>();
+        foreach (Size tamano in new[] { new Size(720, 680), new Size(600, 460), new Size(1000, 700) })
+        {
+            editar.ClientSize = tamano;
+            Disponer(editar);
+            foreach (string nombre in new[] { "btnGuardar", "btnCancelar" })
+                VerificarDentroDelFormulario(editar, editar.Controls.Find(nombre, true).Single());
+        }
+        Console.WriteLine("Editar cliente: Guardar y Cancelar visibles en tres tamaños.");
+    }
+
+    private static void VerificarDentroDelFormulario(Form formulario, Control control)
+    {
+        Rectangle bounds = control.Bounds;
+        for (Control? padre = control.Parent; padre != null && padre != formulario; padre = padre.Parent)
+        {
+            if (bounds.Left < 0 || bounds.Top < 0 || bounds.Right > padre.ClientSize.Width || bounds.Bottom > padre.ClientSize.Height)
+                throw new InvalidOperationException($"Control recortado: {formulario.Name}, {control.Name}, {bounds}, padre {padre.Name}: {padre.ClientSize}.");
+            bounds.Offset(padre.Location);
+        }
+        if (bounds.Right > formulario.ClientSize.Width || bounds.Bottom > formulario.ClientSize.Height)
+            throw new InvalidOperationException("Control fuera del formulario: " + control.Name);
     }
 
     private static void VerificarNavegacionDocumento()

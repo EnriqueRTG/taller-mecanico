@@ -45,6 +45,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dtpDesde = new DateTimePicker();
             dtpHasta = new DateTimePicker();
             btnActualizar = new Button();
+            btnLimpiarFiltros = new Button();
+            flpFiltrosAcciones = new FlowLayoutPanel();
             lblEspacioActualizar = new Label();
             pnlGrilla = new Panel();
             dgvAtenciones = new DataGridView();
@@ -100,7 +102,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.RowCount = 5;
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 75F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 85F));
+            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 125F));
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
@@ -158,6 +160,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
             // pnlFiltros
             // 
             pnlFiltros.BackColor = Color.White;
+            pnlFiltros.AutoSize = true;
+            pnlFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             pnlFiltros.Controls.Add(tlpFiltros);
             pnlFiltros.Dock = DockStyle.Fill;
             pnlFiltros.Location = new Point(0, 75);
@@ -169,12 +173,12 @@ namespace Taller.Presentacion.Formularios.Atenciones
             // 
             // tlpFiltros
             // 
-            tlpFiltros.ColumnCount = 5;
+            tlpFiltros.ColumnCount = 4;
             tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34F));
-            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
-            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
-            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 18F));
-            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12F));
+            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+            tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
+
             tlpFiltros.Controls.Add(lblBuscar, 0, 0);
             tlpFiltros.Controls.Add(txtBuscar, 0, 1);
             tlpFiltros.Controls.Add(lblEstado, 1, 0);
@@ -183,15 +187,28 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpFiltros.Controls.Add(lblHasta, 3, 0);
             tlpFiltros.Controls.Add(dtpDesde, 2, 1);
             tlpFiltros.Controls.Add(dtpHasta, 3, 1);
-            tlpFiltros.Controls.Add(btnActualizar, 4, 1);
-            tlpFiltros.Controls.Add(lblEspacioActualizar, 4, 0);
-            tlpFiltros.Dock = DockStyle.Fill;
+            tlpFiltros.Controls.Add(flpFiltrosAcciones, 0, 2);
+            tlpFiltros.SetColumnSpan(flpFiltrosAcciones, 4);
+            flpFiltrosAcciones.Name = "flpFiltrosAcciones";
+            flpFiltrosAcciones.AutoSize = true;
+            flpFiltrosAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flpFiltrosAcciones.WrapContents = false;
+            flpFiltrosAcciones.Anchor = AnchorStyles.Right;
+            flpFiltrosAcciones.Controls.Add(btnLimpiarFiltros);
+            flpFiltrosAcciones.Controls.Add(btnActualizar);
+            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+            btnLimpiarFiltros.Text = "Limpiar filtros";
+            btnLimpiarFiltros.Click += LimpiarFiltros_Click;
+            tlpFiltros.Dock = DockStyle.Top;
+            tlpFiltros.AutoSize = true;
+            tlpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tlpFiltros.Location = new Point(18, 8);
             tlpFiltros.Margin = new Padding(0);
             tlpFiltros.Name = "tlpFiltros";
-            tlpFiltros.RowCount = 2;
+            tlpFiltros.RowCount = 3;
             tlpFiltros.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
-            tlpFiltros.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpFiltros.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
+            tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpFiltros.Size = new Size(716, 59);
             tlpFiltros.TabIndex = 0;
             // 
@@ -691,6 +708,32 @@ namespace Taller.Presentacion.Formularios.Atenciones
             flpAcciones.PerformLayout();
             pnlInformacionRol.ResumeLayout(false);
             pnlInformacionRol.PerformLayout();
+        btnActualizar.FlatStyle = FlatStyle.Flat;
+        btnActualizar.BackColor = Color.White;
+        btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderSize = 1;
+        btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnActualizar.UseVisualStyleBackColor = false;
+        btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnActualizar.Cursor = Cursors.Hand;
+        btnActualizar.AutoSize = true;
+        btnActualizar.MinimumSize = new Size(110, 32);
+        btnActualizar.Margin = new Padding(0, 0, 8, 4);
+        btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
+        btnLimpiarFiltros.BackColor = Color.White;
+        btnLimpiarFiltros.ForeColor = Color.FromArgb(30, 64, 175);
+        btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnLimpiarFiltros.FlatAppearance.BorderSize = 1;
+        btnLimpiarFiltros.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnLimpiarFiltros.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnLimpiarFiltros.UseVisualStyleBackColor = false;
+        btnLimpiarFiltros.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnLimpiarFiltros.Cursor = Cursors.Hand;
+        btnLimpiarFiltros.AutoSize = true;
+        btnLimpiarFiltros.MinimumSize = new Size(110, 32);
+        btnLimpiarFiltros.Margin = new Padding(0, 0, 8, 4);
             ResumeLayout(false);
         }
 
@@ -711,6 +754,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private DateTimePicker dtpDesde;
         private DateTimePicker dtpHasta;
         private Button btnActualizar;
+        private Button btnLimpiarFiltros;
+        private FlowLayoutPanel flpFiltrosAcciones;
         private Panel pnlGrilla;
         private DataGridView dgvAtenciones;
         private Panel pnlPie;

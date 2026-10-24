@@ -23,6 +23,15 @@ public partial class FrmAuditoriaAccesos : Form, IFormularioConOperacion
         await CargarAsync();
     }
 
+    private async void LimpiarFiltros_Click(object? sender, EventArgs e)
+    {
+        if (OperacionEnCurso) return;
+        desde.Value = FechaHoraTaller.Hoy.AddDays(-7);
+        hasta.Value = FechaHoraTaller.Hoy;
+        resultado.SelectedIndex = 0;
+        await CargarAsync();
+    }
+
     private async void Consultar_Click(object? sender, EventArgs e) => await CargarAsync();
     private async Task CargarAsync()
     {
@@ -31,7 +40,7 @@ public partial class FrmAuditoriaAccesos : Form, IFormularioConOperacion
         try
         {
             OperacionEnCurso = true;
-            consultar.Enabled = false;
+            consultar.Enabled = btnLimpiarFiltros.Enabled = false;
             var datos = await _servicio.ConsultarAsync(desde.Value, hasta.Value, resultado.SelectedIndex == 0 ? null : resultado.SelectedIndex == 1);
             grilla.DataSource = datos.Select(x => new { x.Id, FechaLocal = FechaHoraTaller.DesdeUtc(x.FechaUtc).DateTime, x.Usuario, x.Correcto }).ToList();
             estado.Text = $"{datos.Count} accesos. Máximo 500 por consulta; acote el período si alcanza ese límite. Fechas en hora de Argentina; se almacenan en UTC. No se registran contraseñas.";
@@ -44,7 +53,7 @@ public partial class FrmAuditoriaAccesos : Form, IFormularioConOperacion
         finally
         {
             OperacionEnCurso = false;
-            consultar.Enabled = true;
+            consultar.Enabled = btnLimpiarFiltros.Enabled = true;
         }
     }
 

@@ -22,6 +22,7 @@ public partial class FrmUsuarios : Form
     private readonly SesionUsuario _sesionUsuario;
     private List<Usuario> _usuarios = [];
     private bool _cargando;
+    private bool _restableciendo;
     /// <summary>
     /// Inicializa una nueva instancia del formulario de usuarios.
     /// </summary>
@@ -40,7 +41,7 @@ public partial class FrmUsuarios : Form
         _usuarioServicio = usuarioServicio ?? throw new ArgumentNullException(nameof(usuarioServicio));
         _proveedorServicios = proveedorServicios ?? throw new ArgumentNullException(nameof(proveedorServicios));
         _sesionUsuario = sesionUsuario ?? throw new ArgumentNullException(nameof(sesionUsuario));
-        dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
+
     }
 
     /// <summary>
@@ -98,6 +99,7 @@ public partial class FrmUsuarios : Form
     /// </summary>
     private void AplicarFiltros()
     {
+        if (_restableciendo) return;
         string busqueda = txtBuscar.Text.Trim();
         IEnumerable<Usuario> consulta = _usuarios;
         if (!string.IsNullOrWhiteSpace(busqueda))
@@ -115,6 +117,7 @@ public partial class FrmUsuarios : Form
         dgvUsuarios.DataSource = null;
         dgvUsuarios.DataSource = filas;
         dgvUsuarios.ClearSelection();
+        dgvUsuarios.CurrentCell = null;
         ActualizarEstadoAcciones();
         lblCantidad.Text = filas.Count == 1 ? "1 usuario encontrado" : $"{filas.Count} usuarios encontrados";
     }
@@ -143,6 +146,19 @@ public partial class FrmUsuarios : Form
     /// <summary>
     /// Actualiza manualmente el listado de usuarios.
     /// </summary>
+    private void Filtros_SizeChanged(object? sender, EventArgs e) =>
+        Taller.Presentacion.Estilos.DisposicionFiltros.Ajustar(tlpFiltros, flpFiltrosAcciones, DeviceDpi);
+
+    private void LimpiarFiltros_Click(object? sender, EventArgs e)
+    {
+        if (_cargando) return;
+        _restableciendo = true;
+        try { txtBuscar.Clear(); cboEstado.SelectedIndex = 0; }
+        finally { _restableciendo = false; }
+        AplicarFiltros();
+        txtBuscar.Focus();
+    }
+
     private async void btnActualizar_Click(object? sender, EventArgs e)
     {
         await CargarUsuariosAsync();
@@ -175,6 +191,7 @@ public partial class FrmUsuarios : Form
         _cargando = cargando;
         btnNuevoUsuario.Enabled = !cargando;
         btnActualizar.Enabled = !cargando;
+        btnLimpiarFiltros.Enabled = !cargando;
         txtBuscar.Enabled = !cargando;
         cboEstado.Enabled = !cargando;
         dgvUsuarios.Enabled = !cargando;

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Comprobantes;
 partial class FrmComprobantes
 {
@@ -29,6 +29,9 @@ partial class FrmComprobantes
         btnActualizar = new Button();
         btnActualizar.Name = "btnActualizar";
         components = new System.ComponentModel.Container();
+        tlpFiltros = new TableLayoutPanel();
+        flpFiltrosAcciones = new FlowLayoutPanel();
+        btnLimpiarFiltros = new Button();
         SuspendLayout();
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
@@ -41,8 +44,8 @@ partial class FrmComprobantes
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowCount = 6;
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 0));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
@@ -50,9 +53,9 @@ partial class FrmComprobantes
         tlpPrincipal.Controls.Add(lblTitulo, 0, 0);
         lblTitulo.Dock = DockStyle.Fill;
         lblTitulo.Text = "Liquidaciones, cobros y entregas";
-        tlpPrincipal.Controls.Add(txtBuscar, 0, 1);
+        tlpPrincipal.Controls.Add(tlpFiltros, 0, 1);
         txtBuscar.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(cboEstado, 0, 2);
+
         cboEstado.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(dgvDatos, 0, 3);
         dgvDatos.Dock = DockStyle.Fill;
@@ -93,13 +96,94 @@ partial class FrmComprobantes
         btnActualizar.AutoSize = true;
         btnActualizar.Height = 34;
         btnActualizar.Click += Actualizar;
-        flpAcciones.Controls.Add(btnActualizar);
+
 
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn{Name="colFecha",DataPropertyName="Fecha",HeaderText="Último movimiento",FillWeight=110,DefaultCellStyle=new DataGridViewCellStyle{Format="dd/MM/yyyy HH:mm"}});
         Load += Cargar;
         FormClosing += AlCerrar;
         BackColor=Color.FromArgb(248,250,252);
         btnGestionar.BackColor=Color.FromArgb(30,64,175);btnGestionar.ForeColor=Color.White;btnGestionar.FlatStyle=FlatStyle.Flat;
+        tlpFiltros.Name = "tlpFiltros";
+        tlpFiltros.Dock = DockStyle.Top;
+        tlpFiltros.AutoSize = true;
+        tlpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        tlpFiltros.BackColor = Color.White;
+        tlpFiltros.Padding = new Padding(12, 8, 12, 8);
+        tlpFiltros.ColumnCount = 3;
+        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F));
+        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        tlpFiltros.RowCount = 2;
+        tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        var grupoBuscar = new Panel { Name = "grupoBuscar", Size = new Size(400, 52), MinimumSize = new Size(0, 52), Dock = DockStyle.Fill, Margin = new Padding(0, 0, 16, 0) };
+        var grupoEstado = new Panel { Name = "grupoEstado", Size = new Size(248, 52), MinimumSize = new Size(0, 52), Dock = DockStyle.Fill, Margin = new Padding(0, 0, 12, 0) };
+        grupoBuscar.Controls.Add(new Label { Text = "Buscar", AutoSize = true, Location = new Point(0, 0), ForeColor = Color.FromArgb(51, 65, 85) });
+        grupoBuscar.Controls.Add(txtBuscar);
+        txtBuscar.Dock = DockStyle.Bottom;
+        grupoEstado.Controls.Add(new Label { Text = "Estado", AutoSize = true, Location = new Point(0, 0), ForeColor = Color.FromArgb(51, 65, 85) });
+        grupoEstado.Controls.Add(cboEstado);
+        cboEstado.Dock = DockStyle.Bottom;
+        flpFiltrosAcciones.Name = "flpFiltrosAcciones";
+        flpFiltrosAcciones.AutoSize = true;
+        flpFiltrosAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        flpFiltrosAcciones.WrapContents = false;
+        flpFiltrosAcciones.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+        flpFiltrosAcciones.Margin = new Padding(0);
+        flpFiltrosAcciones.Controls.Add(btnLimpiarFiltros);
+        flpFiltrosAcciones.Controls.Add(btnActualizar);
+        tlpFiltros.Controls.Add(grupoBuscar, 0, 0);
+        tlpFiltros.Controls.Add(grupoEstado, 1, 0);
+        tlpFiltros.Controls.Add(flpFiltrosAcciones, 0, 1);
+        tlpFiltros.SetColumnSpan(flpFiltrosAcciones, 3);
+        tlpFiltros.SizeChanged += Filtros_SizeChanged;
+        btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+        btnLimpiarFiltros.Text = "Limpiar filtros";
+        btnLimpiarFiltros.Click += LimpiarFiltros_Click;
+        btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
+        btnLimpiarFiltros.BackColor = Color.White;
+        btnLimpiarFiltros.ForeColor = Color.FromArgb(30, 64, 175);
+        btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnLimpiarFiltros.FlatAppearance.BorderSize = 1;
+        btnLimpiarFiltros.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnLimpiarFiltros.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnLimpiarFiltros.UseVisualStyleBackColor = false;
+        btnLimpiarFiltros.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnLimpiarFiltros.Cursor = Cursors.Hand;
+        btnLimpiarFiltros.AutoSize = true;
+        btnLimpiarFiltros.MinimumSize = new Size(110, 32);
+        btnLimpiarFiltros.Margin = new Padding(0, 0, 8, 4);
+        btnActualizar.FlatStyle = FlatStyle.Flat;
+        btnActualizar.BackColor = Color.White;
+        btnActualizar.ForeColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnActualizar.FlatAppearance.BorderSize = 1;
+        btnActualizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+        btnActualizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnActualizar.UseVisualStyleBackColor = false;
+        btnActualizar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnActualizar.Cursor = Cursors.Hand;
+        btnActualizar.AutoSize = true;
+        btnActualizar.MinimumSize = new Size(110, 32);
+        btnActualizar.Margin = new Padding(0, 0, 8, 4);
+        btnGestionar.FlatStyle = FlatStyle.Flat;
+        btnGestionar.BackColor = Color.FromArgb(30, 64, 175);
+        btnGestionar.ForeColor = Color.White;
+        btnGestionar.FlatAppearance.BorderColor = Color.FromArgb(30, 64, 175);
+        btnGestionar.FlatAppearance.BorderSize = 0;
+        btnGestionar.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+        btnGestionar.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+        btnGestionar.UseVisualStyleBackColor = false;
+        btnGestionar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnGestionar.Cursor = Cursors.Hand;
+        btnGestionar.AutoSize = true;
+        btnGestionar.MinimumSize = new Size(110, 32);
+        btnGestionar.Margin = new Padding(0, 0, 8, 4);
+        flpAcciones.AutoSize = true;
+        flpAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        flpAcciones.WrapContents = true;
+        flpAcciones.AutoScroll = false;
+        tlpPrincipal.RowStyles[5].SizeType = SizeType.AutoSize;
         ResumeLayout(false);
     }
     private TableLayoutPanel tlpPrincipal = null!;
@@ -111,4 +195,7 @@ partial class FrmComprobantes
     private FlowLayoutPanel flpAcciones = null!;
     private Button btnGestionar = null!;
     private Button btnActualizar = null!;
+    private TableLayoutPanel tlpFiltros = null!;
+    private FlowLayoutPanel flpFiltrosAcciones = null!;
+    private Button btnLimpiarFiltros = null!;
 }

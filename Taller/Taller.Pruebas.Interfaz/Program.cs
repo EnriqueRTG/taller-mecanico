@@ -72,7 +72,7 @@ internal static class Program
                 {
                     Rectangle bounds = tabla.RectangleToClient(control.RectangleToScreen(control.ClientRectangle));
                     if (bounds.Left < 0 || bounds.Top < 0 || bounds.Right > tabla.Width || bounds.Bottom > tabla.Height)
-                        throw new InvalidOperationException($"Filtro recortado: {tipo.Name}, {control.Name}, ancho {ancho}.");
+                        throw new InvalidOperationException($"Filtro recortado: {tipo.Name}, {control.Name}, ancho {ancho}: control {bounds}, tabla {tabla.ClientSize}, contenedor {control.Parent!.Bounds}.");
                 }
             }
             buscar.Text = "ZZZ-INEXISTENTE";

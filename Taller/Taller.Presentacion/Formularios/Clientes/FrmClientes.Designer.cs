@@ -384,7 +384,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             cboEstado.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             cboEstado.FormattingEnabled = true;
             cboEstado.Location = new Point(0, 22);
-            cboEstado.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            cboEstado.Dock = DockStyle.Bottom;
             cboEstado.Margin = new Padding(3, 2, 3, 2);
             cboEstado.Name = "cboEstado";
             cboEstado.Size = new Size(148, 25);
@@ -406,7 +406,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             txtBuscar.BorderStyle = BorderStyle.FixedSingle;
             txtBuscar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtBuscar.Location = new Point(0, 22);
-            txtBuscar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtBuscar.Dock = DockStyle.Bottom;
             txtBuscar.Margin = new Padding(3, 2, 3, 2);
             txtBuscar.Name = "txtBuscar";
             txtBuscar.PlaceholderText = "Nombre, apellido o cliente";

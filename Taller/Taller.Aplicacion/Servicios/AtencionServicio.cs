@@ -104,7 +104,7 @@ public sealed class AtencionServicio
     /// Se produce cuando alguna entidad asociada no existe,
     /// se encuentra inactiva o el vehículo ya posee una atención activa.
     /// </exception>
-    public async Task<Atencion> RegistrarAsync(int idCliente, int idVehiculo, int idUsuarioRecepcion, string motivoConsulta, TipoSolicitudAtencion tipoSolicitud = TipoSolicitudAtencion.Problema)
+    public async Task<Atencion> RegistrarAsync(int idCliente, int idVehiculo, int idUsuarioRecepcion, string motivoConsulta, TipoSolicitudAtencion tipoSolicitud = TipoSolicitudAtencion.Problema, bool enviarATaller = false)
     {
         if (!Enum.IsDefined(tipoSolicitud))
             throw new ValidacionException("Seleccione el tipo de solicitud.");
@@ -131,10 +131,13 @@ public sealed class AtencionServicio
             TipoSolicitud = tipoSolicitud,
             FechaApertura = FechaHoraTaller.Ahora,
             MotivoConsulta = motivoConsulta,
-            Estado = EstadoAtencion.Abierta,
+            Estado = enviarATaller ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.Abierta,
             FechaCierre = null
         };
         atencion.Historial.Add(new HistorialAtencion { IdUsuario = recepcion.Id, Fecha = atencion.FechaApertura, Accion = "AtencionAbierta", EstadoAnterior = null, EstadoNuevo = EstadoAtencion.Abierta, Observaciones = $"Solicitud: {tipoSolicitud}. Motivo registrado por Recepción." });
+        // Ambos eventos y la atención se insertan en el mismo SaveChanges del repositorio.
+        if (enviarATaller)
+            atencion.Historial.Add(new HistorialAtencion { IdUsuario = recepcion.Id, Fecha = atencion.FechaApertura, Accion = "EvaluacionSolicitada", EstadoAnterior = EstadoAtencion.Abierta, EstadoNuevo = atencion.Estado, Observaciones = tipoSolicitud == TipoSolicitudAtencion.ServicioDefinido ? "Solicitud enviada para preparar presupuesto. No autoriza ejecución ni cargos." : "Solicitud enviada para diagnóstico y presupuesto. No autoriza tareas cobrables." });
         await _atencionRepositorio.AgregarAsync(atencion);
         return atencion;
     }

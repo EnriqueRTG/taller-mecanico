@@ -54,6 +54,36 @@ public sealed class EvaluacionServicioPruebas
         public void Dispose() => Db.Dispose();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Apertura_EnvioOpcionalSeGuardaConHistorialSinCrearCargos(bool enviar)
+    {
+        using var e = new Escenario(TipoSolicitudAtencion.ServicioDefinido);
+        // El vehículo del escenario queda libre para una nueva atención.
+        var anterior = await e.Db.Atenciones.SingleAsync();
+        anterior.Estado = EstadoAtencion.Cerrada;
+        anterior.FechaCierre = FechaHoraTaller.Ahora;
+        await e.Db.SaveChangesAsync(); e.Db.ChangeTracker.Clear();
+        var servicio = new AtencionServicio(new AtencionRepositorio(e.Db), new ClienteRepositorio(e.Db),
+            new VehiculoRepositorio(e.Db), new UsuarioRepositorio(e.Db), new ConceptoRepositorio(e.Db), e.Sesion);
+        var creada = await servicio.RegistrarAsync(1, 1, 2, "Cambiar discos y pastillas delanteras", TipoSolicitudAtencion.ServicioDefinido, enviarATaller: enviar);
+        e.Db.ChangeTracker.Clear();
+        var guardada = await e.Db.Atenciones.Include(a => a.Historial).SingleAsync(a => a.IdAtencion == creada.IdAtencion);
+        Assert.Equal(enviar ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.Abierta, guardada.Estado);
+        Assert.Equal(enviar ? 2 : 1, guardada.Historial.Count);
+        Assert.Empty(await e.Db.Presupuestos.ToListAsync());
+        Assert.Empty(await e.Db.Diagnosticos.ToListAsync());
+        if (enviar)
+        {
+            e.Entrar(1);
+            await e.Servicio.TomarAsync(creada.IdAtencion);
+            var datos = await e.Servicio.ObtenerAsync(creada.IdAtencion);
+            Assert.False(datos.IncluyeDiagnostico);
+            Assert.Empty(datos.ServiciosIniciales);
+        }
+    }
+
     [Fact]
     public async Task ServicioDefinido_FinalizaPropuestaSinFabricarDiagnostico()
     {

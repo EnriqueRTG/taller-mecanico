@@ -121,7 +121,7 @@ partial class FrmEvaluarAtencion
         tabs.Controls.Add(tabPropuesta);
         tabs.Controls.Add(tabIniciales);
         tabInforme.Text = "Informe / conclusión";
-        tabPropuesta.Text = "Propuesta económica";
+        tabPropuesta.Text = "Presupuesto";
         tabIniciales.Text = "Servicios iniciales autorizados";
         tlpInforme.Dock = DockStyle.Fill;
         tlpInforme.Padding = new Padding(12);
@@ -138,9 +138,11 @@ partial class FrmEvaluarAtencion
         tlpInforme.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpInforme.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tabInforme.Controls.Add(tlpInforme);
-        tlpInforme.Controls.Add(chkInforme, 0, 0);
-        chkInforme.Dock = DockStyle.Fill;
-        chkInforme.Text = "Registrar informe de diagnóstico (opcional para servicio definido)";
+        flpAcciones.Controls.Add(chkInforme);
+        chkInforme.AutoSize = true;
+        tlpInforme.RowStyles[0].Height = 0;
+
+        chkInforme.Text = "Incluir diagnóstico";
         tlpInforme.Controls.Add(lblHallazgo, 0, 1);
         lblHallazgo.Dock = DockStyle.Fill;
         lblHallazgo.Text = "Hallazgo o conclusión de la revisión";
@@ -318,12 +320,14 @@ partial class FrmEvaluarAtencion
         btnSeguimiento = new Button
         {
             Name = "btnSeguimiento",
-            Text = "Hallazgos y ampliación de inspección",
+            Text = "Solicitar ampliación de inspección",
             AutoSize = true
         };
         btnSeguimiento.Click += Seguimiento;
         flpAcciones.Controls.Add(btnSeguimiento);
-        flpAcciones.AutoScroll = true;
+        flpAcciones.AutoSize = true;
+        flpAcciones.WrapContents = true;
+        tlpPrincipal.RowStyles[3].SizeType = SizeType.AutoSize;
         Load += Cargar;
         FormClosing += AlCerrar;
         BackColor = Color.FromArgb(248, 250, 252);

@@ -112,7 +112,7 @@ public partial class FrmDetalleAtencion : Form
     {
         chkAutorizaIngreso.Enabled = _items.Count > 0;
         btnConfirmarIngreso.Enabled = _items.Count == 0 || chkAutorizaIngreso.Checked;
-        btnConfirmarIngreso.Text = _items.Count == 0 ? "Solicitar evaluación sin cargos iniciales" : "Autorizar servicios y solicitar evaluación";
+        btnConfirmarIngreso.Text = _items.Count == 0 ? "Enviar a taller sin cargos iniciales" : "Autorizar inspección y enviar a taller";
         lblTotal.Text = $"Servicios iniciales: {_items.Sum(i => i.Subtotal):N2}. No equivale a ejecución ni pago. Puede continuar sin agregar servicios.";
     }
 

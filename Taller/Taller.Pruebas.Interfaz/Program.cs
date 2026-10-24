@@ -46,6 +46,7 @@ internal static class Program
         }
         VerificarFiltrosListados(proveedor);
         VerificarUniformidadListados(proveedor);
+        VerificarRecorridoTecnico(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -90,6 +91,37 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarRecorridoTecnico(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        foreach (bool diagnostico in new[] { false, true })
+        {
+            using var formulario = new Taller.Presentacion.Formularios.Diagnosticos.FrmEvaluarAtencion(1,
+                scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(), scope.ServiceProvider);
+            var tipo = formulario.GetType();
+            tipo.GetMethod("CargarDatos", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario,
+                [new Taller.Aplicacion.DTOs.Atenciones.EvaluacionAtencionDto {
+                    IdAtencion = 1,
+                    TipoSolicitud = diagnostico ? Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.Problema : Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido,
+                    IncluyeDiagnostico = diagnostico
+                }]);
+            var tabs = (TabControl)formulario.Controls.Find("tabs", true).Single();
+            if (tabs.TabPages.Count != (diagnostico ? 2 : 1) || tabs.TabPages.ContainsKey("tabIniciales"))
+                throw new InvalidOperationException("El recorrido muestra etapas que no corresponden a la solicitud.");
+            if (tabs.SelectedTab?.Name != (diagnostico ? "tabInforme" : "tabPropuesta"))
+                throw new InvalidOperationException("La apertura técnica no comienza en la tarea correspondiente.");
+            var finalizar = (Button)formulario.Controls.Find("btnFinalizar", true).Single();
+            if (finalizar.Text != "Enviar a recepción") throw new InvalidOperationException("Acción principal ambigua.");
+            foreach (int ancho in new[] { 820, 1020, 1366 })
+            {
+                formulario.ClientSize = new Size(ancho, 620);
+                Disponer(formulario);
+                VerificarDentroDelFormulario(formulario, finalizar);
+            }
+        }
+        Console.WriteLine("Recorrido técnico contextual: presupuesto directo, diagnóstico e inspección opcional.");
     }
 
     private static void VerificarUniformidadListados(IServiceProvider proveedor)

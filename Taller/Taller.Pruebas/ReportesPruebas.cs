@@ -56,6 +56,30 @@ public sealed class ReportesPruebas
         public void Dispose() => Db.Dispose();
     }
     [Fact]
+    public void ExportacionesIdentificanEmpresaYConsulta_SinInyectarHtmlNiFormulas()
+    {
+        var d = new ReporteDocumentoDto {
+            Titulo = "Atenciones recibidas y situación actual", Generado = new DateTime(2026, 10, 24, 10, 50, 39),
+            EmitidoPor = "Laura Gómez", Alcance = "Taller completo", Filtros = "Estado: Todos",
+            Registros = [new ReporteRegistroDto { Codigo = "A-1", Descripcion = "Ruido; frenos, revisión", Responsable = "Pérez, Ana", Importe = 12.5m }]
+        };
+        var empresa = new EmpresaDocumentoDto { Nombre = "<Taller>", Correo = "=SUM(1)", Telefono = "123" };
+        string html = DocumentoReporteExportador.Html(d, empresa: empresa);
+        Assert.Contains("&lt;Taller&gt;", html);
+        Assert.DoesNotContain("<Taller>", html);
+        string csv = DocumentoReporteExportador.Csv(d, empresa);
+        Assert.StartsWith("sep=;\r\n", csv);
+        Assert.Contains("Reporte;Generado;Emitido por;Alcance;Filtros", csv);
+        Assert.Contains("\"Ruido; frenos, revisión\"", csv);
+        Assert.Contains("\"Pérez, Ana\"", csv);
+        Assert.Contains("'=SUM(1)", csv);
+        Assert.Contains("Laura Gómez", csv);
+        Assert.Contains("24/10/2026 10:50:39", csv);
+        Assert.Equal("SGTM-Atenciones-recibidas-y-situacion-actual_20261024_105039",
+            DocumentoReporteExportador.NombreArchivo(d.Titulo, d.Generado));
+        Assert.DoesNotContain("/", DocumentoReporteExportador.NombreArchivo("Informe: / prueba?", d.Generado));
+    }
+    [Fact]
     public async Task EstadosDisponiblesNoSeReducenPorBusquedaEstadoNiResultadoVacio()
     {
         using var c = new Caso();

@@ -11,14 +11,16 @@ namespace Taller.Presentacion.Formularios.Reportes;
 public partial class FrmReportes : Form, IFormularioConOperacion
 {
     private readonly ReporteServicio _servicio;
+    private readonly EmpresaDocumentoDto _empresa;
     private ReporteDocumentoDto? _documento;
     private bool _configurando;
     public bool OperacionEnCurso { get; private set; }
 
-    public FrmReportes(ReporteServicio servicio)
+    public FrmReportes(ReporteServicio servicio, EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
         _servicio = servicio;
+        _empresa = empresa;
     }
 
     private async void FrmReportes_Load(object? sender, EventArgs e)
@@ -176,14 +178,14 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         using var guardar = new SaveFileDialog
         {
             Filter = csv ? "Detalle CSV (*.csv)|*.csv" : "Documento HTML con gráfico (*.html)|*.html",
-            FileName = $"SGTM-{d.Generado:yyyyMMdd-HHmmss}.{(csv ? "csv" : "html")}",
+            FileName = DocumentoReporteExportador.NombreArchivo(d.Titulo, d.Generado) + (csv ? ".csv" : ".html"),
             AddExtension = true
         };
         if (guardar.ShowDialog(this) != DialogResult.OK)
             return;
         try
         {
-            File.WriteAllText(guardar.FileName, csv ? DocumentoReporteExportador.Csv(d) : DocumentoReporteExportador.Html(d, GraficoElegido), new UTF8Encoding(csv));
+            File.WriteAllText(guardar.FileName, csv ? DocumentoReporteExportador.Csv(d, _empresa) : DocumentoReporteExportador.Html(d, GraficoElegido, _empresa), new UTF8Encoding(csv));
             MessageBox.Show(this, "Archivo guardado correctamente.", "Exportar reporte");
         }
         catch (Exception ex)
@@ -200,7 +202,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             return;
         try
         {
-            ImpresionReporte.Mostrar(this, d, GraficoElegido);
+            ImpresionReporte.Mostrar(this, d, GraficoElegido, _empresa);
         }
         catch (Exception ex)
         {

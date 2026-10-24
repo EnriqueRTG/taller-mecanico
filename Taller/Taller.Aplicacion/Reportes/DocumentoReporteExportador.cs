@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Taller.Aplicacion.DTOs.Reportes;
 namespace Taller.Aplicacion.Reportes;
 /// <summary>Genera documentos portables sin scripts ni dependencias externas; codifica texto del usuario y neutraliza fórmulas CSV.</summary>
@@ -8,10 +9,12 @@ public static class DocumentoReporteExportador
 {
     private static readonly CultureInfo Cultura = CultureInfo.GetCultureInfo("es-AR");
     private static string H(string? texto) => WebUtility.HtmlEncode(texto ?? "");
-    public static string Html(ReporteDocumentoDto d, TipoGraficoReporte tipo = TipoGraficoReporte.Barras)
+    public static string Html(ReporteDocumentoDto d, TipoGraficoReporte tipo = TipoGraficoReporte.Barras, EmpresaDocumentoDto? empresa = null)
     {
+        empresa ??= new EmpresaDocumentoDto();
         var b = new StringBuilder("<!doctype html><html lang='es'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>");
-        b.Append(H(d.Titulo)).Append("</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1120px;margin:32px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}.meta,footer{color:#475569}.indicadores{display:flex;flex-wrap:wrap;gap:12px}.indicador{padding:12px;background:#eff6ff;border:1px solid #cbd5e1;min-width:140px}.indicador strong{display:block;font-size:22px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left;overflow-wrap:anywhere}th{background:#e2e8f0}svg{width:100%;height:auto}tr,.indicador{break-inside:avoid}thead{display:table-header-group}@media print{body{margin:0;padding:0;max-width:none}svg{max-height:320px}a{color:inherit}h2{break-after:avoid}}@page{size:A4 landscape;margin:14mm}</style><body><h1>")
+        b.Append(H(d.Titulo)).Append("</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1120px;margin:32px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}.meta,footer{color:#475569}.indicadores{display:flex;flex-wrap:wrap;gap:12px}.indicador{padding:12px;background:#eff6ff;border:1px solid #cbd5e1;min-width:140px}.indicador strong{display:block;font-size:22px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left;overflow-wrap:anywhere}th{background:#e2e8f0}svg{width:100%;height:auto}tr,.indicador{break-inside:avoid}thead{display:table-header-group}@media print{body{margin:0;padding:0;max-width:none}svg{max-height:320px}a{color:inherit}h2{break-after:avoid}}@page{size:A4 landscape;margin:14mm}</style><body>")
+            .Append(Cabecera(empresa)).Append("<h1>")
             .Append(H(d.Titulo)).Append("</h1><p class='meta'>SGTM · Informe de gestión interno<br>Generado: ").Append(d.Generado.ToString("dd/MM/yyyy HH:mm:ss")).Append(" · Por: ").Append(H(d.EmitidoPor)).Append("<br>").Append(H(d.Alcance)).Append("<br>").Append(H(d.Filtros)).Append("</p><div class='indicadores'>");
         foreach (var i in d.Indicadores) b.Append("<div class='indicador'>").Append(H(i.Nombre)).Append("<strong>").Append(H(i.Valor)).Append("</strong></div>");
         b.Append("</div><h2>Distribución · ").Append(H(d.UnidadGrafico)).Append("</h2>").Append(Svg(d, tipo)).Append("<h2>Lectura para la gestión</h2><p>").Append(H(d.Recomendacion)).Append("</p><h2>Alcance y método</h2><p>").Append(H(d.Metodologia)).Append("</p><h2>Detalle · ").Append(d.Registros.Count).Append(" registros</h2><table><thead><tr><th>Código</th><th>Atención</th><th>Fecha</th><th>Descripción</th><th>Responsable</th><th>Estado</th><th>Cantidad realizada</th><th>Importe ARS</th><th>Autorizado ARS</th></tr></thead><tbody>");
@@ -74,10 +77,31 @@ public static class DocumentoReporteExportador
         if (valor.Length > 0 && ("=+-@".Contains(valor.TrimStart().FirstOrDefault()) || char.IsControl(valor[0]))) valor = "'" + valor;
         return "\"" + valor.Replace("\"", "\"\"") + "\"";
     }
-    public static string Csv(ReporteDocumentoDto d)
+    /// <summary>Nombre ordenable por fecha de elaboración; no crea ni reserva un número fiscal.</summary>
+    public static string NombreArchivo(string titulo, DateTime fecha)
     {
-        var b = new StringBuilder("Código;Atención;Fecha;Descripción;Responsable;Estado;Cantidad realizada;Importe ARS;Autorizado ARS\r\n");
-        foreach (var x in d.Registros) b.AppendLine(string.Join(";", Celda(x.Codigo), x.IdAtencion.ToString(Cultura), Celda(x.Fecha.ToString("dd/MM/yyyy HH:mm")), Celda(x.Descripcion), Celda(x.Responsable), Celda(Servicios.ReporteServicio.Legible(x.Estado)), x.Cantidad?.ToString(Cultura) ?? "", x.Importe?.ToString(Cultura) ?? "", x.ImporteAceptado?.ToString(Cultura) ?? ""));
+        string normalizado = titulo.Normalize(NormalizationForm.FormD);
+        string sinAcentos = new(normalizado.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray());
+        string nombre = Regex.Replace(sinAcentos.Normalize(NormalizationForm.FormC), "[^a-zA-Z0-9]+", "-").Trim('-');
+        if (nombre.Length > 100) nombre = nombre[..100].TrimEnd('-');
+        return $"SGTM-{(nombre.Length == 0 ? "Documento" : nombre)}_" + fecha.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+    }
+    private static string Cabecera(EmpresaDocumentoDto empresa)
+    {
+        // Solo admite PNG embebido: nunca URLs externas ni atributos HTML provenientes de configuración.
+        string logo = "";
+        if (empresa.LogoPngBase64.Length > 0 && Convert.TryFromBase64String(empresa.LogoPngBase64, new byte[empresa.LogoPngBase64.Length], out int cantidad) && cantidad > 0)
+            logo = "<img alt='Logo del taller' style='width:80px;height:80px;object-fit:contain;margin-right:18px' src='data:image/png;base64," + empresa.LogoPngBase64 + "'>";
+        return "<header style='display:flex;align-items:center;border-bottom:1px solid #cbd5e1;padding-bottom:12px'>" + logo + "<div><strong>" + H(empresa.Nombre) + "</strong><p>" + H(empresa.Contacto) + "</p></div></header>";
+    }
+    /// <summary>Detalle tabular con contexto por fila. La directiva sep permite abrirlo en Excel sin depender del separador regional.</summary>
+    public static string Csv(ReporteDocumentoDto d, EmpresaDocumentoDto? empresa = null)
+    {
+        empresa ??= new EmpresaDocumentoDto();
+        var b = new StringBuilder("sep=;\r\nCódigo;Atención;Fecha;Descripción;Responsable;Estado;Cantidad realizada;Importe ARS;Autorizado ARS;Reporte;Generado;Emitido por;Alcance;Filtros;Método;Unidad gráfico;Empresa;Dirección;Teléfono;Correo;Identificación fiscal\r\n");
+        foreach (var x in d.Registros) b.AppendLine(string.Join(";", Celda(x.Codigo), x.IdAtencion.ToString(Cultura), Celda(x.Fecha.ToString("dd/MM/yyyy HH:mm")), Celda(x.Descripcion), Celda(x.Responsable), Celda(Servicios.ReporteServicio.Legible(x.Estado)), x.Cantidad?.ToString(Cultura) ?? "", x.Importe?.ToString(Cultura) ?? "", x.ImporteAceptado?.ToString(Cultura) ?? "",
+            Celda(d.Titulo), Celda(d.Generado.ToString("dd/MM/yyyy HH:mm:ss")), Celda(d.EmitidoPor), Celda(d.Alcance), Celda(d.Filtros), Celda(d.Metodologia), Celda(d.UnidadGrafico),
+            Celda(empresa.Nombre), Celda(empresa.Direccion), Celda(empresa.Telefono), Celda(empresa.Correo), Celda(empresa.IdentificacionFiscal)));
         return b.ToString();
     }
 }

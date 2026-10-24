@@ -553,7 +553,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             _tomandoDiagnostico = true;
             try
             {
-                using var f = new FrmSeguimientoTrabajo(fila.IdAtencion, _serviceProvider.GetRequiredService<SeguimientoTrabajoServicio>(), _serviceProvider.GetRequiredService<EvaluacionServicio>(), _serviceProvider.GetRequiredService<PresupuestoServicio>());
+                using var f = new FrmSeguimientoTrabajo(fila.IdAtencion, _serviceProvider.GetRequiredService<SeguimientoTrabajoServicio>(), _serviceProvider.GetRequiredService<EvaluacionServicio>(), _serviceProvider.GetRequiredService<PresupuestoServicio>(), _serviceProvider.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>());
                 f.ShowDialog(this);
             }
             catch (Exception ex)

@@ -34,7 +34,7 @@ internal static class Program
         {
             using var scope=proveedor.CreateScope();
             scope.ServiceProvider.GetRequiredService<SesionUsuario>().Iniciar(new Usuario { Id=rol,Nombre="Prueba",Apellido="Interfaz",RolId=rol,Rol=new Rol { Id=rol,Nombre=RolesSistema.ObtenerNombreEsperado(rol)!,Activo=true } });
-            foreach(var tipo in new[]{typeof(FrmPrincipal),typeof(FrmInicio),typeof(FrmAuditoriaAccesos),typeof(FrmRespaldoRestauracion),typeof(FrmAltaUsuario),typeof(FrmReportes)})
+            foreach(var tipo in new[]{typeof(FrmPrincipal),typeof(FrmInicio),typeof(FrmAuditoriaAccesos),typeof(FrmRespaldoRestauracion),typeof(FrmAltaUsuario),typeof(FrmReportes),typeof(Taller.Presentacion.Formularios.Comprobantes.FrmComprobantes)})
             {
                 using var formulario=(Form)scope.ServiceProvider.GetRequiredService(tipo);
                 formulario.PerformLayout();
@@ -44,7 +44,27 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        VerificarNavegacionDocumento();
         return 0;
+    }
+    private static void VerificarNavegacionDocumento()
+    {
+        using var documento = new System.Drawing.Printing.PrintDocument();
+        Type tipo = typeof(FrmReportes).Assembly.GetType("Taller.Presentacion.Impresion.VistaPreviaDocumento")!;
+        using var formulario = (Form)Activator.CreateInstance(tipo, documento, (Func<int>)(() => 3))!;
+        tipo.GetMethod("ActualizarPaginas", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, null);
+        var pagina = (NumericUpDown)formulario.Controls.Find("nudPagina", true).Single();
+        var siguiente = (Button)formulario.Controls.Find("btnSiguiente", true).Single();
+        var anterior = (Button)formulario.Controls.Find("btnAnterior", true).Single();
+        if (pagina.Maximum != 3 || anterior.Enabled || !siguiente.Enabled)
+            throw new InvalidOperationException("No se identifica el total de páginas.");
+        pagina.Value = 2;
+        if (!anterior.Enabled || !siguiente.Enabled)
+            throw new InvalidOperationException("No se puede navegar a la segunda página.");
+        pagina.Value = 3;
+        if (siguiente.Enabled || !anterior.Enabled)
+            throw new InvalidOperationException("La navegación supera la última página.");
+        Console.WriteLine("Vista previa: navegación entre tres páginas sin impresora ni conexión SQL.");
     }
     private static void VerificarTarjetasInicio(Form formulario)
     {

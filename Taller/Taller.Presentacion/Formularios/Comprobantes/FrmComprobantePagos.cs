@@ -10,13 +10,15 @@ public partial class FrmComprobantePagos : Form
 {
     private readonly int _id;
     private readonly CobroServicio _servicio;
+    private readonly Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto _empresa;
     private CuentaAtencionDto? _datos;
     private bool _ocupado, _cargando;
-    public FrmComprobantePagos(int id, CobroServicio servicio)
+    public FrmComprobantePagos(int id, CobroServicio servicio, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
         _id = id;
         _servicio = servicio;
+        _empresa = empresa;
     }
 
     private async void Cargar(object? s, EventArgs e) => await RecargarAsync();
@@ -130,7 +132,7 @@ public partial class FrmComprobantePagos : Form
         {
             var cuenta = await _servicio.ObtenerAsync(_id);
             if (cuenta.Comprobante is { } d)
-                ImpresionDocumento.Mostrar(this, TextoDocumentos.Liquidacion(d));
+                ImpresionDocumento.Mostrar(this, TextoDocumentos.Liquidacion(d), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Liquidacion-" + d.Numero, d.Fecha));
         });
     }
 
@@ -142,7 +144,7 @@ public partial class FrmComprobantePagos : Form
         {
             var cuenta = await _servicio.ObtenerAsync(_id);
             if (cuenta.Comprobante is { } d && d.Pagos.SingleOrDefault(p => p.IdPago == seleccionado.IdPago)is { } p)
-                ImpresionDocumento.Mostrar(this, TextoDocumentos.Recibo(d, p));
+                ImpresionDocumento.Mostrar(this, TextoDocumentos.Recibo(d, p), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Recibo-" + p.Numero, p.Fecha));
         });
     }
 

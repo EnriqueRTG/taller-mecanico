@@ -55,6 +55,18 @@ public sealed class ReportesPruebas
         public Task<ReporteDocumentoDto> Generar(TipoReporte tipo, string busqueda = "", string estado = "Todos") => Servicio.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = Hoy, Hasta = Hoy, Busqueda = busqueda, Estado = estado });
         public void Dispose() => Db.Dispose();
     }
+    [Fact]
+    public async Task EstadosDisponiblesNoSeReducenPorBusquedaEstadoNiResultadoVacio()
+    {
+        using var c = new Caso();
+        var completo = await c.Generar(TipoReporte.Presupuestos);
+        var filtrado = await c.Generar(TipoReporte.Presupuestos, estado: "Aceptado parcialmente");
+        var vacio = await c.Generar(TipoReporte.Presupuestos, busqueda: "ZZZ-SIN-RESULTADOS");
+        Assert.Equal(2, completo.EstadosDisponibles.Count);
+        Assert.Equal(completo.EstadosDisponibles.ToArray(), filtrado.EstadosDisponibles.ToArray());
+        Assert.Equal(completo.EstadosDisponibles.ToArray(), vacio.EstadosDisponibles.ToArray());
+        Assert.Empty(vacio.Registros);
+    }
     [Fact] public async Task PeriodoIncluyeTodoElUltimoDia_YNoAgregaEjemplos() { using var c = new Caso(); var d = await c.Generar(TipoReporte.Atenciones); Assert.Single(d.Registros); Assert.Equal(2, d.Registros[0].IdAtencion); Assert.Equal(1, d.Grafico.Sum(x => x.Valor)); }
     [Fact] public async Task SaldosIncluyenLiquidacionesAntiguasSinContarCancelacionesDosVeces() { using var c = new Caso(); var d = await c.Generar(TipoReporte.SaldosPendientes); Assert.Equal(60, d.Registros.Single().Importe); Assert.Equal(60, d.Grafico.Sum(x => x.Valor)); }
     [Fact] public async Task CobroMixtoYAnulacionDeOtroPeriodo_ConcilianNetoPorFechaYMedio() { using var c = new Caso(); var d = await c.Generar(TipoReporte.MovimientosCobro); Assert.Equal(3, d.Registros.Count); Assert.Equal(10, d.Registros.Sum(x => x.Importe)); Assert.Equal(10, d.Grafico.Sum(x => x.Valor)); Assert.Contains(d.Grafico, x => x.Etiqueta == "Transferencia" && x.Valor == -20); }

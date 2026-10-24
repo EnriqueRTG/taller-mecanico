@@ -2,6 +2,8 @@ namespace Taller.Aplicacion.DTOs.Reportes;
 /// <summary>Documento generado e inmutable por convención: filtros, indicadores, gráfico, interpretación y detalle de una misma consulta.</summary>
 public sealed class ReporteDocumentoDto
 {
+    /// <summary>Estados del alcance consultado antes de aplicar búsqueda y estado.</summary>
+    public IReadOnlyList<string> EstadosDisponibles { get; init; } = [];
     public string Titulo { get; init; } = "";
     public string EmitidoPor { get; init; } = "";
     public DateTime Generado { get; init; }

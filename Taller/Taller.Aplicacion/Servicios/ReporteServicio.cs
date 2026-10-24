@@ -64,6 +64,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             TipoReporte.ActividadTecnica => await reportes.ListarActividadAsync(desde, hasta, tecnico),
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
             _ => throw new ValidacionException("Tipo de reporte inválido.")};
+        var estadosDisponibles = registros.Select(x => Legible(x.Estado)).Distinct().Order().ToList();
         string texto = (solicitud.Busqueda ?? "").Trim();
         registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
         if (solicitud.Tipo == TipoReporte.SaldosPendientes)
@@ -130,6 +131,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             grafico = grafico.Take(7).Append(new PuntoReporteDto("Otras categorías", grafico.Skip(7).Sum(x => x.Valor))).ToList();
         return new ReporteDocumentoDto
         {
+            EstadosDisponibles = estadosDisponibles,
             Titulo = Nombre(solicitud.Tipo),
             Generado = FechaHoraTaller.Ahora,
             EmitidoPor = $"{usuario.Apellido}, {usuario.Nombre}",

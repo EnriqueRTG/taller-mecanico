@@ -99,14 +99,14 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             // Actualiza opciones sin cambiar el filtro elegido ni regenerar con parámetros distintos.
             _configurando = true;
             string estado = cboEstado.SelectedItem?.ToString() ?? "Todos";
-            if (estado == "Todos")
-            {
-                cboEstado.Items.Clear();
-                cboEstado.Items.Add("Todos");
-                foreach (var valor in _documento.Registros.Select(x => ReporteServicio.Legible(x.Estado)).Distinct().Order())
-                    cboEstado.Items.Add(valor);
-                cboEstado.SelectedIndex = 0;
-            }
+            cboEstado.Items.Clear();
+            cboEstado.Items.Add("Todos");
+            foreach (var valor in _documento.EstadosDisponibles)
+                cboEstado.Items.Add(valor);
+            // Conserva un filtro elegido aunque el nuevo período no contenga ese estado.
+            if (estado != "Todos" && !cboEstado.Items.Contains(estado))
+                cboEstado.Items.Add(estado);
+            cboEstado.SelectedItem = estado;
 
             _configurando = false;
             dgvDetalle.DataSource = _documento.Registros.Select(x => new { x.Codigo, Atencion = x.IdAtencion, x.Fecha, x.Descripcion, x.Responsable, Estado = ReporteServicio.Legible(x.Estado), x.Cantidad, x.Importe, x.ImporteAceptado }).ToList();

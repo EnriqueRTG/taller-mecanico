@@ -539,7 +539,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             var fila = ObtenerFilaSeleccionada();
             if (fila == null || _sesionUsuario.UsuarioActual?.RolId != RolesSistema.AdministrativoId)
                 return;
-            using var formulario = new Taller.Presentacion.Formularios.Comprobantes.FrmComprobantePagos(fila.IdAtencion, _serviceProvider.GetRequiredService<CobroServicio>());
+            using var formulario = new Taller.Presentacion.Formularios.Comprobantes.FrmComprobantePagos(fila.IdAtencion, _serviceProvider.GetRequiredService<CobroServicio>(), _serviceProvider.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>());
             formulario.ShowDialog(this);
             await CargarAtencionesAsync();
         }

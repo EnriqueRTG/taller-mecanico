@@ -8,6 +8,7 @@ namespace Taller.Presentacion.Formularios.Presupuestos;
 public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFormularioConOperacion
 {
     private readonly SeguimientoTrabajoServicio _seguimiento;
+    private readonly Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto _empresa;
     private readonly EvaluacionServicio _servicio;
     private readonly SesionUsuario _sesion;
     private readonly PresupuestoServicio _presupuestos;
@@ -16,13 +17,14 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     private bool _cargando;
     public bool OperacionEnCurso => _ocupado || _cargando;
 
-    public FrmPresupuestos(EvaluacionServicio servicio, SesionUsuario sesion, PresupuestoServicio presupuestos, SeguimientoTrabajoServicio seguimiento)
+    public FrmPresupuestos(EvaluacionServicio servicio, SesionUsuario sesion, PresupuestoServicio presupuestos, SeguimientoTrabajoServicio seguimiento, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
         _servicio = servicio;
         _sesion = sesion;
         _presupuestos = presupuestos;
         _seguimiento = seguimiento;
+        _empresa = empresa;
     }
 
     private async void Cargar(object? s, EventArgs e)
@@ -180,7 +182,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         _ocupado = true;
         try
         {
-            using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(d.IdAtencion, _seguimiento, _servicio, _presupuestos);
+            using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(d.IdAtencion, _seguimiento, _servicio, _presupuestos, _empresa);
             f.ShowDialog(this);
         }
         catch (Exception ex)

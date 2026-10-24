@@ -225,7 +225,7 @@ public partial class FrmEvaluarAtencion : Form
         _ocupado = true;
         try
         {
-            using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(_id, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor), _servicio, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<PresupuestoServicio>(_proveedor));
+            using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(_id, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor), _servicio, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<PresupuestoServicio>(_proveedor), Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>(_proveedor));
             f.ShowDialog(this);
             CargarDatos(await _servicio.ObtenerAsync(_id));
         }

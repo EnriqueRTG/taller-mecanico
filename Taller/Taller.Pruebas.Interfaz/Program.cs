@@ -70,7 +70,9 @@ internal static class Program
                 foreach (Control control in new Control[] { buscar, estado, limpiar,
                     formulario.Controls.Find("btnActualizar", true).Single() })
                 {
-                    Rectangle bounds = tabla.RectangleToClient(control.RectangleToScreen(control.ClientRectangle));
+                    Rectangle bounds = control.Bounds;
+                    for (Control? padre = control.Parent; padre is not null && padre != tabla; padre = padre.Parent)
+                        bounds.Offset(padre.Location);
                     if (bounds.Left < 0 || bounds.Top < 0 || bounds.Right > tabla.Width || bounds.Bottom > tabla.Height)
                         throw new InvalidOperationException($"Filtro recortado: {tipo.Name}, {control.Name}, ancho {ancho}: control {bounds}, tabla {tabla.ClientSize}, contenedor {control.Parent!.Bounds}.");
                 }

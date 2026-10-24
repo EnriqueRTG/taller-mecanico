@@ -36,7 +36,9 @@
             tlpBusquedaCliente = new TableLayoutPanel();
             lblTipoDocumento = new Label();
             cboTipoDocumento = new ComboBox();
-            cboTipoSolicitud = new ComboBox();
+            flpSolicitud = new FlowLayoutPanel();
+            chkRequiereDiagnostico = new CheckBox();
+            chkPrepararIngreso = new CheckBox();
             lblDocumento = new Label();
             txtDocumento = new TextBox();
             btnBuscarCliente = new Button();
@@ -625,12 +627,15 @@
             tlpMotivo.ColumnCount = 1;
             tlpMotivo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpMotivo.Controls.Add(lblSeccionMotivo, 0, 0);
-            tlpMotivo.Controls.Add(cboTipoSolicitud, 0, 1);
-            cboTipoSolicitud.Name = "cboTipoSolicitud";
-            cboTipoSolicitud.Dock = DockStyle.Fill;
-            cboTipoSolicitud.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboTipoSolicitud.Items.AddRange(new object[] { "Síntoma o problema: requiere evaluación", "Servicio definido: preparar propuesta", "Solicitud mixta: problema y servicio definido" });
-            cboTipoSolicitud.AccessibleName = "Tipo de solicitud";
+            tlpMotivo.Controls.Add(flpSolicitud, 0, 1);
+            flpSolicitud.Dock = DockStyle.Fill;
+            flpSolicitud.AutoSize = true;
+            flpSolicitud.Controls.Add(chkRequiereDiagnostico);
+            flpSolicitud.Controls.Add(chkPrepararIngreso);
+            chkRequiereDiagnostico.AutoSize = true;
+            chkRequiereDiagnostico.Text = "Requiere diagnóstico del problema";
+            chkPrepararIngreso.AutoSize = true;
+            chkPrepararIngreso.Text = "Preparar inspección con cargo antes de enviar";
             tlpMotivo.Controls.Add(txtMotivo, 0, 2);
             tlpMotivo.Controls.Add(lblContadorMotivo, 0, 3);
             tlpMotivo.Dock = DockStyle.Fill;
@@ -746,7 +751,7 @@
             btnRegistrar.Name = "btnRegistrar";
             btnRegistrar.Size = new Size(170, 38);
             btnRegistrar.TabIndex = 9;
-            btnRegistrar.Text = "Registrar atención";
+            btnRegistrar.Text = "Registrar y continuar";
             btnRegistrar.UseVisualStyleBackColor = false;
             btnRegistrar.Click += btnRegistrar_Click;
             // 
@@ -821,7 +826,9 @@
         private TableLayoutPanel tlpBusquedaCliente;
         private Label lblTipoDocumento;
         private ComboBox cboTipoDocumento;
-        private ComboBox cboTipoSolicitud;
+        private FlowLayoutPanel flpSolicitud;
+        private CheckBox chkRequiereDiagnostico;
+        private CheckBox chkPrepararIngreso;
         private Label lblDocumento;
         private TextBox txtDocumento;
         private Button btnBuscarCliente;

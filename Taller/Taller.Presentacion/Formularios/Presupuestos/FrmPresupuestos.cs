@@ -118,6 +118,8 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         try
         {
             await _servicio.PresentarAsync(d.IdPresupuesto, d.Version);
+            using var decision = new FrmDecisionPresupuesto(d.IdPresupuesto, _presupuestos);
+            decision.ShowDialog(this);
         }
         catch (Exception ex)
         {

@@ -26,6 +26,9 @@ public partial class FrmNuevaAtencion : Form
     private Vehiculo? _vehiculoSeleccionado;
 #endregion
 #region Inicialización
+    /// <summary>Atención guardada que necesita preparar la autorización inicial antes del envío.</summary>
+    public int? IdIngresoPendiente { get; private set; }
+
     /// <summary>
     /// Inicializa una nueva instancia del formulario con los servicios
     /// necesarios para consultar clientes, vehículos y registrar atenciones.
@@ -63,7 +66,6 @@ public partial class FrmNuevaAtencion : Form
     {
         ConfigurarFormulario();
         CargarTiposDocumento();
-        cboTipoSolicitud.SelectedIndex = 0;
         MostrarUsuarioRecepcion();
         ActualizarEstadoBotonRegistrar();
         cboTipoDocumento.Focus();
@@ -518,8 +520,9 @@ public partial class FrmNuevaAtencion : Form
             btnRegistrar.Enabled = false;
             btnCancelar.Enabled = false;
             btnRegistrar.Text = "Registrando...";
-            var atencion = await _atencionServicio.RegistrarAsync(_clienteSeleccionado.IdCliente, _vehiculoSeleccionado.IdVehiculo, usuario.Id, txtMotivo.Text.Trim(), (Taller.Dominio.Enumeraciones.TipoSolicitudAtencion)(cboTipoSolicitud.SelectedIndex + 1));
-            MessageBox.Show($"Atención N.º {atencion.IdAtencion} registrada correctamente.", "Nueva atención", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var atencion = await _atencionServicio.RegistrarAsync(_clienteSeleccionado.IdCliente, _vehiculoSeleccionado.IdVehiculo, usuario.Id, txtMotivo.Text.Trim(), chkRequiereDiagnostico.Checked ? Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.Problema : Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido, enviarATaller: !chkPrepararIngreso.Checked);
+            IdIngresoPendiente = chkPrepararIngreso.Checked ? atencion.IdAtencion : null;
+            MessageBox.Show($"Atención N.º {atencion.IdAtencion} registrada. " + (IdIngresoPendiente.HasValue ? "Prepare ahora la inspección y su autorización." : "Disponible en taller para " + (chkRequiereDiagnostico.Checked ? "diagnóstico y presupuesto." : "preparar presupuesto.")), "Nueva atención", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -539,7 +542,7 @@ public partial class FrmNuevaAtencion : Form
         {
             if (!IsDisposed)
             {
-                btnRegistrar.Text = "Registrar atención";
+                btnRegistrar.Text = "Registrar y continuar";
                 btnCancelar.Enabled = true;
                 ActualizarEstadoBotonRegistrar();
             }

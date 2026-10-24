@@ -52,6 +52,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             public string Cliente { get; init; } = string.Empty;
             public string Documento { get; init; } = string.Empty;
             public string Motivo { get; init; } = string.Empty;
+            public TipoSolicitudAtencion TipoSolicitud { get; init; }
             public EstadoAtencion EstadoValor { get; init; }
             public string Estado => ObtenerNombreEstado(EstadoValor);
             public string Etapa { get; init; } = string.Empty;
@@ -257,6 +258,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 Cliente = $"{atencion.Cliente.Apellido}, " + atencion.Cliente.Nombre,
                 Documento = $"{atencion.Cliente.TipoDocumento} " + atencion.Cliente.Documento,
                 Motivo = atencion.MotivoConsulta,
+                TipoSolicitud = atencion.TipoSolicitud,
                 EstadoValor = atencion.Estado,
                 Etapa = ObtenerEtapaTemporal(atencion),
                 Recepcion = $"{atencion.UsuarioRecepcion.Nombre} " + atencion.UsuarioRecepcion.Apellido
@@ -396,7 +398,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnVerHistorial.Enabled = puedeConsultarComoTecnico;
             bool puedeTomarDiagnostico = !fila.EvaluacionFinalizada && (fila.EstadoValor == EstadoAtencion.PendienteDiagnostico || fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad is null && fila.ActividadTecnica is null;
             bool puedeRegistrarDiagnostico = fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica && fila.IdTecnicoEnActividad == usuario.Id && fila.ActividadTecnica is ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto;
-            btnRegistrarDiagnostico.Text = puedeRegistrarDiagnostico ? "Continuar evaluación" : "Tomar evaluación";
+            btnRegistrarDiagnostico.Text = puedeRegistrarDiagnostico ? "Continuar" : fila.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido ? "Preparar presupuesto" : "Diagnosticar y presupuestar";
             btnRegistrarDiagnostico.Enabled = !_tomandoDiagnostico && puedeConsultarComoTecnico && (puedeTomarDiagnostico || puedeRegistrarDiagnostico);
             btnFinalizarTrabajo.Enabled = puedeConsultarComoTecnico && fila.EstadoValor == EstadoAtencion.EnEjecucion && (fila.IdTecnicoEnActividad == null || fila.IdTecnicoEnActividad == usuario.Id);
         }
@@ -521,6 +523,11 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 DialogResult resultado = formulario.ShowDialog(this);
                 if (resultado == DialogResult.OK)
                 {
+                    if (formulario.IdIngresoPendiente is int ingreso)
+                    {
+                        using var detalle = new FrmDetalleAtencion(ingreso, _atencionServicio, _sesionUsuario, _serviceProvider.GetRequiredService<EvaluacionServicio>());
+                        detalle.ShowDialog(this);
+                    }
                     await CargarAtencionesAsync();
                 }
             }

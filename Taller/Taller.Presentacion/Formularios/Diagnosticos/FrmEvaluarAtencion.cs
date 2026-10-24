@@ -65,9 +65,26 @@ public partial class FrmEvaluarAtencion : Form
         foreach (DataGridViewRow fila in dgvIniciales.Rows)
             if (fila.DataBoundItem is ServicioEvaluadoDto servicio && servicio.Estado != EstadoEjecucionDetalle.NoIniciado)
                 fila.ReadOnly = true;
+        ConfigurarRecorrido();
         _cargando = false;
         _sucio = false;
         ActualizarTotal();
+    }
+
+    private void ConfigurarRecorrido()
+    {
+        if (_datos is null) return;
+        bool informe = chkInforme.Checked;
+        if (informe && !tabs.TabPages.Contains(tabInforme)) tabs.TabPages.Insert(0, tabInforme);
+        if (!informe) tabs.TabPages.Remove(tabInforme);
+        if (_iniciales.Count == 0) tabs.TabPages.Remove(tabIniciales);
+        else if (!tabs.TabPages.Contains(tabIniciales)) tabs.TabPages.Add(tabIniciales);
+        Text = informe ? "Diagnóstico y presupuesto" : "Preparar presupuesto";
+        btnFinalizar.Text = chkSinPropuesta.Checked ? "Finalizar sin presupuesto" : "Enviar a recepción";
+        btnGuardar.Text = "Guardar borrador";
+        btnSeguimiento.Visible = informe;
+        lblAviso.Text = informe ? "Complete el informe y el presupuesto. Guarde un borrador para continuar después." : "Presupueste lo solicitado. Enviar a recepción no autoriza ejecutar trabajos.";
+        tabs.SelectedTab = informe ? tabInforme : tabPropuesta;
     }
 
     private void Cambiado(object? s, EventArgs e)
@@ -75,7 +92,10 @@ public partial class FrmEvaluarAtencion : Form
         txtHallazgo.Enabled = chkInforme.Checked;
         txtTrabajo.Enabled = chkInforme.Checked;
         if (!_cargando)
+        {
             _sucio = true;
+            if (ReferenceEquals(s, chkInforme) || ReferenceEquals(s, chkSinPropuesta)) ConfigurarRecorrido();
+        }
     }
 
     private void FiltrarCatalogo(object? s, EventArgs e)
@@ -89,6 +109,8 @@ public partial class FrmEvaluarAtencion : Form
     {
         if (cboConcepto.SelectedItem is not ConceptoPropuestaDto c)
             return;
+        chkAportaCliente.Visible = c.Tipo != TipoConcepto.Servicio;
+        if (c.Tipo == TipoConcepto.Servicio) chkAportaCliente.Checked = false;
         txtDescripcion.Text = c.Nombre;
         nudPrecio.Value = Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
         lblPrecio.Text = c.PrecioReferencia.HasValue ? "Precio de referencia: revise su vigencia." : "Sin precio de referencia: establezca el importe (0 si es sin cargo).";
@@ -158,7 +180,7 @@ public partial class FrmEvaluarAtencion : Form
         dgvIniciales.EndEdit();
         if (dgvIniciales.DataSource is not null)
             BindingContext?[dgvIniciales.DataSource]?.EndCurrentEdit();
-        if (finalizar && MessageBox.Show(this, "¿Finalizar la evaluación? El informe quedará como histórico y la propuesta lista para que Recepción la comunique. Esto no autoriza reparar.", "Finalizar evaluación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        if (finalizar && MessageBox.Show(this, "¿Enviar a recepción? El presupuesto quedará listo para comunicar al cliente. Los trabajos requieren su aceptación previa.", "Finalizar evaluación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             return;
         _ocupado = true;
         tlpPrincipal.Enabled = false;

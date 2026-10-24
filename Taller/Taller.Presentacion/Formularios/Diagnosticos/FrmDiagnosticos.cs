@@ -99,7 +99,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
         var d = Fila;
         var tech = _sesion.UsuarioActual?.RolId == RolesSistema.TecnicoId;
         btnTrabajar.Enabled = !_ocupado && tech && d is { Finalizada: false } && (d.IdTecnico == null || d.IdTecnico == _sesion.UsuarioActual?.Id);
-        btnTrabajar.Text = d?.IdTecnico == _sesion.UsuarioActual?.Id ? "Continuar evaluación" : "Tomar y evaluar";
+        btnTrabajar.Text = d?.IdTecnico == _sesion.UsuarioActual?.Id ? "Continuar" : d?.TipoSolicitud == Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido ? "Preparar presupuesto" : "Diagnosticar y presupuestar";
         btnLiberar.Enabled = !_ocupado && tech && d is { Finalizada: false } && d.IdTecnico == _sesion.UsuarioActual?.Id;
         btnInforme.Enabled = !_ocupado && d?.IdDiagnostico != null;
         lblEstado.Text = d is null ? "Seleccione una atención. Mis actividades primero; disponibles por antigüedad; finalizadas al final." : d.Finalizada ? "Evaluación finalizada. Consulte la propuesta en Presupuestos." : d.IdTecnico == null ? "Disponible para tomar." : $"Reservada por {d.Tecnico}. Cerrar el formulario no la libera.";

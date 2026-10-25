@@ -25,6 +25,8 @@ public sealed class PresupuestoConsultaDto
         _ => Estado.ToString()};
     public byte[] Version { get; set; } = [];
     public string? Observaciones { get; set; }
+    public string? PersonaDecision { get; set; }
+    public string? MedioDecision { get; set; }
     public List<ItemPropuestaDto> Items { get; set; } = [];
     public decimal Total => Items.Sum(i => i.Subtotal);
 }

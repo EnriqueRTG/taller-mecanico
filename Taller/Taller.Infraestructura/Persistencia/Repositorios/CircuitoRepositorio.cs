@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
@@ -7,7 +7,7 @@ namespace Taller.Infraestructura.Persistencia.Repositorios;
 public sealed class CircuitoRepositorio(TallerDbContext contexto) : ICircuitoRepositorio
 {
     public Task<Presupuesto?> ObtenerPresupuestoAsync(int id) => contexto.Presupuestos.Include(x => x.Detalles)
-        .Include(x => x.Atencion).ThenInclude(x => x.Cliente).Include(x => x.Atencion).ThenInclude(x => x.Vehiculo)
+        .Include(x => x.Atencion).ThenInclude(x => x.Solicitudes).Include(x => x.Atencion).ThenInclude(x => x.Cliente).Include(x => x.Atencion).ThenInclude(x => x.Vehiculo)
         .SingleOrDefaultAsync(x => x.IdPresupuesto == id);
     private IQueryable<Comprobante> Documentos() => contexto.Set<Comprobante>()
         .Include(x => x.Detalles).Include(x => x.Pagos).ThenInclude(x => x.Medios).ThenInclude(x => x.MedioPago)

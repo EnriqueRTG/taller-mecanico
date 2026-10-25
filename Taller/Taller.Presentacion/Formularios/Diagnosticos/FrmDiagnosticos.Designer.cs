@@ -53,10 +53,10 @@ partial class FrmDiagnosticos
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
-        Controls.Add(tlpPrincipal); Text = "Evaluaciones técnicas";
+        Controls.Add(tlpPrincipal); Text = "Preparación técnica";
         tlpPrincipal.Controls.Add(lblTitulo, 0, 0);
         lblTitulo.Dock = DockStyle.Fill;
-        lblTitulo.Text = "Evaluaciones técnicas · informe y propuesta";
+        lblTitulo.Text = "Preparación técnica · solicitudes y presupuesto";
         tlpPrincipal.Controls.Add(tlpFiltros, 0, 1);
         txtBuscar.Dock = DockStyle.Fill;
 

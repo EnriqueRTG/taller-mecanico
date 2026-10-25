@@ -28,7 +28,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 Version = p.Version.ToArray(),
                 Resumen = $"Atención {p.IdAtencion:D6} · {p.Atencion.Cliente.Apellido}, {p.Atencion.Cliente.Nombre} · {p.Atencion.Vehiculo.Dominio}",
                 Observaciones = p.ObservacionesDecision ?? p.MotivoRevision ?? p.Observaciones,
-                Items = p.Detalles.OrderBy(d => d.IdPresupuestoDetalle).Select(d => new DecisionItemDto { IdConcepto = d.IdConcepto, OrigenMaterial = d.OrigenMaterial, IdDetalle = d.IdPresupuestoDetalle, Aceptar = d.AceptadoPorCliente ?? true, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList()
+                Items = p.Detalles.OrderBy(d => d.IdPresupuestoDetalle).Select(d => new DecisionItemDto { IdSolicitudAtencion = d.IdSolicitudAtencion, IdConcepto = d.IdConcepto, OrigenMaterial = d.OrigenMaterial, IdDetalle = d.IdPresupuestoDetalle, Aceptar = d.AceptadoPorCliente ?? true, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList()
             };
         }
         finally
@@ -53,6 +53,12 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 throw new ValidacionException("La selección contiene ítems repetidos o ajenos a esta propuesta.");
             if (p.Detalles.Count == 0)
                 throw new ValidacionException("No puede decidir sobre una propuesta vacía.");
+            var persona = datos.PersonaDecision?.Trim() ?? "";
+            var medio = datos.MedioDecision?.Trim() ?? "";
+            if (persona.Length > 150 || medio.Length > 30 || p.Atencion.Solicitudes.Count > 0 && (persona.Length == 0 || !new[] { "Presencial", "Teléfono", "Correo", "Mensajería" }.Contains(medio)))
+                throw new ValidacionException("Identifique quién comunica la decisión y seleccione el medio de comunicación.");
+            p.PersonaDecision = persona.Length == 0 ? null : persona;
+            p.MedioDecision = medio.Length == 0 ? null : medio;
             var motivo = AutorizacionOperativa.Texto(datos.Observaciones, datos.ItemsAceptados.Count != p.Detalles.Count);
             foreach (var d in p.Detalles)
                 d.AceptadoPorCliente = datos.ItemsAceptados.Contains(d.IdPresupuestoDetalle);
@@ -67,7 +73,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             if (!p.EsAdicional)
                 a.Estado = parcial ? EstadoAtencion.PendienteDecision : p.Estado == EstadoPresupuesto.Aceptado ? EstadoAtencion.EnEjecucion : EstadoAtencion.PendienteLiquidacion;
             evaluacion.PrepararVersion(a, a.Version);
-            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "DecisionPresupuestoRegistrada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Presupuesto {p.IdPresupuesto}: {datos.ItemsAceptados.Count}/{p.Detalles.Count} ítems aceptados. {motivo}" });
+            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "DecisionPresupuestoRegistrada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Presupuesto {p.IdPresupuesto}: {datos.ItemsAceptados.Count}/{p.Detalles.Count} ítems aceptados. Persona: {p.PersonaDecision ?? "No informada (registro anterior)"}. Medio: {p.MedioDecision ?? "No informado"}. {motivo}" });
             await unidad.GuardarCambiosAsync();
         }
         finally
@@ -107,7 +113,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                     IdUsuarioDecision = usuario.Id,
                     MotivoRevision = motivo,
                     ObservacionesDecision = motivo,
-                    Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, OrigenMaterial = d.OrigenMaterial, AceptadoPorCliente = true }).ToList()
+                    Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdSolicitudAtencion = d.IdSolicitudAtencion, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, OrigenMaterial = d.OrigenMaterial, AceptadoPorCliente = true }).ToList()
                 };
                 evaluacion.AgregarPresupuesto(revision);
                 evaluacion.PrepararVersion(p.Atencion, p.Atencion.Version);
@@ -130,7 +136,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 FechaCreacion = FechaHoraTaller.Ahora,
                 MotivoRevision = motivo,
                 Observaciones = motivo,
-                Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList()
+                Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdSolicitudAtencion = d.IdSolicitudAtencion, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, OrigenMaterial = d.OrigenMaterial }).ToList()
             };
             evaluacion.AgregarPresupuesto(nueva);
             var a = p.Atencion;

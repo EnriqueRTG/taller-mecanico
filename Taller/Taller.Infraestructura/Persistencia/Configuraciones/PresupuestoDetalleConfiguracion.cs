@@ -76,6 +76,7 @@ public sealed class PresupuestoDetalleConfiguracion : IEntityTypeConfiguration<P
         builder.Property(d => d.ObservacionesMaterial).HasMaxLength(1000);
         builder.HasOne(d => d.TecnicoMaterial).WithMany().HasForeignKey(d => d.IdTecnicoMaterial).OnDelete(DeleteBehavior.Restrict);
         builder.Property(d => d.AceptadoPorCliente).IsRequired(false);
+        builder.HasOne<SolicitudAtencion>().WithMany().HasForeignKey(d => d.IdSolicitudAtencion).OnDelete(DeleteBehavior.Restrict);
         builder.HasKey(d => d.IdPresupuestoDetalle);
         builder.Property(d => d.IdPresupuestoDetalle).ValueGeneratedOnAdd();
         builder.Property(d => d.IdPresupuesto).IsRequired();

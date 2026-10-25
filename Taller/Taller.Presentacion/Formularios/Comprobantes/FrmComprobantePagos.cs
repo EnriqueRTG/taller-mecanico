@@ -36,6 +36,7 @@ public partial class FrmComprobantePagos : Form
             if (d != null)
                 txtObservaciones.Text = d.Observaciones;
             txtObservaciones.ReadOnly = d != null;
+            Text = d == null ? "Liquidar trabajos realizados" : d.Saldo > 0 ? "Registrar pagos" : _datos.Estado == EstadoAtencion.Cerrada ? "Cuenta e historial de entrega" : "Registrar entrega del vehículo";
             lblSaldo.Text = d == null ? $"Por liquidar: {_datos.TotalPorLiquidar:N2}. Revise los conceptos antes de emitir." : $"{d.Numero} · Total {d.Total:N2} · Pagado {d.Pagado:N2} · Saldo {d.Saldo:N2}";
             var abierta = _datos.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
             btnEmitir.Enabled = abierta && d == null;

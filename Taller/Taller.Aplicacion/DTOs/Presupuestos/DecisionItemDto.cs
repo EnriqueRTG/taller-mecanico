@@ -4,6 +4,7 @@ namespace Taller.Aplicacion.DTOs.Presupuestos;
 /// <summary>Contrato de datos para presupuestos, independiente de los controles de presentación.</summary>
 public sealed class DecisionItemDto
 {
+    public int? IdSolicitudAtencion { get; set; }
     public int IdConcepto { get; set; }
     public OrigenMaterial OrigenMaterial { get; set; }
     public int IdDetalle { get; set; }

@@ -54,6 +54,23 @@ public sealed class EvaluacionServicioPruebas
         public void Dispose() => Db.Dispose();
     }
 
+    [Fact]
+    public async Task Recepcion_RechazaPedidosInvalidosSinCrearAtenciones()
+    {
+        using var e = new Escenario();
+        var servicio = Recepcion(e);
+        await Assert.ThrowsAsync<ValidacionException>(() => servicio.RegistrarRecepcionAsync(new()));
+        await Assert.ThrowsAsync<ValidacionException>(() => servicio.RegistrarRecepcionAsync(new() { Solicitudes = [
+            new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Cambiar aceite" },
+            new() { Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "  CAMBIAR ACEITE  " } ] }));
+        await Assert.ThrowsAsync<ValidacionException>(() => servicio.RegistrarRecepcionAsync(new() {
+            Kilometraje = -1, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Cambiar aceite" }] }));
+        await Assert.ThrowsAsync<ValidacionException>(() => servicio.RegistrarRecepcionAsync(new() {
+            Solicitudes = [new() { Tipo = (TipoSolicitudIngreso)99, Descripcion = "Pedido inválido" }] }));
+        Assert.Single(await e.Db.Atenciones.ToListAsync());
+        Assert.Empty(await e.Db.Set<SolicitudAtencion>().ToListAsync());
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

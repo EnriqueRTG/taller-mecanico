@@ -114,7 +114,11 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             var items = detalles.Where(d => d.AceptadoPorCliente == true).ToDictionary(d => d.IdPresupuestoDetalle);
             if (datos.Items is null || datos.Items.Any(d => d is null) || datos.Items.Count != items.Count || datos.Items.Select(d => d.IdDetalle).Distinct().Count() != items.Count)
                 throw new ValidacionException("Los ítems autorizados cambiaron. Actualice la ejecución.");
+            if (finalizar && !interrumpir && a.Solicitudes.Count > 0 && !datos.ConformidadTecnica)
+                throw new ValidacionException("Confirme la comprobación final y la conformidad técnica antes de finalizar.");
             var motivo = AutorizacionOperativa.Texto(datos.Observaciones, interrumpir);
+            if (finalizar && !interrumpir && datos.ConformidadTecnica)
+                motivo = "El técnico comprobó el resultado y dio su conformidad sobre los trabajos realizados. " + motivo;
             foreach (var registro in datos.Items)
             {
                 if (!items.TryGetValue(registro.IdDetalle, out var d))

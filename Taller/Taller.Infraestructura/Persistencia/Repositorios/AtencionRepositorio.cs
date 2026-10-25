@@ -54,7 +54,17 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
             _contexto.HistorialAtenciones.Add(evento);
         }
 
-        await GuardarAsync(entrada);
+        foreach (var solicitud in atencion.Solicitudes)
+        {
+            solicitud.Atencion = atencion;
+            _contexto.Set<SolicitudAtencion>().Add(solicitud);
+        }
+        try { await GuardarAsync(entrada); }
+        finally
+        {
+            foreach (var solicitud in atencion.Solicitudes) _contexto.Entry(solicitud).State = EntityState.Detached;
+            foreach (var evento in atencion.Historial) _contexto.Entry(evento).State = EntityState.Detached;
+        }
     }
 
     /// <summary>
@@ -352,7 +362,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// </summary>
     private IQueryable<Atencion> ConsultaConRelaciones()
     {
-        return _contexto.Atenciones.AsNoTracking().Include(a => a.Pausas).AsSplitQuery().Include(a => a.Evaluacion).Include(a => a.Cliente).Include(a => a.Vehiculo).ThenInclude(v => v.Modelo).ThenInclude(m => m.Marca).Include(a => a.UsuarioRecepcion).Include(a => a.TecnicoEnActividad);
+        return _contexto.Atenciones.AsNoTracking().Include(a => a.Solicitudes).Include(a => a.Pausas).AsSplitQuery().Include(a => a.Evaluacion).Include(a => a.Cliente).Include(a => a.Vehiculo).ThenInclude(v => v.Modelo).ThenInclude(m => m.Marca).Include(a => a.UsuarioRecepcion).Include(a => a.TecnicoEnActividad);
     }
 
     /// <summary>

@@ -169,7 +169,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
 
     internal static List<PresupuestoDetalle> PrepararItems(List<ItemPropuestaDto> items, List<Concepto> catalogo)
     {
-        if (items == null || items.Count == 0 || items.Any(i => i == null) || items.Select(i => i.IdConcepto).Distinct().Count() != items.Count)
+        if (items == null || items.Count == 0 || items.Any(i => i == null) || items.Select(i => (i.IdConcepto, i.IdSolicitudAtencion)).Distinct().Count() != items.Count)
             throw new ValidacionException("Agregue conceptos distintos a la propuesta.");
         decimal total = 0;
         const decimal max = 9999999999999999.99m;
@@ -186,6 +186,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             total += i.Subtotal;
             return new PresupuestoDetalle
             {
+                IdSolicitudAtencion = i.IdSolicitudAtencion,
                 IdConcepto = i.IdConcepto,
                 Descripcion = descripcion,
                 Cantidad = i.Cantidad,
@@ -206,6 +207,8 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             ExigirTecnicoDisponible(a, u);
             if (a.Estado is not (EstadoAtencion.EnEjecucion or EstadoAtencion.EnEvaluacionTecnica))
                 throw new ValidacionException("Los adicionales se preparan durante la ejecución. Para cambios previos solicite una revisión.");
+            if (datos.Items is null || datos.Items.Any(i => i is null || i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
+                throw new ValidacionException("Revise las solicitudes asociadas a los ítems del adicional.");
             var motivo = AutorizacionOperativa.Texto(datos.Motivo);
             var h = datos.IdHallazgo is int hi ? a.Hallazgos.SingleOrDefault(h => h.IdHallazgoAtencion == hi) ?? throw new ValidacionException("El hallazgo no pertenece a la atención.") : null;
             var p = new Presupuesto
@@ -246,6 +249,8 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             ExigirTecnicoDisponible(a, u);
             if (!p.Vigente || p.Estado != EstadoPresupuesto.PendienteRevisionTecnica)
                 throw new ValidacionException("La selección ya no está pendiente de revisión.");
+            if (items is null || items.Any(i => i is null || i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
+                throw new ValidacionException("Revise las solicitudes asociadas a los ítems de la revisión.");
             justificacion = AutorizacionOperativa.Texto(justificacion);
             p.Vigente = false;
             var nueva = new Presupuesto

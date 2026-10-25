@@ -42,7 +42,8 @@ public partial class FrmDetalleAtencion : Form
         {
             _atencion = await _atenciones.ObtenerPorIdAsync(_id) ?? throw new InvalidOperationException("La atención no existe.");
             lblResumen.Text = $"Atención {_id:D6} · {_atencion.Estado} · Solicitud: {_atencion.TipoSolicitud}\n{_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · {_atencion.Vehiculo.Dominio} · Apertura {_atencion.FechaApertura:dd/MM/yyyy HH:mm}";
-            txtMotivo.Text = _atencion.MotivoConsulta;
+            txtMotivo.Text = (_atencion.Solicitudes.Count == 0 ? _atencion.MotivoConsulta : string.Join(Environment.NewLine, _atencion.Solicitudes.OrderBy(s => s.Orden).Select(s => $"{s.Orden}. {(s.Tipo == Taller.Dominio.Enumeraciones.TipoSolicitudIngreso.TrabajoSolicitado ? "Solicita" : "Informa")}: {s.Descripcion}")))
+                + $"\r\nKilometraje de ingreso: {_atencion.KilometrajeRecepcion?.ToString("N0") ?? "No informado"}\r\nObservaciones: {_atencion.ObservacionesRecepcion}";
             bool recepcion = _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId;
             grpIngreso.Visible = recepcion && _atencion.Estado == Taller.Dominio.Enumeraciones.EstadoAtencion.Abierta;
             btnConfirmarIngreso.Visible = grpIngreso.Visible;
@@ -60,6 +61,7 @@ public partial class FrmDetalleAtencion : Form
             }
 
             EstadoAutorizacion(null, EventArgs.Empty);
+            AjustarConsulta(recepcion && _atencion.Estado == Taller.Dominio.Enumeraciones.EstadoAtencion.Abierta, dgvServicios.Rows.Count > 0);
         }
         catch (Exception ex)
         {
@@ -70,6 +72,22 @@ public partial class FrmDetalleAtencion : Form
             _ocupado = false;
             tlpPrincipal.Enabled = true;
         }
+    }
+
+    /// <summary>En una consulta sin cargos iniciales muestra los pedidos, no secciones vacías de ingreso.</summary>
+    private void AjustarConsulta(bool prepararIngreso, bool tieneServicios)
+    {
+        bool mostrarServicios = prepararIngreso || tieneServicios;
+        tlpPrincipal.RowStyles[1].SizeType = mostrarServicios ? SizeType.Absolute : SizeType.Percent;
+        tlpPrincipal.RowStyles[1].Height = 100;
+        tlpPrincipal.RowStyles[2].SizeType = SizeType.Absolute;
+        tlpPrincipal.RowStyles[2].Height = prepararIngreso ? 180 : 0;
+        tlpPrincipal.RowStyles[3].SizeType = mostrarServicios ? SizeType.Percent : SizeType.Absolute;
+        tlpPrincipal.RowStyles[3].Height = mostrarServicios ? 100 : 0;
+        tlpPrincipal.RowStyles[4].SizeType = SizeType.Absolute;
+        tlpPrincipal.RowStyles[4].Height = mostrarServicios ? 46 : 0;
+        dgvServicios.Visible = lblTotal.Visible = mostrarServicios;
+        Text = prepararIngreso ? "Autorizar inspección inicial" : "Detalle de atención y solicitudes";
     }
 
     private void ServicioElegido(object? s, EventArgs e)

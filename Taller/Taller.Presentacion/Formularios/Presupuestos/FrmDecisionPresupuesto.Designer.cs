@@ -2,6 +2,8 @@
 namespace Taller.Presentacion.Formularios.Presupuestos;
 partial class FrmDecisionPresupuesto
 {
+    private TextBox txtPersona = null!;
+    private ComboBox cboMedio = null!;
     private System.ComponentModel.IContainer? components;
     protected override void Dispose(bool disposing)
     {
@@ -41,11 +43,21 @@ partial class FrmDecisionPresupuesto
         tlpPrincipal.Padding = new Padding(12);
         tlpPrincipal.ColumnCount = 1;
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPrincipal.RowCount = 5;
+        tlpPrincipal.RowCount = 6;
+        var comunicacion = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, WrapContents = true };
+        txtPersona = new TextBox { Name = "txtPersonaDecision", Width = 320, MaxLength = 150, PlaceholderText = "Nombre de la persona que comunica la decisión" };
+        cboMedio = new ComboBox { Name = "cboMedioDecision", Width = 170, DropDownStyle = ComboBoxStyle.DropDownList };
+        cboMedio.Items.AddRange(["Presencial", "Teléfono", "Correo", "Mensajería"]);
+        cboMedio.SelectedIndex = 0;
+        txtPersona.TextChanged += TextoCambiado;
+        cboMedio.SelectedIndexChanged += TextoCambiado;
+        comunicacion.Controls.AddRange([txtPersona, cboMedio]);
+        tlpPrincipal.Controls.Add(comunicacion, 0, 4);
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
         Controls.Add(tlpPrincipal);
         Text = "Decisión del cliente por ítem";
@@ -57,7 +69,7 @@ partial class FrmDecisionPresupuesto
         lblTotal.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(txtMotivo, 0, 3);
         txtMotivo.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(flpAcciones, 0, 4);
+        tlpPrincipal.Controls.Add(flpAcciones, 0, 5);
         flpAcciones.Dock = DockStyle.Fill;
         dgvItems.AutoGenerateColumns = false;
         dgvItems.AllowUserToAddRows = false;

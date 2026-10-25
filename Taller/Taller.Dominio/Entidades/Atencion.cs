@@ -9,6 +9,9 @@ public sealed class Atencion
 {
     public ICollection<HallazgoAtencion> Hallazgos { get; set; } = new List<HallazgoAtencion>();
     public ICollection<PausaTrabajo> Pausas { get; set; } = new List<PausaTrabajo>();
+    public ICollection<SolicitudAtencion> Solicitudes { get; set; } = new List<SolicitudAtencion>();
+    public int? KilometrajeRecepcion { get; set; }
+    public string? ObservacionesRecepcion { get; set; }
     public int IdAtencion { get; set; }
     public int IdCliente { get; set; }
     public int IdVehiculo { get; set; }

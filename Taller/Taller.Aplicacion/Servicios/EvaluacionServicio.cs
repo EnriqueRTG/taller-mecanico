@@ -170,15 +170,17 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
                 Vehiculo = a.Vehiculo.Dominio + " · " + a.Vehiculo.Modelo.Marca.Nombre + " " + a.Vehiculo.Modelo.Nombre,
                 Motivo = a.MotivoConsulta,
+                Solicitudes = a.Solicitudes.OrderBy(s => s.Orden).Select(s => new SolicitudIngresoDto { IdSolicitud = s.IdSolicitudAtencion, Tipo = s.Tipo, Descripcion = s.Descripcion }).ToList(),
+                ObservacionesRecepcion = a.ObservacionesRecepcion,
                 MotivoRevision = borrador?.MotivoRevision,
                 InformeHistorico = informe != null,
                 IncluyeDiagnostico = avance?.IncluyeDiagnostico ?? (informe != null || a.TipoSolicitud != TipoSolicitudAtencion.ServicioDefinido),
                 FallaDetectada = avance?.FallaDetectada ?? informe?.FallaDetectada ?? "",
                 TrabajoRecomendado = avance?.TrabajoRecomendado ?? informe?.TrabajoRecomendado ?? "",
-                Kilometraje = avance?.Kilometraje ?? informe?.Kilometraje,
+                Kilometraje = avance?.Kilometraje ?? informe?.Kilometraje ?? a.KilometrajeRecepcion,
                 Observaciones = avance?.Observaciones ?? informe?.Observaciones,
                 SoloEvaluacion = avance?.SoloEvaluacion ?? false,
-                Items = borrador?.Detalles.Select(d => new ItemPropuestaDto { OrigenMaterial = d.OrigenMaterial, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList() ?? [],
+                Items = borrador?.Detalles.Select(d => new ItemPropuestaDto { IdSolicitudAtencion = d.IdSolicitudAtencion, OrigenMaterial = d.OrigenMaterial, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario }).ToList() ?? [],
                 ServiciosIniciales = presupuestos.Where(p => (p.Tipo == TipoPresupuesto.Diagnostico || p.EsInspeccion && p.Vigente) && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles).Select(d => new ServicioEvaluadoDto { IdDetalle = d.IdPresupuestoDetalle, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList()
             };
         }
@@ -222,8 +224,14 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 throw new ValidacionException("Ya existe una propuesta confirmada. Su revisión requiere un nuevo circuito.");
             if (finalizar && (a.Pausas.Any(p => p.FechaResolucion == null) || presupuestos.Any(p => p.EsAdicional && p.Vigente && p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendientePresentacion or EstadoPresupuesto.PendienteDecision or EstadoPresupuesto.PendienteRevisionTecnica)))
                 throw new ValidacionException("Resuelva pausas y propuestas adicionales de inspección antes de finalizar la evaluación.");
+            if (datos.Items.Any(i => i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
+                throw new ValidacionException("Un ítem refiere a una solicitud ajena a esta atención.");
+            if (finalizar && a.Solicitudes.Count > 0 && !datos.SoloEvaluacion && datos.Items.Any(i => !i.IdSolicitudAtencion.HasValue))
+                throw new ValidacionException("Indique a qué solicitud responde cada ítem del presupuesto.");
+            if (finalizar && !datos.SoloEvaluacion && !presupuestos.Any(p => p.Vigente && p.IdPresupuestoAnterior.HasValue) && a.Solicitudes.Any(s => !datos.Items.Any(i => i.IdSolicitudAtencion == s.IdSolicitudAtencion)))
+                throw new ValidacionException("El presupuesto debe responder a cada solicitud del cliente. Revise los pedidos antes de enviarlo.");
             var catalogo = (await repositorio.ListarCatalogoAsync()).ToDictionary(c => c.IdConcepto);
-            if (datos.Items.GroupBy(i => i.IdConcepto).Any(g => g.Count() > 1))
+            if (datos.Items.GroupBy(i => new { i.IdConcepto, i.IdSolicitudAtencion }).Any(g => g.Count() > 1))
                 throw new ValidacionException("No repita conceptos en la propuesta.");
             if (datos.Items.Count > 0)
                 _ = SeguimientoTrabajoServicio.PrepararItems(datos.Items, catalogo.Values.ToList());
@@ -303,7 +311,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                     repositorio.AgregarPresupuesto(propuesta);
                 }
 
-                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle { OrigenMaterial = i.OrigenMaterial, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario }));
+                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle { IdSolicitudAtencion = i.IdSolicitudAtencion, OrigenMaterial = i.OrigenMaterial, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario }));
                 propuesta.Observaciones = avance.Observaciones;
             }
 

@@ -16,6 +16,7 @@ public sealed class PresupuestoDetalle
     public DateTime? FechaRecepcionMaterial { get; set; }
     public int IdPresupuestoDetalle { get; set; }
     public int IdPresupuesto { get; set; }
+    public int? IdSolicitudAtencion { get; set; }
     public int IdConcepto { get; set; }
     /// <summary>Null sin decisión; false excluye el ítem sin borrarlo del presupuesto original.</summary>
     public bool? AceptadoPorCliente { get; set; }

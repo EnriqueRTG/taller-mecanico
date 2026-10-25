@@ -45,7 +45,7 @@ public partial class FrmPrepararPropuesta : Form
                 _revision = await _presupuestos.ObtenerAsync(id);
                 if (_revision.Estado != EstadoPresupuesto.PendienteRevisionTecnica || !_revision.Vigente)
                     throw new InvalidOperationException("La selección ya no espera revisión.");
-                _items = new(_revision.Items.Where(i => i.Aceptar).Select(i => new ItemPropuestaDto { IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList());
+                _items = new(_revision.Items.Where(i => i.Aceptar).Select(i => new ItemPropuestaDto { IdSolicitudAtencion = i.IdSolicitudAtencion, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList());
                 lblAyuda.Text = "Selección solicitada por el cliente. Revise dependencias, quite o agregue tareas y justifique la viabilidad. Se conservará el original y se requerirá una nueva aceptación. Solicitud: " + _revision.Observaciones;
             }
             else

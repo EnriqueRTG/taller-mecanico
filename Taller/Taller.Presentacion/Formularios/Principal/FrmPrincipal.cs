@@ -237,7 +237,7 @@ public partial class FrmPrincipal : Form
 
     private void btnDiagnosticos_Click(object sender, EventArgs e)
     {
-        AbrirFormularioAutorizado<FrmDiagnosticos>("Evaluaciones técnicas", btnDiagnosticos, "No tiene permisos para acceder a los diagnósticos.", PermisoAplicacion.ConsultarDiagnosticos, PermisoAplicacion.GestionarDiagnosticos);
+        AbrirFormularioAutorizado<FrmDiagnosticos>("Preparación técnica", btnDiagnosticos, "No tiene permisos para acceder a los diagnósticos.", PermisoAplicacion.ConsultarDiagnosticos, PermisoAplicacion.GestionarDiagnosticos);
     }
 
     private void btnPresupuestos_Click(object sender, EventArgs e)
@@ -334,7 +334,7 @@ public partial class FrmPrincipal : Form
 
             try
             {
-                AbrirFormulario<FrmDiagnosticos>("Evaluaciones técnicas", formulario => formulario.PrepararAperturaDiagnostico(e.IdAtencion));
+                AbrirFormulario<FrmDiagnosticos>("Preparación técnica", formulario => formulario.PrepararAperturaDiagnostico(e.IdAtencion));
                 MarcarBotonActivo(btnDiagnosticos);
             }
             catch (Exception ex)

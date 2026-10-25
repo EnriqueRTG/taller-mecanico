@@ -57,10 +57,17 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<int>("IdVehiculo")
                         .HasColumnType("int");
 
+                    b.Property<int?>("KilometrajeRecepcion")
+                        .HasColumnType("int");
+
                     b.Property<string>("MotivoConsulta")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ObservacionesRecepcion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("TipoSolicitud")
                         .IsRequired()
@@ -91,6 +98,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                             t.HasCheckConstraint("CK_Atenciones_ActividadTecnica", "[ActividadTecnica] IS NULL \nOR [ActividadTecnica] IN (\n    N'Diagnostico',\n    N'Presupuesto',\n    N'Ejecucion'\n)");
 
                             t.HasCheckConstraint("CK_Atenciones_Estado", "[Estado] IN (\n    N'Abierta',\n    N'PendienteDiagnostico',\n    N'EnEvaluacionTecnica',\n    N'PendienteDecision',\n    N'EnEjecucion',\n    N'Pausada',\n    N'TrabajoFinalizado',\n    N'PendienteLiquidacion',\n    N'Cerrada',\n    N'Cancelada'\n)");
+
+                            t.HasCheckConstraint("CK_Atenciones_KilometrajeRecepcion", "[KilometrajeRecepcion] IS NULL OR [KilometrajeRecepcion] >= 0");
 
                             t.HasCheckConstraint("CK_Atenciones_ReservaTecnica", "(\n    [IdTecnicoEnActividad] IS NULL\n    AND [ActividadTecnica] IS NULL\n)\nOR\n(\n    [IdTecnicoEnActividad] IS NOT NULL\n    AND [ActividadTecnica] IS NOT NULL\n)");
 
@@ -964,6 +973,10 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<int?>("IdUsuarioDecision")
                         .HasColumnType("int");
 
+                    b.Property<string>("MedioDecision")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("MotivoRevision")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -975,6 +988,10 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<string>("ObservacionesDecision")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PersonaDecision")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
@@ -1083,6 +1100,9 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<int?>("IdPresupuestoCambio")
                         .HasColumnType("int");
 
+                    b.Property<int?>("IdSolicitudAtencion")
+                        .HasColumnType("int");
+
                     b.Property<int?>("IdTecnicoMaterial")
                         .HasColumnType("int");
 
@@ -1118,6 +1138,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasIndex("IdPresupuesto");
 
                     b.HasIndex("IdPresupuestoCambio");
+
+                    b.HasIndex("IdSolicitudAtencion");
 
                     b.HasIndex("IdTecnicoMaterial");
 
@@ -1195,6 +1217,45 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                             Activo = true,
                             Descripcion = "Gestión técnica de los trabajos del taller",
                             Nombre = "Técnico"
+                        });
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.SolicitudAtencion", b =>
+                {
+                    b.Property<int>("IdSolicitudAtencion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdSolicitudAtencion"));
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("IdAtencion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("IdSolicitudAtencion");
+
+                    b.HasIndex("IdAtencion", "Orden")
+                        .IsUnique();
+
+                    b.ToTable("SolicitudesAtencion", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SolicitudesAtencion_Descripcion", "LEN(LTRIM(RTRIM([Descripcion]))) > 0");
+
+                            t.HasCheckConstraint("CK_SolicitudesAtencion_Orden", "[Orden] > 0");
+
+                            t.HasCheckConstraint("CK_SolicitudesAtencion_Tipo", "[Tipo] IN (N'TrabajoSolicitado', N'ProblemaInformado')");
                         });
                 });
 
@@ -1620,6 +1681,11 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasForeignKey("IdPresupuestoCambio")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Taller.Dominio.Entidades.SolicitudAtencion", null)
+                        .WithMany()
+                        .HasForeignKey("IdSolicitudAtencion")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Taller.Dominio.Entidades.Usuario", "TecnicoMaterial")
                         .WithMany()
                         .HasForeignKey("IdTecnicoMaterial")
@@ -1639,6 +1705,17 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("TecnicoMaterial");
 
                     b.Navigation("TecnicoRegistro");
+                });
+
+            modelBuilder.Entity("Taller.Dominio.Entidades.SolicitudAtencion", b =>
+                {
+                    b.HasOne("Taller.Dominio.Entidades.Atencion", "Atencion")
+                        .WithMany("Solicitudes")
+                        .HasForeignKey("IdAtencion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Atencion");
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Usuario", b =>
@@ -1674,6 +1751,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Historial");
 
                     b.Navigation("Pausas");
+
+                    b.Navigation("Solicitudes");
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Categoria", b =>

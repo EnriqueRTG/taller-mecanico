@@ -212,6 +212,73 @@ public sealed class CircuitoCobrosPruebas
         public void Dispose() => Db.Dispose();
     }
 
+    [Theory]
+    [InlineData(0)] // solo trabajos conocidos
+    [InlineData(1)] // solo problema desconocido
+    [InlineData(2)] // pedidos y síntomas en la misma visita
+    public async Task RecepcionIndividual_HastaEntrega_RespetaAutorizacionYRealizado(int caso)
+    {
+        using var c = new Caso();
+        var anterior = await c.Db.Atenciones.SingleAsync();
+        anterior.Estado = EstadoAtencion.Cerrada; anterior.FechaCierre = FechaHoraTaller.Ahora;
+        await c.Db.SaveChangesAsync(); c.Db.ChangeTracker.Clear();
+        var solicitudes = new List<SolicitudIngresoDto>();
+        if (caso != 1) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Cambiar aceite y filtros" });
+        if (caso != 0) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "Ruido al frenar en caliente" });
+        var a = await c.Recepcion.RegistrarRecepcionAsync(new() { IdCliente = 1, IdVehiculo = 1, IdUsuarioRecepcion = 2,
+            Kilometraje = 45000, ObservacionesRecepcion = "Testigo encendido informado al ingresar", Solicitudes = solicitudes });
+        int id = a.IdAtencion;
+        Assert.Equal(EstadoAtencion.EnEvaluacionTecnica, a.Estado);
+        Assert.Equal(solicitudes.Count, a.Solicitudes.Count);
+        await c.VersionesAsync();
+        c.Entrar(1); await c.Evaluacion.TomarAsync(id); await c.VersionesAsync();
+        var preparacion = await c.Evaluacion.ObtenerAsync(id);
+        Assert.Equal(45000, preparacion.Kilometraje);
+        Assert.Equal(caso != 0, preparacion.IncluyeDiagnostico);
+        Assert.Empty(preparacion.ServiciosIniciales);
+        preparacion.FallaDetectada = caso == 0 ? "" : "Desgaste comprobado en frenos";
+        preparacion.TrabajoRecomendado = caso == 0 ? "" : "Reemplazar las piezas desgastadas";
+        preparacion.Items = [new() { IdSolicitudAtencion = preparacion.Solicitudes[0].IdSolicitud, IdConcepto = 1, Descripcion = "Mano de obra", Cantidad = 2, PrecioUnitario = 100 },
+            new() { IdSolicitudAtencion = preparacion.Solicitudes[^1].IdSolicitud, IdConcepto = 2, Descripcion = "Repuesto", Cantidad = 1, PrecioUnitario = 50 }];
+        if (caso == 2)
+        {
+            var solicitud = preparacion.Items[1].IdSolicitudAtencion;
+            preparacion.Items[1].IdSolicitudAtencion = int.MaxValue;
+            await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.GuardarAsync(preparacion, false));
+            preparacion.Items[1].IdSolicitudAtencion = null;
+            await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.GuardarAsync(preparacion, true));
+            preparacion.Items[1].IdSolicitudAtencion = solicitud;
+        }
+        await c.Evaluacion.GuardarAsync(preparacion, true); await c.VersionesAsync();
+        Assert.Equal(caso == 0 ? 0 : 1, await c.Db.Diagnosticos.CountAsync());
+        var p = await c.Db.Presupuestos.AsNoTracking().SingleAsync();
+        c.Entrar(2); await c.Evaluacion.PresentarAsync(p.IdPresupuesto, p.Version); await c.VersionesAsync();
+        var propuesta = await c.Presupuestos.ObtenerAsync(p.IdPresupuesto);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Presupuestos.DecidirAsync(new() { IdPresupuesto = propuesta.IdPresupuesto, Version = propuesta.Version,
+            ItemsAceptados = propuesta.Items.Select(i => i.IdDetalle).ToList() }));
+        await c.Presupuestos.DecidirAsync(new() { IdPresupuesto = propuesta.IdPresupuesto, Version = propuesta.Version,
+            PersonaDecision = "Ana Pérez", MedioDecision = "Presencial", ItemsAceptados = propuesta.Items.Select(i => i.IdDetalle).ToList() });
+        await c.VersionesAsync();
+        c.Entrar(1); var ejecucion = await c.Ejecucion.ObtenerAsync(id);
+        await c.Ejecucion.TomarAsync(id, ejecucion.Version, "Materiales disponibles"); await c.VersionesAsync();
+        ejecucion = await c.Ejecucion.ObtenerAsync(id);
+        foreach (var item in ejecucion.Items) { item.CantidadEjecutada = item.CantidadAutorizada; item.Estado = EstadoEjecucionDetalle.Completado; }
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Ejecucion.GuardarAsync(ejecucion, true));
+        ejecucion.ConformidadTecnica = true;
+        await c.Ejecucion.GuardarAsync(ejecucion, true); await c.VersionesAsync();
+        c.Entrar(2); var cuenta = await c.Cobros.ObtenerAsync(id);
+        Assert.Equal(250, cuenta.TotalPorLiquidar);
+        await c.Cobros.LiquidarAsync(id, cuenta.VersionAtencion, "Trabajos realizados y comprobados"); await c.VersionesAsync();
+        cuenta = await c.Cobros.ObtenerAsync(id);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Cobros.EntregarAsync(id, cuenta.VersionAtencion, "Cliente conforme"));
+        await c.Cobros.RegistrarPagoAsync(Caso.Pago(cuenta.Comprobante!, 100)); await c.VersionesAsync();
+        cuenta = await c.Cobros.ObtenerAsync(id); Assert.Equal(150, cuenta.Comprobante!.Saldo);
+        await c.Cobros.RegistrarPagoAsync(Caso.Pago(cuenta.Comprobante, 50, 100)); await c.VersionesAsync();
+        cuenta = await c.Cobros.ObtenerAsync(id); Assert.Equal(0, cuenta.Comprobante!.Saldo);
+        await c.Cobros.EntregarAsync(id, cuenta.VersionAtencion, "Ana Pérez retira conforme con los trabajos y documentación");
+        Assert.Equal(EstadoAtencion.Cerrada, (await c.Db.Atenciones.AsNoTracking().SingleAsync(x => x.IdAtencion == id)).Estado);
+    }
+
     [Fact]
     public async Task SeleccionParcial_NoAutorizaHastaRevisionTecnicaYNuevaAceptacion()
     {

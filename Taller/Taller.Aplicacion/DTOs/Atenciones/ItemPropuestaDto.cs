@@ -7,6 +7,8 @@ public sealed class ItemPropuestaDto
     public OrigenMaterial OrigenMaterial { get; set; }
     public int IdDetalle { get; set; }
     public bool? AceptadoPorCliente { get; set; }
+    public int? IdSolicitudAtencion { get; set; }
+    public string SolicitudDescripcion { get; set; } = string.Empty;
     public int IdConcepto { get; set; }
     public string Descripcion { get; set; } = string.Empty;
     public decimal Cantidad { get; set; } = 1;

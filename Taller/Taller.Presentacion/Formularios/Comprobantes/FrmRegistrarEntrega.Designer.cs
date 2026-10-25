@@ -1,6 +1,7 @@
 namespace Taller.Presentacion.Formularios.Comprobantes;
 partial class FrmRegistrarEntrega
 {
+    private Label lblResultado = null!;
     private void InitializeComponent()
     {
         Text = "Registrar entrega"; Font = new Font("Segoe UI", 10); ClientSize = new Size(720, 390); MinimumSize = new Size(620, 390); StartPosition = FormStartPosition.CenterParent;
@@ -8,7 +9,8 @@ partial class FrmRegistrarEntrega
         tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         foreach (int alto in new[] { 55, 24, 36, 45, 24 }) tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, alto));
         tabla.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
-        tabla.Controls.Add(new Label { Text = "La cuenta está saldada. Confirme quién recibe el vehículo.", Dock = DockStyle.Fill }, 0, 0);
+        lblResultado = new Label { Name = "lblResultado", Dock = DockStyle.Fill };
+        tabla.Controls.Add(lblResultado, 0, 0);
         tabla.Controls.Add(new Label { Text = "Persona que retira (cliente o representante)", Dock = DockStyle.Fill }, 0, 1);
          tabla.Controls.Add(persona, 0, 2); tabla.Controls.Add(conforme, 0, 3);
         tabla.Controls.Add(new Label { Text = "Observaciones de entrega (opcional)", Dock = DockStyle.Fill }, 0, 4); tabla.Controls.Add(notas, 0, 5);

@@ -88,12 +88,14 @@ public static class CargadorDemostracion
             int tecnico = tecnicos[i % tecnicos.Count];
             await Entrar(i % 2 == 0 ? recepcion.Id : recepcionDos.Id);
             bool definido = i % 3 == 1;
+            var solicitudes = new List<SolicitudIngresoDto> { new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {motivos[i % 6]}" } };
+            if (i % 3 == 2) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Mantenimiento preventivo solicitado por el cliente" });
             var atencion = etapa == 15
                 ? await recepcionServicio.RegistrarAsync(idsClientes[i % 40], idsVehiculos[i], sesion.UsuarioActual!.Id, $"DEMO-{i + 1:000} · Apertura anterior cancelada", TipoSolicitudAtencion.ServicioDefinido)
                 : await recepcionServicio.RegistrarRecepcionAsync(new() {
                     IdCliente = idsClientes[i % 40], IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
                     Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Ingreso de demostración del circuito actual. Sin cargos automáticos.",
-                    Solicitudes = [new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {motivos[i % 6]}" }]
+                    Solicitudes = solicitudes
                 });
             int id = atencion.IdAtencion;
             if (etapa == 0)
@@ -143,6 +145,10 @@ public static class CargadorDemostracion
             }
 
             ];
+            if (datos.Solicitudes.Count > 1) datos.Items.Add(new() {
+                IdSolicitudAtencion = datos.Solicitudes[1].IdSolicitud, IdConcepto = servicio.IdConcepto,
+                Descripcion = "Mantenimiento preventivo solicitado: " + servicio.Nombre, Cantidad = 1, PrecioUnitario = 5000
+            });
             foreach (var inicial in datos.ServiciosIniciales)
                 inicial.Estado = EstadoEjecucionDetalle.Completado;
             await evaluacion.GuardarAsync(datos, etapa != 2);

@@ -13,7 +13,7 @@ public sealed partial class FrmRegistrarEntrega : Form
     {
         InitializeComponent();
         persona.Text = cliente;
-        Text = "Registrar entrega · " + resultado;
+        lblResultado.Text = resultado + "\r\nCuenta saldada. Confirme quién recibe el vehículo.";
     }
 
     private void Confirmar(object? s, EventArgs e)

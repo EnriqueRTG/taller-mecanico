@@ -29,3 +29,13 @@ Verificar que el técnico recibe todos los pedidos; que el caso conocido no obli
 Las revisiones, decisiones parciales, hallazgos, pausas, adicionales, materiales del cliente e interrupciones existentes se conservan. Se accede a ellas mediante acciones específicas. No forman pasos obligatorios del recorrido principal. Una interrupción justificada permite liquidar cantidades parciales registradas y omitir lo no realizado. Lo autorizado no ejecutado no se cobra. La autorización de una inspección cobrable requiere su propio acuerdo previo; no surge automáticamente por registrar un síntoma.
 
 Los documentos económicos del sistema son internos; no constituyen integración de facturación fiscal.
+
+## Legibilidad, borradores y documentos
+
+- Las acciones exclusivas de otro rol se ocultan. Las propias que dependen del estado se conservan deshabilitadas. Los servicios vuelven a validar permisos, versiones y condiciones reales.
+- Recepción puede **Solicitar revisión** si la propuesta sigue vigente, no tiene ejecución ni liquidación y no está reservada. Registra la solicitud del cliente; no cambia importes ni autoriza reparaciones. **Revisar selección parcial** corresponde al técnico, que justifica la viabilidad y prepara una nueva versión para otra aceptación.
+- En preparación, elija solicitud y concepto, especifique descripción, cantidad y precio, y agregue la fila. Cantidad y precio se pueden corregir en la lista antes de guardar. Material del cliente conserva precio cero.
+- **Guardar borrador** conserva la pestaña y la lista enlazada; permite desplazarse y seguir editando sin agregar filas nuevas. **Enviar a recepción** finaliza la preparación; no autoriza ejecución.
+- Informe y presupuesto cuentan con **Exportar HTML** e **Imprimir / PDF**, logo y contacto configurados en `Empresa`. HTML conserva una tabla de importes y secciones del informe; impresión usa el encabezado común en cada página. El nombre sugerido identifica tipo, número y fecha de elaboración de la copia. El diálogo de la impresora PDF de Windows puede requerir confirmar el nombre.
+
+Prueba de aceptación: en una notebook, abrir presupuesto con 15 filas, bajar hasta la última, guardar borrador, comprobar que permanece la pestaña y volver a recorrer/editar/quitar filas. Probar a 1366×768 al 100 % y 1920×1080 al 125 %. Comprobar recepción sin acciones de validación técnica; técnico sin botones de decisión del cliente. Exportar ambas clases de documento, revisar caracteres especiales, importes, logo, contacto y varias páginas.

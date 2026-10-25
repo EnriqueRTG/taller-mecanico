@@ -49,6 +49,7 @@ internal static class Program
         VerificarRecorridoTecnico(proveedor);
         VerificarSolicitudesIngreso(proveedor);
         VerificarContextoHistorial(proveedor);
+        VerificarEditorPresupuesto(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -93,6 +94,31 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarEditorPresupuesto(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var formulario = new Taller.Presentacion.Formularios.Diagnosticos.FrmEvaluarAtencion(1,
+            scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(), scope.ServiceProvider);
+        formulario.BindingContext = new BindingContext();
+        formulario.GetType().GetMethod("CargarDatos", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario,
+            [new Taller.Aplicacion.DTOs.Atenciones.EvaluacionAtencionDto {
+                TipoSolicitud = Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido,
+                Items = Enumerable.Range(1, 20).Select(n => new Taller.Aplicacion.DTOs.Atenciones.ItemPropuestaDto {
+                    IdConcepto = n, Descripcion = "Ítem de presupuesto " + n, Cantidad = 1, PrecioUnitario = n * 100 }).ToList()
+            }]);
+        var grilla = (DataGridView)formulario.Controls.Find("dgvItems", true).Single();
+        if (grilla.ReadOnly || grilla.Columns["colCantidad"]!.ReadOnly || grilla.Columns["colPrecioUnitario"]!.ReadOnly
+            || !grilla.Columns["colSubtotal"]!.ReadOnly || grilla.ScrollBars != ScrollBars.Both)
+            throw new InvalidOperationException("El presupuesto debe permitir cantidades y precios, sin editar totales calculados.");
+        foreach (int ancho in new[] { 820, 1020, 1366 })
+        {
+            formulario.ClientSize = new Size(ancho, 620);
+            Disponer(formulario);
+            if (grilla.Height < 160) throw new InvalidOperationException($"Lista de presupuesto demasiado pequeña: {ancho}, {grilla.Height}.");
+        }
+        Console.WriteLine("Presupuesto: espacio para lista, desplazamiento y columnas editables delimitadas.");
     }
 
     private static void VerificarContextoHistorial(IServiceProvider proveedor)

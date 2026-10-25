@@ -53,6 +53,7 @@ public partial class FrmEvaluarAtencion : Form
         cboSolicitud.DataSource = d.Solicitudes;
         cboSolicitud.Visible = d.Solicitudes.Count > 0;
         chkInforme.Checked = d.IncluyeDiagnostico;
+        chkInforme.Visible = d.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido;
         chkInforme.Enabled = d.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido && !d.InformeHistorico;
         txtHallazgo.ReadOnly = d.InformeHistorico;
         txtTrabajo.ReadOnly = d.InformeHistorico;
@@ -94,6 +95,10 @@ public partial class FrmEvaluarAtencion : Form
         btnFinalizar.Text = chkSinPropuesta.Checked ? "Finalizar sin presupuesto" : "Enviar a recepción";
         btnGuardar.Text = "Guardar borrador";
         btnSeguimiento.Visible = informe;
+        chkSinPropuesta.Enabled = informe && _items.Count == 0;
+        if (!informe) chkSinPropuesta.Checked = false;
+        btnAgregar.Enabled = !chkSinPropuesta.Checked;
+        btnQuitar.Enabled = !chkSinPropuesta.Checked && _items.Count > 0;
         lblAviso.Text = informe ? "Complete el informe y el presupuesto. Guarde un borrador para continuar después." : "Presupueste lo solicitado. Enviar a recepción no autoriza ejecutar trabajos.";
         // La clasificación de recepción orienta, pero no obliga a inventar un diagnóstico.
         if (_datos.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido) tabs.SelectedTab = tabPropuesta;
@@ -170,7 +175,44 @@ public partial class FrmEvaluarAtencion : Form
         }
     }
 
-    private void ActualizarTotal() => lblTotal.Text = $"Propuesta: {_items.Sum(i => i.Subtotal):N2}. Los servicios iniciales se muestran por separado y no se duplican aquí.";
+    private void ActualizarTotal()
+    {
+        lblTotal.Text = $"{_items.Count} ítems · Total propuesto: {_items.Sum(i => i.Subtotal):N2} ARS. Cantidad y precio se editan en la lista; no autoriza trabajos.";
+        chkSinPropuesta.Enabled = chkInforme.Checked && _items.Count == 0;
+        btnQuitar.Enabled = _items.Count > 0;
+    }
+
+    private void ValidarItem(object? s, DataGridViewCellValidatingEventArgs e)
+    {
+        if (_cargando || e.RowIndex < 0) return;
+        var columna = dgvItems.Columns[e.ColumnIndex].Name;
+        if (columna is not ("colCantidad" or "colPrecioUnitario")) return;
+        var precio = columna == "colPrecioUnitario";
+        if (!decimal.TryParse(Convert.ToString(e.FormattedValue), out var valor)
+            || valor < (precio ? 0 : 0.001m) || valor > (precio ? 1000000000m : 1000000m)
+            || decimal.Round(valor, precio ? 2 : 3) != valor
+            || precio && dgvItems.Rows[e.RowIndex].DataBoundItem is ItemPropuestaDto { OrigenMaterial: OrigenMaterial.Cliente } && valor != 0)
+        {
+            e.Cancel = true;
+            dgvItems.Rows[e.RowIndex].ErrorText = precio ? "Ingrese un precio no negativo con hasta dos decimales. Material del cliente: 0." : "Ingrese una cantidad positiva con hasta tres decimales.";
+        }
+        else dgvItems.Rows[e.RowIndex].ErrorText = "";
+    }
+
+    private void ItemModificado(object? s, DataGridViewCellEventArgs e)
+    {
+        if (_cargando || e.RowIndex < 0) return;
+        _sucio = true;
+        dgvItems.InvalidateRow(e.RowIndex);
+        ActualizarTotal();
+    }
+
+    private void ErrorItem(object? s, DataGridViewDataErrorEventArgs e)
+    {
+        e.ThrowException = false;
+        e.Cancel = true;
+        lblAviso.Text = "Revise cantidad y precio: use valores numéricos válidos para la configuración regional de Windows.";
+    }
     private void InicialModificado(object? s, DataGridViewCellEventArgs e)
     {
         if (!_cargando && e.RowIndex >= 0)
@@ -189,14 +231,18 @@ public partial class FrmEvaluarAtencion : Form
     {
         if (_ocupado || _datos is null)
             return;
-        ValidateChildren();
+        if (!ValidateChildren() || !dgvItems.EndEdit()) return;
+        if (dgvItems.DataSource is not null) BindingContext?[dgvItems.DataSource]?.EndCurrentEdit();
         dgvIniciales.EndEdit();
         if (dgvIniciales.DataSource is not null)
             BindingContext?[dgvIniciales.DataSource]?.EndCurrentEdit();
         if (finalizar && MessageBox.Show(this, "¿Enviar a recepción? El presupuesto quedará listo para comunicar al cliente. Los trabajos requieren su aceptación previa.", "Finalizar evaluación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             return;
+        var pestana = tabs.SelectedTab;
+        var primeraFila = dgvItems.FirstDisplayedScrollingRowIndex;
         _ocupado = true;
-        tlpPrincipal.Enabled = false;
+        flpAcciones.Enabled = false;
+        tabs.Enabled = false;
         try
         {
             _datos.IncluyeDiagnostico = chkInforme.Checked;
@@ -216,7 +262,8 @@ public partial class FrmEvaluarAtencion : Form
             }
             else
             {
-                CargarDatos(await _servicio.ObtenerAsync(_id));
+                // Actualiza versiones sin reconstruir la lista enlazada: conserva selección y desplazamiento.
+                _datos = await _servicio.ObtenerAsync(_id);
                 lblAviso.Text = "Avance guardado. Puede cerrar y continuar luego; la reserva sigue a su nombre.";
             }
         }
@@ -227,7 +274,12 @@ public partial class FrmEvaluarAtencion : Form
         finally
         {
             _ocupado = false;
-            tlpPrincipal.Enabled = true;
+            flpAcciones.Enabled = true;
+            tabs.Enabled = true;
+            if (pestana is not null && tabs.TabPages.Contains(pestana)) tabs.SelectedTab = pestana;
+            dgvItems.PerformLayout();
+            if (primeraFila >= 0 && primeraFila < dgvItems.RowCount) dgvItems.FirstDisplayedScrollingRowIndex = primeraFila;
+            dgvItems.Invalidate();
         }
 
         if (Finalizada)

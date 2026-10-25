@@ -98,6 +98,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
     {
         var d = Fila;
         var tech = _sesion.UsuarioActual?.RolId == RolesSistema.TecnicoId;
+        btnTrabajar.Visible = btnLiberar.Visible = tech;
         btnTrabajar.Enabled = !_ocupado && tech && d is { Finalizada: false } && (d.IdTecnico == null || d.IdTecnico == _sesion.UsuarioActual?.Id);
         btnTrabajar.Text = d?.IdTecnico == _sesion.UsuarioActual?.Id ? "Continuar" : d?.TipoSolicitud == Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido ? "Preparar presupuesto" : "Diagnosticar y presupuestar";
         btnLiberar.Enabled = !_ocupado && tech && d is { Finalizada: false } && d.IdTecnico == _sesion.UsuarioActual?.Id;
@@ -169,7 +170,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
     {
         if (Fila?.IdDiagnostico is int id)
         {
-            using var f = new FrmDetalleDiagnostico(id, _diagnosticos);
+            using var f = new FrmDetalleDiagnostico(id, _diagnosticos, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>(_proveedor));
             f.ShowDialog(this);
         }
     }

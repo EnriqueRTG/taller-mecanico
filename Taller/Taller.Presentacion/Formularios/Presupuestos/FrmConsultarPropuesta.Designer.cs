@@ -79,7 +79,11 @@ partial class FrmConsultarPropuesta
         btnCerrar.AutoSize = true;
         btnCerrar.Height = 34;
         btnCerrar.Click += Cerrar;
-        flpAcciones.Controls.Add(btnCerrar);
+        btnExportar = new Button { Name = "btnExportar", Text = "Exportar HTML", AutoSize = true, Height = 34 };
+        btnExportar.Click += Exportar;
+        btnImprimir = new Button { Name = "btnImprimir", Text = "Imprimir / PDF", AutoSize = true, Height = 34 };
+        btnImprimir.Click += Imprimir;
+        flpAcciones.Controls.AddRange(new Control[] { btnExportar, btnImprimir, btnCerrar });
         BackColor = Color.FromArgb(248, 250, 252);
         CancelButton = btnCerrar;
         btnCerrar.DialogResult = DialogResult.None;
@@ -93,5 +97,6 @@ partial class FrmConsultarPropuesta
     private TextBox txtObservaciones = null!;
     private Label lblTotal = null!;
     private FlowLayoutPanel flpAcciones = null!;
+    private Button btnExportar = null!, btnImprimir = null!;
     private Button btnCerrar = null!;
 }

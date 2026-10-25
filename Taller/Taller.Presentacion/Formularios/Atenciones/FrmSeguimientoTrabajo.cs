@@ -54,6 +54,12 @@ public partial class FrmSeguimientoTrabajo : Form
                 Descripcion = "Toda la intervención"
             }
         }.Concat(_datos.Items).ToList();
+        // Las consultas no muestran editores de operaciones técnicas que este usuario no puede realizar.
+        txtDescripcion.Visible = txtRecomendacion.Visible = chkImpide.Visible = btnHallazgo.Visible = btnAdicional.Visible = _datos.PuedeRegistrar;
+        btnResolver.Visible = btnRecibir.Visible = _datos.PuedeRegistrar;
+        txtMaterial.Visible = _datos.PuedeRegistrar;
+        if (nudRecibido.Parent is { } editorMaterial) editorMaterial.Visible = _datos.PuedeRegistrar;
+        btnPausar.Visible = _datos.PuedePausar;
         btnPausar.Enabled = _datos.PuedePausar;
         btnHallazgo.Enabled = btnAdicional.Enabled = btnResolver.Enabled = btnRecibir.Enabled = _datos.PuedeRegistrar;
         dgvHallazgos.ClearSelection();

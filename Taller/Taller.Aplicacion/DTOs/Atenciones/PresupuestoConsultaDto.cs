@@ -4,6 +4,9 @@ namespace Taller.Aplicacion.DTOs.Atenciones;
 /// <summary>Datos del circuito técnico y su propuesta económica.</summary>
 public sealed class PresupuestoConsultaDto
 {
+    /// <summary>Disponibilidad orientativa de revisión; el servicio vuelve a comprobar estado y concurrencia.</summary>
+    public bool PuedeSolicitarRevision { get; set; }
+    public Taller.Aplicacion.DTOs.Diagnosticos.DiagnosticoDetalleDto? InformeTecnico { get; set; }
     public bool EsAdicional { get; set; }
     public int IdPresupuesto { get; set; }
     public int IdAtencion { get; set; }

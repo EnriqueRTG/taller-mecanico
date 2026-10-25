@@ -86,7 +86,8 @@ public static class DocumentoReporteExportador
         if (nombre.Length > 100) nombre = nombre[..100].TrimEnd('-');
         return $"SGTM-{(nombre.Length == 0 ? "Documento" : nombre)}_" + fecha.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
     }
-    private static string Cabecera(EmpresaDocumentoDto empresa)
+    /// <summary>Identidad de empresa compartida por documentos, con texto codificado y logo embebido.</summary>
+    public static string Cabecera(EmpresaDocumentoDto empresa)
     {
         // Solo admite PNG embebido: nunca URLs externas ni atributos HTML provenientes de configuración.
         string logo = "";

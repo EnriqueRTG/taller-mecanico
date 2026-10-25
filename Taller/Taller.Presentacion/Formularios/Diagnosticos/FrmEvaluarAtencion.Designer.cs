@@ -95,7 +95,7 @@ partial class FrmEvaluarAtencion
         SuspendLayout();
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
-        ClientSize = new Size(1020, 620);
+        ClientSize = new Size(1140, 700);
         MinimumSize = new Size(820, 520);
         StartPosition = FormStartPosition.CenterParent;
         tlpPrincipal.Dock = DockStyle.Fill;
@@ -193,24 +193,36 @@ partial class FrmEvaluarAtencion
         tlpPropuesta.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPropuesta.RowCount = 8;
         cboSolicitud = new ComboBox { Name = "cboSolicitud", Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, AccessibleName = "Solicitud a la que responde el ítem" };
-        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-        tlpPropuesta.Controls.Add(cboSolicitud, 0, 0);
-        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 75));
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
+        var seleccion = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+        seleccion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        seleccion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        seleccion.Controls.Add(Campo("Solicitud del cliente", cboSolicitud), 0, 0);
+        seleccion.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 1, 0);
+        tlpPropuesta.Controls.Add(seleccion, 0, 0);
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 0));
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 0));
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         tabPropuesta.Controls.Add(tlpPropuesta);
-        tlpPropuesta.Controls.Add(txtBuscar, 0, 1);
+
         txtBuscar.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(cboConcepto, 0, 2);
+        var definicion = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+        definicion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        definicion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        definicion.Controls.Add(Campo("Concepto del catálogo", cboConcepto), 0, 0);
+        definicion.Controls.Add(Campo("Descripción que verá el cliente", txtDescripcion), 1, 0);
+        tlpPropuesta.Controls.Add(definicion, 0, 2);
         cboConcepto.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(txtDescripcion, 0, 3);
+
         txtDescripcion.Dock = DockStyle.Fill;
         tlpPropuesta.Controls.Add(flpItem, 0, 4);
         flpItem.Dock = DockStyle.Fill;
+        flpItem.WrapContents = false;
+        flpItem.AutoScroll = true;
         chkAportaCliente = new CheckBox
         {
             Name = "chkAportaCliente",
@@ -223,7 +235,12 @@ partial class FrmEvaluarAtencion
         lblPrecio.Dock = DockStyle.Fill;
         tlpPropuesta.Controls.Add(dgvItems, 0, 6);
         dgvItems.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(lblTotal, 0, 7);
+        var resumenLista = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+        resumenLista.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        resumenLista.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112));
+        resumenLista.Controls.Add(lblTotal, 0, 0);
+        resumenLista.Controls.Add(btnQuitar, 1, 0);
+        tlpPropuesta.Controls.Add(resumenLista, 0, 7);
         lblTotal.Dock = DockStyle.Fill;
         txtBuscar.PlaceholderText = "Buscar concepto por nombre, categoría o descripción";
         txtBuscar.TextChanged += FiltrarCatalogo;
@@ -256,7 +273,7 @@ partial class FrmEvaluarAtencion
         btnQuitar.AutoSize = true;
         btnQuitar.Height = 34;
         btnQuitar.Click += Quitar;
-        flpItem.Controls.Add(btnQuitar);
+
         dgvItems.AutoGenerateColumns = false;
         dgvItems.AllowUserToAddRows = false;
         dgvItems.AllowUserToDeleteRows = false;
@@ -264,7 +281,12 @@ partial class FrmEvaluarAtencion
         dgvItems.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvItems.MultiSelect = false;
-        dgvItems.ReadOnly = true;
+        dgvItems.ReadOnly = false;
+        dgvItems.EditMode = DataGridViewEditMode.EditOnEnter;
+        dgvItems.ScrollBars = ScrollBars.Both;
+        dgvItems.CellValidating += ValidarItem;
+        dgvItems.CellValueChanged += ItemModificado;
+        dgvItems.DataError += ErrorItem;
         dgvItems.RowHeadersVisible = false;
         dgvItems.BackgroundColor = Color.White;
         dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
@@ -275,6 +297,9 @@ partial class FrmEvaluarAtencion
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporta", MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPrecioUnitario", DataPropertyName = "PrecioUnitario", HeaderText = "Precio unitario", FillWeight = 85, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSubtotal", DataPropertyName = "Subtotal", HeaderText = "Subtotal", FillWeight = 85, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
+        foreach (DataGridViewColumn columna in dgvItems.Columns)
+            columna.ReadOnly = columna.Name is not ("colCantidad" or "colPrecioUnitario");
+        ayuda.SetToolTip(dgvItems, "Edite Cantidad o Precio unitario directamente en la fila. Use Quitar ítem para eliminarla. Los importes se validan antes de guardar.");
         tlpIniciales.Dock = DockStyle.Fill;
         tlpIniciales.Padding = new Padding(12);
         tlpIniciales.ColumnCount = 1;
@@ -354,6 +379,17 @@ partial class FrmEvaluarAtencion
         txtResumen.ScrollBars = ScrollBars.Vertical;
         txtResumen.TabStop = false;
         ResumeLayout(false);
+
+        static Control Campo(string etiqueta, Control editor)
+        {
+            var grupo = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Margin = Padding.Empty };
+            grupo.RowStyles.Add(new RowStyle(SizeType.Absolute, 23));
+            grupo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            grupo.Controls.Add(new Label { Text = etiqueta, Dock = DockStyle.Fill, AutoEllipsis = true }, 0, 0);
+            editor.Dock = DockStyle.Fill;
+            grupo.Controls.Add(editor, 0, 1);
+            return grupo;
+        }
     }
 
     private ToolTip ayuda = null!;

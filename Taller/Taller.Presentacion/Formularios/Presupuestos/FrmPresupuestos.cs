@@ -85,10 +85,19 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     private void Seleccion(object? s, EventArgs e)
     {
         var recepcion = _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId;
+        var tecnico = _sesion.UsuarioActual?.RolId == RolesSistema.TecnicoId;
+        btnDecidir.Visible = btnRevision.Visible = btnPresentar.Visible = recepcion;
+        btnValidarSeleccion.Visible = tecnico;
+        btnSeguimiento.Text = recepcion ? "Consultar seguimiento" : "Seguimiento y hallazgos";
+        lblAyuda.Text = Fila is null ? "Seleccione un presupuesto. Los borradores se continúan en Preparación técnica. Las acciones dependen del estado y del rol."
+            : Fila.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? "Selección parcial: el técnico debe comprobar su viabilidad. Luego recepción presenta la nueva versión y registra otra decisión. Aún no autoriza trabajos."
+            : Fila.Estado == EstadoPresupuesto.Borrador ? "Borrador: el técnico debe continuarlo y enviarlo desde Preparación técnica antes de informar al cliente."
+            : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Recepción informa el alcance y los importes al cliente. Solicitar revisión devuelve los cambios al técnico sin autorizar trabajos."
+            : "Solicitar revisión conserva esta versión y pide otra al técnico; solo es posible sin ejecución ni liquidación. La ejecución requiere aceptación del cliente.";
         btnDecidir.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendienteDecision };
-        btnRevision.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion } && Fila.Estado is not (EstadoPresupuesto.Borrador or EstadoPresupuesto.PendienteRevisionTecnica);
+        btnRevision.Enabled = !_ocupado && recepcion && Fila is { PuedeSolicitarRevision: true };
         btnVer.Enabled = btnSeguimiento.Enabled = !_ocupado && Fila != null;
-        btnValidarSeleccion.Enabled = !_ocupado && !recepcion && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
+        btnValidarSeleccion.Enabled = !_ocupado && tecnico && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
         btnPresentar.Enabled = !_ocupado && _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendientePresentacion };
     }
 
@@ -96,7 +105,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     {
         if (Fila is { } d)
         {
-            using var f = new FrmConsultarPropuesta(d);
+            using var f = new FrmConsultarPropuesta(d, _empresa);
             f.ShowDialog(this);
         }
     }

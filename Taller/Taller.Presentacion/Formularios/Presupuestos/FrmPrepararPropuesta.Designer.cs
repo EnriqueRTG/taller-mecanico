@@ -29,11 +29,11 @@ partial class FrmPrepararPropuesta
         };
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 85));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 90));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 116));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
         lblAyuda = new Label
         {
@@ -102,13 +102,13 @@ partial class FrmPrepararPropuesta
             AutoSize = true
         };
         btnQuitar.Click += Quitar;
-        entrada.Controls.Add(cboConcepto, 0, 0);
-        entrada.SetColumnSpan(cboConcepto, 2);
-        entrada.Controls.Add(cboOrigen, 2, 0);
+        entrada.Controls.Add(Campo("Concepto del catálogo", cboConcepto), 0, 0);
+        entrada.SetColumnSpan(cboConcepto.Parent!, 2);
+        entrada.Controls.Add(Campo("Quién aporta el material", cboOrigen), 2, 0);
         entrada.Controls.Add(btnAgregar, 3, 0);
-        entrada.Controls.Add(txtDescripcion, 0, 1);
-        entrada.Controls.Add(nudCantidad, 1, 1);
-        entrada.Controls.Add(nudPrecio, 2, 1);
+        entrada.Controls.Add(Campo("Descripción para el cliente", txtDescripcion), 0, 1);
+        entrada.Controls.Add(Campo("Cantidad", nudCantidad), 1, 1);
+        entrada.Controls.Add(Campo("Precio unitario ARS", nudPrecio), 2, 1);
         entrada.Controls.Add(btnQuitar, 3, 1);
         dgvItems = new DataGridView
         {
@@ -162,11 +162,11 @@ partial class FrmPrepararPropuesta
         btnCerrar.Click += Cerrar;
         acciones.Controls.AddRange(new Control[] { btnGuardar, btnCerrar });
         tlpPrincipal.Controls.Add(lblAyuda, 0, 0);
-        tlpPrincipal.Controls.Add(txtBuscar, 0, 1);
+        tlpPrincipal.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 0, 1);
         tlpPrincipal.Controls.Add(entrada, 0, 2);
         tlpPrincipal.Controls.Add(dgvItems, 0, 3);
         tlpPrincipal.Controls.Add(lblTotal, 0, 4);
-        tlpPrincipal.Controls.Add(txtMotivo, 0, 5);
+        tlpPrincipal.Controls.Add(Campo("Justificación técnica de la propuesta (obligatoria)", txtMotivo), 0, 5);
         tlpPrincipal.Controls.Add(acciones, 0, 6);
         tlpPrincipal.AutoScroll = true;
         dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
@@ -176,10 +176,19 @@ partial class FrmPrepararPropuesta
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10);
         Text = "Preparar propuesta técnica";
-        ClientSize = new Size(1000, 650);
+        ClientSize = new Size(1140, 700);
         MinimumSize = new Size(820, 580);
         StartPosition = FormStartPosition.CenterParent;
         Load += Cargar;
         FormClosing += AlCerrar;
+        static Control Campo(string texto, Control editor)
+        {
+            var grupo = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Margin = Padding.Empty };
+            grupo.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+            grupo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            grupo.Controls.Add(new Label { Text = texto, Dock = DockStyle.Fill, AutoEllipsis = true }, 0, 0);
+            grupo.Controls.Add(editor, 0, 1);
+            return grupo;
+        }
     }
 }

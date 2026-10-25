@@ -42,7 +42,19 @@ public partial class FrmRegistrarPago : Form
         }
     }
 
-    private void MedioCambiado(object? s, EventArgs e) => lblReferencia.Text = cboMedio.SelectedItem is MedioPagoDto { RequiereReferencia: true } ? "Referencia de la operación (obligatoria)" : "Referencia u observación (opcional)";
+    private void MedioCambiado(object? s, EventArgs e)
+    {
+        var medio = cboMedio.SelectedItem as MedioPagoDto;
+        lblReferencia.Text = medio?.RequiereReferencia == true ? "Identificador del comprobante de pago (obligatorio)" : "Observación del pago (opcional)";
+        txtReferencia.PlaceholderText = medio?.Nombre.Contains("Tarjeta", StringComparison.OrdinalIgnoreCase) == true ? "N.º de cupón o autorización del pago; no ingrese datos completos de la tarjeta"
+            : medio?.RequiereReferencia == true ? "N.º o código de operación de la transferencia / billetera; no es el número de factura" : "Puede dejarlo vacío para efectivo";
+    }
+    private void UsarRestante(object? s, EventArgs e)
+    {
+        if (_ocupado) return;
+        nudImporte.Value = Math.Min(nudImporte.Maximum, Math.Max(0, _documento.Saldo - _medios.Sum(m => m.Importe)));
+        nudImporte.Focus();
+    }
     private void Agregar(object? s, EventArgs e)
     {
         ValidateChildren();

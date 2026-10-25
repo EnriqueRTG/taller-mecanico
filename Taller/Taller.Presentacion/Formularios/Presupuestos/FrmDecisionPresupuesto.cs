@@ -84,7 +84,9 @@ public partial class FrmDecisionPresupuesto : Form
         if (_ocupado || _datos == null || _servicio == null)
             return;
         dgvItems.EndEdit();
-        if (MessageBox.Show(this, "¿Registrar esta decisión del cliente? Una selección parcial queda pendiente de revisión técnica y nueva aceptación; todavía no autoriza trabajos.", "Registrar decisión", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        int aceptados = _items.Count(i => i.Aceptar);
+        string confirmacion = aceptados == _items.Count ? "¿Registrar la aceptación completa del presupuesto? Habilita los trabajos acordados." : aceptados == 0 ? "¿Registrar el rechazo completo? No se autorizan los trabajos propuestos." : "¿Solicitar revisión técnica de la selección parcial? Aún no autoriza trabajos y requerirá nueva aceptación.";
+        if (MessageBox.Show(this, confirmacion, "Registrar decisión", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             return;
         _ocupado = true;
         tlpPrincipal.Enabled = false;

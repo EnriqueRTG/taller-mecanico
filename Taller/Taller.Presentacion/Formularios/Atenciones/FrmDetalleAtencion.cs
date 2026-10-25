@@ -76,6 +76,32 @@ public partial class FrmDetalleAtencion : Form
                 dgvServicios.DataSource = presupuestos.Where(p => p.IdAtencion == _id && p.Tipo == Taller.Dominio.Enumeraciones.TipoPresupuesto.Diagnostico).SelectMany(p => p.Items).ToList();
             }
 
+            var documentos = (await _evaluaciones.ListarPresupuestosAsync()).Where(p => p.IdAtencion == _id).OrderBy(p => p.IdPresupuesto).ToList();
+            var seguimiento = await Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor).ObtenerAsync(_id);
+            var detalle = new System.Text.StringBuilder();
+            detalle.AppendLine($"ATENCIÓN {_id:D6} · {_atencion.Estado}\r\nCliente: {_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · Vehículo: {_atencion.Vehiculo.Dominio}");
+            detalle.AppendLine("\r\nINFORMES TÉCNICOS");
+            detalle.AppendLine(string.IsNullOrWhiteSpace(seguimiento.InformeInicial) ? "Sin diagnóstico registrado." : seguimiento.InformeInicial.Replace("\n", Environment.NewLine));
+            detalle.AppendLine("\r\nPRESUPUESTOS Y VERSIONES");
+            foreach (var p in documentos) detalle.AppendLine($"{p.IdPresupuesto:D6} · {p.TipoDescripcion} · {p.EstadoDescripcion} · {(p.Vigente ? "Vigente" : "Histórico")} · Total {p.Total:N2}");
+            detalle.AppendLine("\r\nTRABAJOS AUTORIZADOS Y AVANCE");
+            foreach (var i in seguimiento.Progreso) detalle.AppendLine($"{i.Descripcion}: {i.EstadoDescripcion} · {i.CantidadEjecutada:N3} / {i.CantidadAutorizada:N3}. {i.Observaciones}");
+            detalle.AppendLine("\r\nHALLAZGOS");
+            foreach (var h in seguimiento.Hallazgos) detalle.AppendLine($"{h.Fecha:dd/MM/yyyy HH:mm} · {h.Descripcion} · {h.Recomendacion}");
+            if (recepcion && _atencion.Estado is Taller.Dominio.Enumeraciones.EstadoAtencion.TrabajoFinalizado or Taller.Dominio.Enumeraciones.EstadoAtencion.PendienteLiquidacion or Taller.Dominio.Enumeraciones.EstadoAtencion.Cerrada)
+            {
+                var cuenta = await Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<CobroServicio>(_proveedor).ObtenerAsync(_id);
+                detalle.AppendLine("\r\nLIQUIDACIÓN Y COBROS");
+                if (cuenta.Comprobante is { } c)
+                {
+                    detalle.AppendLine($"{c.Numero} · Liquidado {c.Total:N2} · Pagado {c.Pagado:N2} · Saldo {c.Saldo:N2}");
+                    foreach (var pago in c.Pagos) detalle.AppendLine($"{pago.Numero} · {pago.Fecha:dd/MM/yyyy HH:mm} · {pago.Importe:N2} · {pago.Medios} · {(pago.Anulado ? "Anulado: " + pago.MotivoAnulacion : "Vigente")}");
+                }
+                else detalle.AppendLine("Sin liquidación emitida.");
+            }
+            detalle.AppendLine("\r\nHISTORIAL Y ENTREGA");
+            foreach (var h in _atencion.Historial.OrderBy(h => h.Fecha).ThenBy(h => h.IdHistorialAtencion)) detalle.AppendLine($"{h.Fecha:dd/MM/yyyy HH:mm} · {h.Accion} · {h.Observaciones}");
+            txtExpediente.Text = detalle.ToString();
             EstadoAutorizacion(null, EventArgs.Empty);
             AjustarConsulta(recepcion && _atencion.Estado == Taller.Dominio.Enumeraciones.EstadoAtencion.Abierta, dgvServicios.Rows.Count > 0);
         }
@@ -103,6 +129,11 @@ public partial class FrmDetalleAtencion : Form
         tlpPrincipal.RowStyles[4].SizeType = SizeType.Absolute;
         tlpPrincipal.RowStyles[4].Height = mostrarServicios ? 46 : 0;
         dgvServicios.Visible = lblTotal.Visible = mostrarServicios;
+        if (!prepararIngreso && tieneServicios)
+        {
+            tlpPrincipal.RowStyles[1].SizeType = SizeType.Percent; tlpPrincipal.RowStyles[1].Height = 65;
+            tlpPrincipal.RowStyles[3].SizeType = SizeType.Percent; tlpPrincipal.RowStyles[3].Height = 35;
+        }
         Text = prepararIngreso ? "Autorizar inspección inicial" : "Detalle de atención y solicitudes";
     }
 

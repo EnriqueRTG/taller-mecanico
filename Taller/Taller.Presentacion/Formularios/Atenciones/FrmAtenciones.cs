@@ -394,6 +394,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             bool puedeGestionar = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.GestionarAtenciones);
             bool puedeConsultarComoTecnico = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.ConsultarAtencionesAsignadas);
             btnVerDetalle.Enabled = puedeGestionar || puedeConsultarComoTecnico;
+            btnSeguimiento.Visible = false;
             btnSeguimiento.Enabled = fila.EstadoValor != EstadoAtencion.Abierta && (puedeGestionar || puedeConsultarComoTecnico);
             btnEditar.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta && !fila.TieneSolicitudes;
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;

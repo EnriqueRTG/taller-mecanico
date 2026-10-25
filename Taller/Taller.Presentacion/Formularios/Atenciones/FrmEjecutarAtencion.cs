@@ -41,7 +41,10 @@ public partial class FrmEjecutarAtencion : Form
             dgvItems.DataSource = _items;
             var propia = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
             dgvItems.ReadOnly = !propia;
+            dgvItems.DefaultCellStyle.BackColor = propia ? Color.White : Color.FromArgb(241, 245, 249);
+            Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(propia ? btnGuardar : btnTomar);
             btnCompletar.Visible = false; // La selección de Completado ya sincroniza la cantidad.
+            btnOtrasAcciones.Visible = propia;
             btnTomar.Visible = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
             btnGuardar.Visible = btnFinalizar.Visible = btnInterrumpir.Visible = btnLiberar.Visible = chkConformidad.Visible = propia;
             txtObservaciones.ReadOnly = !propia && _datos.IdTecnico != null;
@@ -139,9 +142,13 @@ public partial class FrmEjecutarAtencion : Form
     {
         bool propia = _datos?.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
         bool resueltos = _items.Count > 0 && _items.All(i => i.Estado is EstadoEjecucionDetalle.Completado or EstadoEjecucionDetalle.Omitido);
+        chkConformidad.Visible = propia && resueltos;
+        btnFinalizar.Visible = propia && resueltos;
         chkConformidad.Enabled = propia && resueltos;
         if (!resueltos) chkConformidad.Checked = false;
         btnFinalizar.Enabled = propia && resueltos && chkConformidad.Checked;
+        if (btnFinalizar.Enabled) { Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnFinalizar); Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnGuardar); }
+        else { btnFinalizar.BackColor = Color.FromArgb(226, 232, 240); btnFinalizar.ForeColor = Color.DimGray; }
     }
 
     private void ConfirmarEstado(object? s, EventArgs e)
@@ -194,6 +201,15 @@ public partial class FrmEjecutarAtencion : Form
         }
     }
 
+    private string _destinoSeguimiento = "tabHallazgos";
+    private void MostrarOpciones(object? s, EventArgs e)
+    {
+        foreach (ToolStripItem item in menuOpciones.Items) item.Enabled = btnGuardar.Enabled;
+        menuOpciones.Show(btnOtrasAcciones, new Point(0, btnOtrasAcciones.Height));
+    }
+    private void Hallazgos(object? s, EventArgs e) { _destinoSeguimiento = "tabHallazgos"; Seguimiento(s, e); }
+    private void Pausas(object? s, EventArgs e) { _destinoSeguimiento = "tabPausas"; Seguimiento(s, e); }
+    private void Materiales(object? s, EventArgs e) { _destinoSeguimiento = "tabMateriales"; Seguimiento(s, e); }
     private async void Seguimiento(object? s, EventArgs e)
     {
         if (_ocupado || _cargando)
@@ -208,6 +224,8 @@ public partial class FrmEjecutarAtencion : Form
         try
         {
             using var f = new FrmSeguimientoTrabajo(_id, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor), Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<EvaluacionServicio>(_proveedor), Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<PresupuestoServicio>(_proveedor), Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>(_proveedor));
+            f.PrepararOperacion(_destinoSeguimiento);
+            _destinoSeguimiento = "tabHallazgos";
             f.ShowDialog(this);
             await RecargarAsync();
         }

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Comprobantes;
 partial class FrmRegistrarPago
 {
@@ -85,6 +85,10 @@ partial class FrmRegistrarPago
         btnAgregar.AutoSize = true;
         btnAgregar.Height = 34;
         btnAgregar.Click += Agregar;
+        var restante = new Button { Name = "btnUsarRestante", Text = "Usar restante", AutoSize = true, Height = 34 };
+        restante.Click += UsarRestante;
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(restante);
+        flpEntrada.Controls.Add(restante);
         flpEntrada.Controls.Add(btnAgregar);
         btnQuitar.Text = "Quitar medio";
         btnQuitar.AutoSize = true;

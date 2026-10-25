@@ -39,7 +39,10 @@ public partial class FrmPrepararPropuesta : Form
         try
         {
             _catalogo = await _evaluacion.ListarCatalogoAsync();
-            _version = (await _servicio.ObtenerAsync(_atencion)).Version;
+            var expediente = await _servicio.ObtenerAsync(_atencion);
+            _version = expediente.Version;
+            bool inspeccion = expediente.Estado == EstadoAtencion.EnEvaluacionTecnica;
+            if (inspeccion) _catalogo = _catalogo.Where(c => c.Tipo == TipoConcepto.Servicio).ToList();
             if (_presupuesto is int id)
             {
                 _revision = await _presupuestos.ObtenerAsync(id);
@@ -49,7 +52,7 @@ public partial class FrmPrepararPropuesta : Form
                 lblAyuda.Text = "Selección solicitada por el cliente. Revise dependencias, quite o agregue tareas y justifique la viabilidad. Se conservará el original y se requerirá una nueva aceptación. Solicitud: " + _revision.Observaciones;
             }
             else
-                lblAyuda.Text = "Adicional independiente: no sustituye lo autorizado. Incluya solo trabajos/materiales nuevos. Recepción comunicará esta propuesta; no se ejecuta hasta su aceptación.";
+                lblAyuda.Text = inspeccion ? "Ampliación de inspección: presupueste solo servicios necesarios para determinar la causa, fuera del alcance habitual. Recepción debe informar y obtener autorización antes de realizarlos. La reparación se presupuesta por separado." : "Adicional independiente: no sustituye lo autorizado. Incluya solo trabajos/materiales nuevos. Recepción comunicará esta propuesta; no se ejecuta hasta su aceptación.";
             dgvItems.DataSource = _items;
             Filtrar(s, e);
             ActualizarTotal();

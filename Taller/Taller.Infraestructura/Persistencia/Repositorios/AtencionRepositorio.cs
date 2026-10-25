@@ -353,7 +353,7 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     /// </returns>
     public Task<Atencion?> ObtenerPorIdAsync(int idAtencion)
     {
-        return ConsultaConRelaciones().FirstOrDefaultAsync(a => a.IdAtencion == idAtencion);
+        return ConsultaConRelaciones().Include(a => a.Historial).Include(a => a.Diagnosticos).FirstOrDefaultAsync(a => a.IdAtencion == idAtencion);
     }
 
     /// <summary>

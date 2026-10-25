@@ -160,6 +160,9 @@ partial class FrmComprobantePagos
         FormClosing += AlCerrar;
         BackColor=Color.FromArgb(248,250,252);
         btnPago.BackColor=Color.FromArgb(30,64,175);btnPago.ForeColor=Color.White;btnPago.FlatStyle=FlatStyle.Flat;
+        foreach (var boton in new[] { btnImprimir, btnRecibo, btnActualizar, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
+        foreach (var boton in new[] { btnEmitir, btnPago, btnEntregar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(boton);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPeligro(btnAnular);
         CancelButton=btnCerrar;btnCerrar.DialogResult=DialogResult.None;
         ResumeLayout(false);
     }

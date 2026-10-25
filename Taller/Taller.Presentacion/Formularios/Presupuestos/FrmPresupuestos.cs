@@ -88,6 +88,10 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         var tecnico = _sesion.UsuarioActual?.RolId == RolesSistema.TecnicoId;
         btnDecidir.Visible = btnRevision.Visible = btnPresentar.Visible = recepcion;
         btnValidarSeleccion.Visible = tecnico;
+        flpAcciones.Controls.SetChildIndex(btnPresentar, 0);
+        flpAcciones.Controls.SetChildIndex(btnDecidir, 1);
+        flpAcciones.Controls.SetChildIndex(btnVer, 2);
+        flpAcciones.Controls.SetChildIndex(btnRevision, flpAcciones.Controls.Count - 1);
         btnSeguimiento.Text = recepcion ? "Consultar seguimiento" : "Seguimiento y hallazgos";
         lblAyuda.Text = Fila is null ? "Seleccione un presupuesto. Los borradores se continúan en Preparación técnica. Las acciones dependen del estado y del rol."
             : Fila.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? "Selección parcial: el técnico debe comprobar su viabilidad. Luego recepción presenta la nueva versión y registra otra decisión. Aún no autoriza trabajos."
@@ -95,6 +99,10 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
             : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Recepción informa el alcance y los importes al cliente. Solicitar revisión devuelve los cambios al técnico sin autorizar trabajos."
             : "Solicitar revisión conserva esta versión y pide otra al técnico; solo es posible sin ejecución ni liquidación. La ejecución requiere aceptación del cliente.";
         btnDecidir.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendienteDecision };
+        btnDecidir.Visible = recepcion && Fila is { Estado: EstadoPresupuesto.PendienteDecision, Vigente: true };
+        btnPresentar.Visible = recepcion && Fila is { Estado: EstadoPresupuesto.PendientePresentacion, Vigente: true };
+        btnRevision.Margin = new Padding(24, 0, 0, 4);
+        btnRevision.Text = Fila?.Estado == EstadoPresupuesto.PendientePresentacion ? "Pedir corrección técnica" : Fila?.Estado == EstadoPresupuesto.Aceptado ? "Revisar acuerdo (excepción)" : "Solicitar cambios del cliente";
         btnRevision.Enabled = !_ocupado && recepcion && Fila is { PuedeSolicitarRevision: true };
         btnVer.Enabled = btnSeguimiento.Enabled = !_ocupado && Fila != null;
         btnValidarSeleccion.Enabled = !_ocupado && tecnico && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
@@ -127,8 +135,11 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         try
         {
             await _servicio.PresentarAsync(d.IdPresupuesto, d.Version);
-            using var decision = new FrmDecisionPresupuesto(d.IdPresupuesto, _presupuestos);
-            decision.ShowDialog(this);
+            if (MessageBox.Show(this, "Presupuesto marcado como informado. ¿El cliente ya respondió y desea registrar su decisión ahora? Puede hacerlo después desde Registrar decisión.", "Presentación registrada", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+            {
+                using var decision = new FrmDecisionPresupuesto(d.IdPresupuesto, _presupuestos);
+                decision.ShowDialog(this);
+            }
         }
         catch (Exception ex)
         {
@@ -155,6 +166,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     {
         if (_ocupado || Fila is not { } d)
             return;
+        if (d.Estado == EstadoPresupuesto.Aceptado && MessageBox.Show(this, "Esta excepción sustituye el acuerdo vigente por una nueva propuesta que el técnico debe preparar y el cliente volver a aceptar. Solo puede usarse antes de ejecutar, sin reserva ni liquidación. ¿Continuar?", "Revisar acuerdo", MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
         using var f = new Taller.Presentacion.Formularios.Compartidos.FrmSolicitarMotivo("Solicitar revisión de presupuesto", "Explique los cambios solicitados. La propuesta anterior se conserva; el técnico prepara una nueva versión que deberá presentarse y aceptarse. Solo se revisa antes de ejecutar trabajos.");
         if (f.ShowDialog(this) != DialogResult.OK)
             return;

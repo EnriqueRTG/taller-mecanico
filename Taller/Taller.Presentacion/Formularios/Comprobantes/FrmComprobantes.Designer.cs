@@ -67,6 +67,7 @@ partial class FrmComprobantes
         txtBuscar.PlaceholderText="Buscar atención, liquidación, cliente o dominio";txtBuscar.TextChanged+=Filtrar;
         cboEstado.DropDownStyle=ComboBoxStyle.DropDownList;cboEstado.Items.AddRange(new object[]{"Todas","Por liquidar","Con saldo pendiente","Listas para entregar","Entregadas"});cboEstado.SelectedIndexChanged+=Filtrar;
         dgvDatos.SelectionChanged+=Seleccion;
+        dgvDatos.CellDoubleClick += AbrirConDobleClick;
         dgvDatos.AutoGenerateColumns = false;
         dgvDatos.AllowUserToAddRows = false;
         dgvDatos.AllowUserToDeleteRows = false;

@@ -95,7 +95,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                 IdAtencion = idAtencion,
                 Estado = a.Estado,
                 VersionAtencion = a.Version.ToArray(),
-                Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {a.Estado}",
+                Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {a.Estado}" + (a.Estado == EstadoAtencion.Cerrada ? "\r\n" + a.Historial.Where(h => h.Accion == "VehiculoEntregado").OrderByDescending(h => h.Fecha).Select(h => $"Entrega {h.Fecha:dd/MM/yyyy HH:mm}: {h.Observaciones}").FirstOrDefault() : ""),
                 Comprobante = d == null ? null : Mapear(d),
                 ItemsPorLiquidar = d != null || a.Estado == EstadoAtencion.Cerrada ? [] : Items(await FacturablesAsync(idAtencion))
             };
@@ -267,6 +267,18 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
         {
             unidad.DescartarCambios();
         }
+    }
+
+    /// <summary>Entrega validada con responsable y conformidad; no permite cambiar el resultado técnico ni omitir el control de saldo.</summary>
+    public Task EntregarAsync(RegistrarEntregaDto datos)
+    {
+        ArgumentNullException.ThrowIfNull(datos);
+        var persona = (datos.PersonaRetira ?? "").Trim();
+        if (persona.Length is 0 or > 150 || persona.Any(char.IsControl)) throw new ValidacionException("Indique el nombre de la persona que retira (hasta 150 caracteres).");
+        if (!datos.ConformidadRecepcion) throw new ValidacionException("Registre la conformidad de recepción del vehículo.");
+        var observaciones = AutorizacionOperativa.Texto(datos.Observaciones, false);
+        if (observaciones.Length > 500) throw new ValidacionException("Las observaciones de entrega admiten hasta 500 caracteres.");
+        return EntregarAsync(datos.IdAtencion, datos.Version, $"Retira: {persona}. Conformidad de recepción registrada. {observaciones}");
     }
 
     public async Task EntregarAsync(int idAtencion, byte[] version, string condicion)

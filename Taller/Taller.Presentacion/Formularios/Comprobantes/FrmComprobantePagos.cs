@@ -39,6 +39,12 @@ public partial class FrmComprobantePagos : Form
             Text = d == null ? "Liquidar trabajos realizados" : d.Saldo > 0 ? "Registrar pagos" : _datos.Estado == EstadoAtencion.Cerrada ? "Cuenta e historial de entrega" : "Registrar entrega del vehículo";
             lblSaldo.Text = d == null ? $"Por liquidar: {_datos.TotalPorLiquidar:N2}. Revise los conceptos antes de emitir." : $"{d.Numero} · Total {d.Total:N2} · Pagado {d.Pagado:N2} · Saldo {d.Saldo:N2}";
             var abierta = _datos.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
+            btnEmitir.Visible = abierta && d == null;
+            btnPago.Visible = abierta && d is { Saldo: > 0 };
+            btnEntregar.Visible = abierta && d is { Saldo: 0 };
+            btnImprimir.Visible = d != null;
+            btnRecibo.Visible = d?.Pagos.Count > 0;
+            btnAnular.Visible = abierta && d?.Pagos.Any(p => !p.Anulado) == true;
             btnEmitir.Enabled = abierta && d == null;
             btnPago.Enabled = abierta && d is { Saldo: > 0 };
             btnEntregar.Enabled = abierta && d is { Saldo: 0 };
@@ -61,6 +67,7 @@ public partial class FrmComprobantePagos : Form
     private void Seleccion(object? s, EventArgs e)
     {
         btnRecibo.Enabled = PagoSeleccionado != null;
+        btnAnular.Visible = PagoSeleccionado is { Anulado: false } && _datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
         btnAnular.Enabled = PagoSeleccionado is { Anulado: false } && _datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
     }
 
@@ -120,9 +127,11 @@ public partial class FrmComprobantePagos : Form
     {
         if (_datos == null || _ocupado)
             return;
-        using var f = new FrmSolicitarMotivo("Registrar entrega del vehículo", "Indique la condición de entrega, el resultado del trabajo y quién retira. Solo se permite entregar con saldo exactamente cero.");
-        if (f.ShowDialog(this) == DialogResult.OK)
-            await OperarAsync(() => _servicio.EntregarAsync(_id, _datos.VersionAtencion, f.Motivo));
+        using var f = new FrmRegistrarEntrega(_datos.Comprobante?.Cliente ?? "", _datos.Estado == EstadoAtencion.TrabajoFinalizado ? "Resultado técnico: trabajos finalizados por el técnico." : "Resultado técnico: cierre con liquidación de lo realizado.");
+        if (f.ShowDialog(this) != DialogResult.OK) return;
+        bool entregado = false;
+        await OperarAsync(async () => { await _servicio.EntregarAsync(new RegistrarEntregaDto { IdAtencion = _id, Version = _datos.VersionAtencion, PersonaRetira = f.PersonaRetira, ConformidadRecepcion = f.Conformidad, Observaciones = f.Observaciones }); entregado = true; });
+        if (entregado) MessageBox.Show(this, "Entrega registrada. La atención está cerrada y esta cuenta queda disponible para consulta e impresión.", "Atención finalizada", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private async void Imprimir(object? s, EventArgs e)

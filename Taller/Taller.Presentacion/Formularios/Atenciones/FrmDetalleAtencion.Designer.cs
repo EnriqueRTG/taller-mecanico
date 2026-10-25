@@ -69,7 +69,14 @@ partial class FrmDetalleAtencion
         Controls.Add(tlpPrincipal); Text = "Detalle de atención e ingreso";
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
         lblResumen.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(txtMotivo, 0, 1);
+        var expediente = new TabControl { Dock = DockStyle.Fill };
+        var ingreso = new TabPage("Ingreso y solicitudes");
+        var resumen = new TabPage("Expediente de la atención");
+        txtExpediente = new TextBox { Name = "txtExpediente", Dock = DockStyle.Fill, ReadOnly = true, Multiline = true, ScrollBars = ScrollBars.Vertical };
+        ingreso.Controls.Add(txtMotivo);
+        resumen.Controls.Add(txtExpediente);
+        expediente.TabPages.AddRange([ingreso, resumen]);
+        tlpPrincipal.Controls.Add(expediente, 0, 1);
         txtMotivo.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(grpIngreso, 0, 2);
         grpIngreso.Dock = DockStyle.Fill;
@@ -180,6 +187,7 @@ partial class FrmDetalleAtencion
     private Label lblTotal = null!;
     private FlowLayoutPanel flpAcciones = null!;
     private Button btnConfirmarIngreso = null!;
+    private TextBox txtExpediente = null!;
     private Button btnProgreso = null!;
     private Button btnCerrar = null!;
 }

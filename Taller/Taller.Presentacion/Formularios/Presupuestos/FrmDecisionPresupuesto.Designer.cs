@@ -49,6 +49,8 @@ partial class FrmDecisionPresupuesto
         cboMedio = new ComboBox { Name = "cboMedioDecision", Width = 170, DropDownStyle = ComboBoxStyle.DropDownList };
         cboMedio.Items.AddRange(["Presencial", "Teléfono", "Correo", "Mensajería"]);
         cboMedio.SelectedIndex = 0;
+        txtPersona.TextChanged += TextoCambiado;
+        cboMedio.SelectedIndexChanged += TextoCambiado;
         comunicacion.Controls.AddRange([txtPersona, cboMedio]);
         tlpPrincipal.Controls.Add(comunicacion, 0, 4);
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));

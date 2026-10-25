@@ -102,7 +102,7 @@ partial class FrmEjecutarAtencion
         btnGuardar.Height = 34;
         btnGuardar.Click += Guardar;
         flpAcciones.Controls.Add(btnGuardar);
-        btnCompletar = new Button { Name = "btnCompletarSeleccionada", Text = "Completar fila seleccionada", AutoSize = true, FlatStyle = FlatStyle.Flat };
+        btnCompletar = new Button { Name = "btnCompletarSeleccionada", Text = "Completar fila seleccionada", AutoSize = true, FlatStyle = FlatStyle.Flat, BackColor = Color.White, ForeColor = Color.FromArgb(30, 64, 175) };
         btnCompletar.Click += CompletarSeleccionada;
         flpAcciones.Controls.Add(btnCompletar);
         btnLiberar.Text = "Liberar actividad";

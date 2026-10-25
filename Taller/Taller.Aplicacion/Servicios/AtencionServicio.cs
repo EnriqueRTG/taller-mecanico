@@ -136,6 +136,9 @@ public sealed class AtencionServicio
             throw new ValidacionException("Revise kilometraje y observaciones de recepción.");
         if (!Enum.IsDefined(tipoSolicitud))
             throw new ValidacionException("Seleccione el tipo de solicitud.");
+        if (pedidos.Count > 0)
+            tipoSolicitud = pedidos.All(s => s.Tipo == TipoSolicitudIngreso.TrabajoSolicitado) ? TipoSolicitudAtencion.ServicioDefinido
+                : pedidos.All(s => s.Tipo == TipoSolicitudIngreso.ProblemaInformado) ? TipoSolicitudAtencion.Problema : TipoSolicitudAtencion.Mixta;
         var recepcion = await ObtenerAdministrativoActualAsync();
         if (recepcion.Id != idUsuarioRecepcion)
             throw new ValidacionException("Usuario de recepción inválido.");

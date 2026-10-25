@@ -47,6 +47,7 @@ internal static class Program
         VerificarFiltrosListados(proveedor);
         VerificarUniformidadListados(proveedor);
         VerificarRecorridoTecnico(proveedor);
+        VerificarSolicitudesIngreso(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -91,6 +92,31 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarSolicitudesIngreso(IServiceProvider proveedor)
+    {
+        using var editor = new Taller.Presentacion.Formularios.Atenciones.EditorSolicitudes();
+        var tipo = (ComboBox)editor.Controls.Find("cboTipo", true).Single();
+        var texto = (TextBox)editor.Controls.Find("txtSolicitud", true).Single();
+        texto.Text = "Cambiar aceite y filtros";
+        editor.GetType().GetMethod("Agregar", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(editor, [null, EventArgs.Empty]);
+        tipo.SelectedIndex = 1; texto.Text = "Ruido al frenar";
+        if (!editor.ConfirmarPendiente() || editor.Solicitudes.Count != 2)
+            throw new InvalidOperationException("El ingreso pierde el pedido escrito o mezcla las solicitudes.");
+        if (editor.Solicitudes[0].Tipo == editor.Solicitudes[1].Tipo)
+            throw new InvalidOperationException("Los tipos de solicitud no se conservan.");
+        using var scope = proveedor.CreateScope();
+        using var formulario = scope.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Atenciones.FrmNuevaAtencion>();
+        foreach (int ancho in new[] { 820, 1020, 1366 })
+        {
+            formulario.ClientSize = new Size(ancho, 620);
+            Disponer(formulario);
+            VerificarDentroDelFormulario(formulario, formulario.Controls.Find("btnRegistrar", true).Single());
+            if (formulario.Controls.Find("editorSolicitudes", true).Length != 1)
+                throw new InvalidOperationException("La recepción no contiene el editor de solicitudes.");
+        }
+        Console.WriteLine("Ingreso: pedidos individuales, síntoma independiente y confirmación del texto pendiente.");
     }
 
     private static void VerificarRecorridoTecnico(IServiceProvider proveedor)

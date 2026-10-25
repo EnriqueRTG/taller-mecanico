@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Taller.Dominio.Entidades;
 
@@ -64,6 +64,9 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
 
         builder.Property(a => a.TipoSolicitud).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.ToTable("Atenciones", t => t.HasCheckConstraint("CK_Atenciones_TipoSolicitud", "[TipoSolicitud] IN (N'Problema', N'ServicioDefinido', N'Mixta')"));
+        builder.Property(a => a.KilometrajeRecepcion).IsRequired(false);
+        builder.Property(a => a.ObservacionesRecepcion).HasMaxLength(1000);
+        builder.ToTable("Atenciones", t => t.HasCheckConstraint("CK_Atenciones_KilometrajeRecepcion", "[KilometrajeRecepcion] IS NULL OR [KilometrajeRecepcion] >= 0"));
         builder.HasKey(a => a.IdAtencion);
 
         builder.Property(a => a.IdAtencion)

@@ -107,7 +107,7 @@ partial class FrmEvaluarAtencion
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         Controls.Add(tlpPrincipal);
-        Text = "Evaluación técnica y propuesta";
+        Text = "Preparación técnica y presupuesto";
         tlpPrincipal.Controls.Add(txtResumen, 0, 0);
         txtResumen.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(tabs, 0, 1);
@@ -190,7 +190,10 @@ partial class FrmEvaluarAtencion
         tlpPropuesta.Padding = new Padding(12);
         tlpPropuesta.ColumnCount = 1;
         tlpPropuesta.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPropuesta.RowCount = 7;
+        tlpPropuesta.RowCount = 8;
+        cboSolicitud = new ComboBox { Name = "cboSolicitud", Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, AccessibleName = "Solicitud a la que responde el ítem" };
+        tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        tlpPropuesta.Controls.Add(cboSolicitud, 0, 0);
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
@@ -199,13 +202,13 @@ partial class FrmEvaluarAtencion
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         tabPropuesta.Controls.Add(tlpPropuesta);
-        tlpPropuesta.Controls.Add(txtBuscar, 0, 0);
+        tlpPropuesta.Controls.Add(txtBuscar, 0, 1);
         txtBuscar.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(cboConcepto, 0, 1);
+        tlpPropuesta.Controls.Add(cboConcepto, 0, 2);
         cboConcepto.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(txtDescripcion, 0, 2);
+        tlpPropuesta.Controls.Add(txtDescripcion, 0, 3);
         txtDescripcion.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(flpItem, 0, 3);
+        tlpPropuesta.Controls.Add(flpItem, 0, 4);
         flpItem.Dock = DockStyle.Fill;
         chkAportaCliente = new CheckBox
         {
@@ -215,11 +218,11 @@ partial class FrmEvaluarAtencion
         };
         chkAportaCliente.CheckedChanged += OrigenCambiado;
         flpItem.Controls.Add(chkAportaCliente);
-        tlpPropuesta.Controls.Add(lblPrecio, 0, 4);
+        tlpPropuesta.Controls.Add(lblPrecio, 0, 5);
         lblPrecio.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(dgvItems, 0, 5);
+        tlpPropuesta.Controls.Add(dgvItems, 0, 6);
         dgvItems.Dock = DockStyle.Fill;
-        tlpPropuesta.Controls.Add(lblTotal, 0, 6);
+        tlpPropuesta.Controls.Add(lblTotal, 0, 7);
         lblTotal.Dock = DockStyle.Fill;
         txtBuscar.PlaceholderText = "Buscar concepto por nombre, categoría o descripción";
         txtBuscar.TextChanged += FiltrarCatalogo;
@@ -265,6 +268,7 @@ partial class FrmEvaluarAtencion
         dgvItems.BackgroundColor = Color.White;
         dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSolicitud", DataPropertyName = "SolicitudDescripcion", HeaderText = "Solicitud", FillWeight = 120, MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Descripción", FillWeight = 240, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad", FillWeight = 70, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporta", MinimumWidth = 90 });
@@ -345,6 +349,7 @@ partial class FrmEvaluarAtencion
 
     private Button btnSeguimiento = null!;
     private CheckBox chkAportaCliente = null!;
+    private ComboBox cboSolicitud = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private TextBox txtResumen = null!;
     private TabControl tabs = null!;

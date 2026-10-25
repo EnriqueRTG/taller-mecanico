@@ -32,7 +32,7 @@ public partial class FrmDecisionPresupuesto : Form
             _datos = await (_servicio ?? throw new InvalidOperationException("Seleccione una propuesta real.")).ObtenerAsync(_id);
             if (!_datos.Vigente || _datos.Estado != EstadoPresupuesto.PendienteDecision)
                 throw new InvalidOperationException("La propuesta no está esperando una decisión.");
-            lblResumen.Text = $"Presupuesto {_id:D6} · {_datos.Resumen}\nQuite la marca de los ítems que el cliente NO acepta. Nada se elimina del documento original.";
+            lblResumen.Text = $"Presupuesto {_id:D6} · {_datos.Resumen}\nRevise el presupuesto con el cliente. Todas las marcas: aceptación completa. Quitar marcas solicita revisión técnica; no autoriza una reparación parcial.";
             _items = new BindingList<DecisionItemDto>(_datos.Items);
             dgvItems.DataSource = _items;
             ActualizarTotal();
@@ -90,7 +90,7 @@ public partial class FrmDecisionPresupuesto : Form
         tlpPrincipal.Enabled = false;
         try
         {
-            await _servicio.DecidirAsync(new DecisionPresupuestoDto { IdPresupuesto = _id, Version = _datos.Version, ItemsAceptados = _items.Where(x => x.Aceptar).Select(x => x.IdDetalle).ToList(), Observaciones = txtMotivo.Text });
+            await _servicio.DecidirAsync(new DecisionPresupuestoDto { PersonaDecision = txtPersona.Text, MedioDecision = cboMedio.SelectedItem?.ToString() ?? "", IdPresupuesto = _id, Version = _datos.Version, ItemsAceptados = _items.Where(x => x.Aceptar).Select(x => x.IdDetalle).ToList(), Observaciones = txtMotivo.Text });
             DialogResult = DialogResult.OK;
         }
         catch (Exception ex)

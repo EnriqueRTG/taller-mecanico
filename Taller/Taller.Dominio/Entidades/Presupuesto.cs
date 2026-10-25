@@ -13,6 +13,8 @@ namespace Taller.Dominio.Entidades;
 /// </remarks>
 public sealed class Presupuesto
 {
+    public string? PersonaDecision { get; set; }
+    public string? MedioDecision { get; set; }
     public int IdPresupuesto { get; set; }
     /// <summary>Propuesta anterior conservada al solicitar una revisión.</summary>
     public int? IdPresupuestoAnterior { get; set; }

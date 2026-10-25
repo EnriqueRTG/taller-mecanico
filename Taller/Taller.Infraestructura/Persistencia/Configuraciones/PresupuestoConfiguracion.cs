@@ -75,6 +75,8 @@ public sealed class PresupuestoConfiguracion : IEntityTypeConfiguration<Presupue
             tabla.HasCheckConstraint("CK_Presupuestos_DiagnosticoAceptado", "[Tipo] <> N'Diagnostico' OR [Estado] = N'Aceptado'");
         });
         builder.HasOne(p => p.Hallazgo).WithMany().HasForeignKey(p => p.IdHallazgoAtencion).OnDelete(DeleteBehavior.Restrict);
+        builder.Property(p => p.PersonaDecision).HasMaxLength(150);
+        builder.Property(p => p.MedioDecision).HasMaxLength(30);
         builder.HasKey(p => p.IdPresupuesto);
         builder.Property(p => p.Vigente).IsRequired();
         builder.Property(p => p.MotivoRevision).HasMaxLength(1000);

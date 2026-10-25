@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Atenciones
+namespace Taller.Presentacion.Formularios.Atenciones
 {
     partial class FrmNuevaAtencion
     {
@@ -36,9 +36,7 @@
             tlpBusquedaCliente = new TableLayoutPanel();
             lblTipoDocumento = new Label();
             cboTipoDocumento = new ComboBox();
-            flpSolicitud = new FlowLayoutPanel();
-            chkRequiereDiagnostico = new CheckBox();
-            chkPrepararIngreso = new CheckBox();
+            editorSolicitudes = new EditorSolicitudes();
             lblDocumento = new Label();
             txtDocumento = new TextBox();
             btnBuscarCliente = new Button();
@@ -60,9 +58,6 @@
             pnlMotivo = new Panel();
             tlpMotivo = new TableLayoutPanel();
             lblSeccionMotivo = new Label();
-            lblAyudaMotivo = new Label();
-            txtMotivo = new TextBox();
-            lblContadorMotivo = new Label();
             pnlAcciones = new Panel();
             flpAcciones = new FlowLayoutPanel();
             btnCancelar = new Button();
@@ -186,7 +181,7 @@
             tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
             tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 155F));
             tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 155F));
-            tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 190F));
+            tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 400F));
             tlpContenido.Size = new Size(812, 600);
             tlpContenido.TabIndex = 0;
             // 
@@ -627,26 +622,16 @@
             tlpMotivo.ColumnCount = 1;
             tlpMotivo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpMotivo.Controls.Add(lblSeccionMotivo, 0, 0);
-            tlpMotivo.Controls.Add(flpSolicitud, 0, 1);
-            flpSolicitud.Dock = DockStyle.Fill;
-            flpSolicitud.AutoSize = true;
-            flpSolicitud.Controls.Add(chkRequiereDiagnostico);
-            flpSolicitud.Controls.Add(chkPrepararIngreso);
-            chkRequiereDiagnostico.AutoSize = true;
-            chkRequiereDiagnostico.Text = "Requiere diagnóstico del problema";
-            chkPrepararIngreso.AutoSize = true;
-            chkPrepararIngreso.Text = "Preparar inspección con cargo antes de enviar";
-            tlpMotivo.Controls.Add(txtMotivo, 0, 2);
-            tlpMotivo.Controls.Add(lblContadorMotivo, 0, 3);
+            tlpMotivo.Controls.Add(editorSolicitudes, 0, 1);
+            editorSolicitudes.Dock = DockStyle.Fill;
+            editorSolicitudes.SolicitudesCambiadas += SolicitudesCambiadas;
             tlpMotivo.Dock = DockStyle.Fill;
             tlpMotivo.Location = new Point(18, 10);
             tlpMotivo.Margin = new Padding(0);
             tlpMotivo.Name = "tlpMotivo";
-            tlpMotivo.RowCount = 4;
+            tlpMotivo.RowCount = 2;
             tlpMotivo.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
-            tlpMotivo.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
             tlpMotivo.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpMotivo.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpMotivo.Size = new Size(776, 170);
             tlpMotivo.TabIndex = 0;
             // 
@@ -660,50 +645,9 @@
             lblSeccionMotivo.Name = "lblSeccionMotivo";
             lblSeccionMotivo.Size = new Size(776, 22);
             lblSeccionMotivo.TabIndex = 0;
-            lblSeccionMotivo.Text = "3. MOTIVO DE CONSULTA";
+            lblSeccionMotivo.Text = "3. SOLICITUDES Y CONDICIONES DE INGRESO";
             lblSeccionMotivo.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // lblAyudaMotivo
-            // 
-            lblAyudaMotivo.AutoEllipsis = true;
-            lblAyudaMotivo.Dock = DockStyle.Fill;
-            lblAyudaMotivo.Font = new Font("Segoe UI", 8.5F);
-            lblAyudaMotivo.ForeColor = Color.FromArgb(100, 116, 139);
-            lblAyudaMotivo.Location = new Point(0, 22);
-            lblAyudaMotivo.Margin = new Padding(0);
-            lblAyudaMotivo.Name = "lblAyudaMotivo";
-            lblAyudaMotivo.Size = new Size(776, 30);
-            lblAyudaMotivo.TabIndex = 1;
-            lblAyudaMotivo.Text = "Describa el inconveniente informado por el cliente. El diagnóstico técnico se registrará posteriormente.";
-            lblAyudaMotivo.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // txtMotivo
-            // 
-            txtMotivo.AcceptsReturn = true;
-            txtMotivo.Dock = DockStyle.Fill;
-            txtMotivo.Font = new Font("Segoe UI", 9.5F);
-            txtMotivo.Location = new Point(0, 54);
-            txtMotivo.Margin = new Padding(0, 2, 0, 2);
-            txtMotivo.MaxLength = 500;
-            txtMotivo.Multiline = true;
-            txtMotivo.Name = "txtMotivo";
-            txtMotivo.ScrollBars = ScrollBars.Vertical;
-            txtMotivo.Size = new Size(776, 94);
-            txtMotivo.TabIndex = 7;
-            txtMotivo.TextChanged += txtMotivo_TextChanged;
-            // 
-            // lblContadorMotivo
-            // 
-            lblContadorMotivo.Dock = DockStyle.Fill;
-            lblContadorMotivo.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblContadorMotivo.ForeColor = Color.FromArgb(100, 116, 139);
-            lblContadorMotivo.Location = new Point(0, 150);
-            lblContadorMotivo.Margin = new Padding(0);
-            lblContadorMotivo.Name = "lblContadorMotivo";
-            lblContadorMotivo.Size = new Size(776, 20);
-            lblContadorMotivo.TabIndex = 8;
-            lblContadorMotivo.Text = "0 / 500";
-            lblContadorMotivo.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pnlAcciones
             // 
@@ -751,7 +695,7 @@
             btnRegistrar.Name = "btnRegistrar";
             btnRegistrar.Size = new Size(170, 38);
             btnRegistrar.TabIndex = 9;
-            btnRegistrar.Text = "Registrar y continuar";
+            btnRegistrar.Text = "Registrar ingreso";
             btnRegistrar.UseVisualStyleBackColor = false;
             btnRegistrar.Click += btnRegistrar_Click;
             // 
@@ -768,7 +712,7 @@
             KeyPreview = true;
             MaximizeBox = false;
             MinimizeBox = false;
-            MinimumSize = new Size(820, 650);
+            MinimumSize = new Size(820, 520);
             Name = "FrmNuevaAtencion";
             Padding = new Padding(2);
             ShowInTaskbar = false;
@@ -826,9 +770,7 @@
         private TableLayoutPanel tlpBusquedaCliente;
         private Label lblTipoDocumento;
         private ComboBox cboTipoDocumento;
-        private FlowLayoutPanel flpSolicitud;
-        private CheckBox chkRequiereDiagnostico;
-        private CheckBox chkPrepararIngreso;
+        private EditorSolicitudes editorSolicitudes;
         private Label lblDocumento;
         private TextBox txtDocumento;
         private Button btnBuscarCliente;
@@ -848,9 +790,6 @@
         private Button btnNuevoVehiculo;
         private TableLayoutPanel tlpMotivo;
         private Label lblSeccionMotivo;
-        private Label lblAyudaMotivo;
-        private TextBox txtMotivo;
-        private Label lblContadorMotivo;
         private Button btnCancelar;
         private Button btnRegistrar;
     }

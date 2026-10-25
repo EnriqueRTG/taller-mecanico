@@ -236,9 +236,13 @@ public sealed class IntegracionSqlPruebas
         var cliente = await clientes.RegistrarAsync("DNI", "23456789", "Lucía", "Gómez", null, null, null);
         var vehiculo = await vehiculos.RegistrarAsync("AC456DE", 2021, "Blanco", ids.Modelo);
         var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), usuarios, new ConceptoRepositorio(db), sesion);
-        var a = await recepcion.RegistrarAsync(cliente.IdCliente, vehiculo.IdVehiculo, ids.Recepcion, "Ruido persistente al frenar", TipoSolicitudAtencion.Problema);
+        var a = await recepcion.RegistrarRecepcionAsync(new RegistrarRecepcionDto {
+            IdCliente = cliente.IdCliente, IdVehiculo = vehiculo.IdVehiculo, IdUsuarioRecepcion = ids.Recepcion,
+            Kilometraje = 80000, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "Ruido persistente al frenar" }]
+        });
+        Assert.Single(a.Solicitudes);
         var evaluacion = new EvaluacionServicio(er, usuarios, unidad, sesion);
-        await evaluacion.EnviarAEvaluacionAsync(a.IdAtencion, a.TipoSolicitud, a.Version);
+        // RegistrarRecepcionAsync ya deja la atención en preparación, sin una segunda transición.
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         await evaluacion.TomarAsync(a.IdAtencion);
         var d = await evaluacion.ObtenerAsync(a.IdAtencion);
@@ -254,6 +258,7 @@ public sealed class IntegracionSqlPruebas
         }
 
         ];
+        foreach (var item in d.Items) item.IdSolicitudAtencion = d.Solicitudes.FirstOrDefault()?.IdSolicitud;
         await evaluacion.GuardarAsync(d, true);
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
         var p = await db.Presupuestos.AsNoTracking().SingleAsync(x => x.Tipo == TipoPresupuesto.Reparacion);
@@ -261,7 +266,7 @@ public sealed class IntegracionSqlPruebas
         await evaluacion.PresentarAsync(p.IdPresupuesto, p.Version);
         var presupuestos = new PresupuestoServicio(er, cr, unidad, acceso);
         var propuesta = await presupuestos.ObtenerAsync(p.IdPresupuesto);
-        await presupuestos.DecidirAsync(new DecisionPresupuestoDto { IdPresupuesto = p.IdPresupuesto, Version = propuesta.Version, ItemsAceptados = propuesta.Items.Select(x => x.IdDetalle).ToList() });
+        await presupuestos.DecidirAsync(new DecisionPresupuestoDto { PersonaDecision = "Lucía Gómez", MedioDecision = "Presencial", IdPresupuesto = p.IdPresupuesto, Version = propuesta.Version, ItemsAceptados = propuesta.Items.Select(x => x.IdDetalle).ToList() });
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         var ejecucion = new EjecucionServicio(er, cr, unidad, acceso);
         var e = await ejecucion.ObtenerAsync(a.IdAtencion);
@@ -273,6 +278,7 @@ public sealed class IntegracionSqlPruebas
             item.Estado = EstadoEjecucionDetalle.Completado;
         }
 
+        e.ConformidadTecnica = true;
         await ejecucion.GuardarAsync(e, true);
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
         var cobro = new CobroServicio(cr, er, unidad, acceso);

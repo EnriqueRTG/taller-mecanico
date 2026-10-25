@@ -1,8 +1,10 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
 namespace Taller.Aplicacion.DTOs.Atenciones;
 /// <summary>Documento de trabajo del técnico. La versión evita sobrescribir avances ajenos.</summary>
 public sealed class EvaluacionAtencionDto
 {
+    public List<SolicitudIngresoDto> Solicitudes { get; set; } = [];
+    public string? ObservacionesRecepcion { get; set; }
     public int IdAtencion { get; set; }
     public byte[] VersionAtencion { get; set; } = [];
     public string Cliente { get; set; } = string.Empty;

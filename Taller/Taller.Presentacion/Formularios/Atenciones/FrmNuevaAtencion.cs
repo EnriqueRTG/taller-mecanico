@@ -26,9 +26,6 @@ public partial class FrmNuevaAtencion : Form
     private Vehiculo? _vehiculoSeleccionado;
 #endregion
 #region Inicialización
-    /// <summary>Atención guardada que necesita preparar la autorización inicial antes del envío.</summary>
-    public int? IdIngresoPendiente { get; private set; }
-
     /// <summary>
     /// Inicializa una nueva instancia del formulario con los servicios
     /// necesarios para consultar clientes, vehículos y registrar atenciones.
@@ -64,6 +61,7 @@ public partial class FrmNuevaAtencion : Form
     /// </summary>
     private void FrmNuevaAtencion_Load(object? sender, EventArgs e)
     {
+        Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
         ConfigurarFormulario();
         CargarTiposDocumento();
         MostrarUsuarioRecepcion();
@@ -80,7 +78,6 @@ public partial class FrmNuevaAtencion : Form
         txtDocumento.MaxLength = 20;
         txtDominio.MaxLength = 10;
         txtDominio.CharacterCasing = CharacterCasing.Upper;
-        txtMotivo.MaxLength = 500;
         _clienteSeleccionado = null;
         _vehiculoSeleccionado = null;
         btnNuevoCliente.Enabled = true;
@@ -91,7 +88,6 @@ public partial class FrmNuevaAtencion : Form
         lblClienteSeleccionado.ForeColor = Color.FromArgb(100, 116, 139);
         lblVehiculoSeleccionado.Text = "Primero seleccione un cliente.";
         lblVehiculoSeleccionado.ForeColor = Color.FromArgb(100, 116, 139);
-        lblContadorMotivo.Text = "0 / 500";
         lblFechaIngreso.Text = $"Fecha de ingreso: {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm}";
     }
 
@@ -157,7 +153,7 @@ public partial class FrmNuevaAtencion : Form
         bool usuarioValido = _sesionUsuario.UsuarioActual is not null;
         bool clienteValido = _clienteSeleccionado is not null;
         bool vehiculoValido = _vehiculoSeleccionado is not null;
-        bool motivoValido = !string.IsNullOrWhiteSpace(txtMotivo.Text);
+        bool motivoValido = true; // El editor valida y agrega el pedido pendiente al confirmar.
         btnRegistrar.Enabled = usuarioValido && clienteValido && vehiculoValido && motivoValido;
     }
 
@@ -211,7 +207,7 @@ public partial class FrmNuevaAtencion : Form
         lblVehiculoSeleccionado.ForeColor = Color.FromArgb(15, 23, 42);
         btnNuevoVehiculo.Enabled = true;
         ActualizarEstadoBotonRegistrar();
-        txtMotivo.Focus();
+        editorSolicitudes.Focus();
     }
 
     /// <summary>
@@ -470,18 +466,8 @@ public partial class FrmNuevaAtencion : Form
     }
 
 #endregion
-#region Motivo de consulta
-    /// <summary>
-    /// Actualiza el contador de caracteres del motivo y vuelve a evaluar
-    /// si la atención contiene todos los datos necesarios para registrarse.
-    /// </summary>
-    private void txtMotivo_TextChanged(object? sender, EventArgs e)
-    {
-        lblContadorMotivo.Text = $"{txtMotivo.TextLength} / 500";
-        ActualizarEstadoBotonRegistrar();
-    }
+    private void SolicitudesCambiadas(object? sender, EventArgs e) => ActualizarEstadoBotonRegistrar();
 
-#endregion
 #region Confirmación y cierre
     /// <summary>
     /// Registra la nueva atención utilizando el cliente,
@@ -501,10 +487,10 @@ public partial class FrmNuevaAtencion : Form
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(txtMotivo.Text))
+        if (!editorSolicitudes.ConfirmarPendiente())
         {
-            MessageBox.Show("Debe ingresar el motivo de la consulta.", "Nueva atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            txtMotivo.Focus();
+            MessageBox.Show("Debe agregar al menos una solicitud del cliente.", "Nueva atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            editorSolicitudes.Focus();
             return;
         }
 
@@ -520,9 +506,12 @@ public partial class FrmNuevaAtencion : Form
             btnRegistrar.Enabled = false;
             btnCancelar.Enabled = false;
             btnRegistrar.Text = "Registrando...";
-            var atencion = await _atencionServicio.RegistrarAsync(_clienteSeleccionado.IdCliente, _vehiculoSeleccionado.IdVehiculo, usuario.Id, txtMotivo.Text.Trim(), chkRequiereDiagnostico.Checked ? Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.Problema : Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido, enviarATaller: !chkPrepararIngreso.Checked);
-            IdIngresoPendiente = chkPrepararIngreso.Checked ? atencion.IdAtencion : null;
-            MessageBox.Show($"Atención N.º {atencion.IdAtencion} registrada. " + (IdIngresoPendiente.HasValue ? "Prepare ahora la inspección y su autorización." : "Disponible en taller para " + (chkRequiereDiagnostico.Checked ? "diagnóstico y presupuesto." : "preparar presupuesto.")), "Nueva atención", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var atencion = await _atencionServicio.RegistrarRecepcionAsync(new Taller.Aplicacion.DTOs.Atenciones.RegistrarRecepcionDto {
+                IdCliente = _clienteSeleccionado.IdCliente, IdVehiculo = _vehiculoSeleccionado.IdVehiculo,
+                IdUsuarioRecepcion = usuario.Id, Solicitudes = editorSolicitudes.Solicitudes,
+                Kilometraje = editorSolicitudes.Kilometraje, ObservacionesRecepcion = editorSolicitudes.Observaciones
+            });
+            MessageBox.Show(this, $"Atención {atencion.IdAtencion:D6} recibida. El técnico puede tomarla desde Preparación técnica.", "Ingreso registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -542,7 +531,7 @@ public partial class FrmNuevaAtencion : Form
         {
             if (!IsDisposed)
             {
-                btnRegistrar.Text = "Registrar y continuar";
+                btnRegistrar.Text = "Registrar ingreso";
                 btnCancelar.Enabled = true;
                 ActualizarEstadoBotonRegistrar();
             }

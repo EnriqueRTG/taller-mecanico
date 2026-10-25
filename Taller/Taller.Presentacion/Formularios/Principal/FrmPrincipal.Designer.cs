@@ -226,7 +226,7 @@ namespace Taller.Presentacion.Formularios.Principal
             btnDiagnosticos.Size = new Size(213, 48);
             btnDiagnosticos.TabIndex = 6;
             btnDiagnosticos.TabStop = false;
-            btnDiagnosticos.Text = "Evaluaciones técnicas";
+            btnDiagnosticos.Text = "Preparación técnica";
             btnDiagnosticos.TextAlign = ContentAlignment.MiddleLeft;
             btnDiagnosticos.UseVisualStyleBackColor = false;
             btnDiagnosticos.Click += btnDiagnosticos_Click;

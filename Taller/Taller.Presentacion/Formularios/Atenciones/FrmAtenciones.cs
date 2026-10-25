@@ -41,6 +41,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private sealed class AtencionFila
         {
             public int IdAtencion { get; init; }
+            public bool TieneSolicitudes { get; init; }
             public bool EvaluacionFinalizada { get; init; }
             public int? IdTecnicoEnActividad { get; init; }
             public ActividadTecnica? ActividadTecnica { get; init; }
@@ -249,6 +250,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             return new AtencionFila
             {
                 IdAtencion = atencion.IdAtencion,
+                TieneSolicitudes = atencion.Solicitudes.Count > 0,
                 EvaluacionFinalizada = atencion.Evaluacion?.Finalizada == true,
                 IdTecnicoEnActividad = atencion.IdTecnicoEnActividad,
                 Fecha = atencion.FechaApertura,
@@ -257,7 +259,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 Vehiculo = $"{atencion.Vehiculo.Modelo.Marca.Nombre} " + atencion.Vehiculo.Modelo.Nombre,
                 Cliente = $"{atencion.Cliente.Apellido}, " + atencion.Cliente.Nombre,
                 Documento = $"{atencion.Cliente.TipoDocumento} " + atencion.Cliente.Documento,
-                Motivo = atencion.MotivoConsulta,
+                Motivo = atencion.Solicitudes.Count == 0 ? atencion.MotivoConsulta : string.Join("; ", atencion.Solicitudes.OrderBy(s => s.Orden).Select(s => s.Descripcion)),
                 TipoSolicitud = atencion.TipoSolicitud,
                 EstadoValor = atencion.Estado,
                 Etapa = ObtenerEtapaTemporal(atencion),
@@ -271,7 +273,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             {
                 EstadoAtencion.Abierta => "Abierta",
                 EstadoAtencion.PendienteDiagnostico => "Pendiente de diagnóstico",
-                EstadoAtencion.EnEvaluacionTecnica => "En evaluación técnica",
+                EstadoAtencion.EnEvaluacionTecnica => "En preparación técnica",
                 EstadoAtencion.PendienteDecision => "Pendiente de decisión",
                 EstadoAtencion.EnEjecucion => "En ejecución",
                 EstadoAtencion.Pausada => "Pausada",
@@ -291,7 +293,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             {
                 EstadoAtencion.Abierta => "Ingreso registrado",
                 EstadoAtencion.PendienteDiagnostico => "Espera que un técnico tome el diagnóstico",
-                EstadoAtencion.EnEvaluacionTecnica => "Evaluación técnica y preparación de propuesta",
+                EstadoAtencion.EnEvaluacionTecnica when atencion.Evaluacion?.Finalizada == true => "Presupuesto preparado: recepción debe informar al cliente",
+                EstadoAtencion.EnEvaluacionTecnica when atencion.IdTecnicoEnActividad == null => "Pendiente de preparación técnica",
+                EstadoAtencion.EnEvaluacionTecnica => "Técnico preparando el alcance y presupuesto",
                 EstadoAtencion.PendienteDecision => "Espera la decisión del cliente",
                 EstadoAtencion.EnEjecucion => "Ejecución de trabajos autorizados",
                 EstadoAtencion.Pausada => "Resolución de un hallazgo adicional",
@@ -391,7 +395,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             bool puedeConsultarComoTecnico = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.ConsultarAtencionesAsignadas);
             btnVerDetalle.Enabled = puedeGestionar || puedeConsultarComoTecnico;
             btnSeguimiento.Enabled = fila.EstadoValor != EstadoAtencion.Abierta && (puedeGestionar || puedeConsultarComoTecnico);
-            btnEditar.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
+            btnEditar.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta && !fila.TieneSolicitudes;
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnCancelarAtencion.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
@@ -523,11 +527,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 DialogResult resultado = formulario.ShowDialog(this);
                 if (resultado == DialogResult.OK)
                 {
-                    if (formulario.IdIngresoPendiente is int ingreso)
-                    {
-                        using var detalle = new FrmDetalleAtencion(ingreso, _atencionServicio, _sesionUsuario, _serviceProvider.GetRequiredService<EvaluacionServicio>());
-                        detalle.ShowDialog(this);
-                    }
                     await CargarAtencionesAsync();
                 }
             }

@@ -41,9 +41,12 @@ public partial class FrmEjecutarAtencion : Form
             dgvItems.DataSource = _items;
             var propia = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
             dgvItems.ReadOnly = !propia;
+            btnCompletar.Enabled = propia;
             btnGuardar.Enabled = btnFinalizar.Enabled = btnInterrumpir.Enabled = btnLiberar.Enabled = propia;
             btnTomar.Enabled = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
             lblAviso.Text = _datos.TieneExclusiones ? "El cliente excluyó ítems. Antes de tomar confirme que el alcance restante es viable y explique su revisión abajo." : "Revise el alcance antes de tomar. Solo se muestran ítems aceptados. Cerrar conserva su reserva.";
+            chkConformidad.Enabled = propia;
+            chkConformidad.Checked = false;
             _sucio = false;
         }
         catch (Exception ex)
@@ -61,7 +64,7 @@ public partial class FrmEjecutarAtencion : Form
     {
         if (_ocupado || _datos == null)
             return;
-        if (MessageBox.Show(this, "¿Validó que puede ejecutar de forma adecuada el alcance aceptado, incluidas las exclusiones del cliente?", "Tomar ejecución", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        if (MessageBox.Show(this, "¿Confirma que puede comenzar los trabajos autorizados y dispone de los materiales necesarios?", "Tomar ejecución", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             return;
         await OperarAsync(() => _servicio.TomarAsync(_id, _datos.Version, txtObservaciones.Text));
     }
@@ -93,6 +96,16 @@ public partial class FrmEjecutarAtencion : Form
             _ocupado = false;
             tlpPrincipal.Enabled = true;
         }
+    }
+
+    private void CompletarSeleccionada(object? sender, EventArgs e)
+    {
+        if (_ocupado || _cargando || dgvItems.ReadOnly || dgvItems.CurrentRow?.DataBoundItem is not EjecucionItemDto item) return;
+        dgvItems.EndEdit();
+        item.CantidadEjecutada = item.CantidadAutorizada;
+        item.Estado = EstadoEjecucionDetalle.Completado;
+        _items.ResetBindings();
+        _sucio = true;
     }
 
     private void CeldaCambiada(object? s, DataGridViewCellEventArgs e)
@@ -127,8 +140,22 @@ public partial class FrmEjecutarAtencion : Form
         if (finalizar && MessageBox.Show(this, interrumpir ? "¿Terminar como reparación interrumpida? Solo se liquidará lo autorizado y efectivamente realizado. Debe explicar la causa." : "¿Finalizar el trabajo? Resuelva todos los ítems como completados u omitidos con motivo.", "Terminar ejecución", MessageBoxButtons.YesNo) != DialogResult.Yes)
             return;
         _datos.Items = _items.ToList();
+        if (finalizar && !interrumpir && !chkConformidad.Checked)
+        {
+            MessageBox.Show(this, "Compruebe el resultado y marque la conformidad técnica antes de finalizar.");
+            return;
+        }
+        _datos.ConformidadTecnica = chkConformidad.Checked;
         _datos.Observaciones = txtObservaciones.Text;
-        await OperarAsync(() => _servicio.GuardarAsync(_datos, finalizar, interrumpir));
+        bool guardado = false;
+        await OperarAsync(async () => { await _servicio.GuardarAsync(_datos, finalizar, interrumpir); guardado = true; });
+        if (guardado && finalizar)
+        {
+            _sucio = false;
+            MessageBox.Show(this, "Registro técnico finalizado. Recepción puede liquidar lo efectivamente realizado y gestionar la entrega.", "Trabajo registrado");
+            DialogResult = DialogResult.OK;
+            Close();
+        }
     }
 
     private async void Seguimiento(object? s, EventArgs e)

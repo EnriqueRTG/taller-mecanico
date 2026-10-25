@@ -42,7 +42,8 @@ public partial class FrmDetalleAtencion : Form
         {
             _atencion = await _atenciones.ObtenerPorIdAsync(_id) ?? throw new InvalidOperationException("La atención no existe.");
             lblResumen.Text = $"Atención {_id:D6} · {_atencion.Estado} · Solicitud: {_atencion.TipoSolicitud}\n{_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · {_atencion.Vehiculo.Dominio} · Apertura {_atencion.FechaApertura:dd/MM/yyyy HH:mm}";
-            txtMotivo.Text = _atencion.MotivoConsulta;
+            txtMotivo.Text = (_atencion.Solicitudes.Count == 0 ? _atencion.MotivoConsulta : string.Join(Environment.NewLine, _atencion.Solicitudes.OrderBy(s => s.Orden).Select(s => $"{s.Orden}. {(s.Tipo == Taller.Dominio.Enumeraciones.TipoSolicitudIngreso.TrabajoSolicitado ? "Solicita" : "Informa")}: {s.Descripcion}")))
+                + $"\r\nKilometraje de ingreso: {_atencion.KilometrajeRecepcion?.ToString("N0") ?? "No informado"}\r\nObservaciones: {_atencion.ObservacionesRecepcion}";
             bool recepcion = _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId;
             grpIngreso.Visible = recepcion && _atencion.Estado == Taller.Dominio.Enumeraciones.EstadoAtencion.Abierta;
             btnConfirmarIngreso.Visible = grpIngreso.Visible;

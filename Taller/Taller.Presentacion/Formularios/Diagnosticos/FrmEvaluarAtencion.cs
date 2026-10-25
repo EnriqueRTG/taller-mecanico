@@ -46,6 +46,11 @@ public partial class FrmEvaluarAtencion : Form
         _cargando = true;
         _datos = d;
         txtResumen.Text = $"Atención {d.IdAtencion:D6} · {d.Cliente} · {d.Vehiculo}\nSolicitud: {d.TipoSolicitud} · {d.Motivo}" + (string.IsNullOrWhiteSpace(d.MotivoRevision) ? "" : $"\nRevisión solicitada: {d.MotivoRevision}");
+        txtResumen.Text += "\r\n" + string.Join(" | ", d.Solicitudes.Select(s => s.Etiqueta))
+            + (string.IsNullOrWhiteSpace(d.ObservacionesRecepcion) ? "" : "\r\nIngreso: " + d.ObservacionesRecepcion);
+        cboSolicitud.DisplayMember = nameof(SolicitudIngresoDto.Etiqueta);
+        cboSolicitud.DataSource = d.Solicitudes;
+        cboSolicitud.Visible = d.Solicitudes.Count > 0;
         chkInforme.Checked = d.IncluyeDiagnostico;
         chkInforme.Enabled = d.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido && !d.InformeHistorico;
         txtHallazgo.ReadOnly = d.InformeHistorico;
@@ -59,6 +64,11 @@ public partial class FrmEvaluarAtencion : Form
         nudKm.Value = d.Kilometraje ?? 0;
         chkKm.Checked = d.Kilometraje.HasValue;
         _items = new BindingList<ItemPropuestaDto>(d.Items);
+        foreach (var item in _items)
+        {
+            if (!item.IdSolicitudAtencion.HasValue && d.Solicitudes.Count == 1) item.IdSolicitudAtencion = d.Solicitudes[0].IdSolicitud;
+            item.SolicitudDescripcion = d.Solicitudes.FirstOrDefault(s => s.IdSolicitud == item.IdSolicitudAtencion)?.Descripcion ?? "";
+        }
         dgvItems.DataSource = _items;
         _iniciales = new BindingList<ServicioEvaluadoDto>(d.ServiciosIniciales);
         dgvIniciales.DataSource = _iniciales;
@@ -84,7 +94,9 @@ public partial class FrmEvaluarAtencion : Form
         btnGuardar.Text = "Guardar borrador";
         btnSeguimiento.Visible = informe;
         lblAviso.Text = informe ? "Complete el informe y el presupuesto. Guarde un borrador para continuar después." : "Presupueste lo solicitado. Enviar a recepción no autoriza ejecutar trabajos.";
-        tabs.SelectedTab = informe ? tabInforme : tabPropuesta;
+        // La clasificación de recepción orienta, pero no obliga a inventar un diagnóstico.
+        if (_datos.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido) tabs.SelectedTab = tabPropuesta;
+        else tabs.SelectedTab = informe ? tabInforme : tabPropuesta;
     }
 
     private void Cambiado(object? s, EventArgs e)
@@ -121,7 +133,7 @@ public partial class FrmEvaluarAtencion : Form
         ValidateChildren();
         if (cboConcepto.SelectedItem is not ConceptoPropuestaDto c)
             return;
-        if (_items.Any(i => i.IdConcepto == c.IdConcepto))
+        if (_items.Any(i => i.IdConcepto == c.IdConcepto && i.IdSolicitudAtencion == (cboSolicitud.SelectedItem as SolicitudIngresoDto)?.IdSolicitud))
         {
             MessageBox.Show(this, "El concepto ya está agregado. Quite la fila para reemplazarlo.");
             return;
@@ -135,7 +147,7 @@ public partial class FrmEvaluarAtencion : Form
             return;
         }
 
-        _items.Add(new ItemPropuestaDto { OrigenMaterial = chkAportaCliente.Checked ? OrigenMaterial.Cliente : OrigenMaterial.Taller, IdConcepto = c.IdConcepto, Descripcion = txtDescripcion.Text.Trim(), Cantidad = nudCantidad.Value, PrecioUnitario = chkAportaCliente.Checked ? 0 : nudPrecio.Value });
+        _items.Add(new ItemPropuestaDto { SolicitudDescripcion = (cboSolicitud.SelectedItem as SolicitudIngresoDto)?.Descripcion ?? "", IdSolicitudAtencion = (cboSolicitud.SelectedItem as SolicitudIngresoDto)?.IdSolicitud, OrigenMaterial = chkAportaCliente.Checked ? OrigenMaterial.Cliente : OrigenMaterial.Taller, IdConcepto = c.IdConcepto, Descripcion = txtDescripcion.Text.Trim(), Cantidad = nudCantidad.Value, PrecioUnitario = chkAportaCliente.Checked ? 0 : nudPrecio.Value });
         _sucio = true;
         ActualizarTotal();
     }

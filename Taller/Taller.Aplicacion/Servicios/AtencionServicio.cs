@@ -104,8 +104,36 @@ public sealed class AtencionServicio
     /// Se produce cuando alguna entidad asociada no existe,
     /// se encuentra inactiva o el vehículo ya posee una atención activa.
     /// </exception>
-    public async Task<Atencion> RegistrarAsync(int idCliente, int idVehiculo, int idUsuarioRecepcion, string motivoConsulta, TipoSolicitudAtencion tipoSolicitud = TipoSolicitudAtencion.Problema, bool enviarATaller = false)
+    /// <summary>Recibe el vehículo y envía los pedidos a preparación técnica en un único guardado.</summary>
+    public Task<Atencion> RegistrarRecepcionAsync(RegistrarRecepcionDto datos)
     {
+        ArgumentNullException.ThrowIfNull(datos);
+        var solicitudes = ValidarSolicitudes(datos.Solicitudes);
+        if (datos.Kilometraje is < 0) throw new ValidacionException("El kilometraje no puede ser negativo.");
+        if (datos.ObservacionesRecepcion?.Trim().Length > 1000) throw new ValidacionException("Las observaciones de recepción admiten hasta 1000 caracteres.");
+        var tipo = solicitudes.All(s => s.Tipo == TipoSolicitudIngreso.TrabajoSolicitado) ? TipoSolicitudAtencion.ServicioDefinido
+            : solicitudes.All(s => s.Tipo == TipoSolicitudIngreso.ProblemaInformado) ? TipoSolicitudAtencion.Problema : TipoSolicitudAtencion.Mixta;
+        var resumen = string.Join("; ", solicitudes.Select(s => s.Descripcion));
+        return RegistrarAsync(datos.IdCliente, datos.IdVehiculo, datos.IdUsuarioRecepcion, resumen[..Math.Min(resumen.Length, 500)], tipo,
+            enviarATaller: true, solicitudes: solicitudes, kilometraje: datos.Kilometraje, observaciones: datos.ObservacionesRecepcion);
+    }
+
+    private static List<SolicitudIngresoDto> ValidarSolicitudes(IReadOnlyList<SolicitudIngresoDto>? solicitudes)
+    {
+        if (solicitudes is null || solicitudes.Count is < 1 or > 20 || solicitudes.Any(s => s is null))
+            throw new ValidacionException("Registre entre 1 y 20 solicitudes del cliente.");
+        if (solicitudes.Any(s => !Enum.IsDefined(s.Tipo) || string.IsNullOrWhiteSpace(s.Descripcion) || s.Descripcion.Trim().Length > 500))
+            throw new ValidacionException("Cada solicitud requiere un tipo válido y una descripción de hasta 500 caracteres.");
+        if (solicitudes.Select(s => s.Descripcion.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() != solicitudes.Count)
+            throw new ValidacionException("No repita la misma solicitud.");
+        return solicitudes.Select(s => new SolicitudIngresoDto { Tipo = s.Tipo, Descripcion = s.Descripcion.Trim() }).ToList();
+    }
+
+    public async Task<Atencion> RegistrarAsync(int idCliente, int idVehiculo, int idUsuarioRecepcion, string motivoConsulta, TipoSolicitudAtencion tipoSolicitud = TipoSolicitudAtencion.Problema, bool enviarATaller = false, IReadOnlyList<SolicitudIngresoDto>? solicitudes = null, int? kilometraje = null, string? observaciones = null)
+    {
+        var pedidos = solicitudes is null ? new List<SolicitudIngresoDto>() : ValidarSolicitudes(solicitudes);
+        if (kilometraje is < 0 || observaciones?.Trim().Length > 1000)
+            throw new ValidacionException("Revise kilometraje y observaciones de recepción.");
         if (!Enum.IsDefined(tipoSolicitud))
             throw new ValidacionException("Seleccione el tipo de solicitud.");
         var recepcion = await ObtenerAdministrativoActualAsync();
@@ -129,6 +157,9 @@ public sealed class AtencionServicio
             IdVehiculo = idVehiculo,
             IdUsuarioRecepcion = idUsuarioRecepcion,
             TipoSolicitud = tipoSolicitud,
+            KilometrajeRecepcion = kilometraje,
+            ObservacionesRecepcion = string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim(),
+            Solicitudes = pedidos.Select((s, i) => new SolicitudAtencion { Orden = i + 1, Tipo = s.Tipo, Descripcion = s.Descripcion }).ToList(),
             FechaApertura = FechaHoraTaller.Ahora,
             MotivoConsulta = motivoConsulta,
             Estado = enviarATaller ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.Abierta,
@@ -167,6 +198,8 @@ public sealed class AtencionServicio
         }
 
         motivoConsulta = NormalizarMotivoConsulta(motivoConsulta);
+        if (atencion.Solicitudes.Count > 0 && (motivoConsulta != atencion.MotivoConsulta || tipoSolicitud.HasValue && tipoSolicitud != atencion.TipoSolicitud))
+            throw new ValidacionException("Esta atención conserva solicitudes individuales. Sus pedidos originales no se sustituyen desde la edición del resumen.");
         await ValidarClienteAsync(idCliente);
         await ValidarVehiculoAsync(idVehiculo);
         if (atencion.IdVehiculo != idVehiculo && await _atencionRepositorio.ExisteAtencionActivaParaVehiculoAsync(idVehiculo))

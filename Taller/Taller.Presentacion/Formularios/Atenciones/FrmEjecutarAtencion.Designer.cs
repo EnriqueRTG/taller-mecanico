@@ -92,7 +92,7 @@ partial class FrmEjecutarAtencion
         txtObservaciones.ScrollBars = ScrollBars.Vertical;
         txtObservaciones.PlaceholderText = "Revisión del alcance, resultado del trabajo o motivo de interrupción.";
         txtObservaciones.TextChanged += TextoCambiado;
-        btnTomar.Text = "Validar alcance y tomar";
+        btnTomar.Text = "Iniciar ejecución";
         btnTomar.AutoSize = true;
         btnTomar.Height = 34;
         btnTomar.Click += Tomar;
@@ -102,6 +102,9 @@ partial class FrmEjecutarAtencion
         btnGuardar.Height = 34;
         btnGuardar.Click += Guardar;
         flpAcciones.Controls.Add(btnGuardar);
+        btnCompletar = new Button { Name = "btnCompletarSeleccionada", Text = "Completar fila seleccionada", AutoSize = true, FlatStyle = FlatStyle.Flat };
+        btnCompletar.Click += CompletarSeleccionada;
+        flpAcciones.Controls.Add(btnCompletar);
         btnLiberar.Text = "Liberar actividad";
         btnLiberar.AutoSize = true;
         btnLiberar.Height = 34;
@@ -125,7 +128,11 @@ partial class FrmEjecutarAtencion
             Height = 34
         };
         btnSeguimiento.Click += Seguimiento;
-        flpAcciones.AutoScroll = true;
+        chkConformidad = new CheckBox { Name = "chkConformidadTecnica", Text = "Comprobé el resultado y doy conformidad técnica", AutoSize = true };
+        flpAcciones.Controls.Add(chkConformidad);
+        flpAcciones.AutoSize = true;
+        flpAcciones.WrapContents = true;
+        tlpPrincipal.RowStyles[4].SizeType = SizeType.AutoSize;
         flpAcciones.Controls.Add(btnSeguimiento);
         btnCerrar.Text = "Cerrar";
         btnCerrar.AutoSize = true;
@@ -153,6 +160,8 @@ partial class FrmEjecutarAtencion
     private DataGridView dgvItems = null!;
     private TextBox txtObservaciones = null!;
     private FlowLayoutPanel flpAcciones = null!;
+    private CheckBox chkConformidad = null!;
+    private Button btnCompletar = null!;
     private Button btnTomar = null!;
     private Button btnGuardar = null!;
     private Button btnLiberar = null!;

@@ -159,7 +159,7 @@ public partial class FrmVehiculos : Form, IFormularioConOperacion
         if (vehiculo is null)
             return;
         using FrmHistorialVehiculo formulario = _proveedorServicios.GetRequiredService<FrmHistorialVehiculo>();
-        formulario.PrepararConsulta(vehiculo.Dominio, vehiculo.Modelo, vehiculo.Anio, vehiculo.UltimoClienteAtendido);
+        formulario.PrepararConsulta(vehiculo.Dominio);
         formulario.ShowDialog(this);
     }
 

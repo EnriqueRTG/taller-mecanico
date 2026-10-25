@@ -149,7 +149,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnIniciarProceso.Visible = puedeGestionar;
             btnCancelarAtencion.Visible = puedeGestionar;
             btnRegistrarEntrega.Visible = puedeGestionar;
-            btnVerHistorial.Visible = puedeConsultarComoTecnico;
+            btnVerHistorial.Visible = puedeGestionar || puedeConsultarComoTecnico;
             btnRegistrarDiagnostico.Visible = puedeConsultarComoTecnico;
             btnFinalizarTrabajo.Visible = puedeConsultarComoTecnico;
             colRecepcion.Visible = puedeGestionar;
@@ -399,7 +399,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnCancelarAtencion.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
-            btnVerHistorial.Enabled = puedeConsultarComoTecnico;
+            btnVerHistorial.Enabled = puedeGestionar || puedeConsultarComoTecnico;
             bool puedeTomarDiagnostico = !fila.EvaluacionFinalizada && (fila.EstadoValor == EstadoAtencion.PendienteDiagnostico || fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad is null && fila.ActividadTecnica is null;
             bool puedeRegistrarDiagnostico = fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica && fila.IdTecnicoEnActividad == usuario.Id && fila.ActividadTecnica is ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto;
             btnRegistrarDiagnostico.Text = puedeRegistrarDiagnostico ? "Continuar" : fila.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido ? "Preparar presupuesto" : "Diagnosticar y presupuestar";
@@ -726,6 +726,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
 
             using var formulario = _serviceProvider.GetRequiredService<FrmHistorialVehiculo>();
+            formulario.PrepararConsulta(fila.Dominio);
             formulario.ShowDialog(this);
         }
 

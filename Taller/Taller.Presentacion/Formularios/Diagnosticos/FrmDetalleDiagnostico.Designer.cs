@@ -1,4 +1,4 @@
-﻿namespace Taller.Presentacion.Formularios.Diagnosticos
+namespace Taller.Presentacion.Formularios.Diagnosticos
 {
     partial class FrmDetalleDiagnostico
     {
@@ -70,7 +70,13 @@
             tlpDetalle.Controls.Add(txtFallaDetectada, 1, 5);
             tlpDetalle.Controls.Add(txtTrabajoRecomendado, 1, 6);
             tlpDetalle.Controls.Add(txtObservaciones, 1, 7);
-            tlpDetalle.Controls.Add(btnCerrar, 1, 8);
+            var acciones = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = false, AutoScroll = true };
+            btnExportar = new Button { Name = "btnExportar", Text = "Exportar HTML", AutoSize = true, Height = 34, Enabled = false };
+            btnExportar.Click += Exportar;
+            btnImprimir = new Button { Name = "btnImprimir", Text = "Imprimir / PDF", AutoSize = true, Height = 34, Enabled = false };
+            btnImprimir.Click += Imprimir;
+            acciones.Controls.AddRange(new Control[] { btnExportar, btnImprimir, btnCerrar });
+            tlpDetalle.Controls.Add(acciones, 1, 8);
             tlpDetalle.Dock = DockStyle.Fill;
             tlpDetalle.Location = new Point(16, 16);
             tlpDetalle.Name = "tlpDetalle";
@@ -294,6 +300,8 @@
         private TextBox txtFallaDetectada;
         private TextBox txtTrabajoRecomendado;
         private TextBox txtObservaciones;
+        private Button btnExportar;
+        private Button btnImprimir;
         private Button btnCerrar;
     }
 }

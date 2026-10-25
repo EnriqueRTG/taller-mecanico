@@ -48,6 +48,7 @@ internal static class Program
         VerificarUniformidadListados(proveedor);
         VerificarRecorridoTecnico(proveedor);
         VerificarSolicitudesIngreso(proveedor);
+        VerificarContextoHistorial(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -92,6 +93,22 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarContextoHistorial(IServiceProvider proveedor)
+    {
+        foreach (int rol in new[] { RolesSistema.AdministrativoId, RolesSistema.TecnicoId })
+        {
+            using var scope = proveedor.CreateScope();
+            scope.ServiceProvider.GetRequiredService<SesionUsuario>().Iniciar(new Usuario { Id = rol, RolId = rol });
+            using var historial = scope.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Vehiculos.FrmHistorialVehiculo>();
+            historial.PrepararConsulta(" aa111bb ");
+            var dominio = (string)historial.GetType().GetField("_dominio", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(historial)!;
+            if (dominio != "AA111BB") throw new InvalidOperationException("El historial perdió el vehículo seleccionado.");
+            try { historial.PrepararConsulta(""); throw new InvalidOperationException("No debe admitirse una consulta sin vehículo."); }
+            catch (ArgumentException) { }
+        }
+        Console.WriteLine("Historial: contexto de dominio explícito y normalizado para recepción y técnico.");
     }
 
     private static void VerificarSolicitudesIngreso(IServiceProvider proveedor)

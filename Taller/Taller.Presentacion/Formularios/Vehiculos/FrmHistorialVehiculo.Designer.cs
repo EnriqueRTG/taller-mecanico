@@ -138,7 +138,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             lblDescripcion.Name = "lblDescripcion";
             lblDescripcion.Size = new Size(601, 38);
             lblDescripcion.TabIndex = 1;
-            lblDescripcion.Text = "Consulte las atenciones anteriores y los trabajos realizados.";
+            lblDescripcion.Text = "Consulte las atenciones anteriores y sus informes técnicos.";
             // 
             // lblDominioEncabezado
             // 
@@ -429,7 +429,7 @@ namespace Taller.Presentacion.Formularios.Vehiculos
             // 
             colTrabajo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colTrabajo.FillWeight = 5.18014765F;
-            colTrabajo.HeaderText = "Trabajo realizado";
+            colTrabajo.HeaderText = "Trabajo recomendado";
             colTrabajo.Name = "colTrabajo";
             colTrabajo.ReadOnly = true;
             colTrabajo.Width = 260;

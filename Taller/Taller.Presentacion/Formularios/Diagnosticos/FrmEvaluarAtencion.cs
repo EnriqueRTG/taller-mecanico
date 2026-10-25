@@ -45,9 +45,10 @@ public partial class FrmEvaluarAtencion : Form
     {
         _cargando = true;
         _datos = d;
-        txtResumen.Text = $"Atención {d.IdAtencion:D6} · {d.Cliente} · {d.Vehiculo}\nSolicitud: {d.TipoSolicitud} · {d.Motivo}" + (string.IsNullOrWhiteSpace(d.MotivoRevision) ? "" : $"\nRevisión solicitada: {d.MotivoRevision}");
-        txtResumen.Text += "\r\n" + string.Join(" | ", d.Solicitudes.Select(s => s.Etiqueta))
-            + (string.IsNullOrWhiteSpace(d.ObservacionesRecepcion) ? "" : "\r\nIngreso: " + d.ObservacionesRecepcion);
+        var pedidos = d.Solicitudes.Count == 0 ? d.Motivo : string.Join(" | ", d.Solicitudes.Select(s => s.Etiqueta));
+        txtResumen.Text = $"Atención {d.IdAtencion:D6} · {d.Cliente} · {d.Vehiculo}{Environment.NewLine}{pedidos}"
+            + (string.IsNullOrWhiteSpace(d.MotivoRevision) ? "" : $"{Environment.NewLine}Revisión solicitada: {d.MotivoRevision}")
+            + (string.IsNullOrWhiteSpace(d.ObservacionesRecepcion) ? "" : Environment.NewLine + "Ingreso: " + d.ObservacionesRecepcion);
         cboSolicitud.DisplayMember = nameof(SolicitudIngresoDto.Etiqueta);
         cboSolicitud.DataSource = d.Solicitudes;
         cboSolicitud.Visible = d.Solicitudes.Count > 0;

@@ -13,6 +13,7 @@ partial class FrmEvaluarAtencion
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container();
+        ayuda = new ToolTip(components) { AutoPopDelay = 18000, InitialDelay = 400, ReshowDelay = 200 };
         tlpPrincipal = new TableLayoutPanel();
         tlpPrincipal.Name = "tlpPrincipal";
         txtResumen = new TextBox();
@@ -332,6 +333,14 @@ partial class FrmEvaluarAtencion
         flpAcciones.AutoSize = true;
         flpAcciones.WrapContents = true;
         tlpPrincipal.RowStyles[3].SizeType = SizeType.AutoSize;
+        ayuda.SetToolTip(chkInforme, "Es obligatorio cuando se informó un problema o síntoma. Para trabajos definidos puede incluirse si el técnico necesita documentar una comprobación. No autoriza reparaciones ni genera cargos.");
+        ayuda.SetToolTip(chkKm, "Marcado: se conserva el kilometraje mostrado. Desmarcado: no se registra kilometraje en este informe. Puede provenir de la recepción; verifique el valor.");
+        ayuda.SetToolTip(chkSinPropuesta, "Solo para terminar una evaluación sin presupuesto de reparación. Requiere explicar el motivo en Observaciones y dejar vacío el presupuesto. No lo marque si va a proponer trabajos.");
+        ayuda.SetToolTip(btnGuardar, "Guarda informe e ítems como borrador. Permite continuar después y mantiene la reserva del técnico. No envía ni autoriza trabajos.");
+        ayuda.SetToolTip(btnFinalizar, "Finaliza la preparación y envía el presupuesto a recepción. El cliente debe aceptarlo antes de ejecutar. Si finaliza sin propuesta, pasa a resolver el cierre económico.");
+        ayuda.SetToolTip(btnCerrar, "Cierra la ventana. Los avances guardados y la reserva se conservan; si hay cambios sin guardar, solicita confirmación para descartarlos.");
+        ayuda.SetToolTip(btnSeguimiento, "Alternativa: si investigar requiere tareas adicionales con costo o mayor alcance, prepare una propuesta de inspección y obtenga autorización antes de realizarlas. No es necesario para enviar el presupuesto habitual.");
+        ayuda.SetToolTip(cboSolicitud, "Seleccione el pedido al que responde el ítem que está por agregar. En una atención mixta, cada concepto conserva su vínculo con la solicitud original.");
         Load += Cargar;
         FormClosing += AlCerrar;
         BackColor = Color.FromArgb(248, 250, 252);
@@ -347,6 +356,7 @@ partial class FrmEvaluarAtencion
         ResumeLayout(false);
     }
 
+    private ToolTip ayuda = null!;
     private Button btnSeguimiento = null!;
     private CheckBox chkAportaCliente = null!;
     private ComboBox cboSolicitud = null!;

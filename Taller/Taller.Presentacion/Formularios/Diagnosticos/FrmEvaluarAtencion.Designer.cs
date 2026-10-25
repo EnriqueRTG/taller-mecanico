@@ -237,7 +237,7 @@ partial class FrmEvaluarAtencion
         dgvItems.Dock = DockStyle.Fill;
         var resumenLista = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
         resumenLista.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        resumenLista.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112));
+        resumenLista.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
         resumenLista.Controls.Add(lblTotal, 0, 0);
         resumenLista.Controls.Add(btnQuitar, 1, 0);
         tlpPropuesta.Controls.Add(resumenLista, 0, 7);
@@ -264,14 +264,15 @@ partial class FrmEvaluarAtencion
         nudPrecio.DecimalPlaces = 2;
         nudPrecio.Maximum = 1000000000;
         nudPrecio.Width = 120;
-        btnAgregar.Text = "Agregar ítem";
+        btnAgregar.Text = "+ Agregar ítem";
         btnAgregar.AutoSize = true;
         btnAgregar.Height = 34;
         btnAgregar.Click += Agregar;
         flpItem.Controls.Add(btnAgregar);
-        btnQuitar.Text = "Quitar ítem";
+        btnQuitar.Text = "− Quitar seleccionado";
         btnQuitar.AutoSize = true;
         btnQuitar.Height = 34;
+        btnQuitar.Margin = Padding.Empty;
         btnQuitar.Click += Quitar;
 
         dgvItems.AutoGenerateColumns = false;
@@ -378,6 +379,8 @@ partial class FrmEvaluarAtencion
         txtResumen.Multiline = true;
         txtResumen.ScrollBars = ScrollBars.Vertical;
         txtResumen.TabStop = false;
+        foreach (var boton in new[] { btnAgregar, btnQuitar, btnSeguimiento, btnGuardar, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
+        ayuda.SetToolTip(btnSeguimiento, "Use esta excepción cuando determinar la causa requiera inspección adicional fuera del alcance habitual. Registre el hallazgo, prepare la propuesta de inspección y espere autorización. Un problema observado en la inspección normal se documenta en este informe.");
         ResumeLayout(false);
 
         static Control Campo(string etiqueta, Control editor)

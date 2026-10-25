@@ -48,6 +48,24 @@ public sealed class CircuitoCobrosPruebas
         Assert.All((await c.Seguimiento.ObtenerAsync(1)).Progreso, i => Assert.Equal(EstadoEjecucionDetalle.Completado, i.Estado));
     }
 
+    [Fact]
+    public async Task EntregaEstructuradaExigeResponsableConformidadYCuentaSaldada()
+    {
+        using var c = new Caso();
+        await c.AceptarAsync(); await c.EjecutarAsync(); var documento = await c.LiquidarAsync();
+        var cuenta = await c.Cobros.ObtenerAsync(1);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Cobros.EntregarAsync(new RegistrarEntregaDto { IdAtencion = 1, Version = cuenta.VersionAtencion, PersonaRetira = "", ConformidadRecepcion = true }));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Cobros.EntregarAsync(new RegistrarEntregaDto { IdAtencion = 1, Version = cuenta.VersionAtencion, PersonaRetira = "Ana Pérez" }));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Cobros.EntregarAsync(new RegistrarEntregaDto { IdAtencion = 1, Version = cuenta.VersionAtencion, PersonaRetira = "Ana Pérez", ConformidadRecepcion = true }));
+        await c.Cobros.RegistrarPagoAsync(Caso.Pago(documento, documento.Total)); await c.VersionesAsync();
+        cuenta = await c.Cobros.ObtenerAsync(1);
+        await c.Cobros.EntregarAsync(new RegistrarEntregaDto { IdAtencion = 1, Version = cuenta.VersionAtencion, PersonaRetira = "Ana Pérez", ConformidadRecepcion = true, Observaciones = "Retiro presencial" });
+        var cerrada = await c.Cobros.ObtenerAsync(1);
+        Assert.Equal(EstadoAtencion.Cerrada, cerrada.Estado);
+        Assert.Contains("Ana Pérez", cerrada.Resumen);
+        Assert.Contains("Retiro presencial", cerrada.Resumen);
+    }
+
     private sealed class Caso : IDisposable
     {
         public TallerDbContext Db { get; }

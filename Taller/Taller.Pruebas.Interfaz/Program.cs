@@ -51,6 +51,7 @@ internal static class Program
         VerificarContextoHistorial(proveedor);
         VerificarEditorPresupuesto(proveedor);
         VerificarEjecucionYConsulta(proveedor);
+        VerificarCobroRestanteYEntrega(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -95,6 +96,24 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarCobroRestanteYEntrega(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var pago = new Taller.Presentacion.Formularios.Comprobantes.FrmRegistrarPago(new Taller.Aplicacion.DTOs.Cobros.ComprobanteDto { Total = 19520.15m }, scope.ServiceProvider.GetRequiredService<CobroServicio>());
+        var medios = (System.ComponentModel.BindingList<Taller.Aplicacion.DTOs.Cobros.PagoMedioDto>)pago.GetType().GetField("_medios", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(pago)!;
+        medios.Add(new() { Importe = 19000 });
+        pago.GetType().GetMethod("UsarRestante", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(pago, [null, EventArgs.Empty]);
+        if (((NumericUpDown)pago.Controls.Find("nudImporte", true).Single()).Value != 520.15m) throw new InvalidOperationException("Usar restante pierde el importe exacto o los centavos.");
+        using var entrega = new Taller.Presentacion.Formularios.Comprobantes.FrmRegistrarEntrega("Ana Pérez", "Trabajos finalizados");
+        if (entrega.PersonaRetira != "Ana Pérez" || entrega.Conformidad) throw new InvalidOperationException("La entrega debe proponer al cliente sin afirmar conformidad por él.");
+        using var ejecucion = new Taller.Presentacion.Formularios.Atenciones.FrmEjecutarAtencion(1,
+            scope.ServiceProvider.GetRequiredService<EjecucionServicio>(), scope.ServiceProvider.GetRequiredService<SesionUsuario>(), scope.ServiceProvider);
+        var iniciar = ejecucion.Controls.Find("btnTomar", true).Single();
+        var acciones = ejecucion.Controls.Find("flpAcciones", true).Single();
+        if (iniciar.Parent == acciones) throw new InvalidOperationException("Iniciar ejecución debe preceder a la lista, fuera del grupo inferior.");
+        Console.WriteLine("Cobros: restante exacto; retiro prefijado sin conformidad automática; inicio de ejecución separado.");
     }
 
     private static void VerificarEjecucionYConsulta(IServiceProvider proveedor)

@@ -135,7 +135,7 @@ partial class FrmPresupuestos
         btnVer.Height = 34;
         btnVer.Click += Ver;
         flpAcciones.Controls.Add(btnVer);
-        btnPresentar.Text = "Informar al cliente";
+        btnPresentar.Text = "Marcar como informado";
         btnPresentar.AutoSize = true;
         btnPresentar.Height = 34;
         btnPresentar.Click += Presentar;

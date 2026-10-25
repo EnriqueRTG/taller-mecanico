@@ -511,6 +511,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 Height = 34,
                 Enabled = false
             };
+            btnSeguimiento.Visible = false;
             btnSeguimiento.Click += VerSeguimiento;
             flpAcciones.Controls.Add(btnSeguimiento);
             flpAcciones.Controls.Add(btnVerDetalle);

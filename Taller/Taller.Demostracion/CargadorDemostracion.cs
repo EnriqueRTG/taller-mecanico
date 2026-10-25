@@ -68,7 +68,6 @@ public static class CargadorDemostracion
         var catalogo = await db.Conceptos.AsNoTracking().Where(c => c.Activo).ToListAsync();
         var servicios = catalogo.Where(c => c.Tipo == TipoConcepto.Servicio && !c.DisponibleParaIngreso).ToList();
         var repuestos = catalogo.Where(c => c.Tipo == TipoConcepto.Repuesto).ToList();
-        var ingreso = catalogo.First(c => c.Tipo == TipoConcepto.Servicio && c.DisponibleParaIngreso);
         var recepcionServicio = sp.GetRequiredService<AtencionServicio>();
         var evaluacion = sp.GetRequiredService<EvaluacionServicio>();
         var presupuestos = sp.GetRequiredService<PresupuestoServicio>();
@@ -89,7 +88,13 @@ public static class CargadorDemostracion
             int tecnico = tecnicos[i % tecnicos.Count];
             await Entrar(i % 2 == 0 ? recepcion.Id : recepcionDos.Id);
             bool definido = i % 3 == 1;
-            var atencion = await recepcionServicio.RegistrarAsync(idsClientes[i % 40], idsVehiculos[i], sesion.UsuarioActual!.Id, $"DEMO-{i + 1:000} · {motivos[i % 6]}", definido ? TipoSolicitudAtencion.ServicioDefinido : TipoSolicitudAtencion.Problema);
+            var atencion = etapa == 15
+                ? await recepcionServicio.RegistrarAsync(idsClientes[i % 40], idsVehiculos[i], sesion.UsuarioActual!.Id, $"DEMO-{i + 1:000} · Apertura anterior cancelada", TipoSolicitudAtencion.ServicioDefinido)
+                : await recepcionServicio.RegistrarRecepcionAsync(new() {
+                    IdCliente = idsClientes[i % 40], IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
+                    Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Ingreso de demostración del circuito actual. Sin cargos automáticos.",
+                    Solicitudes = [new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {motivos[i % 6]}" }]
+                });
             int id = atencion.IdAtencion;
             if (etapa == 0)
             {
@@ -104,10 +109,6 @@ public static class CargadorDemostracion
                 continue;
             }
 
-            if (!definido)
-                await recepcionServicio.ConfirmarIngresoAsync(new() { IdAtencion = id, VersionAtencion = await Version(id), ClienteAutoriza = true, Servicios = [new() { IdConcepto = ingreso.IdConcepto, PrecioUnitario = 12000 }] });
-            else
-                await evaluacion.EnviarAEvaluacionAsync(id, TipoSolicitudAtencion.ServicioDefinido, await Version(id));
             if (etapa == 1)
             {
                 await FecharAsync(db, id, i);
@@ -126,12 +127,14 @@ public static class CargadorDemostracion
             var repuesto = repuestos[i % repuestos.Count];
             datos.Items = [new()
             {
+                IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud,
                 IdConcepto = servicio.IdConcepto,
                 Descripcion = servicio.Nombre,
                 Cantidad = 1,
                 PrecioUnitario = 20000 + i * 150
             }, new()
             {
+                IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud,
                 IdConcepto = repuesto.IdConcepto,
                 Descripcion = repuesto.Nombre,
                 Cantidad = 1,
@@ -165,17 +168,17 @@ public static class CargadorDemostracion
             }
 
             var gestion = await Actual(propuesta.IdPresupuesto);
-            await presupuestos.DecidirAsync(new() { IdPresupuesto = gestion.IdPresupuesto, Version = gestion.Version, ItemsAceptados = etapa == 5 ? [] : etapa == 6 ? [gestion.Items[0].IdDetalle] : gestion.Items.Select(x => x.IdDetalle).ToList(), Observaciones = etapa == 5 ? "Cliente rechaza la propuesta y solicita coordinar el retiro." : etapa == 6 ? "Cliente solicita solo una parte; requiere revisión técnica." : "Cliente acepta el alcance y sus importes." });
+            await presupuestos.DecidirAsync(new() { PersonaDecision = "Cliente de demostración", MedioDecision = "Presencial", IdPresupuesto = gestion.IdPresupuesto, Version = gestion.Version, ItemsAceptados = etapa == 5 ? [] : etapa == 6 ? [gestion.Items[0].IdDetalle] : gestion.Items.Select(x => x.IdDetalle).ToList(), Observaciones = etapa == 5 ? "Cliente rechaza la propuesta y solicita coordinar el retiro." : etapa == 6 ? "Cliente solicita solo una parte; requiere revisión técnica." : "Cliente acepta el alcance y sus importes." });
             if (etapa == 6 && i >= 32)
             {
                 await Entrar(tecnico);
                 var original = await presupuestos.ObtenerAsync(gestion.IdPresupuesto);
-                int revisado = await seguimiento.RevisarSeleccionAsync(original.IdPresupuesto, original.Version, [new() { IdConcepto = original.Items[0].IdConcepto, Descripcion = original.Items[0].Descripcion, Cantidad = original.Items[0].Cantidad, PrecioUnitario = original.Items[0].PrecioUnitario }], "Se revisan las dependencias: el alcance seleccionado es viable por separado.");
+                int revisado = await seguimiento.RevisarSeleccionAsync(original.IdPresupuesto, original.Version, [new() { IdSolicitudAtencion = original.Items[0].IdSolicitudAtencion, IdConcepto = original.Items[0].IdConcepto, Descripcion = original.Items[0].Descripcion, Cantidad = original.Items[0].Cantidad, PrecioUnitario = original.Items[0].PrecioUnitario }], "Se revisan las dependencias: el alcance seleccionado es viable por separado.");
                 await Entrar(recepcion.Id);
                 var revision = await Actual(revisado);
                 await evaluacion.PresentarAsync(revisado, revision.Version);
                 revision = await Actual(revisado);
-                await presupuestos.DecidirAsync(new() { IdPresupuesto = revisado, Version = revision.Version, ItemsAceptados = revision.Items.Select(x => x.IdDetalle).ToList(), Observaciones = "Acepta la nueva versión revisada por el técnico." });
+                await presupuestos.DecidirAsync(new() { PersonaDecision = "Cliente de demostración", MedioDecision = "Presencial", IdPresupuesto = revisado, Version = revision.Version, ItemsAceptados = revision.Items.Select(x => x.IdDetalle).ToList(), Observaciones = "Acepta la nueva versión revisada por el técnico." });
             }
 
             if (etapa is 5 or 6 or 7)
@@ -230,6 +233,7 @@ public static class CargadorDemostracion
                 item.CantidadEjecutada = item.CantidadAutorizada;
             }
 
+            trabajo.ConformidadTecnica = true;
             trabajo.Observaciones = "Técnico confirma trabajos realizados y comprobación final satisfactoria.";
             await ejecucion.GuardarAsync(trabajo, true);
             if (etapa == 11)

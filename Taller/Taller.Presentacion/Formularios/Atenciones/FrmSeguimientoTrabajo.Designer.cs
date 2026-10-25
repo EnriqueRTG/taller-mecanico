@@ -10,6 +10,8 @@ partial class FrmSeguimientoTrabajo
         base.Dispose(disposing);
     }
 
+    private TabControl tabs = null!;
+    private Button btnImprimirInforme = null!, btnExportarAvance = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblResumen = null!;
     private ComboBox cboTarea = null!;
@@ -43,14 +45,14 @@ partial class FrmSeguimientoTrabajo
             Dock = DockStyle.Fill,
             DropDownStyle = ComboBoxStyle.DropDownList
         };
-        var tabs = new TabControl
+        tabs = new TabControl
         {
             Dock = DockStyle.Fill
         };
-        var hallazgos = new TabPage("Hallazgos e informes");
-        var pausas = new TabPage("Pausas y continuidad");
-        var materiales = new TabPage("Materiales del cliente");
-        var progreso = new TabPage("Avance de trabajos");
+        var hallazgos = new TabPage("Hallazgos e informes") { Name = "tabHallazgos" };
+        var pausas = new TabPage("Pausas y continuidad") { Name = "tabPausas" };
+        var materiales = new TabPage("Materiales del cliente") { Name = "tabMateriales" };
+        var progreso = new TabPage("Avance de trabajos") { Name = "tabAvance" };
         dgvProgreso = new DataGridView { Name = "dgvProgreso", Dock = DockStyle.Fill, AutoGenerateColumns = false, ReadOnly = true,
             AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false, BackgroundColor = Color.White,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells };
@@ -253,9 +255,11 @@ partial class FrmSeguimientoTrabajo
             Text = "Informe de intervención",
             AutoSize = true
         };
+        btnImprimirInforme = imprimir;
         imprimir.Click += Imprimir;
         acciones.Controls.Add(imprimir);
         var exportar = new Button { Text = "Exportar avance HTML", AutoSize = true };
+        btnExportarAvance = exportar;
         exportar.Click += Exportar;
         acciones.Controls.Add(exportar);
         var cerrar = new Button

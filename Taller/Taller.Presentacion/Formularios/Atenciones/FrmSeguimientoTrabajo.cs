@@ -16,6 +16,13 @@ public partial class FrmSeguimientoTrabajo : Form
     private readonly PresupuestoServicio _presupuestos;
     private SeguimientoTrabajoDto? _datos;
     private bool _ocupado;
+    private string? _pestanaInicial;
+    /// <summary>Abre el alcance de la operación solicitada, sin confundirlo con un filtro.</summary>
+    public void PrepararOperacion(string pestana)
+    {
+        if (pestana is not ("tabHallazgos" or "tabPausas" or "tabMateriales")) throw new ArgumentException("Operación desconocida.", nameof(pestana));
+        _pestanaInicial = pestana;
+    }
     public FrmSeguimientoTrabajo(int id, SeguimientoTrabajoServicio servicio, EvaluacionServicio evaluacion, PresupuestoServicio presupuestos, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
@@ -33,6 +40,11 @@ public partial class FrmSeguimientoTrabajo : Form
     {
         Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
         await OperarAsync(() => Task.CompletedTask);
+        if (_pestanaInicial is not null && tabs.TabPages.ContainsKey(_pestanaInicial))
+        {
+            tabs.SelectedTab = tabs.TabPages[_pestanaInicial];
+            if (_pestanaInicial == "tabHallazgos" && !txtDescripcion.ReadOnly) txtDescripcion.Focus();
+        }
     }
 
     private async Task RecargarAsync()
@@ -46,6 +58,12 @@ public partial class FrmSeguimientoTrabajo : Form
         Text = "Progreso y seguimiento de la atención";
         lblResumen.Text = _datos.Resumen + $" · {_datos.Progreso.Count(i => i.Estado == EstadoEjecucionDetalle.Completado)} completados / {_datos.Progreso.Count} autorizados. Avances guardados; use Actualizar para consultar cambios. Los hallazgos son incidencias separadas.";
         dgvProgreso.DataSource = _datos.Progreso;
+        cboTarea.Visible = _datos.PuedeRegistrar;
+        if (!_datos.PuedeRegistrar) tlpPrincipal.RowStyles[1].Height = 0;
+        else tlpPrincipal.RowStyles[1].Height = 38;
+        btnExportarAvance.Enabled = _datos.Progreso.Count > 0;
+        btnImprimirInforme.Enabled = _datos.Progreso.Count > 0 || !string.IsNullOrWhiteSpace(_datos.InformeInicial) || _datos.Hallazgos.Count > 0 || _datos.Pausas.Count > 0;
+        if (_datos.Progreso.Count == 0) lblResumen.Text += " Aún no hay trabajos autorizados para mostrar en Avance.";
         if (txtDescripcion.Parent is TableLayoutPanel hallazgos)
             for (int fila = 1; fila < hallazgos.RowCount; fila++) hallazgos.RowStyles[fila].Height = _datos.PuedeRegistrar ? (fila == 3 ? 48 : 65) : 0;
         if (txtMaterial.Parent is TableLayoutPanel materiales)

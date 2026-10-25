@@ -7,6 +7,7 @@ public sealed class PresupuestoConsultaDto
     /// <summary>Disponibilidad orientativa de revisión; el servicio vuelve a comprobar estado y concurrencia.</summary>
     public bool PuedeSolicitarRevision { get; set; }
     public Taller.Aplicacion.DTOs.Diagnosticos.DiagnosticoDetalleDto? InformeTecnico { get; set; }
+    public bool EsInspeccion { get; set; }
     public bool EsAdicional { get; set; }
     public int IdPresupuesto { get; set; }
     public int IdAtencion { get; set; }
@@ -18,7 +19,7 @@ public sealed class PresupuestoConsultaDto
     public DateTime Fecha { get; set; }
     public EstadoPresupuesto Estado { get; set; }
     public TipoPresupuesto Tipo { get; set; }
-    public string TipoDescripcion => Tipo == TipoPresupuesto.Diagnostico ? "Servicios iniciales" : EsAdicional ? "Adicional" : "Propuesta de trabajo";
+    public string TipoDescripcion => Tipo == TipoPresupuesto.Diagnostico ? "Servicios iniciales" : EsInspeccion ? "Inspección adicional" : EsAdicional ? "Adicional de reparación" : "Propuesta de trabajo";
     public string EstadoDescripcion => Estado switch
     {
         EstadoPresupuesto.Aceptado when Items.Any(i => i.AceptadoPorCliente == false) => "Aceptado parcialmente",

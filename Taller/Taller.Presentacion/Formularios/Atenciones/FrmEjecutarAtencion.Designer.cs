@@ -58,7 +58,12 @@ partial class FrmEjecutarAtencion
         Text = "Ejecución de trabajos autorizados";
         tlpPrincipal.Controls.Add(txtResumen, 0, 0);
         txtResumen.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(lblAviso, 0, 1);
+        var inicio = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+        inicio.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        inicio.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 190));
+        inicio.Controls.Add(lblAviso, 0, 0);
+        inicio.Controls.Add(btnTomar, 1, 0);
+        tlpPrincipal.Controls.Add(inicio, 0, 1);
         lblAviso.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(dgvItems, 0, 2);
         dgvItems.Dock = DockStyle.Fill;
@@ -102,7 +107,7 @@ partial class FrmEjecutarAtencion
         btnTomar.AutoSize = true;
         btnTomar.Height = 34;
         btnTomar.Click += Tomar;
-        flpAcciones.Controls.Add(btnTomar);
+
         btnGuardar.Text = "Guardar avance";
         btnGuardar.AutoSize = true;
         btnGuardar.Height = 34;
@@ -115,7 +120,7 @@ partial class FrmEjecutarAtencion
         btnLiberar.AutoSize = true;
         btnLiberar.Height = 34;
         btnLiberar.Click += Liberar;
-        flpAcciones.Controls.Add(btnLiberar);
+
         btnFinalizar.Text = "Finalizar trabajo";
         btnFinalizar.AutoSize = true;
         btnFinalizar.Height = 34;
@@ -125,7 +130,7 @@ partial class FrmEjecutarAtencion
         btnInterrumpir.AutoSize = true;
         btnInterrumpir.Height = 34;
         btnInterrumpir.Click += Interrumpir;
-        flpAcciones.Controls.Add(btnInterrumpir);
+
         btnSeguimiento = new Button
         {
             Name = "btnSeguimiento",
@@ -140,7 +145,7 @@ partial class FrmEjecutarAtencion
         flpAcciones.AutoSize = true;
         flpAcciones.WrapContents = true;
 
-        flpAcciones.Controls.Add(btnSeguimiento);
+
         btnCerrar.Text = "Cerrar";
         btnCerrar.AutoSize = true;
         btnCerrar.Height = 34;
@@ -158,6 +163,19 @@ partial class FrmEjecutarAtencion
         txtResumen.Multiline = true;
         txtResumen.ScrollBars = ScrollBars.Vertical;
         txtResumen.TabStop = false;
+        menuOpciones = new ContextMenuStrip(components);
+        menuOpciones.Items.Add("Registrar hallazgo / solicitar adicional", null, Hallazgos);
+        menuOpciones.Items.Add("Gestionar pausas", null, Pausas);
+        menuOpciones.Items.Add("Registrar material del cliente", null, Materiales);
+        menuOpciones.Items.Add(new ToolStripSeparator());
+        menuOpciones.Items.Add("Dejar disponible para otro técnico", null, Liberar);
+        menuOpciones.Items.Add("Terminar con interrupción (excepción)", null, Interrumpir);
+        btnOtrasAcciones = new Button { Name = "btnOtrasAcciones", Text = "Otras acciones…", AutoSize = true, Height = 34 };
+        btnOtrasAcciones.Click += MostrarOpciones;
+        flpAcciones.Controls.Add(btnOtrasAcciones);
+        flpAcciones.Controls.SetChildIndex(btnCerrar, flpAcciones.Controls.Count - 1);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnOtrasAcciones);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnTomar);
         flpAcciones.AutoScroll = true;
         var ayuda = new ToolTip(components) { AutoPopDelay = 20000 };
         ayuda.SetToolTip(dgvItems, "Completado aplica toda la cantidad autorizada. Alcanzar esa cantidad también marca Completado. En curso admite cero mientras se trabaja. Parcial es un cierre incompleto y exige motivo; Omitido exige cantidad cero y motivo. Guardar hace visible el avance a recepción.");
@@ -176,6 +194,8 @@ partial class FrmEjecutarAtencion
     private TextBox txtObservaciones = null!;
     private FlowLayoutPanel flpAcciones = null!;
     private CheckBox chkConformidad = null!;
+    private ContextMenuStrip menuOpciones = null!;
+    private Button btnOtrasAcciones = null!;
     private Button btnCompletar = null!;
     private Button btnTomar = null!;
     private Button btnGuardar = null!;

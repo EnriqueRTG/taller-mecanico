@@ -8,6 +8,7 @@ public partial class FrmConsultarPropuesta : Form
     public FrmConsultarPropuesta(PresupuestoConsultaDto datos, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        foreach (var boton in new[] { btnExportar, btnImprimir, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
         _datos = datos;
         _empresa = empresa;
         Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);

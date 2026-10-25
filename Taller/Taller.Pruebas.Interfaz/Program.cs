@@ -108,6 +108,12 @@ internal static class Program
                 Items = Enumerable.Range(1, 20).Select(n => new Taller.Aplicacion.DTOs.Atenciones.ItemPropuestaDto {
                     IdConcepto = n, Descripcion = "Ítem de presupuesto " + n, Cantidad = 1, PrecioUnitario = n * 100 }).ToList()
             }]);
+        // TabControl calcula el área de sus páginas con el control nativo creado.
+        // Crear handles no muestra la ventana ni dispara Load/conexiones SQL.
+        _ = formulario.Handle;
+        var pestanas = (TabControl)formulario.Controls.Find("tabs", true).Single();
+        _ = pestanas.Handle;
+        _ = pestanas.SelectedTab!.Handle;
         var grilla = (DataGridView)formulario.Controls.Find("dgvItems", true).Single();
         if (grilla.ReadOnly || grilla.Columns["colCantidad"]!.ReadOnly || grilla.Columns["colPrecioUnitario"]!.ReadOnly
             || !grilla.Columns["colSubtotal"]!.ReadOnly || grilla.ScrollBars != ScrollBars.Both)

@@ -43,7 +43,7 @@ public partial class FrmDetalleDiagnostico : Form
     }
     private async void FrmDetalleDiagnostico_Load(object? sender, EventArgs e)
     {
-        EstilosInterfaz.AplicarBotonSecundario(btnCerrar);
+        foreach (var boton in new[] { btnExportar, btnImprimir, btnCerrar }) EstilosInterfaz.AplicarBotonSecundario(boton);
         DisposicionVentanas.AjustarAlAreaDisponible(this);
         try
         {

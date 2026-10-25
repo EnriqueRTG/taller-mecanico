@@ -50,6 +50,7 @@ internal static class Program
         VerificarSolicitudesIngreso(proveedor);
         VerificarContextoHistorial(proveedor);
         VerificarEditorPresupuesto(proveedor);
+        VerificarEjecucionYConsulta(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -94,6 +95,49 @@ internal static class Program
                     throw new InvalidOperationException("Acción habilitada sin registro seleccionado.");
             Console.WriteLine($"Filtros adaptables y limpieza sin conexión SQL: {tipo.Name}");
         }
+    }
+
+    private static void VerificarEjecucionYConsulta(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        var sesion = scope.ServiceProvider.GetRequiredService<SesionUsuario>();
+        sesion.Iniciar(new Usuario { Id = 1, RolId = RolesSistema.TecnicoId });
+        using var formulario = new Taller.Presentacion.Formularios.Atenciones.FrmEjecutarAtencion(1,
+            scope.ServiceProvider.GetRequiredService<EjecucionServicio>(), sesion, scope.ServiceProvider);
+        var tipo = formulario.GetType();
+        var item = new Taller.Aplicacion.DTOs.Ejecuciones.EjecucionItemDto { IdDetalle = 1, Descripcion = "Trabajo", CantidadAutorizada = 2 };
+        var lista = new System.ComponentModel.BindingList<Taller.Aplicacion.DTOs.Ejecuciones.EjecucionItemDto>([item]);
+        tipo.GetField("_cargando", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario, true);
+        tipo.GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario, lista);
+        tipo.GetField("_datos", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario,
+            new Taller.Aplicacion.DTOs.Ejecuciones.EjecucionAtencionDto { IdTecnico = 1, Estado = Taller.Dominio.Enumeraciones.EstadoAtencion.EnEjecucion });
+        formulario.BindingContext = new BindingContext();
+        _ = formulario.Handle;
+        var grilla = (DataGridView)formulario.Controls.Find("dgvItems", true).Single();
+        _ = grilla.Handle;
+        grilla.DataSource = lista;
+        tipo.GetField("_cargando", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario, false);
+        item.Estado = Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.Completado;
+        tipo.GetMethod("CeldaCambiada", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, [grilla, new DataGridViewCellEventArgs(grilla.Columns["colEstado"]!.Index, 0)]);
+        if (item.CantidadEjecutada != 2) throw new InvalidOperationException("Completado debe aplicar la cantidad autorizada.");
+        item.CantidadEjecutada = 1;
+        tipo.GetMethod("CeldaCambiada", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, [grilla, new DataGridViewCellEventArgs(grilla.Columns["colCantidadEjecutada"]!.Index, 0)]);
+        if (item.Estado != Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.EnCurso) throw new InvalidOperationException("Una cantidad menor debe quedar en curso, sin inventar un cierre parcial.");
+        foreach (int ancho in new[] { 820, 1180, 1366 })
+        {
+            formulario.ClientSize = new Size(ancho, 650); Disponer(formulario);
+            VerificarDentroDelFormulario(formulario, formulario.Controls.Find("btnFinalizar", true).Single());
+        }
+        sesion.Iniciar(new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId });
+        using var bandeja = scope.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Ejecuciones.FrmTrabajosEnCurso>();
+        using var seguimiento = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(1,
+            scope.ServiceProvider.GetRequiredService<SeguimientoTrabajoServicio>(), scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(),
+            scope.ServiceProvider.GetRequiredService<PresupuestoServicio>(), scope.ServiceProvider.GetRequiredService<EmpresaDocumentoDto>());
+        var progreso = (DataGridView)seguimiento.Controls.Find("dgvProgreso", true).Single();
+        if (!progreso.ReadOnly) throw new InvalidOperationException("La consulta de progreso no puede editar la ejecución.");
+        var notas = (TextBox)seguimiento.GetType().GetField("txtDescripcion", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(seguimiento)!;
+        if (!notas.ReadOnly) throw new InvalidOperationException("La consulta no debe iniciar con campos técnicos editables.");
+        Console.WriteLine("Ejecución: estado/cantidad sincronizados; progreso de recepción de solo lectura; acciones dentro de la ventana.");
     }
 
     private static void VerificarEditorPresupuesto(IServiceProvider proveedor)

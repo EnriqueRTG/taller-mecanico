@@ -58,9 +58,14 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 IdAtencion = id,
                 Version = a.Version.ToArray(),
                 Estado = a.Estado,
+                Progreso = ps.Where(p => !p.EsInspeccion && p.Tipo == TipoPresupuesto.Reparacion && p.Estado == EstadoPresupuesto.Aceptado)
+                    .SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0)))
+                    .OrderBy(d => d.IdPresupuestoDetalle).Select(d => new EjecucionItemDto {
+                        IdDetalle = d.IdPresupuestoDetalle, Descripcion = d.Descripcion, CantidadAutorizada = d.Cantidad,
+                        CantidadEjecutada = d.CantidadEjecutada, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList(),
                 PuedePausar = operable,
                 InformeInicial = string.Join("\n\n", informes.Select(d => $"Informe {d.IdDiagnostico} ({d.Tipo}) · {d.FechaDiagnostico:dd/MM/yyyy HH:mm} · Técnico {d.IdTecnicoAutor}\nConclusión: {d.FallaDetectada}\nRecomendación: {d.TrabajoRecomendado}\n{d.Observaciones}")),
-                TrabajosRegistrados = string.Join("\n\n", ps.Where(p => p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0))).Select(d => $"P{d.IdPresupuesto} / Ítem {d.IdPresupuestoDetalle}: {d.Descripcion} · Aporta {d.OrigenMaterial}\nAutorizado {d.Cantidad:N3}; realizado {d.CantidadEjecutada:N3}; estado {d.EstadoEjecucion}; técnico {d.IdTecnicoRegistro}; registro {d.FechaRegistroEjecucion:dd/MM/yyyy HH:mm}\n{d.ObservacionesEjecucion}")),
+                TrabajosRegistrados = string.Join("\n\n", ps.Where(p => p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0))).Select(d => $"P{d.IdPresupuesto} / Ítem {d.IdPresupuestoDetalle}: {d.Descripcion} · Aporta {d.OrigenMaterial}\nAutorizado {d.Cantidad:N3}; realizado {d.CantidadEjecutada:N3}; estado {new EjecucionItemDto { Estado = d.EstadoEjecucion }.EstadoDescripcion}; técnico {d.IdTecnicoRegistro}; registro {d.FechaRegistroEjecucion:dd/MM/yyyy HH:mm}\n{d.ObservacionesEjecucion}")),
                 Resumen = $"Atención {id:D6} · {a.Vehiculo.Dominio} · {a.Cliente.Apellido}, {a.Cliente.Nombre}",
                 PuedeRegistrar = u.RolId == RolesSistema.TecnicoId && a.FechaCierre == null && (a.Estado is EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDiagnostico or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) && (a.IdTecnicoEnActividad == null || a.IdTecnicoEnActividad == u.Id) && await circuito.ObtenerPorAtencionAsync(id) == null,
                 Hallazgos = a.Hallazgos.OrderByDescending(x => x.Fecha).ThenByDescending(x => x.IdHallazgoAtencion).Select(x => new HallazgoConsultaDto { Id = x.IdHallazgoAtencion, IdTecnico = x.IdTecnico, Fecha = x.Fecha, Descripcion = x.Descripcion, Recomendacion = x.Recomendacion, ImpideContinuar = x.ImpideContinuar, IdDetalle = x.IdDetalleAfectado }).ToList(),

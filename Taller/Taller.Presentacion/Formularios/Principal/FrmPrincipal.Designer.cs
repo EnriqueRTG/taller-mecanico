@@ -55,6 +55,11 @@ namespace Taller.Presentacion.Formularios.Principal
             btnAuditoria.Click += btnAuditoria_Click;
             btnReportes = new Button();
             btnComprobantes = new Button();
+            btnEjecuciones = new Button { Name = "btnEjecuciones", Text = "Trabajos en curso", Dock = DockStyle.Top, Height = 48,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5F), ForeColor = Color.FromArgb(220, 231, 245),
+                TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(20, 0, 0, 0), Cursor = Cursors.Hand, UseVisualStyleBackColor = false };
+            btnEjecuciones.FlatAppearance.BorderSize = 0;
+            btnEjecuciones.Click += btnEjecuciones_Click;
             btnPresupuestos = new Button();
             btnDiagnosticos = new Button();
             btnAtenciones = new Button();
@@ -101,6 +106,7 @@ namespace Taller.Presentacion.Formularios.Principal
             pnlOpciones.Controls.Add(btnAuditoria);
             pnlOpciones.Controls.Add(btnReportes);
             pnlOpciones.Controls.Add(btnComprobantes);
+            pnlOpciones.Controls.Add(btnEjecuciones);
             pnlOpciones.Controls.Add(btnPresupuestos);
             pnlOpciones.Controls.Add(btnDiagnosticos);
             pnlOpciones.Controls.Add(btnAtenciones);
@@ -518,6 +524,7 @@ namespace Taller.Presentacion.Formularios.Principal
         private Label lblNombreSistemaMenu;
         private Panel pnlSeparadorMarca;
         private Panel pnlOpciones;
+        private Button btnEjecuciones;
         private Button btnPresupuestos;
         private Button btnDiagnosticos;
         private Button btnAtenciones;

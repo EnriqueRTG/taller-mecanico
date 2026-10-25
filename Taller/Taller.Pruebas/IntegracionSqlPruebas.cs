@@ -272,6 +272,16 @@ public sealed class IntegracionSqlPruebas
         var e = await ejecucion.ObtenerAsync(a.IdAtencion);
         await ejecucion.TomarAsync(a.IdAtencion, e.Version, "");
         e = await ejecucion.ObtenerAsync(a.IdAtencion);
+        e.Items[0].Estado = EstadoEjecucionDetalle.EnCurso;
+        await ejecucion.GuardarAsync(e, false);
+        sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+        Assert.Equal(1, Assert.Single(await ejecucion.ListarAsync()).EnCurso);
+        var seguimiento = new SeguimientoTrabajoServicio(er, cr, unidad, acceso);
+        var consulta = await seguimiento.ObtenerAsync(a.IdAtencion);
+        Assert.False(consulta.PuedeRegistrar);
+        Assert.Contains(consulta.Progreso, i => i.Estado == EstadoEjecucionDetalle.EnCurso);
+        sesion.Iniciar(new Usuario { Id = ids.Tecnico });
+        e = await ejecucion.ObtenerAsync(a.IdAtencion);
         foreach (var item in e.Items)
         {
             item.CantidadEjecutada = item.CantidadAutorizada;

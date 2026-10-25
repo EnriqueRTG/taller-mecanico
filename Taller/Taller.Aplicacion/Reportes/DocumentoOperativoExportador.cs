@@ -32,6 +32,19 @@ public static class DocumentoOperativoExportador
         return b.Append(Fin).ToString();
     }
 
+    /// <summary>Copia de consulta del progreso guardado: no cambia ejecución, autorizaciones ni cobros.</summary>
+    public static string Progreso(Taller.Aplicacion.DTOs.Ejecuciones.SeguimientoTrabajoDto d, EmpresaDocumentoDto empresa)
+    {
+        var b = new StringBuilder(Inicio($"Avance de atención {d.IdAtencion:D6}", empresa));
+        b.Append($"<p>{H(d.Resumen)}<br>Consultado: {Taller.Dominio.Tiempo.FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm}</p><h2>Trabajos autorizados y avance registrado</h2><table><thead><tr><th>Trabajo</th><th>Autorizado</th><th>Realizado</th><th>Estado</th><th>Registro técnico</th></tr></thead><tbody>");
+        foreach (var i in d.Progreso) b.Append($"<tr><td>{H(i.Descripcion)}</td><td>{i.CantidadAutorizada.ToString("N3", Cultura)}</td><td>{i.CantidadEjecutada.ToString("N3", Cultura)}</td><td>{H(i.EstadoDescripcion)}</td><td>{H(i.Observaciones)}</td></tr>");
+        b.Append("</tbody></table><h2>Hallazgos e incidencias</h2>");
+        foreach (var h in d.Hallazgos) b.Append($"<p class='texto'>{h.Fecha:dd/MM/yyyy HH:mm} · {H(h.Descripcion)}<br>Recomendación: {H(h.Recomendacion)}<br>Impide continuar: {(h.ImpideContinuar ? "Sí" : "No")}</p>");
+        b.Append("<h2>Pausas</h2>");
+        foreach (var p in d.Pausas) b.Append($"<p>{H(p.Alcance)} · {H(p.Motivo)}<br>Resolución: {H(p.Resolucion ?? "Pendiente")}</p>");
+        return b.Append("<p class='aviso'>Refleja avances guardados al momento de la consulta. El cierre técnico, la liquidación, el pago y la entrega son instancias diferentes.</p>").Append(Fin).ToString();
+    }
+
     public static string Diagnostico(DiagnosticoDetalleDto d, EmpresaDocumentoDto empresa) =>
         Inicio($"Informe técnico {d.IdDiagnostico:D6}", empresa) + CuerpoDiagnostico(d) + Fin;
     private static string CuerpoDiagnostico(DiagnosticoDetalleDto d) => $"<p>Atención {d.IdAtencion:D6} · Fecha: {d.FechaDiagnostico:dd/MM/yyyy HH:mm}<br>Técnico responsable: {H(d.TecnicoAutor)}<br>Tipo: {H(d.Tipo.ToString())}<br>Kilometraje: {H(d.Kilometraje?.ToString(Cultura) ?? "No registrado")}</p>"

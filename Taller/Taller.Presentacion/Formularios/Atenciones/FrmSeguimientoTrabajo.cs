@@ -19,6 +19,9 @@ public partial class FrmSeguimientoTrabajo : Form
     public FrmSeguimientoTrabajo(int id, SeguimientoTrabajoServicio servicio, EvaluacionServicio evaluacion, PresupuestoServicio presupuestos, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        txtDescripcion.ReadOnly = txtRecomendacion.ReadOnly = txtMaterial.ReadOnly = true;
+        txtDescripcion.Visible = txtRecomendacion.Visible = chkImpide.Visible = btnHallazgo.Visible = btnAdicional.Visible = false;
+        btnResolver.Visible = btnRecibir.Visible = false;
         _id = id;
         _empresa = empresa;
         _servicio = servicio;
@@ -40,7 +43,14 @@ public partial class FrmSeguimientoTrabajo : Form
         dgvMateriales.DataSource = null;
         btnHallazgo.Enabled = btnAdicional.Enabled = btnResolver.Enabled = btnRecibir.Enabled = btnPausar.Enabled = false;
         _datos = await _servicio.ObtenerAsync(_id);
-        lblResumen.Text = _datos.Resumen + " · Seleccione una tarea o Toda la intervención. Un hallazgo no autoriza cargos.";
+        Text = "Progreso y seguimiento de la atención";
+        lblResumen.Text = _datos.Resumen + $" · {_datos.Progreso.Count(i => i.Estado == EstadoEjecucionDetalle.Completado)} completados / {_datos.Progreso.Count} autorizados. Avances guardados; use Actualizar para consultar cambios. Los hallazgos son incidencias separadas.";
+        dgvProgreso.DataSource = _datos.Progreso;
+        if (txtDescripcion.Parent is TableLayoutPanel hallazgos)
+            for (int fila = 1; fila < hallazgos.RowCount; fila++) hallazgos.RowStyles[fila].Height = _datos.PuedeRegistrar ? (fila == 3 ? 48 : 65) : 0;
+        if (txtMaterial.Parent is TableLayoutPanel materiales)
+            for (int fila = 1; fila < materiales.RowCount; fila++) materiales.RowStyles[fila].Height = _datos.PuedeRegistrar ? (fila == 1 ? 65 : 50) : 0;
+        txtDescripcion.ReadOnly = txtRecomendacion.ReadOnly = txtMaterial.ReadOnly = !_datos.PuedeRegistrar;
         dgvHallazgos.DataSource = _datos.Hallazgos;
         dgvPausas.DataSource = _datos.Pausas;
         dgvMateriales.DataSource = _datos.Items.Where(i => i.Origen == OrigenMaterial.Cliente).ToList();
@@ -165,6 +175,15 @@ public partial class FrmSeguimientoTrabajo : Form
         {
             _ocupado = false;
         }
+    }
+
+    private void Exportar(object? s, EventArgs e)
+    {
+        if (_datos == null || _ocupado) return;
+        try { Taller.Presentacion.Impresion.ExportacionDocumento.GuardarHtml(this,
+            Taller.Aplicacion.Reportes.DocumentoOperativoExportador.Progreso(_datos, _empresa),
+            Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Avance-Atencion-" + _id, Taller.Dominio.Tiempo.FechaHoraTaller.Ahora)); }
+        catch (Exception ex) { ErroresInterfaz.Mostrar(this, ex, "Exportar avance"); }
     }
 
     private void Imprimir(object? s, EventArgs e)

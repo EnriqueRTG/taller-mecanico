@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Entidades;
+using Taller.Dominio.Entidades;
 using Taller.Aplicacion.DTOs.Atenciones;
 namespace Taller.Aplicacion.Abstracciones.Persistencia;
 /// <summary>Consultas y preparación de cambios del expediente técnico. No confirma guardados.</summary>
@@ -10,6 +10,7 @@ public interface IEvaluacionRepositorio
     Task<List<Diagnostico>> ObtenerDiagnosticosAsync(int id);
     Task<List<Concepto>> ListarCatalogoAsync();
     Task<List<EvaluacionBandejaDto>> ListarAsync();
+    Task<List<Taller.Aplicacion.DTOs.Ejecuciones.TrabajoEnCursoDto>> ListarEjecucionesAsync();
     Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync();
     void PrepararVersion(Atencion atencion, byte[] version);
     void EliminarBorrador(Presupuesto presupuesto);

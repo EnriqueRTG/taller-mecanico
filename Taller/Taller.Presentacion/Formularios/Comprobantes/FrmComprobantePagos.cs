@@ -21,7 +21,7 @@ public partial class FrmComprobantePagos : Form
         _empresa = empresa;
     }
 
-    private async void Cargar(object? s, EventArgs e) => await RecargarAsync();
+    private async void Cargar(object? s, EventArgs e) { Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this); await RecargarAsync(); }
     private async Task RecargarAsync()
     {
         _cargando = true;
@@ -30,7 +30,7 @@ public partial class FrmComprobantePagos : Form
         {
             _datos = await _servicio.ObtenerAsync(_id);
             var d = _datos.Comprobante;
-            lblResumen.Text = _datos.Resumen;
+            lblResumen.Text = _datos.Resumen.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             dgvItems.DataSource = d?.Items ?? _datos.ItemsPorLiquidar;
             dgvPagos.DataSource = d?.Pagos;
             if (d != null)

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Comprobantes;
 partial class FrmComprobantePagos
 {
@@ -49,8 +49,8 @@ partial class FrmComprobantePagos
         SuspendLayout();
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
-        ClientSize = new Size(1020, 620);
-        MinimumSize = new Size(820, 520);
+        ClientSize = new Size(1180, 700);
+        MinimumSize = new Size(820, 600);
         StartPosition = FormStartPosition.CenterParent;
         tlpPrincipal.Dock = DockStyle.Fill;
         tlpPrincipal.Padding = new Padding(12);
@@ -61,7 +61,7 @@ partial class FrmComprobantePagos
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 62));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         Controls.Add(tlpPrincipal);Text="Liquidación, pagos y entrega";
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
         lblResumen.Dock = DockStyle.Fill;
@@ -69,10 +69,17 @@ partial class FrmComprobantePagos
         lblSaldo.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(tabs, 0, 2);
         tabs.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(txtObservaciones, 0, 3);
+        var notas = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
+        notas.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+        notas.Controls.Add(new Label { Text = "Observaciones de liquidación / conformidad del cliente para la entrega", Dock = DockStyle.Fill }, 0, 0);
+        notas.Controls.Add(txtObservaciones, 0, 1);
+        tlpPrincipal.Controls.Add(notas, 0, 3);
         txtObservaciones.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(flpAcciones, 0, 4);
         flpAcciones.Dock = DockStyle.Fill;
+        flpAcciones.AutoSize = true;
+        flpAcciones.AutoScroll = true;
+        flpAcciones.WrapContents = true;
         tabs.Controls.Add(tabItems);tabs.Controls.Add(tabPagos);tabItems.Text="Conceptos a liquidar / liquidados";tabPagos.Text="Recibos de pago";
         tabItems.Controls.Add(dgvItems);dgvItems.Dock=DockStyle.Fill;tabPagos.Controls.Add(dgvPagos);dgvPagos.Dock=DockStyle.Fill;
         txtObservaciones.Multiline=true;txtObservaciones.MaxLength=1000;txtObservaciones.ScrollBars=ScrollBars.Vertical;

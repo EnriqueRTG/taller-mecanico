@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace Taller.Presentacion.Formularios.Atenciones;
 partial class FrmDetalleAtencion
 {
@@ -145,6 +145,10 @@ partial class FrmDetalleAtencion
         btnCerrar.AutoSize = true;
         btnCerrar.Height = 34;
         btnCerrar.Click += Cerrar;
+        btnProgreso = new Button { Name = "btnProgreso", Text = "Ver progreso y seguimiento", AutoSize = true, Height = 34, Enabled = false };
+        btnProgreso.Click += VerProgreso;
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnProgreso);
+        flpAcciones.Controls.Add(btnProgreso);
         flpAcciones.Controls.Add(btnCerrar);
 
         Load += Cargar;
@@ -176,5 +180,6 @@ partial class FrmDetalleAtencion
     private Label lblTotal = null!;
     private FlowLayoutPanel flpAcciones = null!;
     private Button btnConfirmarIngreso = null!;
+    private Button btnProgreso = null!;
     private Button btnCerrar = null!;
 }

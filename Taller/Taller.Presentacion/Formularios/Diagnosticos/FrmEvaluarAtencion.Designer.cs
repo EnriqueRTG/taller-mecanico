@@ -103,7 +103,7 @@ partial class FrmEvaluarAtencion
         tlpPrincipal.ColumnCount = 1;
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowCount = 4;
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
@@ -188,7 +188,7 @@ partial class FrmEvaluarAtencion
         chkInforme.CheckedChanged += Cambiado;
         chkSinPropuesta.CheckedChanged += Cambiado;
         tlpPropuesta.Dock = DockStyle.Fill;
-        tlpPropuesta.Padding = new Padding(12);
+        tlpPropuesta.Padding = new Padding(8);
         tlpPropuesta.ColumnCount = 1;
         tlpPropuesta.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPropuesta.RowCount = 8;

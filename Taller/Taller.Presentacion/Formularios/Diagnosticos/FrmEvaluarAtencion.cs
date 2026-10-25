@@ -177,7 +177,7 @@ public partial class FrmEvaluarAtencion : Form
 
     private void ActualizarTotal()
     {
-        lblTotal.Text = $"{_items.Count} ítems · Total propuesto: {_items.Sum(i => i.Subtotal):N2} ARS. Cantidad y precio se editan en la lista; no autoriza trabajos.";
+        lblTotal.Text = $"{_items.Count} ítems · Total propuesto: {_items.Sum(i => i.Subtotal):N2} ARS · Cantidad y precio editables en la lista.";
         chkSinPropuesta.Enabled = chkInforme.Checked && _items.Count == 0;
         btnQuitar.Enabled = _items.Count > 0;
     }

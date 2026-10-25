@@ -7,7 +7,7 @@ public sealed class EjecucionItemDto
     public string Descripcion { get; set; } = string.Empty;
     public decimal CantidadAutorizada { get; set; }
     public decimal CantidadEjecutada { get; set; }
-    public EstadoEjecucionDetalle Estado { get; set; }
+    public EstadoEjecucionDetalle Estado { get; set; } = EstadoEjecucionDetalle.NoIniciado;
     public string EstadoDescripcion => Estado switch {
         EstadoEjecucionDetalle.NoIniciado => "No iniciado", EstadoEjecucionDetalle.EnCurso => "En curso",
         EstadoEjecucionDetalle.Parcial => "Finalizado parcial", EstadoEjecucionDetalle.Completado => "Completado",

@@ -105,7 +105,7 @@ internal static class Program
         using var formulario = new Taller.Presentacion.Formularios.Atenciones.FrmEjecutarAtencion(1,
             scope.ServiceProvider.GetRequiredService<EjecucionServicio>(), sesion, scope.ServiceProvider);
         var tipo = formulario.GetType();
-        var item = new Taller.Aplicacion.DTOs.Ejecuciones.EjecucionItemDto { IdDetalle = 1, Descripcion = "Trabajo", CantidadAutorizada = 2 };
+        var item = new Taller.Aplicacion.DTOs.Ejecuciones.EjecucionItemDto { IdDetalle = 1, Descripcion = "Trabajo", Estado = Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.NoIniciado, CantidadAutorizada = 2 };
         var lista = new System.ComponentModel.BindingList<Taller.Aplicacion.DTOs.Ejecuciones.EjecucionItemDto>([item]);
         tipo.GetField("_cargando", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario, true);
         tipo.GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario, lista);

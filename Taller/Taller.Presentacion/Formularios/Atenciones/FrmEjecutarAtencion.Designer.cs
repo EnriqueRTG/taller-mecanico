@@ -40,19 +40,20 @@ partial class FrmEjecutarAtencion
         SuspendLayout();
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
-        ClientSize = new Size(1020, 620);
-        MinimumSize = new Size(820, 520);
+        ClientSize = new Size(1180, 720);
+        MinimumSize = new Size(820, 600);
         StartPosition = FormStartPosition.CenterParent;
         tlpPrincipal.Dock = DockStyle.Fill;
         tlpPrincipal.Padding = new Padding(12);
         tlpPrincipal.ColumnCount = 1;
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPrincipal.RowCount = 5;
+        tlpPrincipal.RowCount = 6;
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         Controls.Add(tlpPrincipal);
         Text = "Ejecución de trabajos autorizados";
         tlpPrincipal.Controls.Add(txtResumen, 0, 0);
@@ -61,9 +62,13 @@ partial class FrmEjecutarAtencion
         lblAviso.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(dgvItems, 0, 2);
         dgvItems.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(txtObservaciones, 0, 3);
+        var notas = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
+        notas.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+        notas.Controls.Add(new Label { Text = "Resumen de intervención / motivo si termina con interrupción", Dock = DockStyle.Fill }, 0, 0);
+        notas.Controls.Add(txtObservaciones, 0, 1);
+        tlpPrincipal.Controls.Add(notas, 0, 3);
         txtObservaciones.Dock = DockStyle.Fill;
-        tlpPrincipal.Controls.Add(flpAcciones, 0, 4);
+        tlpPrincipal.Controls.Add(flpAcciones, 0, 5);
         flpAcciones.Dock = DockStyle.Fill;
         dgvItems.AutoGenerateColumns = false;
         dgvItems.AllowUserToAddRows = false;
@@ -84,8 +89,9 @@ partial class FrmEjecutarAtencion
         dgvItems.ReadOnly = false;
         dgvItems.Columns[0].ReadOnly = true;
         dgvItems.Columns[1].ReadOnly = true;
-        dgvItems.Columns.Insert(3, new DataGridViewComboBoxColumn { Name = "colEstado", DataPropertyName = "Estado", HeaderText = "Estado", DataSource = Enum.GetValues<Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle>(), FillWeight = 95 });
+        dgvItems.Columns.Insert(3, new DataGridViewComboBoxColumn { Name = "colEstado", DataPropertyName = "Estado", HeaderText = "Estado", DataSource = Enum.GetValues<Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle>().Select(estado => new KeyValuePair<Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle, string>(estado, new Taller.Aplicacion.DTOs.Ejecuciones.EjecucionItemDto { Estado = estado }.EstadoDescripcion)).ToList(), ValueMember = "Key", DisplayMember = "Value", FillWeight = 95, MinimumWidth = 125 });
         dgvItems.CellValueChanged += CeldaCambiada;
+        dgvItems.CurrentCellDirtyStateChanged += ConfirmarEstado;
         dgvItems.DataError += ErrorCelda;
         txtObservaciones.Multiline = true;
         txtObservaciones.MaxLength = 1000;
@@ -129,10 +135,11 @@ partial class FrmEjecutarAtencion
         };
         btnSeguimiento.Click += Seguimiento;
         chkConformidad = new CheckBox { Name = "chkConformidadTecnica", Text = "Comprobé el resultado y doy conformidad técnica", AutoSize = true };
-        flpAcciones.Controls.Add(chkConformidad);
+        chkConformidad.CheckedChanged += ActualizarConformidad;
+        tlpPrincipal.Controls.Add(chkConformidad, 0, 4);
         flpAcciones.AutoSize = true;
         flpAcciones.WrapContents = true;
-        tlpPrincipal.RowStyles[4].SizeType = SizeType.AutoSize;
+
         flpAcciones.Controls.Add(btnSeguimiento);
         btnCerrar.Text = "Cerrar";
         btnCerrar.AutoSize = true;
@@ -151,6 +158,14 @@ partial class FrmEjecutarAtencion
         txtResumen.Multiline = true;
         txtResumen.ScrollBars = ScrollBars.Vertical;
         txtResumen.TabStop = false;
+        flpAcciones.AutoScroll = true;
+        var ayuda = new ToolTip(components) { AutoPopDelay = 20000 };
+        ayuda.SetToolTip(dgvItems, "Completado aplica toda la cantidad autorizada. Alcanzar esa cantidad también marca Completado. En curso admite cero mientras se trabaja. Parcial es un cierre incompleto y exige motivo; Omitido exige cantidad cero y motivo. Guardar hace visible el avance a recepción.");
+        ayuda.SetToolTip(chkConformidad, "Confirma, bajo responsabilidad del técnico, que comprobó el resultado final. Solo se requiere al finalizar normalmente; no para guardar avances.");
+        ayuda.SetToolTip(txtObservaciones, "Resumen general opcional al guardar avances. Obligatorio al terminar con interrupción. Las causas de cada tarea parcial u omitida se escriben en la columna Motivo / registro técnico.");
+        ayuda.SetToolTip(btnLiberar, "Conserva los avances guardados y deja la ejecución disponible para otro técnico. Cerrar la ventana conserva la reserva.");
+        foreach (var boton in new[] { btnTomar, btnGuardar, btnLiberar, btnInterrumpir, btnSeguimiento, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnFinalizar);
         ResumeLayout(false);
     }
 

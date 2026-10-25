@@ -17,6 +17,37 @@ namespace Taller.Pruebas;
 /// <summary>Recorridos de negocio con repositorios reales. InMemory no reproduce restricciones o transacciones de SQL Server.</summary>
 public sealed class CircuitoCobrosPruebas
 {
+    [Fact]
+    public async Task BandejaYProgresoCompartenAvancePersistidoConRecepcionYSeRetiranAlFinalizar()
+    {
+        using var c = new Caso();
+        await c.AceptarAsync();
+        Assert.Single(await c.Ejecucion.ListarAsync());
+        c.Entrar(1);
+        var datos = await c.Ejecucion.ObtenerAsync(1);
+        await c.Ejecucion.TomarAsync(1, datos.Version, "Alcance revisado");
+        await c.VersionesAsync();
+        datos = await c.Ejecucion.ObtenerAsync(1);
+        datos.Items[0].Estado = EstadoEjecucionDetalle.EnCurso;
+        datos.Items[0].CantidadEjecutada = 1;
+        await c.Ejecucion.GuardarAsync(datos, false);
+        await c.VersionesAsync();
+        c.Entrar(2);
+        var fila = Assert.Single(await c.Ejecucion.ListarAsync());
+        Assert.Equal(1, fila.EnCurso);
+        var progreso = await c.Seguimiento.ObtenerAsync(1);
+        Assert.False(progreso.PuedeRegistrar);
+        Assert.Contains(progreso.Progreso, i => i.Estado == EstadoEjecucionDetalle.EnCurso && i.CantidadEjecutada == 1);
+        Assert.Contains(await c.Db.Set<HistorialAtencion>().AsNoTracking().ToListAsync(), h => h.Accion == "ItemEjecucionActualizado");
+        datos.Items[0].CantidadEjecutada = 2;
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Ejecucion.GuardarAsync(datos, false));
+        c.Entrar(1);
+        await c.EjecutarAsync();
+        c.Entrar(2);
+        Assert.Empty(await c.Ejecucion.ListarAsync());
+        Assert.All((await c.Seguimiento.ObtenerAsync(1)).Progreso, i => Assert.Equal(EstadoEjecucionDetalle.Completado, i.Estado));
+    }
+
     private sealed class Caso : IDisposable
     {
         public TallerDbContext Db { get; }
@@ -635,7 +666,7 @@ public sealed class CircuitoCobrosPruebas
         var maximo = c.Db.Model.FindEntityType(typeof(Presupuesto))!.FindProperty(nameof(Presupuesto.Observaciones))!.GetMaxLength()!.Value;
         Assert.True(nuevo.Observaciones!.Length <= maximo);
         var limiteHistorial = c.Db.Model.FindEntityType(typeof(HistorialAtencion))!.FindProperty(nameof(HistorialAtencion.Observaciones))!.GetMaxLength()!.Value;
-        Assert.All(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(), x => Assert.True((x.Observaciones?.Length ?? 0) <= limiteHistorial));
+        Assert.All(await c.Db.Set<HistorialAtencion>().AsNoTracking().ToListAsync(), x => Assert.True((x.Observaciones?.Length ?? 0) <= limiteHistorial));
     }
 
     [Fact]
@@ -651,7 +682,7 @@ public sealed class CircuitoCobrosPruebas
         var motivo = new string ('y', 1000);
         await c.Cobros.AnularPagoAsync(d.IdComprobante, id, d.Version, motivo);
         Assert.Equal(motivo, (await c.Db.Pagos.AsNoTracking().SingleAsync()).MotivoAnulacion);
-        var evento = await c.Db.HistorialAtenciones.AsNoTracking().SingleAsync(h => h.Accion == "PagoAnulado");
+        var evento = await c.Db.Set<HistorialAtencion>().AsNoTracking().SingleAsync(h => h.Accion == "PagoAnulado");
         Assert.EndsWith(motivo, evento.Observaciones);
         var limite = c.Db.Model.FindEntityType(typeof(HistorialAtencion))!.FindProperty(nameof(HistorialAtencion.Observaciones))!.GetMaxLength()!.Value;
         Assert.True(evento.Observaciones!.Length <= limite);
@@ -666,7 +697,7 @@ public sealed class CircuitoCobrosPruebas
         var actual = await c.Db.Atenciones.AsNoTracking().SingleAsync();
         Assert.Equal(EstadoAtencion.Cancelada, actual.Estado);
         Assert.NotNull(actual.FechaCierre);
-        Assert.Equal("AperturaCancelada", (await c.Db.HistorialAtenciones.AsNoTracking().SingleAsync()).Accion);
+        Assert.Equal("AperturaCancelada", (await c.Db.Set<HistorialAtencion>().AsNoTracking().SingleAsync()).Accion);
     }
 
     [Fact]

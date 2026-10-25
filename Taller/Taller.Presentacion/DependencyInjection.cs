@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddTransient<FrmEditarUsuario>();
         services.AddTransient<FrmGestionarCredenciales>();
         services.AddTransient<FrmAtenciones>();
+        services.AddTransient<Taller.Presentacion.Formularios.Ejecuciones.FrmTrabajosEnCurso>();
         services.AddTransient<FrmNuevaAtencion>();
         services.AddTransient<FrmClientes>();
         services.AddTransient<FrmAltaCliente>();

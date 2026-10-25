@@ -176,6 +176,7 @@ public partial class FrmPrincipal : Form
         btnAtenciones.Visible = TienePermiso(rolId, PermisoAplicacion.GestionarAtenciones) || TienePermiso(rolId, PermisoAplicacion.ConsultarAtencionesAsignadas);
         btnDiagnosticos.Visible = TienePermiso(rolId, PermisoAplicacion.ConsultarDiagnosticos) || TienePermiso(rolId, PermisoAplicacion.GestionarDiagnosticos);
         btnPresupuestos.Visible = TienePermiso(rolId, PermisoAplicacion.GestionarDecisionPresupuesto) || TienePermiso(rolId, PermisoAplicacion.GestionarPresupuestosTecnicos);
+        btnEjecuciones.Visible = TienePermiso(rolId, PermisoAplicacion.GestionarAtenciones) || TienePermiso(rolId, PermisoAplicacion.RegistrarFinalizacionTecnica);
         btnComprobantes.Visible = TienePermiso(rolId, PermisoAplicacion.GestionarComprobantesPagos);
         btnReportes.Visible = TienePermiso(rolId, PermisoAplicacion.ConsultarReportesGenerales) || TienePermiso(rolId, PermisoAplicacion.ConsultarReportesOperativos) || TienePermiso(rolId, PermisoAplicacion.ConsultarReportesTecnicos);
         btnCatalogo.Visible = TienePermiso(rolId, PermisoAplicacion.ConsultarCatalogo);
@@ -202,6 +203,7 @@ public partial class FrmPrincipal : Form
         btnAtenciones.Visible = false;
         btnDiagnosticos.Visible = false;
         btnPresupuestos.Visible = false;
+        btnEjecuciones.Visible = false;
         btnComprobantes.Visible = false;
         btnReportes.Visible = false;
         btnCatalogo.Visible = false;
@@ -238,6 +240,11 @@ public partial class FrmPrincipal : Form
     private void btnDiagnosticos_Click(object sender, EventArgs e)
     {
         AbrirFormularioAutorizado<FrmDiagnosticos>("Preparación técnica", btnDiagnosticos, "No tiene permisos para acceder a los diagnósticos.", PermisoAplicacion.ConsultarDiagnosticos, PermisoAplicacion.GestionarDiagnosticos);
+    }
+
+    private void btnEjecuciones_Click(object sender, EventArgs e)
+    {
+        AbrirFormularioAutorizado<Taller.Presentacion.Formularios.Ejecuciones.FrmTrabajosEnCurso>("Trabajos en curso", btnEjecuciones, "No tiene permisos para consultar ejecuciones.", PermisoAplicacion.GestionarAtenciones, PermisoAplicacion.RegistrarFinalizacionTecnica);
     }
 
     private void btnPresupuestos_Click(object sender, EventArgs e)

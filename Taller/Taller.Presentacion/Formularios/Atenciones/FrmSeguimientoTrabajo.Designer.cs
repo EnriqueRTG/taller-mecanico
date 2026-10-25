@@ -16,6 +16,7 @@ partial class FrmSeguimientoTrabajo
     private TextBox txtDescripcion = null!, txtRecomendacion = null!, txtMaterial = null!;
     private CheckBox chkImpide = null!, chkConforme = null!;
     private NumericUpDown nudRecibido = null!;
+    private DataGridView dgvProgreso = null!;
     private DataGridView dgvHallazgos = null!, dgvPausas = null!, dgvMateriales = null!;
     private Button btnHallazgo = null!, btnAdicional = null!, btnPausar = null!, btnResolver = null!, btnRecibir = null!;
     private void InitializeComponent()
@@ -49,7 +50,18 @@ partial class FrmSeguimientoTrabajo
         var hallazgos = new TabPage("Hallazgos e informes");
         var pausas = new TabPage("Pausas y continuidad");
         var materiales = new TabPage("Materiales del cliente");
-        tabs.TabPages.AddRange(new[] { hallazgos, pausas, materiales });
+        var progreso = new TabPage("Avance de trabajos");
+        dgvProgreso = new DataGridView { Name = "dgvProgreso", Dock = DockStyle.Fill, AutoGenerateColumns = false, ReadOnly = true,
+            AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false, BackgroundColor = Color.White,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells };
+        dgvProgreso.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvProgreso.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTrabajo", DataPropertyName = "Descripcion", HeaderText = "Trabajo autorizado", FillWeight = 200, MinimumWidth = 180 });
+        dgvProgreso.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAutorizado", DataPropertyName = "CantidadAutorizada", HeaderText = "Autorizado", MinimumWidth = 85, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
+        dgvProgreso.Columns.Add(new DataGridViewTextBoxColumn { Name = "colRealizado", DataPropertyName = "CantidadEjecutada", HeaderText = "Realizado", MinimumWidth = 85, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
+        dgvProgreso.Columns.Add(new DataGridViewTextBoxColumn { Name = "colEstado", DataPropertyName = "EstadoDescripcion", HeaderText = "Estado", MinimumWidth = 120 });
+        dgvProgreso.Columns.Add(new DataGridViewTextBoxColumn { Name = "colNota", DataPropertyName = "Observaciones", HeaderText = "Registro del técnico", FillWeight = 150, MinimumWidth = 140 });
+        progreso.Controls.Add(dgvProgreso);
+        tabs.TabPages.AddRange(new[] { progreso, hallazgos, pausas, materiales });
         dgvHallazgos = new DataGridView
         {
             Dock = DockStyle.Fill,
@@ -243,6 +255,9 @@ partial class FrmSeguimientoTrabajo
         };
         imprimir.Click += Imprimir;
         acciones.Controls.Add(imprimir);
+        var exportar = new Button { Text = "Exportar avance HTML", AutoSize = true };
+        exportar.Click += Exportar;
+        acciones.Controls.Add(exportar);
         var cerrar = new Button
         {
             Text = "Cerrar",
@@ -250,6 +265,8 @@ partial class FrmSeguimientoTrabajo
         };
         cerrar.Click += Cerrar;
         acciones.Controls.AddRange(new Control[] { actualizar, cerrar });
+        acciones.AutoScroll = true;
+        foreach (var boton in new[] { actualizar, cerrar, imprimir, exportar, btnHallazgo, btnAdicional, btnPausar, btnResolver, btnRecibir }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
         tlpPrincipal.Controls.Add(cboTarea, 0, 1);
         tlpPrincipal.Controls.Add(tabs, 0, 2);
@@ -267,8 +284,14 @@ partial class FrmSeguimientoTrabajo
         Controls.Add(tlpPrincipal);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10);
-        Text = "Seguimiento, hallazgos y materiales";
-        ClientSize = new Size(1050, 650);
+        foreach (var grilla in new[] { dgvProgreso, dgvHallazgos, dgvPausas, dgvMateriales })
+        {
+            grilla.BackgroundColor = Color.White;
+            grilla.AllowUserToResizeColumns = true;
+            grilla.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        }
+        Text = "Progreso y seguimiento";
+        ClientSize = new Size(1180, 700);
         MinimumSize = new Size(820, 570);
         StartPosition = FormStartPosition.CenterParent;
         Load += Cargar;

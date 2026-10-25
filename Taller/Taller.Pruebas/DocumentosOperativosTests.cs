@@ -27,6 +27,20 @@ public sealed class DocumentosOperativosTests
         Assert.Contains("no registra autorización ni pago", html);
     }
     [Fact]
+    public void AvanceExportadoIdentificaEstadosRealesYNoAutorizaNiAcreditaPagos()
+    {
+        var html = DocumentoOperativoExportador.Progreso(new() {
+            IdAtencion = 101, Resumen = "Cliente · AA111BB", Progreso = [new() {
+                Descripcion = "Cambio de filtro", CantidadAutorizada = 2, CantidadEjecutada = 1,
+                Estado = EstadoEjecucionDetalle.EnCurso, Observaciones = "<b>Nota técnica</b>" }]
+        }, new() { Nombre = "Taller", Telefono = "12345" });
+        Assert.Contains("En curso", html);
+        Assert.Contains("1,000", html);
+        Assert.Contains("12345", html);
+        Assert.DoesNotContain("<b>Nota", html);
+        Assert.Contains("no registra autorización ni pago", html);
+    }
+    [Fact]
     public void InformeDistingueHallazgoRecomendacionYAutorizacion()
     {
         var datos = new DiagnosticoDetalleDto { IdDiagnostico = 3, IdAtencion = 101, TecnicoAutor = "Técnico", FallaDetectada = "Batería agotada", TrabajoRecomendado = "Reemplazar batería", ImpideContinuar = true };

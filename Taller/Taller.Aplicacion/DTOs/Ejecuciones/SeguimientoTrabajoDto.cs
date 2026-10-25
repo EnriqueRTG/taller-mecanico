@@ -11,6 +11,7 @@ public sealed class SeguimientoTrabajoDto
     public EstadoAtencion Estado { get; set; }
     public string InformeInicial { get; set; } = "";
     public string TrabajosRegistrados { get; set; } = "";
+    public List<EjecucionItemDto> Progreso { get; set; } = [];
     public bool PuedePausar { get; set; }
     public bool PuedeRegistrar { get; set; }
     public List<HallazgoConsultaDto> Hallazgos { get; set; } = [];

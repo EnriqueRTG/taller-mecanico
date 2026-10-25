@@ -644,7 +644,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 return;
             }
 
-            using var formulario = new FrmDetalleAtencion(fila.IdAtencion, _atencionServicio, _sesionUsuario, _serviceProvider.GetRequiredService<EvaluacionServicio>());
+            using var formulario = new FrmDetalleAtencion(fila.IdAtencion, _atencionServicio, _sesionUsuario, _serviceProvider.GetRequiredService<EvaluacionServicio>(), _serviceProvider);
             formulario.ShowDialog(this);
             await CargarAtencionesAsync();
         }

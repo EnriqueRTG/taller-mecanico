@@ -506,7 +506,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnSeguimiento = new Button
             {
                 Name = "btnSeguimiento",
-                Text = "Seguimiento y hallazgos",
+                Text = "Ver progreso y seguimiento",
                 AutoSize = true,
                 Height = 34,
                 Enabled = false

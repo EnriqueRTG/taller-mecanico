@@ -13,7 +13,7 @@ public partial class FrmEjecutarAtencion : Form
     private readonly SesionUsuario _sesion;
     private EjecucionAtencionDto? _datos;
     private BindingList<EjecucionItemDto> _items = [];
-    private bool _ocupado, _sucio, _cargando;
+    private bool _ocupado, _sucio, _cargando, _sincronizando;
     public FrmEjecutarAtencion(int id, EjecucionServicio servicio, SesionUsuario sesion, IServiceProvider proveedor)
     {
         InitializeComponent();
@@ -36,11 +36,15 @@ public partial class FrmEjecutarAtencion : Form
         try
         {
             _datos = await _servicio.ObtenerAsync(_id);
-            txtResumen.Text = _datos.Resumen;
+            txtResumen.Text = _datos.Resumen.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             _items = new BindingList<EjecucionItemDto>(_datos.Items);
             dgvItems.DataSource = _items;
             var propia = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
             dgvItems.ReadOnly = !propia;
+            btnCompletar.Visible = false; // La selección de Completado ya sincroniza la cantidad.
+            btnTomar.Visible = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
+            btnGuardar.Visible = btnFinalizar.Visible = btnInterrumpir.Visible = btnLiberar.Visible = chkConformidad.Visible = propia;
+            txtObservaciones.ReadOnly = !propia && _datos.IdTecnico != null;
             btnCompletar.Enabled = propia;
             btnGuardar.Enabled = btnFinalizar.Enabled = btnInterrumpir.Enabled = btnLiberar.Enabled = propia;
             btnTomar.Enabled = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
@@ -48,6 +52,7 @@ public partial class FrmEjecutarAtencion : Form
             chkConformidad.Enabled = propia;
             chkConformidad.Checked = false;
             _sucio = false;
+            ActualizarConformidad(null, EventArgs.Empty);
         }
         catch (Exception ex)
         {
@@ -110,8 +115,39 @@ public partial class FrmEjecutarAtencion : Form
 
     private void CeldaCambiada(object? s, DataGridViewCellEventArgs e)
     {
-        if (!_cargando && e.RowIndex >= 0)
+        if (_cargando || _sincronizando || e.RowIndex < 0 || dgvItems.Rows[e.RowIndex].DataBoundItem is not EjecucionItemDto item) return;
+        _sincronizando = true;
+        try
+        {
+            var columna = dgvItems.Columns[e.ColumnIndex].Name;
+            if (columna == "colEstado" && item.Estado == EstadoEjecucionDetalle.Completado)
+                item.CantidadEjecutada = item.CantidadAutorizada;
+            else if (columna == "colCantidadEjecutada")
+            {
+                if (item.CantidadEjecutada == item.CantidadAutorizada) item.Estado = EstadoEjecucionDetalle.Completado;
+                else if (item.CantidadEjecutada >= 0 && item.CantidadEjecutada < item.CantidadAutorizada && item.Estado is not (EstadoEjecucionDetalle.Parcial or EstadoEjecucionDetalle.Omitido))
+                    item.Estado = EstadoEjecucionDetalle.EnCurso;
+            }
+            _items.ResetItem(e.RowIndex);
+            ActualizarConformidad(null, EventArgs.Empty);
             _sucio = true;
+        }
+        finally { _sincronizando = false; }
+    }
+
+    private void ActualizarConformidad(object? sender, EventArgs e)
+    {
+        bool propia = _datos?.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
+        bool resueltos = _items.Count > 0 && _items.All(i => i.Estado is EstadoEjecucionDetalle.Completado or EstadoEjecucionDetalle.Omitido);
+        chkConformidad.Enabled = propia && resueltos;
+        if (!resueltos) chkConformidad.Checked = false;
+        btnFinalizar.Enabled = propia && resueltos && chkConformidad.Checked;
+    }
+
+    private void ConfirmarEstado(object? s, EventArgs e)
+    {
+        if (dgvItems.IsCurrentCellDirty && dgvItems.CurrentCell is DataGridViewComboBoxCell)
+            dgvItems.CommitEdit(DataGridViewDataErrorContexts.Commit);
     }
 
     private void TextoCambiado(object? s, EventArgs e)

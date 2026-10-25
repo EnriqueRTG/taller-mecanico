@@ -8,6 +8,7 @@ namespace Taller.Presentacion.Formularios.Atenciones;
 /// <summary>Consulta la recepción y prepara servicios iniciales opcionales antes de solicitar evaluación.</summary>
 public partial class FrmDetalleAtencion : Form
 {
+    private readonly IServiceProvider _proveedor;
     private readonly int _id;
     private readonly AtencionServicio _atenciones;
     private readonly EvaluacionServicio _evaluaciones;
@@ -24,15 +25,29 @@ public partial class FrmDetalleAtencion : Form
         public decimal Subtotal => decimal.Round(Cantidad * PrecioUnitario, 2, MidpointRounding.AwayFromZero);
     }
 
-    public FrmDetalleAtencion(int idAtencion, AtencionServicio atencionServicio, SesionUsuario sesionUsuario, EvaluacionServicio evaluaciones)
+    public FrmDetalleAtencion(int idAtencion, AtencionServicio atencionServicio, SesionUsuario sesionUsuario, EvaluacionServicio evaluaciones, IServiceProvider proveedor)
     {
         InitializeComponent();
+        _proveedor = proveedor;
         _id = idAtencion;
         _atenciones = atencionServicio;
         _sesion = sesionUsuario;
         _evaluaciones = evaluaciones;
     }
 
+    private void VerProgreso(object? sender, EventArgs e)
+    {
+        if (_ocupado || !btnProgreso.Enabled) return;
+        try
+        {
+            using var f = new FrmSeguimientoTrabajo(_id,
+                Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor),
+                _evaluaciones, Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<PresupuestoServicio>(_proveedor),
+                Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>(_proveedor));
+            f.ShowDialog(this);
+        }
+        catch (Exception ex) { Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Consultar progreso"); }
+    }
     private async void Cargar(object? s, EventArgs e) => await RecargarAsync();
     private async Task RecargarAsync()
     {
@@ -44,6 +59,7 @@ public partial class FrmDetalleAtencion : Form
             lblResumen.Text = $"Atención {_id:D6} · {_atencion.Estado} · Solicitud: {_atencion.TipoSolicitud}\n{_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · {_atencion.Vehiculo.Dominio} · Apertura {_atencion.FechaApertura:dd/MM/yyyy HH:mm}";
             txtMotivo.Text = (_atencion.Solicitudes.Count == 0 ? _atencion.MotivoConsulta : string.Join(Environment.NewLine, _atencion.Solicitudes.OrderBy(s => s.Orden).Select(s => $"{s.Orden}. {(s.Tipo == Taller.Dominio.Enumeraciones.TipoSolicitudIngreso.TrabajoSolicitado ? "Solicita" : "Informa")}: {s.Descripcion}")))
                 + $"\r\nKilometraje de ingreso: {_atencion.KilometrajeRecepcion?.ToString("N0") ?? "No informado"}\r\nObservaciones: {_atencion.ObservacionesRecepcion}";
+            btnProgreso.Enabled = _atencion.Estado != Taller.Dominio.Enumeraciones.EstadoAtencion.Abierta;
             bool recepcion = _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId;
             grpIngreso.Visible = recepcion && _atencion.Estado == Taller.Dominio.Enumeraciones.EstadoAtencion.Abierta;
             btnConfirmarIngreso.Visible = grpIngreso.Visible;

@@ -11,6 +11,12 @@ namespace Taller.Aplicacion.Servicios;
 /// <summary>Reserva y registra únicamente trabajos autorizados; no cambia precios ni confirma cobros.</summary>
 public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircuitoRepositorio circuito, IUnidadDeTrabajo unidad, AutorizacionOperativa acceso)
 {
+    /// <summary>Consulta compartida por recepción y técnico; no toma ni modifica las reservas.</summary>
+    public async Task<List<TrabajoEnCursoDto>> ListarAsync()
+    {
+        try { await acceso.ExigirAsync(); return await repositorio.ListarEjecucionesAsync(); }
+        finally { unidad.DescartarCambios(); }
+    }
     private async Task<Atencion> AtencionAsync(int id) => await repositorio.ObtenerAtencionAsync(id) ?? throw new ValidacionException("La atención no existe.");
     private async Task<List<Presupuesto>> PropuestasAsync(int id)
     {
@@ -137,6 +143,8 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
                     throw new ValidacionException("Antes de terminar resuelva cada ítem: completado u omitido con motivo. Una interrupción admite cantidades parciales justificadas.");
                 if (d.CantidadEjecutada != q || d.EstadoEjecucion != estado || (d.ObservacionesEjecucion ?? "") != nota)
                 {
+                    Evento(a, u, "ItemEjecucionActualizado", a.Estado,
+                        $"{d.Descripcion}: {d.EstadoEjecucion} ({d.CantidadEjecutada:N3}) → {estado} ({q:N3}) de {d.Cantidad:N3} autorizados. {nota}");
                     d.CantidadEjecutada = q;
                     d.EstadoEjecucion = estado;
                     d.ObservacionesEjecucion = nota;

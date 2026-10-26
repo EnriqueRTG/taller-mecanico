@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
 namespace Taller.Aplicacion.DTOs.Cobros;
 /// <summary>Contrato de datos para cobros, independiente de los controles de presentación.</summary>
 public sealed class AtencionCobroDto
@@ -12,5 +12,6 @@ public sealed class AtencionCobroDto
     public decimal? Total { get; set; }
     public decimal? Pagado { get; set; }
     public decimal? Saldo => Total - Pagado;
+    public bool PuedeRegistrarEntrega => IdComprobante.HasValue && Saldo == 0 && (Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion);
     public string Situacion => IdComprobante == null ? "Por liquidar" : Saldo == 0 ? "Sin saldo" : Pagado > 0 ? "Pago parcial" : "Sin pagos";
 }

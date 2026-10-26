@@ -17,6 +17,9 @@ public partial class FrmComprobantePagos : Form
     {
         InitializeComponent();
         Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
+        Button[] orden = [btnEmitir, btnPago, btnEntregar, btnImprimir, btnRecibo, btnActualizar, btnAnular, btnCerrar];
+        for (int i = 0; i < orden.Length; i++) flpAcciones.Controls.SetChildIndex(orden[i], i);
+        btnAnular.Margin = new Padding(20, 3, 3, 3);
         _id = id;
         _servicio = servicio;
         _empresa = empresa;
@@ -33,7 +36,13 @@ public partial class FrmComprobantePagos : Form
             var d = _datos.Comprobante;
             lblResumen.Text = _datos.Resumen.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             dgvItems.DataSource = d?.Items ?? _datos.ItemsPorLiquidar;
+            int? pagoAnterior = PagoSeleccionado?.IdPago;
             dgvPagos.DataSource = d?.Pagos;
+            dgvPagos.ClearSelection();
+            dgvPagos.CurrentCell = null;
+            var filaPago = dgvPagos.Rows.Cast<DataGridViewRow>().FirstOrDefault(r => r.DataBoundItem is PagoConsultaDto p && p.IdPago == pagoAnterior)
+                ?? dgvPagos.Rows.Cast<DataGridViewRow>().FirstOrDefault();
+            if (filaPago != null) { dgvPagos.CurrentCell = filaPago.Cells[0]; filaPago.Selected = true; }
             if (d != null)
                 txtObservaciones.Text = d.Observaciones;
             txtObservaciones.ReadOnly = d != null;
@@ -42,13 +51,13 @@ public partial class FrmComprobantePagos : Form
             var abierta = _datos.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
             btnEmitir.Visible = abierta && d == null;
             btnPago.Visible = abierta && d is { Saldo: > 0 };
-            btnEntregar.Visible = abierta && d is { Saldo: 0 };
+            btnEntregar.Visible = _datos.PuedeRegistrarEntrega;
             btnImprimir.Visible = d != null;
             btnRecibo.Visible = d?.Pagos.Count > 0;
             btnAnular.Visible = abierta && d?.Pagos.Any(p => !p.Anulado) == true;
             btnEmitir.Enabled = abierta && d == null;
             btnPago.Enabled = abierta && d is { Saldo: > 0 };
-            btnEntregar.Enabled = abierta && d is { Saldo: 0 };
+            btnEntregar.Enabled = _datos.PuedeRegistrarEntrega;
             btnImprimir.Enabled = d != null;
             Seleccion(null, EventArgs.Empty);
         }
@@ -63,13 +72,13 @@ public partial class FrmComprobantePagos : Form
         }
     }
 
-    private PagoConsultaDto? PagoSeleccionado => dgvPagos.CurrentRow?.DataBoundItem as PagoConsultaDto;
+    private PagoConsultaDto? PagoSeleccionado => dgvPagos.CurrentRow?.DataBoundItem as PagoConsultaDto ?? _datos?.Comprobante?.Pagos.FirstOrDefault();
 
     private void Seleccion(object? s, EventArgs e)
     {
         btnRecibo.Enabled = PagoSeleccionado != null;
-        btnAnular.Visible = PagoSeleccionado is { Anulado: false } && _datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
-        btnAnular.Enabled = PagoSeleccionado is { Anulado: false } && _datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion;
+        btnAnular.Visible = _datos?.Comprobante?.Pagos.Any(p => !p.Anulado) == true && (_datos.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion);
+        btnAnular.Enabled = PagoSeleccionado is { Anulado: false } && (_datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion);
     }
 
     private async Task OperarAsync(Func<Task> accion)
@@ -102,7 +111,8 @@ public partial class FrmComprobantePagos : Form
             return;
         await OperarAsync(async () =>
         {
-            await _servicio.LiquidarAsync(_id, _datos.VersionAtencion, txtObservaciones.Text);
+            int idDocumento = await _servicio.LiquidarAsync(_id, _datos.VersionAtencion, txtObservaciones.Text);
+            MessageBox.Show(this, $"{_datos.Resumen}\nLiquidación LIQ-{idDocumento:D8} emitida. No acredita pagos. Registre los cobros cuando se reciban.", "Liquidación emitida", MessageBoxButtons.OK, MessageBoxIcon.Information);
         });
     }
 
@@ -128,11 +138,10 @@ public partial class FrmComprobantePagos : Form
     {
         if (_datos == null || _ocupado)
             return;
-        using var f = new FrmRegistrarEntrega(_datos.Comprobante?.Cliente ?? "", _datos.Estado == EstadoAtencion.TrabajoFinalizado ? "Resultado técnico: trabajos finalizados por el técnico." : "Resultado técnico: cierre con liquidación de lo realizado.");
-        if (f.ShowDialog(this) != DialogResult.OK) return;
-        bool entregado = false;
-        await OperarAsync(async () => { await _servicio.EntregarAsync(new RegistrarEntregaDto { IdAtencion = _id, Version = _datos.VersionAtencion, PersonaRetira = f.PersonaRetira, ConformidadRecepcion = f.Conformidad, Observaciones = f.Observaciones }); entregado = true; });
-        if (entregado) MessageBox.Show(this, "Entrega registrada. La atención está cerrada y esta cuenta queda disponible para consulta e impresión.", "Atención finalizada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        _ocupado = true;
+        try { await EntregaAtencionPresentador.MostrarAsync(this, _id, _servicio); }
+        catch (Exception ex) { Error(ex); }
+        finally { _ocupado = false; await RecargarAsync(); }
     }
 
     private async void Imprimir(object? s, EventArgs e)

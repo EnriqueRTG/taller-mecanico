@@ -54,6 +54,7 @@ internal static class Program
         VerificarCobroRestanteYEntrega(proveedor);
         VerificarContextoSeguimiento(proveedor);
         VerificarCantidadConcepto(proveedor);
+        VerificarSeleccionRecibos(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -106,6 +107,31 @@ internal static class Program
         combo.SelectedIndex = 1;
         if (cantidad.Value != 1) throw new InvalidOperationException("Un nuevo concepto debe iniciar cantidad en uno.");
         Console.WriteLine("Presupuesto: cambiar de concepto reinicia cantidad sin alterar filas agregadas.");
+    }
+
+    private static void VerificarSeleccionRecibos(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var f = new Taller.Presentacion.Formularios.Comprobantes.FrmComprobantePagos(1,
+            scope.ServiceProvider.GetRequiredService<CobroServicio>(), scope.ServiceProvider.GetRequiredService<EmpresaDocumentoDto>());
+        f.BindingContext = new BindingContext();
+        var tipo = f.GetType();
+        var cuenta = new Taller.Aplicacion.DTOs.Cobros.CuentaAtencionDto { Estado = Taller.Dominio.Enumeraciones.EstadoAtencion.TrabajoFinalizado,
+            Comprobante = new() { Total = 100, Pagado = 100, Pagos = [new() { IdPago = 1, Importe = 100 }] } };
+        tipo.GetField("_datos", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(f, cuenta);
+        var recibos = (DataGridView)f.Controls.Find("dgvPagos", true).Single();
+        var tabs = (TabControl)f.Controls.Find("tabs", true).Single();
+        foreach (int pagina in new[] { 0, 1, 0 })
+        {
+            tabs.SelectedIndex = pagina;
+            tipo.GetMethod("Seleccion", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [null, EventArgs.Empty]);
+            if (!((Button)f.Controls.Find("btnRecibo", true).Single()).Enabled || !((Button)f.Controls.Find("btnAnular", true).Single()).Enabled)
+                throw new InvalidOperationException("Las acciones de recibo no deben depender de visitar su pestaña.");
+        }
+        cuenta.Comprobante.Pagos[0].Anulado = true;
+        tipo.GetMethod("Seleccion", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [null, EventArgs.Empty]);
+        if (((Button)f.Controls.Find("btnAnular", true).Single()).Enabled) throw new InvalidOperationException("No debe anular dos veces el recibo.");
+        Console.WriteLine("Cuenta: recibo disponible desde ambas pestañas y anulación condicionada al pago vigente.");
     }
 
     private static void VerificarFiltrosListados(IServiceProvider proveedor)

@@ -14,6 +14,7 @@ public partial class FrmRegistrarPago : Form
     public FrmRegistrarPago(ComprobanteDto documento, CobroServicio servicio)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
         _documento = documento;
         _servicio = servicio;
     }
@@ -102,7 +103,8 @@ public partial class FrmRegistrarPago : Form
         tlpPrincipal.Enabled = false;
         try
         {
-            await _servicio.RegistrarPagoAsync(new RegistrarPagoDto { IdOperacion = _operacion, IdComprobante = _documento.IdComprobante, Version = _documento.Version, Medios = _medios.ToList() });
+            int idPago = await _servicio.RegistrarPagoAsync(new RegistrarPagoDto { IdOperacion = _operacion, IdComprobante = _documento.IdComprobante, Version = _documento.Version, Medios = _medios.ToList() });
+            MessageBox.Show(this, $"Atención {_documento.IdAtencion:D6} · Dominio {_documento.Dominio}\nCobro registrado. Recibo REC-{idPago:D8}. Saldo posterior: {_documento.Saldo - _medios.Sum(m => m.Importe):N2}. El pago no registra la entrega.", "Cobro registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
         }
         catch (Exception ex)

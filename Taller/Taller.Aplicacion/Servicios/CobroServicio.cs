@@ -52,7 +52,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
         Pagado = d.TotalPagado,
         EstadoAtencion = d.Atencion.Estado,
         Items = d.Detalles.OrderBy(x => x.IdComprobanteDetalle).Select(x => new ComprobanteItemDto { Descripcion = x.Descripcion, Cantidad = x.Cantidad, PrecioUnitario = x.PrecioUnitario, Subtotal = x.Subtotal }).ToList(),
-        Pagos = d.Pagos.OrderByDescending(p => p.Fecha).ThenByDescending(p => p.IdPago).Select(p => new PagoConsultaDto { IdPago = p.IdPago, Fecha = p.Fecha, Importe = p.Importe, SaldoPosterior = p.SaldoPosterior, Anulado = p.Anulado, MotivoAnulacion = p.MotivoAnulacion, Usuario = p.UsuarioRegistroNombre, Medios = string.Join("; ", p.Medios.OrderBy(m => m.Orden).Select(m => $"{m.NombreMedio}: {m.Importe:N2}" + (string.IsNullOrEmpty(m.Referencia) ? "" : $" ({m.Referencia})"))) }).ToList()
+        Pagos = d.Pagos.OrderByDescending(p => p.Fecha).ThenByDescending(p => p.IdPago).Select(p => new PagoConsultaDto { IdPago = p.IdPago, Fecha = p.Fecha, Importe = p.Importe, SaldoPosterior = p.SaldoPosterior, Anulado = p.Anulado, MotivoAnulacion = p.MotivoAnulacion, Usuario = p.UsuarioRegistroNombre, DetalleMedios = p.Medios.OrderBy(m => m.Orden).Select(m => new PagoMedioDto { IdMedioPago = m.IdMedioPago, Nombre = m.NombreMedio, Importe = m.Importe, Referencia = m.Referencia }).ToList(), Medios = string.Join("; ", p.Medios.OrderBy(m => m.Orden).Select(m => $"{m.NombreMedio}: {m.Importe:N2}" + (string.IsNullOrEmpty(m.Referencia) ? "" : $" ({m.Referencia})"))) }).ToList()
     };
     public async Task<List<AtencionCobroDto>> ListarAsync()
     {

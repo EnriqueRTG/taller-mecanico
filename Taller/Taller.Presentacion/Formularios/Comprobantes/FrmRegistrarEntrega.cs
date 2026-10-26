@@ -9,11 +9,12 @@ public sealed partial class FrmRegistrarEntrega : Form
     public string PersonaRetira => persona.Text.Trim();
     public bool Conformidad => conforme.Checked;
     public string Observaciones => notas.Text.Trim();
-    public FrmRegistrarEntrega(string cliente, string resultado)
+    public FrmRegistrarEntrega(string cliente, string resultado, string contexto = "")
     {
         InitializeComponent();
+        Estilos.CabeceraOperacion.Aplicar(lblResultado);
         persona.Text = cliente;
-        lblResultado.Text = resultado + "\r\nCuenta saldada. Confirme quién recibe el vehículo.";
+        lblResultado.Text = (string.IsNullOrWhiteSpace(contexto) ? "" : contexto + "\r\n") + resultado + "\r\nCuenta saldada. Confirme quién recibe el vehículo.";
     }
 
     private void Confirmar(object? s, EventArgs e)

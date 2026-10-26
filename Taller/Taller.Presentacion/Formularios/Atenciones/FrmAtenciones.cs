@@ -20,10 +20,12 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private readonly IServiceProvider _serviceProvider;
         private readonly AutorizacionNavegacion _autorizacionNavegacion;
         private List<AtencionFila> _atenciones = [];
+        private HashSet<int> _entregasDisponibles = [];
+        private bool _registrandoEntrega;
         private bool _formularioNuevaAtencionAbierto;
         private bool _tomandoDiagnostico = false;
         private bool _cargandoDatos;
-        public bool OperacionEnCurso => _cargandoDatos;
+        public bool OperacionEnCurso => _cargandoDatos || _registrandoEntrega;
 
 #endregion
 #region Constructor y modelo de presentación
@@ -106,6 +108,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             cboEstado.Items.Clear();
             cboEstado.Items.Add("Todas");
             cboEstado.Items.Add("En curso");
+            if (_sesionUsuario.UsuarioActual?.RolId == RolesSistema.AdministrativoId) cboEstado.Items.Add("Pendientes de entrega");
             if (!esTecnico)
             {
                 cboEstado.Items.Add("Finalizadas");
@@ -149,6 +152,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnIniciarProceso.Visible = puedeGestionar;
             btnCancelarAtencion.Visible = puedeGestionar;
             btnRegistrarEntrega.Visible = puedeGestionar;
+            btnEntregaDirecta.Visible = puedeGestionar;
             btnVerHistorial.Visible = puedeGestionar || puedeConsultarComoTecnico;
             btnRegistrarDiagnostico.Visible = puedeConsultarComoTecnico;
             btnFinalizarTrabajo.Visible = puedeConsultarComoTecnico;
@@ -208,6 +212,12 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 Cursor = Cursors.WaitCursor;
                 EstablecerEstadoCarga(true);
                 List<Atencion> atenciones = await _atencionServicio.ListarTodasAsync();
+                _entregasDisponibles = [];
+                if (_sesionUsuario.UsuarioActual?.RolId == RolesSistema.AdministrativoId)
+                {
+                    var cuentas = await _serviceProvider.GetRequiredService<CobroServicio>().ListarAsync();
+                    _entregasDisponibles = cuentas.Where(c => c.PuedeRegistrarEntrega).Select(c => c.IdAtencion).ToHashSet();
+                }
                 _atenciones = atenciones.Select(MapearFila).ToList();
                 AplicarFiltros();
             }
@@ -332,6 +342,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 case "En curso":
                     consulta = consulta.Where(a => a.EstadoValor != EstadoAtencion.Cerrada && a.EstadoValor != EstadoAtencion.Cancelada);
                     break;
+                case "Pendientes de entrega":
+                    consulta = consulta.Where(a => _entregasDisponibles.Contains(a.IdAtencion));
+                    break;
                 case "Finalizadas":
                     consulta = consulta.Where(a => a.EstadoValor == EstadoAtencion.Cerrada || a.EstadoValor == EstadoAtencion.Cancelada);
                     break;
@@ -400,6 +413,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnCancelarAtencion.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
+            btnEntregaDirecta.Enabled = !_registrandoEntrega && puedeGestionar && _entregasDisponibles.Contains(fila.IdAtencion);
             btnVerHistorial.Enabled = puedeGestionar || puedeConsultarComoTecnico;
             bool puedeTomarDiagnostico = !fila.EvaluacionFinalizada && (fila.EstadoValor == EstadoAtencion.PendienteDiagnostico || fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad is null && fila.ActividadTecnica is null;
             bool puedeRegistrarDiagnostico = fila.EstadoValor == EstadoAtencion.EnEvaluacionTecnica && fila.IdTecnicoEnActividad == usuario.Id && fila.ActividadTecnica is ActividadTecnica.Diagnostico or ActividadTecnica.Presupuesto;
@@ -416,6 +430,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnIniciarProceso.Enabled = false;
             btnCancelarAtencion.Enabled = false;
             btnRegistrarEntrega.Enabled = false;
+            btnEntregaDirecta.Enabled = false;
             btnVerHistorial.Enabled = false;
             btnRegistrarDiagnostico.Enabled = false;
             btnFinalizarTrabajo.Enabled = false;
@@ -551,6 +566,21 @@ namespace Taller.Presentacion.Formularios.Atenciones
         /// <summary>
         /// Abre el formulario de entrega para la atención seleccionada.
         /// </summary>
+        private async void RegistrarEntregaDirecta(object? sender, EventArgs e)
+        {
+            var fila = ObtenerFilaSeleccionada();
+            if (_registrandoEntrega || fila == null || _sesionUsuario.UsuarioActual?.RolId != RolesSistema.AdministrativoId) return;
+            _registrandoEntrega = true;
+            btnEntregaDirecta.Enabled = false;
+            try
+            {
+                await Taller.Presentacion.Formularios.Comprobantes.EntregaAtencionPresentador.MostrarAsync(this, fila.IdAtencion,
+                    _serviceProvider.GetRequiredService<CobroServicio>());
+            }
+            catch (Exception ex) { Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Registrar entrega"); }
+            finally { _registrandoEntrega = false; await CargarAtencionesAsync(); }
+        }
+
         private async void BtnRegistrarEntrega_Click(object? sender, EventArgs e)
         {
             var fila = ObtenerFilaSeleccionada();

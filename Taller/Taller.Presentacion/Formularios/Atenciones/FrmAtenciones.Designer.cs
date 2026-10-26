@@ -519,6 +519,10 @@ namespace Taller.Presentacion.Formularios.Atenciones
             flpAcciones.Controls.Add(btnIniciarProceso);
             flpAcciones.Controls.Add(btnCancelarAtencion);
             flpAcciones.Controls.Add(btnRegistrarEntrega);
+            btnEntregaDirecta = new Button { Name = "btnEntregaDirecta", Text = "Registrar entrega", AutoSize = true, MinimumSize = new Size(130, 34), Enabled = false, Visible = false };
+            Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnEntregaDirecta);
+            btnEntregaDirecta.Click += RegistrarEntregaDirecta;
+            flpAcciones.Controls.Add(btnEntregaDirecta);
             flpAcciones.Controls.Add(btnVerHistorial);
             flpAcciones.Controls.Add(btnRegistrarDiagnostico);
             flpAcciones.Controls.Add(btnFinalizarTrabajo);
@@ -773,6 +777,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private Label lblCantidad;
         private Button btnCancelarAtencion;
         private Button btnRegistrarEntrega;
+        private Button btnEntregaDirecta;
         private Button btnVerHistorial;
         private Button btnRegistrarDiagnostico;
         private Button btnFinalizarTrabajo;

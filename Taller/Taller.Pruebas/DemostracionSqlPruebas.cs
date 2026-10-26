@@ -47,6 +47,7 @@ public sealed class DemostracionSqlPruebas
             Assert.Equal(100, await db.Atenciones.CountAsync());
             Assert.False(await db.Atenciones.AnyAsync(a => a.Estado == EstadoAtencion.Abierta || a.Estado == EstadoAtencion.PendienteDiagnostico || a.Estado == EstadoAtencion.Pausada));
             Assert.True(await db.Conceptos.CountAsync() >= 157);
+            Assert.True(await db.Conceptos.AnyAsync(c => !c.Activo && !c.Categoria.Activo));
             Assert.False(await db.Conceptos.AnyAsync(c => c.Activo && (c.PrecioReferencia == null || c.PrecioReferencia <= 0)));
             Assert.True(await db.Conceptos.AnyAsync(c => c.Nombre == "Disco de freno trasero"));
             Assert.True(await db.Conceptos.AnyAsync(c => c.Nombre == "Service completo de filtros y lubricación"));

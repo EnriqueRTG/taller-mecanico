@@ -45,6 +45,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             public int IdAtencion { get; init; }
             public bool TieneSolicitudes { get; init; }
             public bool EvaluacionFinalizada { get; init; }
+            public bool TieneEvaluacion { get; init; }
             public int? IdTecnicoEnActividad { get; init; }
             public ActividadTecnica? ActividadTecnica { get; init; }
             public string Numero => IdAtencion.ToString("D6");
@@ -263,6 +264,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 IdAtencion = atencion.IdAtencion,
                 TieneSolicitudes = atencion.Solicitudes.Count > 0,
                 EvaluacionFinalizada = atencion.Evaluacion?.Finalizada == true,
+                TieneEvaluacion = atencion.Evaluacion != null,
                 IdTecnicoEnActividad = atencion.IdTecnicoEnActividad,
                 Fecha = atencion.FechaApertura,
                 Dominio = atencion.Vehiculo.Dominio,
@@ -425,7 +427,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnSeguimiento.Enabled = fila.EstadoValor != EstadoAtencion.Abierta && (puedeGestionar || puedeConsultarComoTecnico);
             btnEditar.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta && !fila.TieneSolicitudes;
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
-            btnCancelarAtencion.Enabled = puedeGestionar && (fila.EstadoValor is EstadoAtencion.Abierta or EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad == null && !fila.EvaluacionFinalizada;
+            btnCancelarAtencion.Enabled = puedeGestionar && (fila.EstadoValor is EstadoAtencion.Abierta or EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad == null && !fila.TieneEvaluacion;
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
             btnEntregaDirecta.Enabled = !_registrandoEntrega && puedeGestionar && _entregasDisponibles.Contains(fila.IdAtencion);
             btnVerHistorial.Enabled = puedeGestionar || puedeConsultarComoTecnico;

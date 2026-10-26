@@ -192,6 +192,10 @@ public static class CatalogoDemostracion
             c.PrecioReferencia = e.Precio;
             c.Descripcion = $"Referencia académica ARS (2026-10), {e.Unidad}. Confirmar aplicación y precio antes de presupuestar. No acredita existencias.";
         }
+        var historica = new Categoria { Nombre = "Histórico de demostración", Descripcion = "Categoría fuera de oferta para comprobar filtros de inactivos.", Activo = false };
+        db.Categorias.Add(historica);
+        db.Conceptos.Add(new Concepto { Categoria = historica, Tipo = TipoConcepto.Repuesto, Nombre = "Filtro discontinuado de demostración",
+            Descripcion = "Registro inactivo de prueba; no disponible para presupuestar.", PrecioReferencia = 8000m, Activo = false });
         await db.SaveChangesAsync(); db.ChangeTracker.Clear();
     }
 }

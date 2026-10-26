@@ -394,8 +394,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             bool puedeGestionar = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.GestionarAtenciones);
             bool puedeConsultarComoTecnico = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.ConsultarAtencionesAsignadas);
             btnVerDetalle.Enabled = puedeGestionar || puedeConsultarComoTecnico;
-            btnSeguimiento.Visible = false;
-            btnSeguimiento.Enabled = (puedeGestionar || puedeConsultarComoTecnico);
             btnCancelarAtencion.Enabled = puedeGestionar && (fila.EstadoValor is EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad == null && !fila.TieneEvaluacion;
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
             btnEntregaDirecta.Enabled = !_registrandoEntrega && puedeGestionar && _entregasDisponibles.Contains(fila.IdAtencion);
@@ -409,7 +407,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
         private void DeshabilitarAcciones()
         {
-            btnSeguimiento.Enabled = false;
             btnVerDetalle.Enabled = false;
             btnCancelarAtencion.Enabled = false;
             btnRegistrarEntrega.Enabled = false;
@@ -571,27 +568,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
 #endregion
 #region Eventos de consulta y acciones técnicas
-        private async void VerSeguimiento(object? sender, EventArgs e)
-        {
-            if (_cargandoDatos || _tomandoDiagnostico || ObtenerFilaSeleccionada()is not { } fila)
-                return;
-            _tomandoDiagnostico = true;
-            try
-            {
-                using var f = new FrmSeguimientoTrabajo(fila.IdAtencion, _serviceProvider.GetRequiredService<SeguimientoTrabajoServicio>(), _serviceProvider.GetRequiredService<EvaluacionServicio>(), _serviceProvider.GetRequiredService<PresupuestoServicio>(), _serviceProvider.GetRequiredService<Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto>());
-                f.ShowDialog(this);
-            }
-            catch (Exception ex)
-            {
-                Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Seguimiento de atención");
-            }
-            finally
-            {
-                _tomandoDiagnostico = false;
-                await CargarAtencionesAsync();
-            }
-        }
-
         private async void BtnVerDetalle_ClickAsync(object? sender, EventArgs e)
         {
             await AbrirDetalleSeleccionadoAsync();
@@ -704,10 +680,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
         }
 
 #endregion
-        private void DgvAtenciones_CellDoubleClickAsync(object sender, DataGridViewCellEventArgs e)
-        {
-        }
-
         private static bool EsAtencionFinalizada(EstadoAtencion estado)
         {
             return estado == EstadoAtencion.Cerrada || estado == EstadoAtencion.Cancelada;

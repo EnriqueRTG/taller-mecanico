@@ -367,7 +367,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dgvAtenciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvAtenciones.Size = new Size(750, 175);
             dgvAtenciones.TabIndex = 0;
-            dgvAtenciones.CellDoubleClick += DgvAtenciones_CellDoubleClickAsync;
             dgvAtenciones.CellFormatting += DgvAtenciones_CellFormatting;
             dgvAtenciones.CellToolTipTextNeeded += DgvAtenciones_CellToolTipTextNeeded;
             dgvAtenciones.SelectionChanged += DgvAtenciones_SelectionChanged;
@@ -501,17 +500,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             flpAcciones.Dock = DockStyle.Fill;
             flpAcciones.AutoSize = false;
             flpAcciones.AutoScroll = true;
-            btnSeguimiento = new Button
-            {
-                Name = "btnSeguimiento",
-                Text = "Ver progreso y seguimiento",
-                AutoSize = true,
-                Height = 34,
-                Enabled = false
-            };
-            btnSeguimiento.Visible = false;
-            btnSeguimiento.Click += VerSeguimiento;
-            flpAcciones.Controls.Add(btnSeguimiento);
             flpAcciones.Controls.Add(btnVerDetalle);
             flpAcciones.Controls.Add(btnCancelarAtencion);
             flpAcciones.Controls.Add(btnRegistrarEntrega);
@@ -744,7 +732,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private Label lblEspacioActualizar;
         private TableLayoutPanel tlpPie;
         private FlowLayoutPanel flpAcciones;
-        private Button btnSeguimiento;
         private Button btnVerDetalle;
         private Label lblCantidad;
         private Button btnCancelarAtencion;

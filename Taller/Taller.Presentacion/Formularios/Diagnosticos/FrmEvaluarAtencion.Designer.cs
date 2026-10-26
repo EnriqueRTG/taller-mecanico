@@ -123,7 +123,7 @@ partial class FrmEvaluarAtencion
         tabs.Controls.Add(tabIniciales);
         tabInforme.Text = "Informe / conclusión";
         tabPropuesta.Text = "Presupuesto";
-        tabIniciales.Text = "Servicios iniciales autorizados";
+        tabIniciales.Text = "Inspecciones autorizadas";
         tlpInforme.Dock = DockStyle.Fill;
         tlpInforme.Padding = new Padding(12);
         tlpInforme.ColumnCount = 1;
@@ -311,7 +311,7 @@ partial class FrmEvaluarAtencion
         tabIniciales.Controls.Add(tlpIniciales);
         tlpIniciales.Controls.Add(lblIniciales, 0, 0);
         lblIniciales.Dock = DockStyle.Fill;
-        lblIniciales.Text = "Registre solo lo efectivamente realizado. Un servicio autorizado no equivale a ejecutado ni pagado. Omitido requiere justificación; no duplique estos cargos en la propuesta.";
+        lblIniciales.Text = "Aquí se registra la inspección extraordinaria previamente aceptada por el cliente: completada u omitida con motivo. Luego continúe el informe y presupuesto de reparación. No duplique este costo en la reparación.";
         tlpIniciales.Controls.Add(dgvIniciales, 0, 1);
         dgvIniciales.Dock = DockStyle.Fill;
         dgvIniciales.AutoGenerateColumns = false;

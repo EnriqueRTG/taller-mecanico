@@ -58,9 +58,7 @@ public partial class FrmSeguimientoTrabajo : Form
         Text = "Progreso y seguimiento de la atención";
         lblResumen.Text = _datos.Resumen + $" · {_datos.Progreso.Count(i => i.Estado == EstadoEjecucionDetalle.Completado)} completados / {_datos.Progreso.Count} autorizados. Avances guardados; use Actualizar para consultar cambios. Los hallazgos son incidencias separadas.";
         dgvProgreso.DataSource = _datos.Progreso;
-        cboTarea.Visible = _datos.PuedeRegistrar;
-        if (!_datos.PuedeRegistrar) tlpPrincipal.RowStyles[1].Height = 0;
-        else tlpPrincipal.RowStyles[1].Height = 38;
+
         btnExportarAvance.Enabled = _datos.Progreso.Count > 0;
         btnImprimirInforme.Enabled = _datos.Progreso.Count > 0 || !string.IsNullOrWhiteSpace(_datos.InformeInicial) || _datos.Hallazgos.Count > 0 || _datos.Pausas.Count > 0;
         if (_datos.Progreso.Count == 0) lblResumen.Text += " Aún no hay trabajos autorizados para mostrar en Avance.";
@@ -96,6 +94,30 @@ public partial class FrmSeguimientoTrabajo : Form
         dgvPausas.CurrentCell = null;
         dgvMateriales.ClearSelection();
         dgvMateriales.CurrentCell = null;
+        ActualizarContexto(null, EventArgs.Empty);
+    }
+
+    private void ActualizarContexto(object? sender, EventArgs e)
+    {
+        if (_datos == null) return;
+        var pestana = tabs.SelectedTab?.Name;
+        bool alcance = _datos.PuedeRegistrar && (pestana is "tabHallazgos" or "tabPausas");
+        cboTarea.Visible = lblAlcance.Visible = alcance;
+        panelContexto.RowStyles[1].Height = alcance ? 34 : 0;
+        tlpPrincipal.RowStyles[1].Height = alcance ? 68 : 34;
+        lblAlcance.Text = pestana == "tabHallazgos" ? "El hallazgo afecta a:" : "Detener este alcance:";
+        lblContexto.Text = pestana switch
+        {
+            "tabHallazgos" => "Registre problemas nuevos; un informe no autoriza trabajos ni genera cargos. Seleccione el informe para presupuestar un adicional.",
+            "tabPausas" => "Una pausa bloquea el alcance indicado. El técnico documenta su resolución antes de continuar.",
+            "tabMateriales" => "Seleccione un material acordado a cargo del cliente y registre el total recibido y su aptitud para utilizarlo.",
+            _ => "Avances guardados de los trabajos autorizados. La edición se realiza desde Gestionar ejecución."
+        };
+        btnPausar.Text = _datos.PuedeRegistrar ? "Pausar alcance seleccionado" : "Registrar detención solicitada por el cliente";
+        btnAdicional.Enabled = _datos.PuedeRegistrar && (_datos.Estado is EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.EnEjecucion)
+            && dgvHallazgos.CurrentRow?.DataBoundItem is HallazgoConsultaDto;
+        btnResolver.Enabled = _datos.PuedeRegistrar && dgvPausas.CurrentRow?.DataBoundItem is PausaConsultaDto { FechaResolucion: null };
+        btnRecibir.Enabled = _datos.PuedeRegistrar && dgvMateriales.CurrentRow?.DataBoundItem is MaterialTrabajoDto;
     }
 
     private int? Tarea => cboTarea.SelectedItem is MaterialTrabajoDto { IdDetalle: > 0 } i ? i.IdDetalle : null;
@@ -140,9 +162,9 @@ public partial class FrmSeguimientoTrabajo : Form
     {
         if (_datos == null || _ocupado)
             return;
-        using var f = new FrmSolicitarMotivo("Pausar trabajo", "Indique la causa: espera de repuesto, solicitud de detener, autorización pendiente u otra. La pausa no borra lo ejecutado ni cancela lo autorizado.");
+        using var f = new FrmSolicitarMotivo("Pausar trabajo", _datos.PuedeRegistrar ? "Indique la causa. Se bloquea el alcance elegido sin borrar lo ejecutado ni cancelar lo autorizado." : "Registre quién pidió detener y el motivo. Se detendrá toda la intervención. Avise también directamente al técnico: el sistema controla el registro, no detiene físicamente el trabajo.");
         if (f.ShowDialog(this) == DialogResult.OK)
-            await OperarAsync(() => _servicio.PausarAsync(_id, _datos.Version, Tarea, f.Motivo));
+            await OperarAsync(() => _servicio.PausarAsync(_id, _datos.Version, _datos.PuedeRegistrar ? Tarea : null, f.Motivo));
     }
 
     private async void Resolver(object? s, EventArgs e)
@@ -156,6 +178,7 @@ public partial class FrmSeguimientoTrabajo : Form
 
     private void MaterialSeleccionado(object? s, EventArgs e)
     {
+        ActualizarContexto(s, e);
         if (dgvMateriales.CurrentRow?.DataBoundItem is MaterialTrabajoDto d)
         {
             nudRecibido.Value = 0;
@@ -177,7 +200,8 @@ public partial class FrmSeguimientoTrabajo : Form
     {
         if (_datos == null || _ocupado)
             return;
-        int? hallazgo = dgvHallazgos.CurrentRow?.DataBoundItem is HallazgoConsultaDto h ? h.Id : null;
+        if (dgvHallazgos.CurrentRow?.DataBoundItem is not HallazgoConsultaDto h) return;
+        int? hallazgo = h.Id;
         _ocupado = true;
         try
         {

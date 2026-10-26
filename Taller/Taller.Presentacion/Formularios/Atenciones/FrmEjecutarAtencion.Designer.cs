@@ -10,8 +10,12 @@ partial class FrmEjecutarAtencion
         base.Dispose(disposing);
     }
 
+    private System.Windows.Forms.Timer temporizadorPausas = null!;
     private void InitializeComponent()
     {
+        components = new System.ComponentModel.Container();
+        temporizadorPausas = new System.Windows.Forms.Timer(components) { Interval = 10000 };
+        temporizadorPausas.Tick += ComprobarPausas;
         tlpPrincipal = new TableLayoutPanel();
         tlpPrincipal.Name = "tlpPrincipal";
         txtResumen = new TextBox();
@@ -36,7 +40,6 @@ partial class FrmEjecutarAtencion
         btnInterrumpir.Name = "btnInterrumpir";
         btnCerrar = new Button();
         btnCerrar.Name = "btnCerrar";
-        components = new System.ComponentModel.Container();
         SuspendLayout();
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);

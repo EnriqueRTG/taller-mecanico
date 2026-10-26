@@ -113,7 +113,11 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             await ExigirAbiertaAsync(a);
             if (u.RolId == RolesSistema.TecnicoId)
                 ExigirTecnicoDisponible(a, u);
+            if (u.RolId == RolesSistema.AdministrativoId && idDetalle.HasValue)
+                throw new ValidacionException("Recepción registra una detención general del cliente; las pausas por tarea corresponden al técnico.");
             motivo = AutorizacionOperativa.Texto(motivo);
+            if (u.RolId == RolesSistema.AdministrativoId) motivo = "Detención solicitada por el cliente: " + motivo;
+            if (motivo.Length > 1000) throw new ValidacionException("Reduzca el motivo de la detención a 950 caracteres.");
             if (idDetalle is int d)
                 await DetalleAsync(id, d);
             if (a.Pausas.Any(p => p.FechaResolucion == null && p.IdDetalle == idDetalle))

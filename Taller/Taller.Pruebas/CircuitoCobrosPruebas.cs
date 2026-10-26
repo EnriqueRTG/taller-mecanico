@@ -802,6 +802,40 @@ public sealed class CircuitoCobrosPruebas
     }
 
     [Fact]
+    public async Task DetencionAdministrativaBloqueaAvancesYSoloTecnicoResuelve()
+    {
+        using var c = new Caso();
+        await c.AceptarAsync();
+        c.Entrar(1);
+        var e = await c.Ejecucion.ObtenerAsync(1);
+        await c.Ejecucion.TomarAsync(1, e.Version, "");
+        await c.VersionesAsync();
+        c.Entrar(2);
+        var seguimiento = await c.Seguimiento.ObtenerAsync(1);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Seguimiento.PausarAsync(1, seguimiento.Version,
+            seguimiento.Items[0].IdDetalle, "El cliente solicita detener"));
+        await c.Seguimiento.PausarAsync(1, seguimiento.Version, null, "Cliente solicita detener hasta nueva comunicación");
+        await c.VersionesAsync();
+        seguimiento = await c.Seguimiento.ObtenerAsync(1);
+        Assert.Null(seguimiento.Pausas.Single().IdDetalle);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Seguimiento.ResolverPausaAsync(1, seguimiento.Version,
+            seguimiento.Pausas.Single().Id, "Recepción no puede certificar continuidad"));
+        c.Entrar(1);
+        e = await c.Ejecucion.ObtenerAsync(1);
+        e.Items[0].Estado = EstadoEjecucionDetalle.Completado;
+        e.Items[0].CantidadEjecutada = e.Items[0].CantidadAutorizada;
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Ejecucion.GuardarAsync(e, false));
+        seguimiento = await c.Seguimiento.ObtenerAsync(1);
+        await c.Seguimiento.ResolverPausaAsync(1, seguimiento.Version, seguimiento.Pausas.Single().Id,
+            "Recepción confirmó el pedido de retomar y el técnico comprobó condiciones seguras");
+        await c.VersionesAsync();
+        e = await c.Ejecucion.ObtenerAsync(1);
+        e.Items[0].Estado = EstadoEjecucionDetalle.Completado;
+        e.Items[0].CantidadEjecutada = e.Items[0].CantidadAutorizada;
+        await c.Ejecucion.GuardarAsync(e, false);
+    }
+
+    [Fact]
     public async Task MaterialCliente_ExigeRecepcionConformeYNoCobraSuVenta()
     {
         using var c = new Caso();

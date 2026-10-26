@@ -14,6 +14,8 @@ partial class FrmSeguimientoTrabajo
     private Button btnImprimirInforme = null!, btnExportarAvance = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblResumen = null!;
+    private Label lblContexto = null!, lblAlcance = null!;
+    private TableLayoutPanel panelContexto = null!;
     private ComboBox cboTarea = null!;
     private TextBox txtDescripcion = null!, txtRecomendacion = null!, txtMaterial = null!;
     private CheckBox chkImpide = null!, chkConforme = null!;
@@ -45,6 +47,17 @@ partial class FrmSeguimientoTrabajo
             Dock = DockStyle.Fill,
             DropDownStyle = ComboBoxStyle.DropDownList
         };
+        panelContexto = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2 };
+        panelContexto.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 210));
+        panelContexto.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        panelContexto.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+        panelContexto.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        lblContexto = new Label { Dock = DockStyle.Fill, AutoEllipsis = true };
+        lblAlcance = new Label { Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
+        panelContexto.Controls.Add(lblContexto, 0, 0);
+        panelContexto.SetColumnSpan(lblContexto, 2);
+        panelContexto.Controls.Add(lblAlcance, 0, 1);
+        panelContexto.Controls.Add(cboTarea, 1, 1);
         tabs = new TabControl
         {
             Dock = DockStyle.Fill
@@ -76,6 +89,7 @@ partial class FrmSeguimientoTrabajo
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
+        dgvHallazgos.SelectionChanged += ActualizarContexto;
         dgvHallazgos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "Fecha", HeaderText = "Fecha", MinimumWidth = 125, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" } });
         dgvHallazgos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Hallazgo", MinimumWidth = 220, FillWeight = 180 });
         dgvHallazgos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colRecomendacion", DataPropertyName = "Recomendacion", HeaderText = "Recomendación", MinimumWidth = 220, FillWeight = 180 });
@@ -146,7 +160,8 @@ partial class FrmSeguimientoTrabajo
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         };
-        dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTarea", DataPropertyName = "Alcance", HeaderText = "Ítem (vacío: toda)", MinimumWidth = 95 });
+        dgvPausas.SelectionChanged += ActualizarContexto;
+        dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTarea", DataPropertyName = "Alcance", HeaderText = "Alcance detenido", MinimumWidth = 95 });
         dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colMotivo", DataPropertyName = "Motivo", HeaderText = "Motivo", MinimumWidth = 220, FillWeight = 200 });
         dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colResolucion", DataPropertyName = "Resolucion", HeaderText = "Resolución técnica", MinimumWidth = 220, FillWeight = 200 });
         dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFechaResolucion", DataPropertyName = "FechaResolucion", HeaderText = "Resuelta el", MinimumWidth = 125 });
@@ -272,7 +287,8 @@ partial class FrmSeguimientoTrabajo
         acciones.AutoScroll = true;
         foreach (var boton in new[] { actualizar, cerrar, imprimir, exportar, btnHallazgo, btnAdicional, btnPausar, btnResolver, btnRecibir }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
-        tlpPrincipal.Controls.Add(cboTarea, 0, 1);
+        tlpPrincipal.Controls.Add(panelContexto, 0, 1);
+        tabs.SelectedIndexChanged += ActualizarContexto;
         tlpPrincipal.Controls.Add(tabs, 0, 2);
         tlpPrincipal.Controls.Add(acciones, 0, 3);
         tlpPrincipal.AutoScroll = true;

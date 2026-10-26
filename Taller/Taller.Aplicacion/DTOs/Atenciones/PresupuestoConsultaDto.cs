@@ -18,8 +18,7 @@ public sealed class PresupuestoConsultaDto
     public string Vehiculo { get; set; } = string.Empty;
     public DateTime Fecha { get; set; }
     public EstadoPresupuesto Estado { get; set; }
-    public TipoPresupuesto Tipo { get; set; }
-    public string TipoDescripcion => Tipo == TipoPresupuesto.Diagnostico ? "Servicios iniciales" : EsInspeccion ? "Inspección adicional" : EsAdicional ? "Adicional de reparación" : "Propuesta de trabajo";
+    public string TipoDescripcion => EsInspeccion ? "Inspección adicional" : EsAdicional ? "Adicional de reparación" : "Propuesta de trabajo";
     public string EstadoDescripcion => Estado switch
     {
         EstadoPresupuesto.Aceptado when Items.Any(i => i.AceptadoPorCliente == false) => "Aceptado parcialmente",

@@ -73,7 +73,7 @@ public partial class FrmEvaluarAtencion : Form
             item.SolicitudDescripcion = d.Solicitudes.FirstOrDefault(s => s.IdSolicitud == item.IdSolicitudAtencion)?.Descripcion ?? "";
         }
         dgvItems.DataSource = _items;
-        _iniciales = new BindingList<ServicioEvaluadoDto>(d.ServiciosIniciales);
+        _iniciales = new BindingList<ServicioEvaluadoDto>(d.InspeccionesAutorizadas);
         dgvIniciales.DataSource = _iniciales;
         foreach (DataGridViewRow fila in dgvIniciales.Rows)
             if (fila.DataBoundItem is ServicioEvaluadoDto servicio && servicio.Estado != EstadoEjecucionDetalle.NoIniciado)
@@ -254,7 +254,7 @@ public partial class FrmEvaluarAtencion : Form
             _datos.Observaciones = txtObservaciones.Text;
             _datos.Kilometraje = chkKm.Checked ? (int)nudKm.Value : null;
             _datos.Items = _items.ToList();
-            _datos.ServiciosIniciales = _iniciales.ToList();
+            _datos.InspeccionesAutorizadas = _iniciales.ToList();
             await _servicio.GuardarAsync(_datos, finalizar);
             _sucio = false;
             if (finalizar)

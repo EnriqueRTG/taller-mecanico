@@ -44,9 +44,11 @@ public sealed class DemostracionSqlPruebas
             await db.Database.MigrateAsync();
             await sp.GetRequiredService<InicializadorDatos>().InicializarAsync();
             await CargadorDemostracion.CargarAsync(sp, clave);
-            Assert.Equal(100, await db.Atenciones.CountAsync());
-            Assert.False(await db.Atenciones.AnyAsync(a => a.Estado == EstadoAtencion.Abierta || a.Estado == EstadoAtencion.PendienteDiagnostico || a.Estado == EstadoAtencion.Pausada));
-            Assert.True(await db.Conceptos.CountAsync() >= 157);
+            Assert.Equal(48, await db.Atenciones.CountAsync());
+            foreach (var estado in Enum.GetValues<EstadoAtencion>())
+                Assert.True(await db.Atenciones.AnyAsync(a => a.Estado == estado), "Falta etapa de atención: " + estado);
+            await db.Database.MigrateAsync(); // Repetir preparación no reintroduce conceptos del catálogo mínimo.
+            Assert.Equal(CatalogoDemostracion.Entradas.Count + 1, await db.Conceptos.CountAsync());
             Assert.True(await db.Conceptos.AnyAsync(c => !c.Activo && !c.Categoria.Activo));
             Assert.False(await db.Conceptos.AnyAsync(c => c.Activo && (c.PrecioReferencia == null || c.PrecioReferencia <= 0)));
             Assert.True(await db.Conceptos.AnyAsync(c => c.Nombre == "Disco de freno trasero"));
@@ -58,9 +60,9 @@ public sealed class DemostracionSqlPruebas
             sp.GetRequiredService<SesionUsuario>().Iniciar(receptor);
             Assert.Contains(await sp.GetRequiredService<CobroServicio>().ListarAsync(), c => c.PuedeRegistrarEntrega);
 
-            Assert.Equal(45, await db.Clientes.CountAsync());
-            Assert.Equal(5, await db.Clientes.CountAsync(x => !x.Activo));
-            Assert.Equal(5, await db.Vehiculos.CountAsync(x => !x.Activo));
+            Assert.Equal(19, await db.Clientes.CountAsync());
+            Assert.Equal(3, await db.Clientes.CountAsync(x => !x.Activo));
+            Assert.Equal(2, await db.Vehiculos.CountAsync(x => !x.Activo));
             Assert.False(await db.Atenciones.AnyAsync(a=>a.FechaApertura<a.Cliente.FechaAlta||a.FechaApertura<a.Vehiculo.FechaAlta));
             Assert.True(await db.Atenciones.AnyAsync(x => x.Estado == EstadoAtencion.Cerrada));
             Assert.True(await db.Presupuestos.AnyAsync(x => x.Estado == EstadoPresupuesto.PendienteRevisionTecnica));

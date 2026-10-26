@@ -5,9 +5,6 @@ namespace Taller.Dominio.Entidades;
 /// Registra una propuesta económica y la decisión del cliente.
 /// </summary>
 /// <remarks>
-/// El presupuesto de diagnóstico se vincula directamente
-/// con la atención.
-///
 /// Toda propuesta pertenece a una atención. Puede vincular un informe
 /// de diagnóstico o describir directamente un servicio definido.
 /// </remarks>
@@ -28,7 +25,6 @@ public sealed class Presupuesto
     public string? MotivoRevision { get; set; }
     public string? ObservacionesDecision { get; set; }
     public bool AlcanceValidado { get; set; }
-    public TipoPresupuesto Tipo { get; set; }
     /// <summary>
     /// Atención a la que pertenece la propuesta, con o sin diagnóstico.
     /// </summary>

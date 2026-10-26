@@ -49,7 +49,7 @@ Durante la ejecución, el técnico puede preparar un presupuesto adicional vincu
 
 Un adicional sin ejecutar también puede ser enviado a revisión por recepción. Se conserva su documento anterior; el técnico prepara la alternativa desde Presupuestos. Los ítems ya ejecutados no se reescriben ni se eliminan.
 
-Si se necesita más inspección/desarme con costo, desde la evaluación técnica se prepara un **adicional de inspección**, limitado a servicios. Se presenta y acepta antes de que aparezca habilitado para registrar su ejecución en los servicios iniciales. Rechazar la reparación posterior no borra ese servicio autorizado y realizado.
+Si se necesita más inspección/desarme con costo, desde la evaluación técnica se prepara un **adicional de inspección**, limitado a servicios. Se presenta y acepta antes de que aparezca habilitado para registrar su ejecución en Inspecciones autorizadas. Rechazar la reparación posterior no borra ese servicio autorizado y realizado.
 
 ## Materiales aportados por el cliente
 

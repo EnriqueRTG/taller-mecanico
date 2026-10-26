@@ -99,7 +99,7 @@ public sealed class CircuitoCobrosPruebas
             Solicitudes = [new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Solicita reemplazo de discos" }] });
         await c.VersionesAsync();
         a = await c.Db.Atenciones.AsNoTracking().SingleAsync(x => x.IdAtencion == a.IdAtencion);
-        await c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "Desiste antes de cualquier intervención");
+        await c.Evaluacion.CancelarIngresoAsync(a.IdAtencion, a.Version, "Desiste antes de cualquier intervención");
         Assert.Equal(EstadoAtencion.Cancelada, (await c.Db.Atenciones.AsNoTracking().SingleAsync(x => x.IdAtencion == a.IdAtencion)).Estado);
         Assert.Contains(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(), h => h.IdAtencion == a.IdAtencion && h.Accion == "AperturaCancelada" && h.EstadoAnterior == EstadoAtencion.EnEvaluacionTecnica);
     }
@@ -142,7 +142,7 @@ public sealed class CircuitoCobrosPruebas
                 Nombre = "Modelo",
                 Activo = true
             };
-            Db.Add(new Atencion { IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = new Vehiculo { IdVehiculo = 1, Dominio = "AB123CD", Color = "Gris", IdModelo = 1, Modelo = modelo }, IdUsuarioRecepcion = 2, TipoSolicitud = TipoSolicitudAtencion.Problema, MotivoConsulta = "Ruido al frenar", Estado = EstadoAtencion.Abierta, FechaApertura = FechaHoraTaller.Ahora, Version = new byte[8] });
+            Db.Add(new Atencion { IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = new Vehiculo { IdVehiculo = 1, Dominio = "AB123CD", Color = "Gris", IdModelo = 1, Modelo = modelo }, IdUsuarioRecepcion = 2, TipoSolicitud = TipoSolicitudAtencion.Problema, MotivoConsulta = "Ruido al frenar", Estado = EstadoAtencion.EnEvaluacionTecnica, FechaApertura = FechaHoraTaller.Ahora, Version = new byte[8] });
             Db.AddRange(new Usuario { Id = 1, RolId = RolesSistema.TecnicoId, Nombre = "Técnico", Apellido = "Uno", Activo = true }, new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId, Nombre = "Recepción", Apellido = "Uno", Activo = true }, new Usuario { Id = 3, RolId = RolesSistema.TecnicoId, Nombre = "Técnico", Apellido = "Dos", Activo = true });
             var categoria = new Categoria
             {
@@ -150,7 +150,7 @@ public sealed class CircuitoCobrosPruebas
                 Nombre = "Frenos",
                 Activo = true
             };
-            Db.AddRange(new Concepto { IdConcepto = 1, IdCategoria = 1, Categoria = categoria, Nombre = "Mano de obra", Tipo = TipoConcepto.Servicio, Activo = true }, new Concepto { IdConcepto = 2, IdCategoria = 1, Categoria = categoria, Nombre = "Repuesto", Tipo = TipoConcepto.Repuesto, Activo = true }, new Concepto { IdConcepto = 3, IdCategoria = 1, Categoria = categoria, Nombre = "Inspección inicial", Tipo = TipoConcepto.Servicio, Activo = true, DisponibleParaIngreso = true });
+            Db.AddRange(new Concepto { IdConcepto = 1, IdCategoria = 1, Categoria = categoria, Nombre = "Mano de obra", Tipo = TipoConcepto.Servicio, Activo = true }, new Concepto { IdConcepto = 2, IdCategoria = 1, Categoria = categoria, Nombre = "Repuesto", Tipo = TipoConcepto.Repuesto, Activo = true }, new Concepto { IdConcepto = 3, IdCategoria = 1, Categoria = categoria, Nombre = "Inspección inicial", Tipo = TipoConcepto.Servicio, Activo = true });
             Db.SaveChanges();
             Db.ChangeTracker.Clear();
             var evaluacion = new EvaluacionRepositorio(Db);
@@ -163,7 +163,7 @@ public sealed class CircuitoCobrosPruebas
             Seguimiento = new SeguimientoTrabajoServicio(evaluacion, circuito, unidad, acceso);
             Ejecucion = new EjecucionServicio(evaluacion, circuito, unidad, acceso);
             Cobros = new CobroServicio(circuito, evaluacion, unidad, acceso);
-            Recepcion = new AtencionServicio(new AtencionRepositorio(Db), new ClienteRepositorio(Db), new VehiculoRepositorio(Db), usuarios, new ConceptoRepositorio(Db), Sesion);
+            Recepcion = new AtencionServicio(new AtencionRepositorio(Db), new ClienteRepositorio(Db), new VehiculoRepositorio(Db), usuarios, Sesion);
             Entrar(2);
         }
 
@@ -186,12 +186,23 @@ public sealed class CircuitoCobrosPruebas
         {
             var a = await Db.Atenciones.AsNoTracking().SingleAsync();
             if (servicioInicial)
-                await Recepcion.ConfirmarIngresoAsync(new ConfirmarIngresoDto { IdAtencion = 1, VersionAtencion = a.Version, ClienteAutoriza = true, Servicios = [new ServicioIngresoSeleccionadoDto { IdConcepto = 3, PrecioUnitario = 30 }] });
-            else
-                await Evaluacion.EnviarAEvaluacionAsync(1, a.TipoSolicitud, a.Version);
+            {
+                Entrar(1);
+                await Evaluacion.TomarAsync(1);
+                await VersionesAsync();
+                var seguimiento = await Seguimiento.ObtenerAsync(1);
+                var idInspeccion = await Seguimiento.CrearAdicionalAsync(new() { IdAtencion = 1, Version = seguimiento.Version, Motivo = "Desarme adicional para determinar la falla", Items = [new() { IdConcepto = 3, Descripcion = "Inspección autorizada", Cantidad = 1, PrecioUnitario = 30 }] });
+                await VersionesAsync();
+                Entrar(2);
+                var inspeccion = await Presupuestos.ObtenerAsync(idInspeccion);
+                await Evaluacion.PresentarAsync(idInspeccion, inspeccion.Version);
+                await VersionesAsync();
+                inspeccion = await Presupuestos.ObtenerAsync(idInspeccion);
+                await Presupuestos.DecidirAsync(new() { IdPresupuesto = idInspeccion, Version = inspeccion.Version, ItemsAceptados = inspeccion.Items.Select(i => i.IdDetalle).ToList() });
+            }
             await VersionesAsync();
             Entrar(1);
-            await Evaluacion.TomarAsync(1);
+            if (!servicioInicial) await Evaluacion.TomarAsync(1);
             await VersionesAsync();
             var d = await Evaluacion.ObtenerAsync(1);
             d.FallaDetectada = "Desgaste detectado";
@@ -211,12 +222,12 @@ public sealed class CircuitoCobrosPruebas
             }
 
             ];
-            foreach (var i in d.ServiciosIniciales)
+            foreach (var i in d.InspeccionesAutorizadas)
                 i.Estado = EstadoEjecucionDetalle.Completado;
             await Evaluacion.GuardarAsync(d, true);
             await VersionesAsync();
             Entrar(2);
-            var p = await Db.Presupuestos.AsNoTracking().SingleAsync(x => x.Tipo == TipoPresupuesto.Reparacion);
+            var p = await Db.Presupuestos.AsNoTracking().SingleAsync(x => !x.EsAdicional);
             await Evaluacion.PresentarAsync(p.IdPresupuesto, p.Version);
             await VersionesAsync();
             return await Presupuestos.ObtenerAsync(p.IdPresupuesto);
@@ -322,7 +333,7 @@ public sealed class CircuitoCobrosPruebas
         var preparacion = await c.Evaluacion.ObtenerAsync(id);
         Assert.Equal(45000, preparacion.Kilometraje);
         Assert.Equal(caso != 0, preparacion.IncluyeDiagnostico);
-        Assert.Empty(preparacion.ServiciosIniciales);
+        Assert.Empty(preparacion.InspeccionesAutorizadas);
         preparacion.FallaDetectada = caso == 0 ? "" : "Desgaste comprobado en frenos";
         preparacion.TrabajoRecomendado = caso == 0 ? "" : "Reemplazar las piezas desgastadas";
         preparacion.Items = [new() { IdSolicitudAtencion = preparacion.Solicitudes[0].IdSolicitud, IdConcepto = 1, Descripcion = "Mano de obra", Cantidad = 2, PrecioUnitario = 100 },
@@ -406,7 +417,7 @@ public sealed class CircuitoCobrosPruebas
     [Theory]
     [InlineData(false, 0)]
     [InlineData(true, 30)]
-    public async Task Rechazo_LiquidaSoloServiciosInicialesRealizados(bool inicial, int total)
+    public async Task Rechazo_LiquidaSoloInspeccionesAutorizadasRealizados(bool inicial, int total)
     {
         using var c = new Caso();
         var p = await c.PropuestaAsync(inicial);
@@ -749,7 +760,7 @@ public sealed class CircuitoCobrosPruebas
     {
         using var c = new Caso();
         var a = await c.Db.Atenciones.AsNoTracking().SingleAsync();
-        await c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "El cliente desiste antes de ingresar");
+        await c.Evaluacion.CancelarIngresoAsync(a.IdAtencion, a.Version, "El cliente desiste antes de ingresar");
         var actual = await c.Db.Atenciones.AsNoTracking().SingleAsync();
         Assert.Equal(EstadoAtencion.Cancelada, actual.Estado);
         Assert.NotNull(actual.FechaCierre);
@@ -762,13 +773,13 @@ public sealed class CircuitoCobrosPruebas
         using var c = new Caso();
         var a = await c.Db.Atenciones.AsNoTracking().SingleAsync();
         c.Entrar(1);
-        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "Motivo"));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.CancelarIngresoAsync(a.IdAtencion, a.Version, "Motivo"));
         c.Entrar(2);
-        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, Enumerable.Repeat((byte)255, 8).ToArray(), "Motivo"));
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => c.Evaluacion.CancelarIngresoAsync(a.IdAtencion, Enumerable.Repeat((byte)255, 8).ToArray(), "Motivo"));
         await c.PropuestaAsync(servicioInicial: true);
         a = await c.Db.Atenciones.AsNoTracking().SingleAsync();
         c.Entrar(2);
-        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "Motivo"));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.CancelarIngresoAsync(a.IdAtencion, a.Version, "Motivo"));
         Assert.NotEqual(EstadoAtencion.Cancelada, (await c.Db.Atenciones.AsNoTracking().SingleAsync()).Estado);
     }
 
@@ -970,7 +981,6 @@ public sealed class CircuitoCobrosPruebas
     {
         using var c = new Caso();
         var a = await c.Db.Atenciones.AsNoTracking().SingleAsync();
-        await c.Evaluacion.EnviarAEvaluacionAsync(1, a.TipoSolicitud, a.Version);
         await c.VersionesAsync();
         c.Entrar(1);
         await c.Evaluacion.TomarAsync(1);
@@ -978,7 +988,7 @@ public sealed class CircuitoCobrosPruebas
         var seg = await c.Seguimiento.ObtenerAsync(1);
         int id = await c.Seguimiento.CrearAdicionalAsync(new() { IdAtencion = 1, Version = seg.Version, Motivo = "Se necesita desarme adicional para inspeccionar", Items = [new() { IdConcepto = 3, Descripcion = "Desarme autorizado por separado", Cantidad = 1, PrecioUnitario = 30 }] });
         await c.VersionesAsync();
-        Assert.Empty((await c.Evaluacion.ObtenerAsync(1)).ServiciosIniciales);
+        Assert.Empty((await c.Evaluacion.ObtenerAsync(1)).InspeccionesAutorizadas);
         c.Entrar(2);
         var p = await c.Presupuestos.ObtenerAsync(id);
         await c.Evaluacion.PresentarAsync(id, p.Version);
@@ -988,8 +998,8 @@ public sealed class CircuitoCobrosPruebas
         await c.VersionesAsync();
         c.Entrar(1);
         var d = await c.Evaluacion.ObtenerAsync(1);
-        Assert.Single(d.ServiciosIniciales);
-        d.ServiciosIniciales[0].Estado = EstadoEjecucionDetalle.Completado;
+        Assert.Single(d.InspeccionesAutorizadas);
+        d.InspeccionesAutorizadas[0].Estado = EstadoEjecucionDetalle.Completado;
         d.FallaDetectada = "Falla determinada tras desarme";
         d.TrabajoRecomendado = "Reparar según propuesta";
         d.Items = [new()

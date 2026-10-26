@@ -20,7 +20,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
     private async Task<Atencion> AtencionAsync(int id) => await repositorio.ObtenerAtencionAsync(id) ?? throw new ValidacionException("La atención no existe.");
     private async Task<List<Presupuesto>> PropuestasAsync(int id)
     {
-        var ps = (await repositorio.ObtenerPresupuestosAsync(id)).Where(p => p.Vigente && !p.EsInspeccion && p.Tipo == TipoPresupuesto.Reparacion && p.Estado == EstadoPresupuesto.Aceptado).ToList();
+        var ps = (await repositorio.ObtenerPresupuestosAsync(id)).Where(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado).ToList();
         if (ps.Count == 0)
             throw new ValidacionException("La atención no tiene una propuesta vigente aceptada.");
         return ps;

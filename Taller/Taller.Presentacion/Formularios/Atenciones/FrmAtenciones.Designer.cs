@@ -63,8 +63,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpPie = new TableLayoutPanel();
             flpAcciones = new FlowLayoutPanel();
             btnVerDetalle = new Button();
-            btnEditar = new Button();
-            btnIniciarProceso = new Button();
             btnCancelarAtencion = new Button();
             btnRegistrarEntrega = new Button();
             btnVerHistorial = new Button();
@@ -85,9 +83,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             flpAcciones.SuspendLayout();
             pnlInformacionRol.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // tlpPrincipal
-            // 
+            //
             tlpPrincipal.BackColor = Color.Transparent;
             tlpPrincipal.ColumnCount = 1;
             tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -108,9 +106,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
             tlpPrincipal.Size = new Size(752, 460);
             tlpPrincipal.TabIndex = 0;
-            // 
+            //
             // pnlCabecera
-            // 
+            //
             pnlCabecera.BackColor = Color.White;
             pnlCabecera.Controls.Add(btnNuevaAtencion);
             pnlCabecera.Controls.Add(lblDescripcion);
@@ -122,9 +120,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlCabecera.Padding = new Padding(18, 8, 18, 8);
             pnlCabecera.Size = new Size(752, 65);
             pnlCabecera.TabIndex = 0;
-            // 
+            //
             // btnNuevaAtencion
-            // 
+            //
             btnNuevaAtencion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnNuevaAtencion.FlatStyle = FlatStyle.Flat;
             btnNuevaAtencion.Location = new Point(533, 11);
@@ -134,9 +132,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnNuevaAtencion.Text = "＋ Nueva atención";
             btnNuevaAtencion.UseVisualStyleBackColor = true;
             btnNuevaAtencion.Click += BtnNuevaAtencion_Click;
-            // 
+            //
             // lblDescripcion
-            // 
+            //
             lblDescripcion.AutoSize = true;
             lblDescripcion.Font = new Font("Segoe UI", 9.5F);
             lblDescripcion.ForeColor = Color.FromArgb(100, 116, 139);
@@ -145,9 +143,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblDescripcion.Size = new Size(358, 17);
             lblDescripcion.TabIndex = 1;
             lblDescripcion.Text = "Registro y seguimiento de los vehículos ingresados al taller.";
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTitulo.ForeColor = Color.FromArgb(15, 23, 42);
@@ -156,9 +154,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblTitulo.Size = new Size(229, 30);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión de atenciones";
-            // 
+            //
             // pnlFiltros
-            // 
+            //
             pnlFiltros.BackColor = Color.White;
             pnlFiltros.AutoSize = true;
             pnlFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -170,9 +168,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlFiltros.Padding = new Padding(18, 8, 18, 8);
             pnlFiltros.Size = new Size(752, 75);
             pnlFiltros.TabIndex = 1;
-            // 
+            //
             // tlpFiltros
-            // 
+            //
             tlpFiltros.ColumnCount = 4;
             tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34F));
             tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 22F));
@@ -211,9 +209,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpFiltros.Size = new Size(716, 59);
             tlpFiltros.TabIndex = 0;
-            // 
+            //
             // lblBuscar
-            // 
+            //
             lblBuscar.AutoSize = true;
             lblBuscar.Dock = DockStyle.Fill;
             lblBuscar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -224,9 +222,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblBuscar.TabIndex = 0;
             lblBuscar.Text = "Buscar";
             lblBuscar.TextAlign = ContentAlignment.BottomLeft;
-            // 
+            //
             // txtBuscar
-            // 
+            //
             txtBuscar.Dock = DockStyle.Fill;
             txtBuscar.Font = new Font("Segoe UI", 9.75F);
             txtBuscar.Location = new Point(5, 22);
@@ -236,9 +234,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             txtBuscar.Size = new Size(233, 25);
             txtBuscar.TabIndex = 1;
             txtBuscar.TextChanged += TxtBuscar_TextChanged;
-            // 
+            //
             // lblEstado
-            // 
+            //
             lblEstado.AutoSize = true;
             lblEstado.Dock = DockStyle.Fill;
             lblEstado.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -249,9 +247,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblEstado.TabIndex = 2;
             lblEstado.Text = "Estado";
             lblEstado.TextAlign = ContentAlignment.BottomLeft;
-            // 
+            //
             // cboEstado
-            // 
+            //
             cboEstado.Dock = DockStyle.Fill;
             cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstado.Font = new Font("Segoe UI", 9.75F);
@@ -262,9 +260,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             cboEstado.Size = new Size(118, 25);
             cboEstado.TabIndex = 3;
             cboEstado.SelectedIndexChanged += CboEstado_SelectedIndexChanged;
-            // 
+            //
             // lblDesde
-            // 
+            //
             lblDesde.AutoSize = true;
             lblDesde.Dock = DockStyle.Fill;
             lblDesde.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -275,9 +273,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblDesde.TabIndex = 4;
             lblDesde.Text = "Desde";
             lblDesde.TextAlign = ContentAlignment.BottomLeft;
-            // 
+            //
             // lblHasta
-            // 
+            //
             lblHasta.AutoSize = true;
             lblHasta.Dock = DockStyle.Fill;
             lblHasta.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -288,9 +286,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblHasta.TabIndex = 5;
             lblHasta.Text = "Hasta";
             lblHasta.TextAlign = ContentAlignment.BottomLeft;
-            // 
+            //
             // dtpDesde
-            // 
+            //
             dtpDesde.Checked = false;
             dtpDesde.CustomFormat = "dd/MM/yyyy";
             dtpDesde.Dock = DockStyle.Fill;
@@ -302,9 +300,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dtpDesde.Size = new Size(118, 25);
             dtpDesde.TabIndex = 7;
             dtpDesde.ValueChanged += FiltroFecha_ValueChanged;
-            // 
+            //
             // dtpHasta
-            // 
+            //
             dtpHasta.Checked = false;
             dtpHasta.CustomFormat = "dd/MM/yyyy";
             dtpHasta.Dock = DockStyle.Fill;
@@ -316,9 +314,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dtpHasta.Size = new Size(118, 25);
             dtpHasta.TabIndex = 8;
             dtpHasta.ValueChanged += FiltroFecha_ValueChanged;
-            // 
+            //
             // btnActualizar
-            // 
+            //
             btnActualizar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             btnActualizar.Location = new Point(635, 24);
             btnActualizar.Margin = new Padding(8, 0, 0, 5);
@@ -330,9 +328,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
             btnActualizar.Click += BtnActualizar_Click;
-            // 
+            //
             // lblEspacioActualizar
-            // 
+            //
             lblEspacioActualizar.AutoSize = true;
             lblEspacioActualizar.Dock = DockStyle.Fill;
             lblEspacioActualizar.Location = new Point(627, 0);
@@ -340,9 +338,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblEspacioActualizar.Name = "lblEspacioActualizar";
             lblEspacioActualizar.Size = new Size(89, 22);
             lblEspacioActualizar.TabIndex = 10;
-            // 
+            //
             // pnlGrilla
-            // 
+            //
             pnlGrilla.BackColor = Color.White;
             pnlGrilla.Controls.Add(dgvAtenciones);
             pnlGrilla.Dock = DockStyle.Fill;
@@ -352,9 +350,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlGrilla.Padding = new Padding(1);
             pnlGrilla.Size = new Size(752, 177);
             pnlGrilla.TabIndex = 2;
-            // 
+            //
             // dgvAtenciones
-            // 
+            //
             dgvAtenciones.AllowUserToAddRows = false;
             dgvAtenciones.AllowUserToDeleteRows = false;
             dgvAtenciones.AllowUserToResizeRows = false;
@@ -369,13 +367,12 @@ namespace Taller.Presentacion.Formularios.Atenciones
             dgvAtenciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvAtenciones.Size = new Size(750, 175);
             dgvAtenciones.TabIndex = 0;
-            dgvAtenciones.CellDoubleClick += DgvAtenciones_CellDoubleClickAsync;
             dgvAtenciones.CellFormatting += DgvAtenciones_CellFormatting;
             dgvAtenciones.CellToolTipTextNeeded += DgvAtenciones_CellToolTipTextNeeded;
             dgvAtenciones.SelectionChanged += DgvAtenciones_SelectionChanged;
-            // 
+            //
             // colId
-            // 
+            //
             colId.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colId.DataPropertyName = "Numero";
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -387,9 +384,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colId.Name = "colId";
             colId.ReadOnly = true;
             colId.Width = 70;
-            // 
+            //
             // colFechaApertura
-            // 
+            //
             colFechaApertura.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colFechaApertura.DataPropertyName = "FechaApertura";
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -399,9 +396,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colFechaApertura.Name = "colFechaApertura";
             colFechaApertura.ReadOnly = true;
             colFechaApertura.Width = 140;
-            // 
+            //
             // colDominio
-            // 
+            //
             colDominio.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colDominio.DataPropertyName = "Dominio";
             colDominio.HeaderText = "Dominio";
@@ -409,9 +406,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colDominio.Name = "colDominio";
             colDominio.ReadOnly = true;
             colDominio.Width = 140;
-            // 
+            //
             // colVehiculo
-            // 
+            //
             colVehiculo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colVehiculo.DataPropertyName = "Vehiculo";
             colVehiculo.HeaderText = "Vehículo";
@@ -419,9 +416,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colVehiculo.Name = "colVehiculo";
             colVehiculo.ReadOnly = true;
             colVehiculo.Width = 140;
-            // 
+            //
             // colCliente
-            // 
+            //
             colCliente.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colCliente.DataPropertyName = "Cliente";
             colCliente.HeaderText = "Cliente";
@@ -429,9 +426,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colCliente.Name = "colCliente";
             colCliente.ReadOnly = true;
             colCliente.Width = 210;
-            // 
+            //
             // colMotivo
-            // 
+            //
             colMotivo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colMotivo.DataPropertyName = "Motivo";
             colMotivo.HeaderText = "Motivo";
@@ -439,9 +436,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colMotivo.Name = "colMotivo";
             colMotivo.ReadOnly = true;
             colMotivo.Width = 630;
-            // 
+            //
             // colEstado
-            // 
+            //
             colEstado.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colEstado.DataPropertyName = "Estado";
             colEstado.HeaderText = "Estado";
@@ -449,9 +446,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colEstado.Name = "colEstado";
             colEstado.ReadOnly = true;
             colEstado.Width = 140;
-            // 
+            //
             // colEtapa
-            // 
+            //
             colEtapa.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colEtapa.DataPropertyName = "Etapa";
             colEtapa.HeaderText = "Etapa actua";
@@ -459,9 +456,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colEtapa.Name = "colEtapa";
             colEtapa.ReadOnly = true;
             colEtapa.Width = 140;
-            // 
+            //
             // colRecepcion
-            // 
+            //
             colRecepcion.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             colRecepcion.DataPropertyName = "Recepcion";
             colRecepcion.HeaderText = "Recepción";
@@ -469,9 +466,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             colRecepcion.Name = "colRecepcion";
             colRecepcion.ReadOnly = true;
             colRecepcion.Width = 210;
-            // 
+            //
             // pnlPie
-            // 
+            //
             pnlPie.BackColor = Color.White;
             pnlPie.Controls.Add(tlpPie);
             pnlPie.Dock = DockStyle.Fill;
@@ -481,9 +478,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlPie.Padding = new Padding(12, 10, 12, 10);
             pnlPie.Size = new Size(752, 65);
             pnlPie.TabIndex = 3;
-            // 
+            //
             // tlpPie
-            // 
+            //
             tlpPie.ColumnCount = 1;
             tlpPie.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpPie.Controls.Add(flpAcciones, 0, 1);
@@ -497,26 +494,13 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpPie.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpPie.Size = new Size(728, 45);
             tlpPie.TabIndex = 0;
-            // 
+            //
             // flpAcciones
-            // 
+            //
             flpAcciones.Dock = DockStyle.Fill;
             flpAcciones.AutoSize = false;
             flpAcciones.AutoScroll = true;
-            btnSeguimiento = new Button
-            {
-                Name = "btnSeguimiento",
-                Text = "Ver progreso y seguimiento",
-                AutoSize = true,
-                Height = 34,
-                Enabled = false
-            };
-            btnSeguimiento.Visible = false;
-            btnSeguimiento.Click += VerSeguimiento;
-            flpAcciones.Controls.Add(btnSeguimiento);
             flpAcciones.Controls.Add(btnVerDetalle);
-            flpAcciones.Controls.Add(btnEditar);
-            flpAcciones.Controls.Add(btnIniciarProceso);
             flpAcciones.Controls.Add(btnCancelarAtencion);
             flpAcciones.Controls.Add(btnRegistrarEntrega);
             btnEntregaDirecta = new Button { Name = "btnEntregaDirecta", Text = "Registrar entrega", AutoSize = true, MinimumSize = new Size(130, 34), Enabled = false, Visible = false };
@@ -533,9 +517,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             flpAcciones.Size = new Size(546, 38);
             flpAcciones.TabIndex = 4;
             flpAcciones.WrapContents = true;
-            // 
+            //
             // btnVerDetalle
-            // 
+            //
             btnVerDetalle.AutoSize = true;
             btnVerDetalle.Location = new Point(4, 2);
             btnVerDetalle.Margin = new Padding(4, 0, 4, 0);
@@ -546,35 +530,13 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnVerDetalle.Text = "Ver detalle";
             btnVerDetalle.UseVisualStyleBackColor = true;
             btnVerDetalle.Click += BtnVerDetalle_ClickAsync;
-            // 
-            // btnEditar
-            // 
-            btnEditar.AutoSize = true;
-            btnEditar.Location = new Point(117, 2);
-            btnEditar.Margin = new Padding(4, 0, 4, 0);
-            btnEditar.MinimumSize = new Size(105, 34);
-            btnEditar.Name = "btnEditar";
-            btnEditar.Size = new Size(105, 34);
-            btnEditar.TabIndex = 1;
-            btnEditar.Text = "Editar datos";
-            btnEditar.UseVisualStyleBackColor = true;
-            btnEditar.Click += BtnEditar_Click;
-            // 
-            // btnIniciarProceso
-            // 
-            btnIniciarProceso.AutoSize = true;
-            btnIniciarProceso.Location = new Point(230, 2);
-            btnIniciarProceso.Margin = new Padding(4, 0, 4, 0);
-            btnIniciarProceso.MinimumSize = new Size(105, 34);
-            btnIniciarProceso.Name = "btnIniciarProceso";
-            btnIniciarProceso.Size = new Size(109, 34);
-            btnIniciarProceso.TabIndex = 2;
-            btnIniciarProceso.Text = "Gestionar ingreso";
-            btnIniciarProceso.UseVisualStyleBackColor = true;
-            btnIniciarProceso.Click += BtnIniciarProceso_ClickAsync;
-            // 
+            //
+            //
+            //
+            //
+            //
             // btnCancelarAtencion
-            // 
+            //
             btnCancelarAtencion.AutoSize = true;
             btnCancelarAtencion.Location = new Point(347, 2);
             btnCancelarAtencion.Margin = new Padding(4, 0, 4, 0);
@@ -585,9 +547,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnCancelarAtencion.Text = "Cancelar";
             btnCancelarAtencion.UseVisualStyleBackColor = true;
             btnCancelarAtencion.Click += BtnCancelarAtencion_Click;
-            // 
+            //
             // btnRegistrarEntrega
-            // 
+            //
             btnRegistrarEntrega.AutoSize = true;
             btnRegistrarEntrega.Location = new Point(460, 2);
             btnRegistrarEntrega.Margin = new Padding(4, 0, 4, 0);
@@ -598,9 +560,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnRegistrarEntrega.Text = "Liquidación y cobros";
             btnRegistrarEntrega.UseVisualStyleBackColor = true;
             btnRegistrarEntrega.Click += BtnRegistrarEntrega_Click;
-            // 
+            //
             // btnVerHistorial
-            // 
+            //
             btnVerHistorial.AutoSize = true;
             btnVerHistorial.Location = new Point(574, 2);
             btnVerHistorial.Margin = new Padding(4, 0, 4, 0);
@@ -611,9 +573,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnVerHistorial.Text = "Ver historial";
             btnVerHistorial.UseVisualStyleBackColor = true;
             btnVerHistorial.Click += BtnVerHistorial_Click;
-            // 
+            //
             // btnRegistrarDiagnostico
-            // 
+            //
             btnRegistrarDiagnostico.AutoSize = true;
             btnRegistrarDiagnostico.Enabled = false;
             btnRegistrarDiagnostico.Location = new Point(687, 2);
@@ -625,9 +587,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnRegistrarDiagnostico.Text = "Tomar diagnóstico";
             btnRegistrarDiagnostico.UseVisualStyleBackColor = true;
             btnRegistrarDiagnostico.Click += BtnRegistrarDiagnostico_Click;
-            // 
+            //
             // btnFinalizarTrabajo
-            // 
+            //
             btnFinalizarTrabajo.AutoSize = true;
             btnFinalizarTrabajo.Location = new Point(840, 2);
             btnFinalizarTrabajo.Margin = new Padding(4, 0, 4, 0);
@@ -638,9 +600,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnFinalizarTrabajo.Text = "Gestionar ejecución";
             btnFinalizarTrabajo.UseVisualStyleBackColor = true;
             btnFinalizarTrabajo.Click += BtnFinalizarTrabajo_Click;
-            // 
+            //
             // lblCantidad
-            // 
+            //
             lblCantidad.AutoSize = true;
             lblCantidad.Dock = DockStyle.Fill;
             lblCantidad.ForeColor = Color.FromArgb(100, 116, 139);
@@ -651,9 +613,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblCantidad.TabIndex = 5;
             lblCantidad.Text = "0 atenciones encontradas";
             lblCantidad.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
             // pnlInformacionRol
-            // 
+            //
             pnlInformacionRol.BackColor = Color.FromArgb(239, 246, 255);
             pnlInformacionRol.Controls.Add(lblInformacionRol);
             pnlInformacionRol.Controls.Add(pnlIndicador);
@@ -664,9 +626,9 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlInformacionRol.Padding = new Padding(12, 10, 12, 8);
             pnlInformacionRol.Size = new Size(752, 40);
             pnlInformacionRol.TabIndex = 4;
-            // 
+            //
             // lblInformacionRol
-            // 
+            //
             lblInformacionRol.AutoSize = true;
             lblInformacionRol.Font = new Font("Segoe UI", 8.75F);
             lblInformacionRol.ForeColor = Color.FromArgb(51, 65, 85);
@@ -675,18 +637,18 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblInformacionRol.Size = new Size(38, 15);
             lblInformacionRol.TabIndex = 1;
             lblInformacionRol.Text = "label1";
-            // 
+            //
             // pnlIndicador
-            // 
+            //
             pnlIndicador.BackColor = Color.FromArgb(30, 64, 175);
             pnlIndicador.Dock = DockStyle.Left;
             pnlIndicador.Location = new Point(12, 10);
             pnlIndicador.Name = "pnlIndicador";
             pnlIndicador.Size = new Size(4, 22);
             pnlIndicador.TabIndex = 0;
-            // 
+            //
             // FrmAtenciones
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(245, 247, 250);
@@ -770,10 +732,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
         private Label lblEspacioActualizar;
         private TableLayoutPanel tlpPie;
         private FlowLayoutPanel flpAcciones;
-        private Button btnSeguimiento;
         private Button btnVerDetalle;
-        private Button btnEditar;
-        private Button btnIniciarProceso;
         private Label lblCantidad;
         private Button btnCancelarAtencion;
         private Button btnRegistrarEntrega;

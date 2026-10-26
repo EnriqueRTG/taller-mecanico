@@ -20,5 +20,5 @@ public sealed class EvaluacionAtencionDto
     public int? Kilometraje { get; set; }
     public bool SoloEvaluacion { get; set; }
     public List<ItemPropuestaDto> Items { get; set; } = [];
-    public List<ServicioEvaluadoDto> ServiciosIniciales { get; set; } = [];
+    public List<ServicioEvaluadoDto> InspeccionesAutorizadas { get; set; } = [];
 }

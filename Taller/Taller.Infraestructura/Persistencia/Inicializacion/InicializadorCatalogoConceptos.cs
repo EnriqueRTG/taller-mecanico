@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 
@@ -8,7 +8,7 @@ namespace Taller.Infraestructura.Persistencia.Inicializacion;
 /// Carga las categorías y los conceptos del catálogo inicial.
 /// </summary>
 /// <remarks>
-/// Agrega únicamente registros faltantes.
+/// Inicializa únicamente un catálogo vacío.
 /// Conserva precios, descripciones y estados de los registros existentes.
 ///
 /// Debe ejecutarse durante la preparación de la base de datos,
@@ -24,14 +24,15 @@ public static class InicializadorCatalogoConceptos
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(contexto);
+        if (await contexto.Conceptos.AnyAsync(cancellationToken)) return;
 
         await AgregarCategoriaAsync(
             contexto,
             "Diagnóstico e inspección",
-            "Servicios de ingreso, inspección y evaluación técnica.",
+            "Servicios de inspección y evaluación técnica.",
             [
                 (TipoConcepto.Servicio,
-                    "Ingreso e inspección diagnóstica inicial",
+                    "Inspección diagnóstica general",
                     "Inspección diagnóstica general según el alcance acordado. " +
                     "No autoriza reparaciones."),
 
@@ -51,14 +52,7 @@ public static class InicializadorCatalogoConceptos
                     "Inspección del sistema de refrigeración",
                     "Evaluación del sistema de refrigeración. No incluye reparaciones.")
             ],
-            cancellationToken,
-            serviciosDisponiblesParaIngreso:
-            [
-                "Ingreso e inspección diagnóstica inicial",
-                "Diagnóstico electrónico",
-                "Inspección del sistema de frenos",
-                "Inspección del sistema de refrigeración"
-            ]);
+            cancellationToken);
 
         await AgregarCategoriaAsync(
             contexto,
@@ -297,17 +291,12 @@ public static class InicializadorCatalogoConceptos
     /// <param name="descripcion">Descripción inicial de la categoría.</param>
     /// <param name="conceptos">Conceptos iniciales de la categoría.</param>
     /// <param name="cancellationToken">Token de cancelación.</param>
-    /// <param name="serviciosDisponiblesParaIngreso">
-    /// Nombres de los servicios que se habilitan para ingreso
-    /// únicamente cuando se crean.
-    /// </param>
     private static async Task AgregarCategoriaAsync(
         TallerDbContext contexto,
         string nombre,
         string descripcion,
         (TipoConcepto Tipo, string Nombre, string Descripcion)[] conceptos,
-        CancellationToken cancellationToken,
-        string[]? serviciosDisponiblesParaIngreso = null)
+        CancellationToken cancellationToken)
     {
         var categoria = await contexto.Categorias
             .SingleOrDefaultAsync(
@@ -342,11 +331,6 @@ public static class InicializadorCatalogoConceptos
                 continue;
             }
 
-            bool disponibleParaIngreso =
-                dato.Tipo == TipoConcepto.Servicio
-                && serviciosDisponiblesParaIngreso?.Contains(
-                    dato.Nombre,
-                    StringComparer.Ordinal) == true;
 
             contexto.Conceptos.Add(new Concepto
             {
@@ -355,8 +339,7 @@ public static class InicializadorCatalogoConceptos
                 Nombre = dato.Nombre,
                 Descripcion = dato.Descripcion,
                 PrecioReferencia = null,
-                Activo = true,
-                DisponibleParaIngreso = disponibleParaIngreso
+                Activo = true
             });
         }
     }

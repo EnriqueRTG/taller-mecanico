@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Aplicacion.DTOs.Diagnosticos;
 
@@ -18,6 +18,4 @@ public sealed class DiagnosticoDetalleDto
     public int? Kilometraje { get; init; }
     public string? Observaciones { get; init; }
 
-    public TipoDiagnostico Tipo { get; init; }
-    public bool ImpideContinuar { get; init; }
 }

@@ -145,13 +145,12 @@ public sealed class MaestrosPruebas
     {
         using var c = new Caso();
         c.Db.Categorias.Add(new Categoria { IdCategoria = 91, Nombre = "Categoría Prueba", Activo = false });
-        c.Db.Conceptos.Add(new Concepto { IdConcepto = 91, IdCategoria = 91, Nombre = "Concepto Real", Tipo = Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, PrecioReferencia = null, DisponibleParaIngreso = true });
+        c.Db.Conceptos.Add(new Concepto { IdConcepto = 91, IdCategoria = 91, Nombre = "Concepto Real", Tipo = Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, PrecioReferencia = null });
         await c.Db.SaveChangesAsync();
         c.Db.ChangeTracker.Clear();
         c.Entrar(92);
         var d = Assert.Single(await c.Catalogo.ListarAsync(), x => x.IdConcepto == 91);
         Assert.False(d.Disponible);
-        Assert.False(d.DisponibleParaIngreso);
         Assert.Equal("A cotizar", d.Precio);
         c.Sesion.Cerrar();
         await Assert.ThrowsAsync<ValidacionException>(() => c.Catalogo.ListarAsync());
@@ -160,8 +159,8 @@ public sealed class MaestrosPruebas
     [Fact]
     public void FiltrosCombinanTextoCategoriaTipoYDisponibilidadSinCrearFilas()
     {
-        Taller.Aplicacion.DTOs.Catalogo.ConceptoCatalogoDto[] datos = [new(1, 1, "Mecánica", Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, "Inspección inicial", "Revisión", 100, true, true), new(2, 1, "Mecánica", Taller.Dominio.Enumeraciones.TipoConcepto.Repuesto, "Repuesto", "", null, true, false), new(3, 2, "Electricidad", Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, "Inspección eléctrica", "", 200, false, false)];
-        var f = new Taller.Aplicacion.DTOs.Catalogo.FiltroCatalogoDto("inspeccion", 1, Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, 3);
+        Taller.Aplicacion.DTOs.Catalogo.ConceptoCatalogoDto[] datos = [new(1, 1, "Mecánica", Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, "Inspección inicial", "Revisión", 100, true), new(2, 1, "Mecánica", Taller.Dominio.Enumeraciones.TipoConcepto.Repuesto, "Repuesto", "", null, true), new(3, 2, "Electricidad", Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, "Inspección eléctrica", "", 200, false)];
+        var f = new Taller.Aplicacion.DTOs.Catalogo.FiltroCatalogoDto("inspeccion", 1, Taller.Dominio.Enumeraciones.TipoConcepto.Servicio, 1);
         Assert.Equal(1, Assert.Single(Taller.Aplicacion.Consultas.ConsultaCatalogo.Aplicar(datos, f)).IdConcepto);
         Assert.Empty(Taller.Aplicacion.Consultas.ConsultaCatalogo.Aplicar(datos, f with { IdCategoria = 2 }));
         Assert.Equal(3, Assert.Single(Taller.Aplicacion.Consultas.ConsultaCatalogo.Aplicar(datos, new(Disponibilidad: 2))).IdConcepto);

@@ -81,7 +81,7 @@ partial class FrmCatalogo
         cboDisponibilidad.Name = "cboDisponibilidad";
         cboDisponibilidad.Width = 185;
         cboDisponibilidad.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboDisponibilidad.Items.AddRange(["Toda disponibilidad", "Disponibles en catálogo", "No disponibles", "Servicios para ingreso"]);
+        cboDisponibilidad.Items.AddRange(["Toda disponibilidad", "Disponibles en catálogo", "No disponibles"]);
         btnActualizar.Name = "btnActualizar";
         btnActualizar.Text = "Actualizar";
         btnActualizar.AutoSize = true;

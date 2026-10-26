@@ -48,11 +48,11 @@ public static class CargadorDemostracion
         string[] nombres = ["María", "José", "Elena", "Pablo", "Sofía", "Pedro", "Valeria", "Jorge"];
         string[] apellidos = ["Fernández", "Torres", "Pérez", "García", "Romero"];
         var idsClientes = new List<int>();
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < 16; i++)
             idsClientes.Add((await clientes.RegistrarAsync("DNI", (40000000 + i).ToString(), nombres[i % 8], apellidos[i / 8], "379400" + (1000 + i), $"demo{i + 1}@example.invalid", "Calle de prueba " + (100 + i))).IdCliente);
         var modelos = await db.Modelos.AsNoTracking().OrderBy(x => x.IdModelo).ToListAsync();
         var idsVehiculos = new List<int>();
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 48; i++)
             idsVehiculos.Add((await vehiculos.RegistrarAsync($"DM{i:000}AA", 2010 + i % 16, new[] { "Blanco", "Gris", "Azul", "Rojo", "Negro" }[i % 5], modelos[i % modelos.Count].IdModelo)).IdVehiculo);
         await CatalogoDemostracion.CargarAsync(db);
         // Los maestros y autores deben existir antes que las atenciones históricas del lote.
@@ -81,18 +81,18 @@ public static class CargadorDemostracion
         }
 
         async Task<PresupuestoGestionDto> Actual(int id) => await presupuestos.ObtenerAsync(id);
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 48; i++)
         {
             int etapa = i % 16;
-            string nombreCliente = $"{nombres[i % 8]} {apellidos[(i % 40) / 8]}";
+            string nombreCliente = $"{nombres[i % 8]} {apellidos[(i % idsClientes.Count) / 8]}";
             int tecnico = tecnicos[i % tecnicos.Count];
             await Entrar(i % 2 == 0 ? recepcion.Id : recepcionDos.Id);
             bool definido = i % 3 == 1;
             var solicitudes = new List<SolicitudIngresoDto> { new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {(definido ? pedidos[i % 6] : sintomas[i % 6])}" } };
             if (i % 3 == 2) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Control preventivo de niveles y luces solicitado por el cliente" });
             var atencion = await recepcionServicio.RegistrarRecepcionAsync(new() {
-                IdCliente = idsClientes[i % 40], IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
-                Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Recepción DEMO v2: ingreso documentado, sin cargos automáticos.", Solicitudes = solicitudes
+                IdCliente = idsClientes[i % idsClientes.Count], IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
+                Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Recepción DEMO v3: ingreso documentado, sin cargos automáticos.", Solicitudes = solicitudes
             });
             int id = atencion.IdAtencion;
             if (etapa == 0)
@@ -103,7 +103,7 @@ public static class CargadorDemostracion
 
             if (etapa == 15)
             {
-                await evaluacion.CancelarAperturaAsync(id, await Version(id), "El cliente desiste antes de cualquier intervención.");
+                await evaluacion.CancelarIngresoAsync(id, await Version(id), "El cliente desiste antes de cualquier intervención.");
                 await FecharAsync(db, id, i);
                 continue;
             }
@@ -175,7 +175,7 @@ public static class CargadorDemostracion
                 IdSolicitudAtencion = datos.Solicitudes[1].IdSolicitud, IdConcepto = Concepto("Control preventivo de niveles y luces").IdConcepto,
                 Descripcion = "Control preventivo de niveles y luces", Cantidad = 1, PrecioUnitario = Concepto("Control preventivo de niveles y luces").PrecioReferencia!.Value
             });
-            foreach (var inicial in datos.ServiciosIniciales)
+            foreach (var inicial in datos.InspeccionesAutorizadas)
                 inicial.Estado = EstadoEjecucionDetalle.Completado;
             await evaluacion.GuardarAsync(datos, etapa != 2);
             if (etapa == 2)
@@ -184,7 +184,7 @@ public static class CargadorDemostracion
                 continue;
             }
 
-            var propuesta = await db.Presupuestos.AsNoTracking().SingleAsync(p => p.IdAtencion == id && p.Tipo == TipoPresupuesto.Reparacion && !p.EsAdicional && p.Vigente);
+            var propuesta = await db.Presupuestos.AsNoTracking().SingleAsync(p => p.IdAtencion == id && !p.EsAdicional && p.Vigente);
             if (etapa == 3)
             {
                 await FecharAsync(db, id, i);
@@ -321,13 +321,13 @@ public static class CargadorDemostracion
         }
 
         await Entrar(recepcion.Id);
-        foreach(var idVehiculo in await db.Atenciones.Where(a=>a.Estado==EstadoAtencion.Cerrada).OrderBy(a=>a.IdAtencion).Select(a=>a.IdVehiculo).Take(5).ToListAsync())
+        foreach(var idVehiculo in await db.Atenciones.Where(a=>a.Estado==EstadoAtencion.Cerrada).OrderBy(a=>a.IdAtencion).Select(a=>a.IdVehiculo).Take(2).ToListAsync())
         {
             var v=await vehiculos.ObtenerPorIdAsync(idVehiculo);
             await vehiculos.DarDeBajaAsync(idVehiculo,v!.Version);
         }
         // Registros inactivos para filtros. Solo maestros sin atenciones asociadas.
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
         {
             var c = await clientes.RegistrarAsync("DNI", (49000000 + i).ToString(), "Cliente", "Inactivo", null, null, null);
             var actual = await clientes.ObtenerPorIdAsync(c.IdCliente);

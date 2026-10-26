@@ -5,7 +5,7 @@ Aplicación de escritorio para gestionar la atención de vehículos en un taller
 ## Circuito implementado en esta rama
 
 1. Identificar cliente y vehículo y abrir una atención por síntoma, servicio definido o solicitud mixta.
-2. Confirmar el ingreso técnico; registrar, cuando corresponda, servicios iniciales autorizados con su importe. La autorización no significa ejecución ni pago.
+2. La recepción con solicitudes individuales pasa directamente a preparación técnica. No agrega servicios cobrables automáticamente; una inspección extraordinaria requiere presupuesto y autorización específicos.
 3. Reservar una evaluación, guardar avances, registrar un diagnóstico cuando sea necesario y preparar la propuesta económica.
 4. Comunicar el presupuesto y registrar aceptación total, aceptación por ítems o rechazo. Las revisiones previas a la ejecución conservan el documento anterior.
 5. Validar el alcance y registrar cantidades efectivamente realizadas, omisiones justificadas o interrupción del trabajo.
@@ -53,7 +53,7 @@ Se requiere Windows para ejecutar la interfaz, SDK .NET compatible con `global.j
 1. Guardar los cambios locales y descargar la rama que se quiere probar.
 2. Configurar `ConnectionStrings:Default` en `Taller/Taller.Presentacion/appsettings.Local.json` o la variable `SGTM_CONN`. No publicar credenciales ni copiar una conexión ajena.
 3. Realizar y verificar un respaldo mediante SQL Server Management Studio. Si el módulo SGTM todavía no está instalado y validado, realizar esta copia mediante SQL Server Management Studio.
-4. Aplicar las migraciones sobre una copia de la base para validar la actualización.
+4. Preparar una base nueva con `EsquemaInicialCircuitoActual`; no actualizar bases de versiones anteriores. Seguir [la guía de entornos e instalación](docs/entornos-demo-e-instalacion.md).
 
 Desde la raíz:
 
@@ -82,7 +82,7 @@ La fábrica de contexto utiliza la configuración local o `SGTM_CONN`. Los datos
 - [Reportes por rol y revisión de consistencia](docs/reportes-por-rol.md).
 - [Instalar y operar respaldos y restauración](docs/respaldos-restauracion.md).
 
-Esta rama continúa los cambios de los PR #30 y #31. Las revisiones de reportes/respaldos no agregan migraciones de negocio; requieren las migraciones previas del circuito. Respaldos agrega una base de control instalada explícitamente mediante el agente, según su guía.
+El esquema actual parte de una única migración inicial y no conserva compatibilidad con la base anterior. El lote Demo v3 se carga explícitamente; la instalación comercial no incluye atenciones ficticias. Respaldos utiliza una base de control instalada explícitamente mediante el agente, según su guía.
 
 La integración compatible de catálogo, clientes y vehículos se describe en [la guía de integración](docs/integracion-catalogo-maestros.md). Incluye la migración no destructiva de versiones de clientes/vehículos; no aplicar la migración `AjustarCatalogoActual` de la rama paralela sobre el circuito vigente.
 
@@ -97,3 +97,5 @@ La integración compatible de catálogo, clientes y vehículos se describe en [l
 El lote se carga explícitamente con `scripts/Cargar-Demostracion.ps1`; no se ejecuta al iniciar Windows Forms. Las instalaciones nuevas requieren una contraseña inicial suministrada por el instalador.
 
 - [Criterio de fechas y zona horaria del taller](docs/fechas-y-zona-horaria.md).
+
+Estados y decisiones de limpieza: [estados del circuito actual](docs/estados-circuito-actual.md).

@@ -47,8 +47,8 @@ public static class DocumentoOperativoExportador
 
     public static string Diagnostico(DiagnosticoDetalleDto d, EmpresaDocumentoDto empresa) =>
         Inicio($"Informe técnico {d.IdDiagnostico:D6}", empresa) + CuerpoDiagnostico(d) + Fin;
-    private static string CuerpoDiagnostico(DiagnosticoDetalleDto d) => $"<p>Atención {d.IdAtencion:D6} · Fecha: {d.FechaDiagnostico:dd/MM/yyyy HH:mm}<br>Técnico responsable: {H(d.TecnicoAutor)}<br>Tipo: {H(d.Tipo.ToString())}<br>Kilometraje: {H(d.Kilometraje?.ToString(Cultura) ?? "No registrado")}</p>"
-        + $"<h2>Hallazgo / conclusión</h2><p class='texto'>{H(d.FallaDetectada)}</p><h2>Trabajo recomendado</h2><p class='texto'>{H(d.TrabajoRecomendado)}</p><h2>Observaciones</h2><p class='texto'>{H(d.Observaciones ?? "Sin observaciones")}</p><p class='aviso'>Impide continuar: {(d.ImpideContinuar ? "Sí" : "No")}. Este informe fundamenta la propuesta; no autoriza trabajos adicionales.</p>";
+    private static string CuerpoDiagnostico(DiagnosticoDetalleDto d) => $"<p>Atención {d.IdAtencion:D6} · Fecha: {d.FechaDiagnostico:dd/MM/yyyy HH:mm}<br>Técnico responsable: {H(d.TecnicoAutor)}<br>Kilometraje: {H(d.Kilometraje?.ToString(Cultura) ?? "No registrado")}</p>"
+        + $"<h2>Hallazgo / conclusión</h2><p class='texto'>{H(d.FallaDetectada)}</p><h2>Trabajo recomendado</h2><p class='texto'>{H(d.TrabajoRecomendado)}</p><h2>Observaciones</h2><p class='texto'>{H(d.Observaciones ?? "Sin observaciones")}</p><p class='aviso'>Este informe fundamenta la propuesta; no autoriza trabajos adicionales.</p>";
 
     public static string TextoPresupuesto(PresupuestoConsultaDto d)
     {
@@ -60,5 +60,5 @@ public static class DocumentoOperativoExportador
         if (d.InformeTecnico is { } informe) b.AppendLine("\nINFORME TÉCNICO DE RESPALDO\n").AppendLine(TextoDiagnostico(informe));
         return b.ToString();
     }
-    public static string TextoDiagnostico(DiagnosticoDetalleDto d) => $"INFORME TÉCNICO {d.IdDiagnostico:D6}\nAtención {d.IdAtencion:D6} · {d.FechaDiagnostico:dd/MM/yyyy HH:mm}\nTécnico: {d.TecnicoAutor} · Tipo: {d.Tipo}\nKilometraje: {d.Kilometraje?.ToString(Cultura) ?? "No registrado"}\n\nHALLAZGO / CONCLUSIÓN\n{d.FallaDetectada}\n\nTRABAJO RECOMENDADO\n{d.TrabajoRecomendado}\n\nOBSERVACIONES\n{d.Observaciones}\nImpide continuar: {(d.ImpideContinuar ? "Sí" : "No")}\n\nEl informe no autoriza trabajos ni acredita pagos.";
+    public static string TextoDiagnostico(DiagnosticoDetalleDto d) => $"INFORME TÉCNICO {d.IdDiagnostico:D6}\nAtención {d.IdAtencion:D6} · {d.FechaDiagnostico:dd/MM/yyyy HH:mm}\nTécnico: {d.TecnicoAutor}\nKilometraje: {d.Kilometraje?.ToString(Cultura) ?? "No registrado"}\n\nHALLAZGO / CONCLUSIÓN\n{d.FallaDetectada}\n\nTRABAJO RECOMENDADO\n{d.TrabajoRecomendado}\n\nOBSERVACIONES\n{d.Observaciones}\n\nEl informe no autoriza trabajos ni acredita pagos.";
 }

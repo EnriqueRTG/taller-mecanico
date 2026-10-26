@@ -1,37 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Dominio.Entidades;
-using Taller.Dominio.Enumeraciones;
-
 namespace Taller.Infraestructura.Persistencia.Repositorios;
-/// <summary>
-/// Implementa las consultas de persistencia de conceptos.
-/// </summary>
-public sealed class ConceptoRepositorio : IConceptoRepositorio
+/// <summary>Lee la oferta real y su disponibilidad de catálogo; no representa inventario.</summary>
+public sealed class ConceptoRepositorio(TallerDbContext contexto) : IConceptoRepositorio
 {
-    private readonly TallerDbContext _contexto;
-    public ConceptoRepositorio(TallerDbContext contexto)
-    {
-        _contexto = contexto ?? throw new ArgumentNullException(nameof(contexto));
-    }
-
-    public Task<List<Concepto>> ListarCatalogoAsync() => _contexto.Conceptos.AsNoTracking().Include(x => x.Categoria).OrderBy(x => x.Categoria.Nombre).ThenBy(x => x.Nombre).ThenBy(x => x.IdConcepto).ToListAsync();
-    public Task<Concepto?> ObtenerPorIdAsync(int idConcepto)
-    {
-        return _contexto.Conceptos.AsNoTracking().Include(c => c.Categoria).FirstOrDefaultAsync(c => c.IdConcepto == idConcepto);
-    }
-
-    public Task<List<Concepto>> ListarServiciosActivosAsync()
-    {
-        return _contexto.Conceptos.AsNoTracking().Include(c => c.Categoria).Where(c => c.Activo && c.Categoria.Activo && c.Tipo == TipoConcepto.Servicio).OrderBy(c => c.Nombre).ThenBy(c => c.IdConcepto).ToListAsync();
-    }
-
-    /// <summary>
-    /// Obtiene las prestaciones que pueden ofrecerse
-    /// al confirmar el ingreso al circuito técnico.
-    /// </summary>
-    public Task<List<Concepto>> ListarServiciosDisponiblesParaIngresoAsync()
-    {
-        return _contexto.Conceptos.AsNoTracking().Include(c => c.Categoria).Where(c => c.Activo && c.Categoria.Activo && c.Tipo == TipoConcepto.Servicio && c.DisponibleParaIngreso).OrderBy(c => c.Nombre).ThenBy(c => c.IdConcepto).ToListAsync();
-    }
+    public Task<List<Concepto>> ListarCatalogoAsync() => contexto.Conceptos.AsNoTracking().Include(c => c.Categoria)
+        .OrderBy(c => c.Categoria.Nombre).ThenBy(c => c.Nombre).ThenBy(c => c.IdConcepto).ToListAsync();
 }

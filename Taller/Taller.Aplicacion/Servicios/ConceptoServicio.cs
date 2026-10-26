@@ -9,6 +9,6 @@ public sealed class ConceptoServicio(IConceptoRepositorio conceptos, Autorizacio
     public async Task<List<ConceptoCatalogoDto>> ListarAsync()
     {
         await acceso.ExigirAsync();
-        return (await conceptos.ListarCatalogoAsync()).Select(c => new ConceptoCatalogoDto(c.IdConcepto, c.IdCategoria, c.Categoria.Nombre, c.Tipo, c.Nombre, c.Descripcion ?? "", c.PrecioReferencia, c.Activo && c.Categoria.Activo, c.DisponibleParaIngreso && c.Activo && c.Categoria.Activo)).ToList();
+        return (await conceptos.ListarCatalogoAsync()).Select(c => new ConceptoCatalogoDto(c.IdConcepto, c.IdCategoria, c.Categoria.Nombre, c.Tipo, c.Nombre, c.Descripcion ?? "", c.PrecioReferencia, c.Activo && c.Categoria.Activo)).ToList();
     }
 }

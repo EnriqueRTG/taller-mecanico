@@ -71,8 +71,6 @@ public static class DependencyInjection
         services.AddScoped<IAtencionRepositorio, AtencionRepositorio>();
         // Registrar el servicio concreto utilizado para las operaciones de persistencia de Roles.
         services.AddScoped<IRolRepositorio, RolRepositorio>();
-        // Registrar el servicio concreto utilizado para las operaciones de persistencia de categorías de conceptos.
-        services.AddScoped<ICategoriaRepositorio, CategoriaRepositorio>();
         // Registrar el servicio concreto utilizado para las operaciones de persistencia de conceptos.
         services.AddScoped<IConceptoRepositorio, ConceptoRepositorio>();
         // Registrar el servicio concreto utilizado para las operaciones de persistencia de diagnósticos.

@@ -11,38 +11,45 @@ using Xunit;
 namespace Taller.Pruebas;
 public sealed class SeguridadInicioPruebas
 {
-    private sealed class Reloj : TimeProvider
-    {
-        public DateTimeOffset Ahora = DateTimeOffset.UtcNow;
-        public override DateTimeOffset GetUtcNow() => Ahora;
-    }
-
     [Fact]
-    public void SesionInactiva_NoSeReviveConActividad()
+    public void SesionConservaIdentidadHastaCierreExplicitoYPuedeIniciarseOtra()
     {
-        var reloj = new Reloj();
-        var sesion = new SesionUsuario(reloj);
-        sesion.Iniciar(new Usuario { Id = 1 });
-        reloj.Ahora = reloj.Ahora.AddMinutes(30);
-        sesion.RegistrarActividad();
-        Assert.Null(sesion.UsuarioActual);
-    }
-
-    [Fact]
-    public void SesionActiva_ExpiraAlLimiteAbsoluto()
-    {
-        var reloj = new Reloj();
-        var sesion = new SesionUsuario(reloj);
-        sesion.Iniciar(new Usuario { Id = 1 });
-        for (int i = 0; i < 47; i++)
-        {
-            reloj.Ahora = reloj.Ahora.AddMinutes(10);
-            sesion.RegistrarActividad();
-            Assert.True(sesion.EstaAutenticado);
-        }
-
-        reloj.Ahora = reloj.Ahora.AddMinutes(10);
+        var sesion = new SesionUsuario();
         Assert.False(sesion.EstaAutenticado);
+        var primero = new Usuario { Id = 1 };
+        sesion.Iniciar(primero);
+        Assert.Same(primero, sesion.UsuarioActual);
+        Assert.True(sesion.EstaAutenticado);
+        sesion.Cerrar();
+        sesion.Cerrar();
+        Assert.Null(sesion.UsuarioActual);
+        var segundo = new Usuario { Id = 2 };
+        sesion.Iniciar(segundo);
+        Assert.Same(segundo, sesion.UsuarioActual);
+    }
+
+    [Fact]
+    public async Task SesionAbiertaNoPermiteOperarConUsuarioDeshabilitadoORolRevocado()
+    {
+        using var db = new TallerDbContext(new DbContextOptionsBuilder<TallerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        await db.Database.EnsureCreatedAsync();
+        var usuario = new Usuario { NombreUsuario = "recepcion-prueba", Nombre = "Ana", Apellido = "Prueba", PasswordHash = "hash", RolId = 2 };
+        db.Usuarios.Add(usuario);
+        await db.SaveChangesAsync();
+        var sesion = new SesionUsuario();
+        sesion.Iniciar(new Usuario { Id = usuario.Id, RolId = 2 });
+        var acceso = new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new Taller.Infraestructura.Persistencia.Repositorios.UsuarioRepositorio(db), sesion);
+        Assert.Equal(usuario.Id, (await acceso.ExigirAsync(2)).Id);
+        usuario.Activo = false;
+        await db.SaveChangesAsync(); db.ChangeTracker.Clear();
+        await Assert.ThrowsAsync<Taller.Aplicacion.Excepciones.ValidacionException>(() => acceso.ExigirAsync(2));
+        usuario = (await db.Usuarios.FindAsync(usuario.Id))!;
+        usuario.Activo = true; usuario.RolId = 3;
+        await db.SaveChangesAsync(); db.ChangeTracker.Clear();
+        await Assert.ThrowsAsync<Taller.Aplicacion.Excepciones.ValidacionException>(() => acceso.ExigirAsync(2));
+        Assert.True(sesion.EstaAutenticado); // La identidad en memoria no sustituye la autorización persistida.
+        sesion.Cerrar();
+        await Assert.ThrowsAsync<Taller.Aplicacion.Excepciones.ValidacionException>(() => acceso.ExigirAsync());
     }
 
     [Fact]

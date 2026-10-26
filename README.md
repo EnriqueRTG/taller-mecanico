@@ -2,6 +2,12 @@
 
 Aplicación de escritorio para gestionar la atención de vehículos en un taller mecánico. Proyecto académico de **Taller de Programación II**, **Licenciatura en Sistemas de Información, UNNE**.
 
+## Abrir en Visual Studio
+
+- `Taller/Taller.sln`: solución completa agrupada en Sistema (cuatro capas), Herramientas, Pruebas y Documentación.
+- `Taller/Taller.Sistema.slnf`: vista de las cuatro capas para recorrer y ejecutar la aplicación. Seleccionar Taller.Presentacion como proyecto de inicio.
+- [Organización, referencias y preparación del coloquio](docs/estructura-solucion.md). Las herramientas no son capas adicionales y no se ejecutan al abrir la aplicación.
+
 ## Circuito implementado en esta rama
 
 1. Identificar cliente y vehículo y abrir una atención por síntoma, servicio definido o solicitud mixta.

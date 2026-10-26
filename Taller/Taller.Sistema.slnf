@@ -1,0 +1,11 @@
+{
+  "solution": {
+    "path": "Taller.sln",
+    "projects": [
+      "Taller.Presentacion\\Taller.Presentacion.csproj",
+      "Taller.Dominio\\Taller.Dominio.csproj",
+      "Taller.Aplicacion\\Taller.Aplicacion.csproj",
+      "Taller.Infraestructura\\Taller.Infraestructura.csproj"
+    ]
+  }
+}

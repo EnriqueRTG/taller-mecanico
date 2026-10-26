@@ -50,20 +50,9 @@ public partial class FrmPrincipal : Form
             return;
         }
 
-        relojSesion.Start();
         ConfigurarMenuSegunRol();
         AbrirFormulario<FrmInicio>("Inicio");
         MarcarBotonActivo(btnInicio);
-    }
-
-    private void RelojSesion_Tick(object? sender, EventArgs e)
-    {
-        if (_sesionUsuario.EstaAutenticado || _formularioActivo is IFormularioConOperacion { OperacionEnCurso: true })
-            return;
-        relojSesion.Stop();
-        pnlContenido.Enabled = pnlOpciones.Enabled = false;
-        lblTituloSeccion.Text = "Sesión vencida · cierre sesión para volver a ingresar";
-        MessageBox.Show(this, "La sesión venció por inactividad o duración máxima. No se realizarán nuevas operaciones. Use Cerrar sesión y vuelva a ingresar. Los datos ya guardados se conservan.", "Sesión vencida", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     /// <summary>

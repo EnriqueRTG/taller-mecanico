@@ -15,5 +15,7 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Construir solución
         run: dotnet build Taller/Taller.sln --configuration Release --nologo
+      - name: Construir vista de las cuatro capas
+        run: dotnet build Taller/Taller.Sistema.slnf --configuration Release --no-restore --nologo
       - name: Construir formularios reales en STA sin conectar a SQL
         run: dotnet run --project Taller/Taller.Pruebas.Interfaz --configuration Release --no-build

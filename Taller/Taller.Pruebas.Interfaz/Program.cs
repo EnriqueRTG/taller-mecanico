@@ -29,7 +29,7 @@ internal static class Program
         servicios.AddSingleton<IConfiguration>(config);
         servicios.AddLogging();
         servicios.AddAplicacion().AddInfraestructura(config).AddPresentacion();
-        using var proveedor=servicios.BuildServiceProvider();
+        using var proveedor=servicios.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
         foreach(int rol in new[]{1,2,3})
         {
             using var scope=proveedor.CreateScope();
@@ -401,7 +401,8 @@ internal static class Program
             }
             Console.WriteLine("Uniformidad, filtros y acciones visibles: " + tipo.Name);
         }
-        using var editar = proveedor.GetRequiredService<Taller.Presentacion.Formularios.Clientes.FrmEditarCliente>();
+        using var alcanceEdicion = proveedor.CreateScope();
+        using var editar = alcanceEdicion.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Clientes.FrmEditarCliente>();
         foreach (Size tamano in new[] { new Size(720, 680), new Size(600, 460), new Size(1000, 700) })
         {
             editar.ClientSize = tamano;

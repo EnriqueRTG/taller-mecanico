@@ -52,7 +52,7 @@ public static class DocumentoOperativoExportador
 
     public static string TextoPresupuesto(PresupuestoConsultaDto d)
     {
-        var b = new StringBuilder($"PRESUPUESTO {d.IdPresupuesto:D6}\nAtención {d.IdAtencion:D6} · {d.Fecha:dd/MM/yyyy HH:mm}\nCliente: {d.Cliente}\nVehículo: {d.Vehiculo}\nEstado: {d.EstadoDescripcion} · {(d.Vigente ? "Vigente" : "Histórico")}\n\nALCANCE PROPUESTO\n\n");
+        var b = new StringBuilder($"PRESUPUESTO {d.IdPresupuesto:D6}\nAtención {d.IdAtencion:D6} · Último movimiento: {d.Fecha:dd/MM/yyyy HH:mm}\nCliente: {d.Cliente}\nVehículo: {d.Vehiculo}\nEstado: {d.EstadoDescripcion} · {(d.Vigente ? "Vigente" : "Histórico")}\n\nALCANCE PROPUESTO\n\n");
         foreach (var i in d.Items) b.AppendLine($"{i.Descripcion}\n  Solicitud: {i.SolicitudDescripcion}\n  {i.Cantidad.ToString("N3", Cultura)} × {N(i.PrecioUnitario)} ARS = {N(i.Subtotal)} ARS · Aporta: {i.OrigenMaterial}\n");
         b.AppendLine($"TOTAL PROPUESTO: ARS {N(d.Total)}");
         if (!string.IsNullOrWhiteSpace(d.Observaciones)) b.AppendLine($"\nOBSERVACIONES Y CONDICIONES\n{d.Observaciones}");

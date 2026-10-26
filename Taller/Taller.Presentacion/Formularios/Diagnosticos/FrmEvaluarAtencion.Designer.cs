@@ -143,7 +143,7 @@ partial class FrmEvaluarAtencion
         chkInforme.AutoSize = true;
         tlpInforme.RowStyles[0].Height = 0;
 
-        chkInforme.Text = "Adjuntar informe técnico (sin cargo automático)";
+        chkInforme.Text = "Adjuntar informe";
         tlpInforme.Controls.Add(lblHallazgo, 0, 1);
         lblHallazgo.Dock = DockStyle.Fill;
         lblHallazgo.Text = "Hallazgo o conclusión de la revisión";

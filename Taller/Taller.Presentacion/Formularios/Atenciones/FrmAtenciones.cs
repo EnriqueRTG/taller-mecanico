@@ -114,7 +114,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                 cboEstado.Items.Add("Finalizadas");
             }
 
-            foreach (var estado in Enum.GetValues<EstadoAtencion>())
+            foreach (var estado in Taller.Aplicacion.Consultas.EstadosAtencionConsulta.Listar(_atenciones.Select(a => a.EstadoValor)))
             {
                 if (esTecnico && (estado == EstadoAtencion.Cerrada || estado == EstadoAtencion.Cancelada))
                 {
@@ -219,6 +219,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
                     _entregasDisponibles = cuentas.Where(c => c.PuedeRegistrarEntrega).Select(c => c.IdAtencion).ToHashSet();
                 }
                 _atenciones = atenciones.Select(MapearFila).ToList();
+                ActualizarEstadosCompatibilidad();
                 AplicarFiltros();
             }
             catch (Exception ex)
@@ -394,6 +395,19 @@ namespace Taller.Presentacion.Formularios.Atenciones
             return dgvAtenciones.CurrentRow?.DataBoundItem as AtencionFila;
         }
 
+        private void ActualizarEstadosCompatibilidad()
+        {
+            string? seleccionado = cboEstado.SelectedItem?.ToString();
+            foreach (var e in new[] { EstadoAtencion.Abierta, EstadoAtencion.PendienteDiagnostico, EstadoAtencion.Pausada })
+            {
+                string nombre = ObtenerNombreEstado(e);
+                if (_atenciones.Any(a => a.EstadoValor == e) && !cboEstado.Items.Contains(nombre)) cboEstado.Items.Add(nombre);
+                if (!_atenciones.Any(a => a.EstadoValor == e)) cboEstado.Items.Remove(nombre);
+            }
+            if (seleccionado != null && cboEstado.Items.Contains(seleccionado)) cboEstado.SelectedItem = seleccionado;
+            else if (cboEstado.SelectedIndex < 0) cboEstado.SelectedIndex = 0;
+        }
+
         private void ActualizarAccionesSeleccion()
         {
             AtencionFila? fila = ObtenerFilaSeleccionada();
@@ -411,7 +425,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnSeguimiento.Enabled = fila.EstadoValor != EstadoAtencion.Abierta && (puedeGestionar || puedeConsultarComoTecnico);
             btnEditar.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta && !fila.TieneSolicitudes;
             btnIniciarProceso.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
-            btnCancelarAtencion.Enabled = puedeGestionar && fila.EstadoValor == EstadoAtencion.Abierta;
+            btnCancelarAtencion.Enabled = puedeGestionar && (fila.EstadoValor is EstadoAtencion.Abierta or EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad == null && !fila.EvaluacionFinalizada;
             btnRegistrarEntrega.Enabled = puedeGestionar && fila.EstadoValor is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion or EstadoAtencion.Cerrada;
             btnEntregaDirecta.Enabled = !_registrandoEntrega && puedeGestionar && _entregasDisponibles.Contains(fila.IdAtencion);
             btnVerHistorial.Enabled = puedeGestionar || puedeConsultarComoTecnico;
@@ -711,17 +725,12 @@ namespace Taller.Presentacion.Formularios.Atenciones
             await CargarAtencionesAsync();
         }
 
-        private void MostrarFuncionEnDesarrollo(string nombreFuncion)
-        {
-            MessageBox.Show($"La opción \"{nombreFuncion}\" forma parte del flujo " + "previsto del sistema y será conectada con su lógica " + "de negocio en la siguiente etapa.", nombreFuncion, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
         private async Task CancelarAperturaSeleccionadaAsync()
         {
             var fila = ObtenerFilaSeleccionada();
             if (fila is null || _cargandoDatos)
                 return;
-            using var motivo = new Taller.Presentacion.Formularios.Compartidos.FrmSolicitarMotivo("Cancelar apertura", "Solo se cancela una atención abierta que no haya ingresado al circuito técnico. Indique el motivo.");
+            using var motivo = new Taller.Presentacion.Formularios.Compartidos.FrmSolicitarMotivo("Cancelar apertura", "Solo se cancela antes de actividad técnica, informes, servicios autorizados o presupuestos. Indique el motivo.");
             if (motivo.ShowDialog(this) != DialogResult.OK)
                 return;
             try

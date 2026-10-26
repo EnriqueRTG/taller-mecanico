@@ -88,6 +88,22 @@ public sealed class CircuitoCobrosPruebas
         Assert.False((await c.Cobros.ListarAsync()).Single(a => a.IdAtencion == 1).PuedeRegistrarEntrega);
     }
 
+    [Fact]
+    public async Task RecepcionActualPuedeCancelarseSoloAntesDeActividadTecnica()
+    {
+        using var c = new Caso();
+        var anterior = await c.Db.Atenciones.SingleAsync();
+        anterior.Estado = EstadoAtencion.Cerrada; anterior.FechaCierre = FechaHoraTaller.Ahora;
+        await c.Db.SaveChangesAsync(); c.Db.ChangeTracker.Clear(); c.Entrar(2);
+        var a = await c.Recepcion.RegistrarRecepcionAsync(new() { IdCliente = 1, IdVehiculo = 1, IdUsuarioRecepcion = 2,
+            Solicitudes = [new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Solicita reemplazo de discos" }] });
+        await c.VersionesAsync();
+        a = await c.Db.Atenciones.AsNoTracking().SingleAsync(x => x.IdAtencion == a.IdAtencion);
+        await c.Evaluacion.CancelarAperturaAsync(a.IdAtencion, a.Version, "Desiste antes de cualquier intervención");
+        Assert.Equal(EstadoAtencion.Cancelada, (await c.Db.Atenciones.AsNoTracking().SingleAsync(x => x.IdAtencion == a.IdAtencion)).Estado);
+        Assert.Contains(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(), h => h.IdAtencion == a.IdAtencion && h.Accion == "AperturaCancelada" && h.EstadoAnterior == EstadoAtencion.EnEvaluacionTecnica);
+    }
+
     private sealed class Caso : IDisposable
     {
         public TallerDbContext Db { get; }

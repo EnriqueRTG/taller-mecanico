@@ -15,6 +15,7 @@ public partial class FrmDecisionPresupuesto : Form
     public FrmDecisionPresupuesto()
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
     }
 
     public FrmDecisionPresupuesto(int id, PresupuestoServicio servicio) : this()

@@ -26,6 +26,7 @@ public partial class FrmSeguimientoTrabajo : Form
     public FrmSeguimientoTrabajo(int id, SeguimientoTrabajoServicio servicio, EvaluacionServicio evaluacion, PresupuestoServicio presupuestos, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
         txtDescripcion.ReadOnly = txtRecomendacion.ReadOnly = txtMaterial.ReadOnly = true;
         txtDescripcion.Visible = txtRecomendacion.Visible = chkImpide.Visible = btnHallazgo.Visible = btnAdicional.Visible = false;
         btnResolver.Visible = btnRecibir.Visible = false;

@@ -8,14 +8,15 @@ public partial class FrmConsultarPropuesta : Form
     public FrmConsultarPropuesta(PresupuestoConsultaDto datos, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
         foreach (var boton in new[] { btnExportar, btnImprimir, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
         _datos = datos;
         _empresa = empresa;
         Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
         lblResumen.Text = $"Presupuesto {datos.IdPresupuesto:D6} · Atención {datos.IdAtencion:D6} · {datos.Cliente} · {datos.Vehiculo}\nTipo: {datos.TipoDescripcion} · Estado: {datos.EstadoDescripcion} · {(datos.Vigente ? "Vigente" : "Histórico")} · Revisa: {datos.IdPresupuestoAnterior?.ToString() ?? "—"}";
         dgvItems.DataSource = datos.Items;
-        txtObservaciones.Text = datos.Observaciones + (string.IsNullOrWhiteSpace(datos.PersonaDecision) ? "" : $"\r\nDecisión comunicada por: {datos.PersonaDecision} · Medio: {datos.MedioDecision}");
-        lblTotal.Text = $"Total del documento: {datos.Total:N2}. No es un comprobante de pago. Los cargos iniciales pertenecen a su propio documento.";
+        txtObservaciones.Text = datos.Observaciones + (string.IsNullOrWhiteSpace(datos.PersonaDecision) ? "" : $"\r\nCliente / representante: {datos.PersonaDecision} · Medio: {datos.MedioDecision}");
+        lblTotal.Text = $"Total del documento: {datos.Total:N2}. No es un comprobante de pago. Solo se liquida lo autorizado y efectivamente realizado.";
     }
     private string NombreArchivo => Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Presupuesto-" + _datos.IdPresupuesto.ToString("D6"), Taller.Dominio.Tiempo.FechaHoraTaller.Ahora);
     private void Exportar(object? s, EventArgs e)

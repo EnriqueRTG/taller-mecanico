@@ -160,6 +160,7 @@ partial class FrmEjecutarAtencion
         btnFinalizar.BackColor = Color.FromArgb(30, 64, 175);
         btnFinalizar.ForeColor = Color.White;
         btnFinalizar.FlatStyle = FlatStyle.Flat;
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnCerrar);
         CancelButton = btnCerrar;
         btnCerrar.DialogResult = DialogResult.None;
         txtResumen.ReadOnly = true;

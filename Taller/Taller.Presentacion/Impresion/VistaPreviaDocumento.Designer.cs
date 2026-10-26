@@ -1,14 +1,14 @@
 namespace Taller.Presentacion.Impresion;
 internal partial class VistaPreviaDocumento
 {
-    private PrintPreviewControl vista = null!;
+    private VistaPreviaNavegable vista = null!;
     private Button btnAnterior = null!, btnSiguiente = null!;
     private NumericUpDown nudPagina = null!;
     private Label lblTotal = null!;
     private ComboBox cboZoom = null!;
     private void InitializeComponent()
     {
-        vista = new PrintPreviewControl { Dock = DockStyle.Fill, AutoZoom = true, UseAntiAlias = true, Name = "vista" };
+        vista = new VistaPreviaNavegable { Dock = DockStyle.Fill, AutoZoom = true, UseAntiAlias = true, Name = "vista" };
         btnAnterior = new Button { Text = "Anterior", AutoSize = true, Name = "btnAnterior", Enabled = false };
         btnSiguiente = new Button { Text = "Siguiente", AutoSize = true, Name = "btnSiguiente", Enabled = false };
         nudPagina = new NumericUpDown { Minimum = 1, Maximum = 1, Value = 1, Width = 65, Name = "nudPagina" };
@@ -31,7 +31,7 @@ internal partial class VistaPreviaDocumento
         btnSiguiente.Click += Siguiente;
         nudPagina.ValueChanged += PaginaCambio;
         vista.StartPageChanged += InicioPaginaCambio;
-        vista.MouseWheel += Rueda;
+        vista.SolicitarZoom += CambiarZoomConTeclado;
         cboZoom.SelectedIndexChanged += ZoomCambio;
         btnImprimir.Click += Imprimir;
         btnCerrar.Click += Cerrar;

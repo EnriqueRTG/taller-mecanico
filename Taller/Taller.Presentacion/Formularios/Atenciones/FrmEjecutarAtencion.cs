@@ -21,6 +21,7 @@ public partial class FrmEjecutarAtencion : Form
     public FrmEjecutarAtencion(int id, EjecucionServicio servicio, SesionUsuario sesion, IServiceProvider proveedor)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(txtResumen);
         _proveedor = proveedor;
         _id = id;
         _servicio = servicio;
@@ -267,7 +268,7 @@ public partial class FrmEjecutarAtencion : Form
         if (guardado && finalizar)
         {
             _sucio = false;
-            MessageBox.Show(this, "Registro técnico finalizado. Recepción puede liquidar lo efectivamente realizado y gestionar la entrega.", "Trabajo registrado");
+            MessageBox.Show(this, $"Atención {_id:D6}\n{txtResumen.Lines.FirstOrDefault()}\nTrabajo técnico finalizado. Informe a recepción para comunicar al cliente y liquidar lo efectivamente realizado.", "Trabajo registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }

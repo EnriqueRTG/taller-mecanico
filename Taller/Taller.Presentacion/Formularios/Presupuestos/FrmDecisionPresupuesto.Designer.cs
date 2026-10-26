@@ -45,7 +45,7 @@ partial class FrmDecisionPresupuesto
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowCount = 6;
         var comunicacion = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, WrapContents = true };
-        txtPersona = new TextBox { Name = "txtPersonaDecision", Width = 320, MaxLength = 150, PlaceholderText = "Nombre de la persona que comunica la decisión" };
+        txtPersona = new TextBox { Name = "txtPersonaDecision", Width = 320, MaxLength = 150, PlaceholderText = "Ej.: cliente Juan Pérez o representante de la empresa" };
         cboMedio = new ComboBox { Name = "cboMedioDecision", Width = 170, DropDownStyle = ComboBoxStyle.DropDownList };
         cboMedio.Items.AddRange(["Presencial", "Teléfono", "Correo", "Mensajería"]);
         cboMedio.SelectedIndex = 0;
@@ -53,7 +53,7 @@ partial class FrmDecisionPresupuesto
         cboMedio.SelectedIndexChanged += TextoCambiado;
         var persona = new TableLayoutPanel { Width = 330, Height = 55, RowCount = 2, ColumnCount = 1 };
         persona.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
-        persona.Controls.Add(new Label { Text = "Persona que comunica la decisión", AutoSize = true }, 0, 0);
+        persona.Controls.Add(new Label { Text = "Cliente / representante que decide", AutoSize = true }, 0, 0);
         persona.Controls.Add(txtPersona, 0, 1);
         var medio = new TableLayoutPanel { Width = 180, Height = 55, RowCount = 2, ColumnCount = 1 };
         medio.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));

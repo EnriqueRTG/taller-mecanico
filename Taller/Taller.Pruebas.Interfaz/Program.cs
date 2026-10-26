@@ -53,6 +53,7 @@ internal static class Program
         VerificarEjecucionYConsulta(proveedor);
         VerificarCobroRestanteYEntrega(proveedor);
         VerificarContextoSeguimiento(proveedor);
+        VerificarCantidadConcepto(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
@@ -86,6 +87,25 @@ internal static class Program
         if (panel.RowStyles[1].Height != 0 || !((Button)Campo("btnPausar")).Text.Contains("cliente") || ((Button)Campo("btnResolver")).Enabled)
             throw new InvalidOperationException("Recepción solo debe registrar detención general del cliente.");
         Console.WriteLine("Seguimiento: alcance contextual, selección obligatoria y detención administrativa explícita.");
+    }
+
+    private static void VerificarCantidadConcepto(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var f = new Taller.Presentacion.Formularios.Diagnosticos.FrmEvaluarAtencion(1,
+            scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(), scope.ServiceProvider);
+        f.BindingContext = new BindingContext();
+        var tipo = f.GetType();
+        var combo = (ComboBox)tipo.GetField("cboConcepto", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(f)!;
+        var cantidad = (NumericUpDown)tipo.GetField("nudCantidad", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(f)!;
+        combo.DataSource = new List<Taller.Aplicacion.DTOs.Atenciones.ConceptoPropuestaDto> {
+            new() { IdConcepto = 1, Nombre = "Repuesto", Tipo = Taller.Dominio.Enumeraciones.TipoConcepto.Repuesto },
+            new() { IdConcepto = 2, Nombre = "Servicio", Tipo = Taller.Dominio.Enumeraciones.TipoConcepto.Servicio } };
+        combo.SelectedIndex = 0;
+        cantidad.Value = 7;
+        combo.SelectedIndex = 1;
+        if (cantidad.Value != 1) throw new InvalidOperationException("Un nuevo concepto debe iniciar cantidad en uno.");
+        Console.WriteLine("Presupuesto: cambiar de concepto reinicia cantidad sin alterar filas agregadas.");
     }
 
     private static void VerificarFiltrosListados(IServiceProvider proveedor)
@@ -396,7 +416,13 @@ internal static class Program
         pagina.Value = 3;
         if (siguiente.Enabled || !anterior.Enabled)
             throw new InvalidOperationException("La navegación supera la última página.");
-        Console.WriteLine("Vista previa: navegación entre tres páginas sin impresora ni conexión SQL.");
+        var vista = formulario.Controls.Find("vista", true).Single();
+        var tecla = vista.GetType().GetMethod("OnKeyDown", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        tecla.Invoke(vista, [new KeyEventArgs(Keys.PageUp)]);
+        if (pagina.Value != 2) throw new InvalidOperationException("RePág debe navegar sin usar la barra.");
+        tecla.Invoke(vista, [new KeyEventArgs(Keys.Home)]);
+        if (pagina.Value != 1) throw new InvalidOperationException("Inicio debe volver a la primera hoja.");
+        Console.WriteLine("Vista previa: tres páginas y navegación por teclado sin impresora ni conexión SQL.");
     }
     private static void VerificarTarjetasInicio(Form formulario)
     {

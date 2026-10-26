@@ -20,6 +20,7 @@ public partial class FrmEvaluarAtencion : Form
     public FrmEvaluarAtencion(int id, EvaluacionServicio servicio, IServiceProvider proveedor)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(txtResumen);
         _proveedor = proveedor;
         _id = id;
         _servicio = servicio;
@@ -129,6 +130,7 @@ public partial class FrmEvaluarAtencion : Form
             return;
         chkAportaCliente.Visible = c.Tipo != TipoConcepto.Servicio;
         if (c.Tipo == TipoConcepto.Servicio) chkAportaCliente.Checked = false;
+        nudCantidad.Value = 1;
         txtDescripcion.Text = c.Nombre;
         nudPrecio.Value = Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
         lblPrecio.Text = c.PrecioReferencia.HasValue ? "Precio de referencia: revise su vigencia." : "Sin precio de referencia: establezca el importe (0 si es sin cargo).";
@@ -257,6 +259,7 @@ public partial class FrmEvaluarAtencion : Form
             _sucio = false;
             if (finalizar)
             {
+                MessageBox.Show(this, $"Atención {_id:D6} · {_datos.Vehiculo}\nPropuesta enviada a recepción. Pendiente de informar al cliente y obtener su decisión.", "Preparación finalizada", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Finalizada = true;
                 DialogResult = DialogResult.OK;
             }

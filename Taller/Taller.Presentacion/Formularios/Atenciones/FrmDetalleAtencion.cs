@@ -140,7 +140,10 @@ public partial class FrmDetalleAtencion : Form
     private void ServicioElegido(object? s, EventArgs e)
     {
         if (cboServicioIngreso.SelectedItem is ServicioIngresoDto c)
+        {
+            nudCantidadIngreso.Value = 1;
             nudImporteIngreso.Value = Math.Min(nudImporteIngreso.Maximum, c.PrecioReferencia ?? 0);
+        }
     }
 
     private void ServicioConfirmado(object? s, EventArgs e)

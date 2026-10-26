@@ -13,6 +13,9 @@ internal partial class VistaPreviaDocumento : Form
         _contarPaginas = contarPaginas;
         vista.Document = documento;
         cboZoom.SelectedIndex = 0;
+        var ayuda = new ToolTip();
+        ayuda.SetToolTip(vista, "Haga clic en la hoja. Rueda y flechas: desplazar al ampliar; RePág/AvPág: cambiar página; Ctrl+rueda o +/−: zoom. Mayús+rueda: horizontal.");
+        Disposed += (_, _) => ayuda.Dispose();
         documento.EndPrint += Documento_EndPrint;
     }
     private void Preparar(object? sender, EventArgs e) => Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
@@ -26,6 +29,7 @@ internal partial class VistaPreviaDocumento : Form
         if (IsDisposed || Disposing) return;
         _actualizando = true;
         int total = Math.Max(1, _contarPaginas());
+        vista.TotalPaginas = total;
         nudPagina.Maximum = total;
         nudPagina.Value = Math.Clamp(vista.StartPage + 1, 1, total);
         lblTotal.Text = "de " + total;
@@ -42,9 +46,9 @@ internal partial class VistaPreviaDocumento : Form
     private void InicioPaginaCambio(object? sender, EventArgs e) => ActualizarPaginas();
     private void Anterior(object? sender, EventArgs e) { if (nudPagina.Value > 1) nudPagina.Value--; }
     private void Siguiente(object? sender, EventArgs e) { if (nudPagina.Value < nudPagina.Maximum) nudPagina.Value++; }
-    private void Rueda(object? sender, MouseEventArgs e)
+    private void CambiarZoomConTeclado(int direccion)
     {
-        if (e.Delta < 0) Siguiente(sender, e); else if (e.Delta > 0) Anterior(sender, e);
+        cboZoom.SelectedIndex = Math.Clamp(cboZoom.SelectedIndex + direccion, 0, cboZoom.Items.Count - 1);
     }
     private void ZoomCambio(object? sender, EventArgs e)
     {

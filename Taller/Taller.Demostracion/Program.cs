@@ -41,5 +41,5 @@ if (await db.Clientes.AnyAsync() || await db.Vehiculos.AnyAsync() || await db.At
 await sp.GetRequiredService<InicializadorDatos>().InicializarAsync();
 await CargadorDemostracion.CargarAsync(sp, clave);
 await transaccion.CommitAsync();
-Console.WriteLine("Lote DEMO completo: 45 clientes, 100 vehículos y 100 atenciones. Consulte docs/coloquio-demostracion.md. Contraseña: la suministrada en SGTM_DEMO_PASSWORD. Retire esa variable al terminar.");
+Console.WriteLine("Lote DEMO v2 completo: 45 clientes, 100 vehículos y 100 atenciones, con catálogo ampliado y precios ARS orientativos. Consulte docs/coloquio-demostracion.md. Contraseña: la suministrada en SGTM_DEMO_PASSWORD. Retire esa variable al terminar.");
 return 0;

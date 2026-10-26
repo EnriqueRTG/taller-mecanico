@@ -64,12 +64,13 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             var a = await AtencionAsync(id);
             Seguridad.AutorizacionOperativa.Version(version, a.Version);
             motivo = Seguridad.AutorizacionOperativa.Texto(motivo);
-            if (a.Estado != EstadoAtencion.Abierta || a.IdTecnicoEnActividad != null || a.FechaCierre != null || await repositorio.ObtenerAvanceAsync(id) != null || (await repositorio.ObtenerPresupuestosAsync(id)).Count > 0 || (await repositorio.ObtenerDiagnosticosAsync(id)).Count > 0)
-                throw new ValidacionException("Solo puede cancelar una apertura sin ingreso, evaluación ni servicios autorizados. Los trabajos iniciados requieren resolver la actividad técnica y liquidar lo realizado.");
+            if (a.Estado is not (EstadoAtencion.Abierta or EstadoAtencion.EnEvaluacionTecnica) || a.IdTecnicoEnActividad != null || a.FechaCierre != null || a.Hallazgos.Count > 0 || a.Pausas.Count > 0 || await repositorio.ObtenerAvanceAsync(id) != null || (await repositorio.ObtenerPresupuestosAsync(id)).Count > 0 || (await repositorio.ObtenerDiagnosticosAsync(id)).Count > 0)
+                throw new ValidacionException("Solo puede cancelar un ingreso sin actividad técnica, evaluación ni servicios autorizados. Los trabajos iniciados requieren resolver la actividad técnica y liquidar lo realizado.");
+            var anterior = a.Estado;
             a.Estado = EstadoAtencion.Cancelada;
             a.FechaCierre = FechaHoraTaller.Ahora;
             repositorio.PrepararVersion(a, version);
-            Evento(a, usuario, "AperturaCancelada", EstadoAtencion.Abierta, motivo);
+            Evento(a, usuario, "AperturaCancelada", anterior, motivo);
             await unidad.GuardarCambiosAsync();
         }
         finally

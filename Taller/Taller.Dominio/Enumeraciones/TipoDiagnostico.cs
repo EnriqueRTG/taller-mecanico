@@ -1,4 +1,4 @@
-﻿namespace Taller.Dominio.Enumeraciones;
+namespace Taller.Dominio.Enumeraciones;
 
 /// <summary>
 /// Distingue el informe inicial de los hallazgos adicionales.
@@ -11,7 +11,8 @@ public enum TipoDiagnostico
     Inicial = 1,
 
     /// <summary>
-    /// Evaluación de un nuevo hallazgo durante la reparación.
+    /// Valor histórico para lectura de informes adicionales anteriores.
+    /// Los hallazgos actuales se registran en HallazgoAtencion.
     /// </summary>
     Adicional = 2
 }

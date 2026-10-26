@@ -45,6 +45,19 @@ public sealed class DemostracionSqlPruebas
             await sp.GetRequiredService<InicializadorDatos>().InicializarAsync();
             await CargadorDemostracion.CargarAsync(sp, clave);
             Assert.Equal(100, await db.Atenciones.CountAsync());
+            Assert.False(await db.Atenciones.AnyAsync(a => a.Estado == EstadoAtencion.Abierta || a.Estado == EstadoAtencion.PendienteDiagnostico || a.Estado == EstadoAtencion.Pausada));
+            Assert.True(await db.Conceptos.CountAsync() >= 157);
+            Assert.True(await db.Conceptos.AnyAsync(c => !c.Activo && !c.Categoria.Activo));
+            Assert.False(await db.Conceptos.AnyAsync(c => c.Activo && (c.PrecioReferencia == null || c.PrecioReferencia <= 0)));
+            Assert.True(await db.Conceptos.AnyAsync(c => c.Nombre == "Disco de freno trasero"));
+            Assert.True(await db.Conceptos.AnyAsync(c => c.Nombre == "Service completo de filtros y lubricación"));
+            Assert.True(await db.Presupuestos.AnyAsync(p => p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado && p.Detalles.Any(d => d.CantidadEjecutada > 0)));
+            foreach (var estado in Enum.GetValues<EstadoEjecucionDetalle>())
+                Assert.True(await db.PresupuestoDetalles.AnyAsync(d => d.EstadoEjecucion == estado), "Falta estado de ejecución: " + estado);
+            var receptor = await db.Usuarios.Include(u => u.Rol).AsNoTracking().FirstAsync(u => u.RolId == 2 && u.Activo);
+            sp.GetRequiredService<SesionUsuario>().Iniciar(receptor);
+            Assert.Contains(await sp.GetRequiredService<CobroServicio>().ListarAsync(), c => c.PuedeRegistrarEntrega);
+
             Assert.Equal(45, await db.Clientes.CountAsync());
             Assert.Equal(5, await db.Clientes.CountAsync(x => !x.Activo));
             Assert.Equal(5, await db.Vehiculos.CountAsync(x => !x.Activo));

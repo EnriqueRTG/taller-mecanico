@@ -74,11 +74,6 @@ public enum EstadoAtencion
     /// que requiere evaluación, preparación de un presupuesto
     /// o una decisión del cliente.
     /// </summary>
-    /// <remarks>
-    /// Si el cliente acepta el adicional, se reanuda el trabajo.
-    /// Si lo rechaza, el técnico debe justificar si puede continuar
-    /// con el alcance autorizado o debe interrumpir la reparación.
-    /// </remarks>
     Pausada = 6,
 
     /// <summary>

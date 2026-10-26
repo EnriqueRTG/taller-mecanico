@@ -18,14 +18,14 @@ Remove-Item Env:SGTM_DEMO_PASSWORD
 
 Elegir mínimo 12 caracteres con mayúsculas, minúsculas, número y símbolo, hasta 100. La credencial se usa únicamente en este entorno académico. No se imprime ni se incluye en Git. Si existe una variable `SGTM_ADMIN_INICIAL_PASSWORD` de una instalación anterior, retirarla antes de cargar para que el administrador inicial de esta base utilice la contraseña del lote.
 
-El cargador debe terminar indicando `Lote DEMO completo`. Si falla, no continúe operando con un lote incompleto; capture el error. El comando puede crear la base si la identidad SQL tiene permiso. No use el nombre de la base real ni renombre una copia real para pasar esta protección.
+El cargador debe terminar indicando `Lote DEMO v2 completo`. Si falla, no continúe operando con un lote incompleto; capture el error. El comando puede crear la base si la identidad SQL tiene permiso. No use el nombre de la base real ni renombre una copia real para pasar esta protección.
 
 ## Contenido
 
 - Roles y catálogos de referencia del modelo.
 - Ocho usuarios: `admin`, `demo.admin`, `demo.recepcion`, `demo.recepciondos`, `demo.tecnico`, `demo.tecnicodos`, `demo.tecnicotres` y `demo.inactivo` (deshabilitado, para probar filtros y rechazo de acceso).
 - 45 clientes ficticios (cinco inactivos), 100 vehículos (cinco inactivos con atenciones históricas cerradas), marcas/modelos y conceptos de distintas categorías y tipos.
-- 100 atenciones de problema o servicio definido, con fechas distribuidas en seis meses. Cada una tiene un marcador buscable `DEMO-001` a `DEMO-100` en el motivo.
+- 100 atenciones del circuito actual de problema, servicio definido o solicitudes mixtas, con fechas distribuidas en seis meses. Cada una tiene un marcador buscable `DEMO-001` a `DEMO-100` en el motivo.
 - Evaluaciones, diagnósticos cuando corresponden, propuestas, decisiones, selección parcial y nuevas versiones aceptadas, ejecución, hallazgos, adicionales, pausas por material del cliente, recepciones conformes, liquidaciones, pagos mixtos por los cinco medios, anulaciones justificadas y entregas.
 - Los precios son académicos, no una lista de precios real. Los datos de nombres/documentos/dominios son ficticios. La retrodatación es exclusiva de los fixtures y conserva la secuencia de eventos de cada atención; no existe esa operación en la interfaz normal.
 - Auditoría de acceso y de respaldos NO se inventa: se genera al iniciar sesión y al ejecutar respaldos reales. El historial comercial sí procede de las operaciones invocadas durante la carga.
@@ -36,22 +36,22 @@ Los primeros 16 marcadores se repiten en grupos posteriores, con diferentes usua
 
 | Motivo | Punto de partida | Qué demostrar |
 |---|---|---|
-| DEMO-001 | Recepción abierta | Edición e ingreso al circuito |
-| DEMO-002 | Pendiente de evaluación | Tomar como técnico |
+| DEMO-001 | Ingreso actual, disponible para preparación | Consultar solicitudes e iniciar preparación |
+| DEMO-002 | Preparación disponible | Tomar como técnico |
 | DEMO-003 | Avance de evaluación | Continuar borrador |
-| DEMO-004 | Propuesta pendiente de presentar | Comunicación al cliente |
+| DEMO-004 | Propuesta con inspección extraordinaria ya autorizada y realizada | Comunicación al cliente |
 | DEMO-005 | Presupuesto presentado | Registrar aceptación o rechazo |
-| DEMO-006 | Presupuesto rechazado | Liquidación según lo realizado, sin cobrar reparación |
+| DEMO-006 | Presupuesto rechazado tras inspección autorizada | Cobrar solo inspección realizada, no reparación rechazada |
 | DEMO-007 | Selección parcial | Revisión técnica antes de nueva aceptación |
 | DEMO-008 | Alcance aceptado | Iniciar ejecución |
-| DEMO-009 | Ejecución parcial | Registrar avances y completar |
+| DEMO-009 | Ejecución en curso | Registrar avances y completar |
 | DEMO-010 | Hallazgo bloqueante y adicional | Presentar adicional y resolver causa de pausa |
 | DEMO-011 | Material a cargo del cliente | Recibir y conformar material, resolver pausa |
 | DEMO-012 | Trabajo finalizado | Emitir liquidación |
 | DEMO-013 | Liquidación sin pagos | Registrar cobro |
 | DEMO-014 | Pago parcial | Completar con otro medio |
-| DEMO-015 | Entregada, saldo cero | Consulta histórica y documentos |
-| DEMO-016 | Cancelada antes de intervenir | Historial y filtros |
+| DEMO-015 | Cuenta saldada pendiente de entrega | Retiro posterior al pago; DEMO-031 muestra una ya entregada |
+| DEMO-016 | Ingreso actual cancelado antes de intervenir | Historial y filtros |
 
 La asignación a técnicos rota: use el técnico indicado en la bandeja. Los servicios vuelven a comprobar la asignación; no habilitarán modificar una actividad ajena para facilitar una demostración.
 
@@ -71,3 +71,7 @@ No es necesario reconstruir todo el historial en vivo. Los casos preparados perm
 Configure el perfil F5 con `SGTM_CONN` hacia `SGTM_DB_Demo`, mantenimiento hacia la misma base y respaldos deshabilitados durante la prueba del negocio. No basta con cambiar una variable en otra terminal si Visual Studio ya estaba abierto. Para probar respaldos, prepare su base de control Demo y permisos siguiendo las otras guías.
 
 Tras verificar el lote, cree un respaldo completo de `SGTM_DB_Demo` desde SSMS y consérvelo como punto de partida. Antes de restaurarlo para otra práctica, cierre la aplicación y confirme explícitamente el destino Demo. No restaure ese archivo sobre su base real. Conserve además el código y el identificador de la migración para saber qué versión corresponde al respaldo.
+
+## Lote v2 y precios
+
+El lote v2 usa solicitudes individuales, conceptos coherentes con cada motivo y precios de referencia del catálogo. Incluye inspecciones autorizadas realizadas, un rechazo posterior, ejecución en curso, cierres parciales/interrupciones en grupos posteriores y un pago total aún pendiente de entrega. No crea atenciones actuales en Abierta, PendienteDiagnostico ni Pausada. Ver `estados-y-compatibilidad.md`, `catalogo-demo-referencias.md` y `entornos-demo-e-instalacion.md`. Los importes y resultados cuantitativos de reportes del lote anterior ya no son valores de aceptación del lote nuevo. La base existente no se modifica al actualizar main.

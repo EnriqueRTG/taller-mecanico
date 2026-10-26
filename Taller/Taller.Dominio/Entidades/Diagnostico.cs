@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Dominio.Entidades;
 
@@ -6,8 +6,7 @@ namespace Taller.Dominio.Entidades;
 /// Representa un informe técnico completo de una atención.
 /// </summary>
 /// <remarks>
-/// Los informes adicionales se agregan sin sobrescribir
-/// el diagnóstico inicial.
+/// Los hallazgos posteriores se registran mediante HallazgoAtencion.
 /// </remarks>
 public sealed class Diagnostico
 {
@@ -25,14 +24,7 @@ public sealed class Diagnostico
     public string TrabajoRecomendado { get; set; } = null!;
     public int? Kilometraje { get; set; }
     public string? Observaciones { get; set; }
-    public TipoDiagnostico Tipo { get; set; }
 
-    /// <summary>
-    /// Indica si el hallazgo adicional impide continuar
-    /// los trabajos anteriores cuando se rechaza su solución.
-    /// Debe ser false en el diagnóstico inicial.
-    /// </summary>
-    public bool ImpideContinuar { get; set; }
 
     public Atencion Atencion { get; set; } = null!;
 

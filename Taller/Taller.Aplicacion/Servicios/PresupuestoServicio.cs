@@ -45,7 +45,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             var usuario = await acceso.ExigirAsync(RolesSistema.AdministrativoId);
             var p = await RequerirAsync(datos.IdPresupuesto);
             AutorizacionOperativa.Version(datos.Version, p.Version);
-            if (!p.Vigente || p.Tipo != TipoPresupuesto.Reparacion || p.Estado != EstadoPresupuesto.PendienteDecision || (!p.EsAdicional && (p.Atencion.Estado != EstadoAtencion.PendienteDecision || p.Atencion.IdTecnicoEnActividad != null)) || (p.EsAdicional && p.Atencion.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))
+            if (!p.Vigente || p.Estado != EstadoPresupuesto.PendienteDecision || (!p.EsAdicional && (p.Atencion.Estado != EstadoAtencion.PendienteDecision || p.Atencion.IdTecnicoEnActividad != null)) || (p.EsAdicional && p.Atencion.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))
                 throw new ValidacionException("La propuesta no está disponible para registrar una decisión.");
             if (await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
                 throw new ValidacionException("La atención ya está liquidada.");
@@ -104,7 +104,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                     EsInspeccion = p.EsInspeccion,
                     IdHallazgoAtencion = p.IdHallazgoAtencion,
                     IdPresupuestoAnterior = p.IdPresupuesto,
-                    Tipo = TipoPresupuesto.Reparacion,
+
                     Estado = EstadoPresupuesto.PendienteRevisionTecnica,
                     IdUsuarioCreacion = usuario.Id,
                     FechaCreacion = FechaHoraTaller.Ahora,
@@ -122,7 +122,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 return revision.IdPresupuesto;
             }
 
-            if (p.Estado == EstadoPresupuesto.PendienteRevisionTecnica || !p.Vigente || p.Tipo != TipoPresupuesto.Reparacion || p.Estado == EstadoPresupuesto.Borrador || p.Atencion.IdTecnicoEnActividad != null || p.Atencion.Estado is EstadoAtencion.Cerrada or EstadoAtencion.Cancelada || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
+            if (p.Estado == EstadoPresupuesto.PendienteRevisionTecnica || !p.Vigente || p.Estado == EstadoPresupuesto.Borrador || p.Atencion.IdTecnicoEnActividad != null || p.Atencion.Estado is EstadoAtencion.Cerrada or EstadoAtencion.Cancelada || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
                 throw new ValidacionException("Solo puede revisar una propuesta vigente, sin reserva, sin ejecución ni liquidación. Con trabajos iniciados use el registro técnico de omisiones/interrupción.");
             p.Vigente = false;
             var nueva = new Presupuesto
@@ -130,7 +130,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 IdAtencion = p.IdAtencion,
                 IdDiagnostico = p.IdDiagnostico,
                 IdPresupuestoAnterior = id,
-                Tipo = TipoPresupuesto.Reparacion,
+
                 Estado = EstadoPresupuesto.Borrador,
                 IdUsuarioCreacion = usuario.Id,
                 FechaCreacion = FechaHoraTaller.Ahora,

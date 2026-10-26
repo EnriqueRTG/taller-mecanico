@@ -17,15 +17,8 @@ public sealed class CatalogoDemostracionPruebas
         Assert.Contains(datos, c => c.Tipo == TipoConcepto.Consumible && c.Unidad.Contains("litro"));
     }
     [Fact]
-    public void EstadosDeCompatibilidadSoloSeOfrecenSiExistenEnRegistros()
+    public void EstadosRepresentanSoloLasSieteEtapasVigentes()
     {
-        var actuales = EstadosAtencionConsulta.Listar([]);
-        Assert.Equal(7, actuales.Count);
-        Assert.DoesNotContain(EstadoAtencion.Abierta, actuales);
-        Assert.DoesNotContain(EstadoAtencion.Pausada, actuales);
-        Assert.Contains(EstadoAtencion.Cancelada, actuales);
-        var historicos = EstadosAtencionConsulta.Listar([EstadoAtencion.Abierta]);
-        Assert.Contains(EstadoAtencion.Abierta, historicos);
-        Assert.DoesNotContain(EstadoAtencion.PendienteDiagnostico, historicos);
+        Assert.Equal(new[] { "EnEvaluacionTecnica", "PendienteDecision", "EnEjecucion", "TrabajoFinalizado", "PendienteLiquidacion", "Cerrada", "Cancelada" }, Enum.GetNames<EstadoAtencion>());
     }
 }

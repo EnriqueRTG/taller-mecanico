@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Taller.Dominio.Entidades;
 
@@ -14,30 +14,23 @@ public sealed class ConceptoConfiguracion : IEntityTypeConfiguration<Concepto>
         builder.ToTable("Conceptos", tabla =>
         {
             // Rechaza nombres vacíos o compuestos solo por espacios.
-            tabla.HasCheckConstraint("CK_Conceptos_Nombre", 
+            tabla.HasCheckConstraint("CK_Conceptos_Nombre",
                 "LEN(LTRIM(RTRIM(Nombre))) > 0");
 
             tabla.HasCheckConstraint("CK_Conceptos_Tipo",
                 """
                 [Tipo] IN (
-                    N'Servicio', 
-                    N'Repuesto', 
+                    N'Servicio',
+                    N'Repuesto',
                     N'Consumible')
-                """); // Asegura que el tipo sea válido 
+                """); // Asegura que el tipo sea válido
 
             tabla.HasCheckConstraint("CK_Conceptos_PrecioReferencia",
                 """
-                [PrecioReferencia] IS NULL OR 
+                [PrecioReferencia] IS NULL OR
                 [PrecioReferencia] >= 0
                 """); // Asegura que el precio de referencia sea nulo o no negativo
 
-            // Los repuestos y consumibles no se ofrecen como servicios de ingreso.
-            tabla.HasCheckConstraint(
-                "CK_Conceptos_DisponibleParaIngreso",
-                """
-                [DisponibleParaIngreso] = 0
-                OR [Tipo] = N'Servicio'
-                """);
         });
 
         builder.HasKey(c => c.IdConcepto);
@@ -68,9 +61,6 @@ public sealed class ConceptoConfiguracion : IEntityTypeConfiguration<Concepto>
         builder.Property(c => c.Activo)
             .IsRequired();
 
-        builder.Property(c => c.DisponibleParaIngreso)
-            .IsRequired()
-            .HasDefaultValue(false);
 
         // Facilita listar conceptos de una categoría específica.
         builder.HasIndex(c => c.IdCategoria)

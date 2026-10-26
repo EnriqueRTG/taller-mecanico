@@ -64,7 +64,6 @@ public partial class FrmDetalleDiagnostico : Form
             txtAtencion.Text = datos.IdAtencion.ToString("D6");
             txtFecha.Text = datos.FechaDiagnostico.ToString("dd/MM/yyyy HH:mm");
             txtTecnicoAutor.Text = datos.TecnicoAutor;
-            txtTipo.Text = datos.Tipo.ToString();
             txtKilometraje.Text = datos.Kilometraje?.ToString() ?? "No registrado";
             txtFallaDetectada.Text = datos.FallaDetectada;
             txtTrabajoRecomendado.Text = datos.TrabajoRecomendado;

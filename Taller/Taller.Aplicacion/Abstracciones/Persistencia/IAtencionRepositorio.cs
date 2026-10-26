@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Entidades;
+using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Abstracciones.Persistencia;
 
@@ -18,33 +18,7 @@ public interface IAtencionRepositorio
         int idVehiculo);
     Task AgregarAsync(
         Atencion atencion);
-    Task ActualizarAsync(Atencion atencion);
-
-    /// <summary>
-    /// Actualiza la atención y registra el evento correspondiente
-    /// en una misma operación de persistencia.
-    /// </summary>
-    Task ActualizarConHistorialAsync(
-        Atencion atencion,
-        HistorialAtencion historial);
-
-    /// <summary>
-    /// Prepara la actualización de la reserva técnica y agrega
-    /// su evento al historial, sin confirmar los cambios.
-    /// </summary>
-    void PrepararCambioReservaConHistorial(
-        Atencion atencion,
-        HistorialAtencion historial);
-
     Task<bool> ExisteAtencionActivaParaVehiculoAsync(
         int idVehiculo);
 
-    /// <summary>
-    /// Guarda el envío a diagnóstico, el presupuesto inicial
-    /// con su detalle y el evento del historial conjuntamente.
-    /// </summary>
-    Task ConfirmarIngresoAsync(
-        Atencion atencion,
-        Presupuesto presupuesto,
-        HistorialAtencion historial);
 }

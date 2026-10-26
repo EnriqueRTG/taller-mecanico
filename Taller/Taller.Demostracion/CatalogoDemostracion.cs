@@ -171,11 +171,15 @@ public static class CatalogoDemostracion
     {
         if (!db.Database.IsSqlServer() || !db.Database.GetDbConnection().Database.EndsWith("_Demo", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("El catálogo académico solo se carga en una base SQL de demostración terminada en _Demo.");
-        var categorias = await db.Categorias.ToDictionaryAsync(c => c.Nombre);
-        var conceptos = await db.Conceptos.ToListAsync();
-        // El catálogo básico preexistente conserva su identidad; solo el entorno Demo recibe referencias iniciales.
-        foreach (var c in conceptos)
-            c.PrecioReferencia = c.Tipo == TipoConcepto.Servicio ? 35000m : c.Tipo == TipoConcepto.Repuesto ? 45000m : 12000m;
+        if (await db.Atenciones.AnyAsync() || await db.Presupuestos.AnyAsync())
+            throw new InvalidOperationException("Prepare una base Demo nueva; el catálogo no reemplaza conceptos de operaciones existentes.");
+        // Construcción íntegra del lote, sin heredar conceptos ni precios genéricos del catálogo mínimo.
+        db.Conceptos.RemoveRange(await db.Conceptos.ToListAsync());
+        await db.SaveChangesAsync();
+        db.Categorias.RemoveRange(await db.Categorias.ToListAsync());
+        await db.SaveChangesAsync();
+        var categorias = new Dictionary<string, Categoria>();
+        var conceptos = new List<Concepto>();
         foreach (var e in Entradas)
         {
             if (!categorias.TryGetValue(e.Categoria, out var categoria))
@@ -192,7 +196,7 @@ public static class CatalogoDemostracion
             c.PrecioReferencia = e.Precio;
             c.Descripcion = $"Referencia académica ARS (2026-10), {e.Unidad}. Confirmar aplicación y precio antes de presupuestar. No acredita existencias.";
         }
-        var historica = new Categoria { Nombre = "Histórico de demostración", Descripcion = "Categoría fuera de oferta para comprobar filtros de inactivos.", Activo = false };
+        var historica = new Categoria { Nombre = "Fuera de oferta", Descripcion = "Categoría fuera de oferta para comprobar filtros de inactivos.", Activo = false };
         db.Categorias.Add(historica);
         db.Conceptos.Add(new Concepto { Categoria = historica, Tipo = TipoConcepto.Repuesto, Nombre = "Filtro discontinuado de demostración",
             Descripcion = "Registro inactivo de prueba; no disponible para presupuestar.", PrecioReferencia = 8000m, Activo = false });

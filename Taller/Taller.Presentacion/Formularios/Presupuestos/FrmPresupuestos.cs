@@ -74,7 +74,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     private void Filtrar(object? s, EventArgs e)
     {
         var q = txtBuscar.Text.Trim();
-        dgvDatos.DataSource = _datos.Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision || cboEstado.SelectedIndex == 4 && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Tipo == TipoPresupuesto.Reparacion && d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
+        dgvDatos.DataSource = _datos.Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision || cboEstado.SelectedIndex == 4 && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
         dgvDatos.ClearSelection();
         dgvDatos.CurrentCell = null;
         Seleccion(null, EventArgs.Empty);
@@ -98,7 +98,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
             : Fila.Estado == EstadoPresupuesto.Borrador ? "Borrador: el técnico debe continuarlo y enviarlo desde Preparación técnica antes de informar al cliente."
             : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Propuesta emitida: informe al cliente. Si detecta una falta o error, Pedir corrección técnica devuelve la propuesta al técnico; no modifica ni autoriza trabajos."
             : "Solicitar revisión conserva esta versión y pide otra al técnico; solo es posible sin ejecución ni liquidación. La ejecución requiere aceptación del cliente.";
-        btnDecidir.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendienteDecision };
+        btnDecidir.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteDecision };
         btnDecidir.Visible = recepcion && Fila is { Estado: EstadoPresupuesto.PendienteDecision, Vigente: true };
         btnPresentar.Visible = recepcion && Fila is { Estado: EstadoPresupuesto.PendientePresentacion, Vigente: true };
         btnRevision.Margin = new Padding(24, 0, 0, 4);
@@ -106,7 +106,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         btnRevision.Enabled = !_ocupado && recepcion && Fila is { PuedeSolicitarRevision: true };
         btnVer.Enabled = btnSeguimiento.Enabled = !_ocupado && Fila != null;
         btnValidarSeleccion.Enabled = !_ocupado && tecnico && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
-        btnPresentar.Enabled = !_ocupado && _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendientePresentacion };
+        btnPresentar.Enabled = !_ocupado && _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendientePresentacion };
     }
 
     private void Ver(object? s, EventArgs e)

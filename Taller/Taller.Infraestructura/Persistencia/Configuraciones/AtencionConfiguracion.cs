@@ -20,12 +20,9 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
                 "CK_Atenciones_Estado",
                 """
                 [Estado] IN (
-                    N'Abierta',
-                    N'PendienteDiagnostico',
                     N'EnEvaluacionTecnica',
                     N'PendienteDecision',
                     N'EnEjecucion',
-                    N'Pausada',
                     N'TrabajoFinalizado',
                     N'PendienteLiquidacion',
                     N'Cerrada',
@@ -38,7 +35,7 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
             tabla.HasCheckConstraint(
                 "CK_Atenciones_ActividadTecnica",
                 """
-                [ActividadTecnica] IS NULL 
+                [ActividadTecnica] IS NULL
                 OR [ActividadTecnica] IN (
                     N'Diagnostico',
                     N'Presupuesto',
@@ -89,10 +86,10 @@ public sealed class AtencionConfiguracion : IEntityTypeConfiguration<Atencion>
             .IsRequired(false)
             .HasMaxLength(20);
 
-        builder.Property(a => a.FechaApertura) 
+        builder.Property(a => a.FechaApertura)
             .IsRequired();
 
-        builder.Property(a => a.MotivoConsulta) 
+        builder.Property(a => a.MotivoConsulta)
             .IsRequired()
             .HasMaxLength(500);
 

@@ -1,10 +1,6 @@
-# Estados y clasificaciones: revisión del circuito vigente
+# Estados del circuito actual
 
-## Resultado
-
-La atención tiene siete estados operativos actuales: EnEvaluacionTecnica, PendienteDecision, EnEjecucion, TrabajoFinalizado, PendienteLiquidacion, Cerrada y Cancelada. Los valores numéricos/nombres persistidos no se renumeran. El filtro de Atenciones no ofrece los tres valores de compatibilidad salvo que existan registros con ellos. Las pausas actuales se representan mediante PausaTrabajo por alcance, no mediante otro estado general.
-
-No se eliminan valores del enum que pueden estar almacenados en historiales, diagnósticos, presupuestos o copias anteriores: EF convierte esos nombres/valores al leerlos. Eliminarlos sin conocer y transformar todos esos registros rompería la lectura y recuperación. Compatibilidad no significa que se generen nuevos registros con el circuito antiguo.
+La base se construye desde cero mediante EsquemaInicialCircuitoActual. No se conservan estados ni rutas de compatibilidad: Abierta, PendienteDiagnostico y Pausada fueron retirados del dominio, las consultas, los filtros y las restricciones del esquema e historial. La recepción se guarda directamente en EnEvaluacionTecnica con un único evento RecepcionRegistrada. No se convierten historiales anteriores: este esquema requiere una base nueva.
 
 | Estado de atención | Uso y operación responsable |
 |---|---|
@@ -15,9 +11,7 @@ No se eliminan valores del enum que pueden estar almacenados en historiales, dia
 | PendienteLiquidacion | Rechazo, cierre sin reparación completa o interrupción. Se cobra solo lo autorizado y realizado, incluso si el resultado es cero. |
 | Cerrada | Entrega registrada con liquidación saldada. |
 | Cancelada | Desistimiento previo a actividad técnica, presupuestos o servicios autorizados; conserva motivo e historial. |
-| Abierta | Compatibilidad con aperturas antiguas y origen de eventos de recepción del historial. |
-| PendienteDiagnostico | Compatibilidad con ingreso/servicio inicial del circuito anterior; permite retomar mediante preparación técnica. |
-| Pausada | Lectura histórica. No se asigna en el circuito actual; no se interpreta automáticamente como una pausa por tarea. Su eventual conversión necesita revisión de los registros afectados. |
+
 
 ## Presupuesto y ejecución
 
@@ -29,12 +23,11 @@ Los cinco EstadoEjecucionDetalle son necesarios: NoIniciado, EnCurso, Completado
 
 - TipoSolicitudIngreso: TrabajoSolicitado / ProblemaInformado, expresado por cada pedido. TipoSolicitudAtencion (Problema, ServicioDefinido, Mixta) es el resumen derivado, no una tercera pregunta de ingreso.
 - ActividadTecnica: Diagnostico, Presupuesto, Ejecucion. Identifica reserva y permisos, no duplica el estado de la atención.
-- TipoPresupuesto.Reparacion incluye la propuesta inicial y adicionales; EsAdicional/EsInspeccion distinguen su alcance. TipoPresupuesto.Diagnostico se conserva para servicios iniciales del circuito anterior.
-- TipoDiagnostico.Inicial es el informe actual. Adicional se conserva para lectura de informes anteriores; los hallazgos actuales utilizan HallazgoAtencion, no generan automáticamente otro Diagnostico.Adicional.
+- Presupuesto no necesita un enum de tipo: todos son propuestas. EsAdicional/EsInspeccion distinguen alcances realmente usados. Se retiraron TipoPresupuesto y su columna Tipo.
+- Diagnostico es el informe definitivo de evaluación, único por atención. Los hallazgos usan HallazgoAtencion. Se retiraron TipoDiagnostico, su columna Tipo y el indicador ImpideContinuar del diagnóstico, que duplicaba un comportamiento exclusivo del hallazgo.
 - TipoConcepto: Servicio / Repuesto / Consumible. Determina validación de materiales aportados y la oferta del catálogo.
 - OrigenMaterial: Taller / Cliente; el aporte del cliente tiene precio de venta cero y requiere recepción/conformidad antes de utilizarse.
 - Cliente, vehículo, usuario y catálogos emplean Activo; no necesitan un enum adicional. Pago conserva Anulado y su motivo, no un borrado. Comprobante conserva total/pagado/saldo, no un estado de pago redundante. Pausa conserva resolución/fecha; no necesita otro enum.
 - TipoRespaldo: Completa / Diferencial (no respaldo de log ni incremental encadenado). Ambos tienen implementación.
 - TipoReporte: siete consultas diferentes; TipoGraficoReporte: Barras, Columnas, Torta; PermisoAplicacion conserva las capacidades de navegación por rol. Son tipos/capacidades, no estados comerciales.
 
-Se revisaron los lectores, asignaciones, servicios, consultas y selectores fuera de migraciones. No se retiraron validaciones de autorización, concurrencia, importes o estados solo porque una ruta alternativa no aparezca en el recorrido ideal. Se eliminó el método de interfaz MostrarFuncionEnDesarrollo sin llamadas, que contenía un mensaje de simulación ajeno al circuito implementado.

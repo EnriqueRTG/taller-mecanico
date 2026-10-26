@@ -85,12 +85,11 @@ public sealed class DocumentosOperativosTests
     [Fact]
     public void InformeDistingueHallazgoRecomendacionYAutorizacion()
     {
-        var datos = new DiagnosticoDetalleDto { IdDiagnostico = 3, IdAtencion = 101, TecnicoAutor = "Técnico", FallaDetectada = "Batería agotada", TrabajoRecomendado = "Reemplazar batería", ImpideContinuar = true };
+        var datos = new DiagnosticoDetalleDto { IdDiagnostico = 3, IdAtencion = 101, TecnicoAutor = "Técnico", FallaDetectada = "Batería agotada", TrabajoRecomendado = "Reemplazar batería" };
         var html = DocumentoOperativoExportador.Diagnostico(datos, new());
         Assert.Contains("Hallazgo / conclusión", html);
         Assert.Contains("Batería agotada", System.Net.WebUtility.HtmlDecode(html));
         Assert.Contains("Trabajo recomendado", html);
-        Assert.Contains("Impide continuar: Sí", html);
         Assert.Contains("no autoriza trabajos adicionales", html);
     }
 }

@@ -39,7 +39,7 @@ El documento contiene datos de clientes y del taller; quien exporta es responsab
 - Los historiales muestran atenciones reales; un cliente de una atención no se presenta como propietario permanente del vehículo. El historial del cliente incluye los vehículos atendidos para él, no un padrón de propiedad.
 - Las consultas de clientes y vehículos no conservan entidades rastreadas entre operaciones. Guardar un vehículo modifica solo el vehículo, no el grafo de marca/modelo.
 - Las ediciones preservan identificador, fecha de alta y estado; estos últimos se gestionan desde su acción específica. En vehículo, marca y modelo se conservan como catálogo de consulta en esta edición; no se pretende cambiar su identidad escribiendo texto libre.
-- Cancelar apertura es una operación real para Recepción: requiere motivo, versión vigente, estado Abierta y ausencia de evaluación/diagnóstico/presupuestos. Conserva fecha y evento de cancelación. Después del ingreso técnico se resuelve el circuito, no se descartan cargos mediante este botón.
+- Cancelar apertura es una operación real para Recepción: requiere motivo, versión vigente, estado EnEvaluacionTecnica y ausencia de evaluación/diagnóstico/presupuestos. Conserva fecha y evento de cancelación. Después de iniciar actividad técnica se resuelve el circuito, no se descartan cargos mediante este botón.
 - Respaldo/restauración dejó de simular operaciones exitosas. Su implementación posterior requiere instalación técnica y queda documentada en [Respaldos y restauración](respaldos-restauracion.md).
 
 ## Instalación y pruebas

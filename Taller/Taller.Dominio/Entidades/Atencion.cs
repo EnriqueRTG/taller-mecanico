@@ -29,7 +29,7 @@ public sealed class Atencion
     public DateTime FechaApertura { get; set; } = FechaHoraTaller.Ahora;
     public TipoSolicitudAtencion TipoSolicitud { get; set; } = TipoSolicitudAtencion.Problema;
     public string MotivoConsulta { get; set; } = null!;
-    public EstadoAtencion Estado { get; set; } = EstadoAtencion.Abierta;
+    public EstadoAtencion Estado { get; set; } = EstadoAtencion.EnEvaluacionTecnica;
     public DateTime? FechaCierre { get; set; }
     /// <summary>
     /// Identifica la versión del registro para detectar

@@ -20,21 +20,6 @@ namespace Taller.Dominio.Enumeraciones;
 public enum EstadoAtencion
 {
     /// <summary>
-    /// Estado de apertura conservado para registros y operaciones anteriores.
-    /// Recepción registró la atención, pero todavía no confirmó
-    /// el ingreso del vehículo al circuito técnico.
-    /// </summary>
-    Abierta = 1,
-
-    /// <summary>
-    /// Estado del circuito anterior conservado para consultar y continuar esos registros.
-    /// Recepción confirmó el ingreso y registró la autorización
-    /// del servicio de diagnóstico inicial.
-    /// La atención espera que un técnico tome el trabajo.
-    /// </summary>
-    PendienteDiagnostico = 2,
-
-    /// <summary>
     /// La atención está disponible o reservada para preparación técnica.
     /// La reserva identifica si un técnico ya comenzó. Incluye la evaluación,
     /// registrando el diagnóstico o preparando un presupuesto
@@ -66,15 +51,6 @@ public enum EstadoAtencion
     /// antes de ejecutarse.
     /// </remarks>
     EnEjecucion = 5,
-
-    /// <summary>
-    /// Estado histórico conservado. El circuito actual registra pausas por alcance
-    /// sin cambiar el estado general, permitiendo continuar tareas independientes.
-    /// La reparación está detenida por un hallazgo adicional
-    /// que requiere evaluación, preparación de un presupuesto
-    /// o una decisión del cliente.
-    /// </summary>
-    Pausada = 6,
 
     /// <summary>
     /// El técnico confirmó la finalización de los trabajos

@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Infraestructura.Persistencia.Configuraciones;
 
 /// <summary>
-/// Configura los informes técnicos iniciales y adicionales.
+/// Configura los informes técnicos de la evaluación técnica.
 /// </summary>
 public sealed class DiagnosticoConfiguracion : IEntityTypeConfiguration<Diagnostico>
 {
@@ -13,19 +13,11 @@ public sealed class DiagnosticoConfiguracion : IEntityTypeConfiguration<Diagnost
     {
         builder.ToTable("Diagnosticos", tabla =>
         {
-            tabla.HasCheckConstraint(
-                "CK_Diagnosticos_Tipo",
-                "Tipo IN (N'Inicial', N'Adicional')");
 
             tabla.HasCheckConstraint(
                 "CK_Diagnosticos_Kilometraje",
                 "[Kilometraje] IS NULL OR [Kilometraje] >= 0");
 
-            // El bloqueo de trabajos anteriores solo corresponde a
-            // un hallazgo adicional.
-            tabla.HasCheckConstraint(
-                "CK_Diagnosticos_ImpideContinuar",
-                "[Tipo] <> N'Inicial' OR [ImpideContinuar] = 0");
 
             tabla.HasCheckConstraint(
                 "CK_Diagnosticos_FallaDetectada",
@@ -66,21 +58,12 @@ public sealed class DiagnosticoConfiguracion : IEntityTypeConfiguration<Diagnost
             .IsRequired(false)
             .HasMaxLength(1000);
 
-        builder.Property(d => d.Tipo)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(20);
 
-        builder.Property(d => d.ImpideContinuar)
-            .IsRequired()
-            .HasDefaultValue(false);
 
-        // Solo el informe inicial debe ser único por atención.
-        // Los adicionales no quedan limitados por este índice.
+        // Un informe definitivo de evaluación por atención; los hallazgos tienen su propia entidad.
         builder.HasIndex(d => d.IdAtencion)
-            .HasDatabaseName("UX_Diagnosticos_InicialPorAtencion")
-            .IsUnique()
-            .HasFilter("[Tipo] = N'Inicial'");
+            .HasDatabaseName("UX_Diagnosticos_Atencion")
+            .IsUnique();
 
         builder.HasOne(d => d.Atencion)
             .WithMany(a => a.Diagnosticos)

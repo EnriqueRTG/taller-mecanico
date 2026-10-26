@@ -24,7 +24,7 @@ public sealed class IntegracionSqlPruebas
     {
         public string Nombre = "SGTM_Pruebas_Integracion_" + Guid.NewGuid().ToString("N");
         public string Master = "", Conexion = "";
-        public static async Task<BasePrueba> CrearAsync(bool anterior = false)
+        public static async Task<BasePrueba> CrearAsync()
         {
             var b = new SqlConnectionStringBuilder(Environment.GetEnvironmentVariable("SGTM_SQL_PRUEBAS"));
             if (b.InitialCatalog != "master" || Environment.GetEnvironmentVariable("SGTM_PERMITIR_PRUEBAS_SQL") != "1")
@@ -46,13 +46,7 @@ public sealed class IntegracionSqlPruebas
             {
                 await using var db = t.Contexto();
                 db.Database.SetCommandTimeout(120);
-                if (anterior)
-                {
-                    var prev = db.Database.GetMigrations().Single(m => m.EndsWith("_DecisionesEjecucionLiquidacionYCobros"));
-                    await db.GetService<IMigrator>().MigrateAsync(prev);
-                }
-                else
-                    await db.Database.MigrateAsync();
+                await db.Database.MigrateAsync();
                 return t;
             }
             catch
@@ -155,40 +149,18 @@ public sealed class IntegracionSqlPruebas
     }
 
     [SqlRespaldoFact]
-    public async Task ActualizarVersionAnteriorConservaClientesVehiculosYAtencionesExistentes()
+    public async Task BaseNuevaSoloAdmiteEstadosVigentesYNoContieneClasificadoresObsoletos()
     {
-        await using var b = await BasePrueba.CrearAsync(true);
-        await using (var sql = new SqlConnection(b.Conexion))
-        {
-            await sql.OpenAsync();
-            await new SqlCommand("""
-                INSERT dbo.Clientes(TipoDocumento,Documento,Nombre,Apellido,Activo,FechaAlta) VALUES(N'DNI',N'34567890',N'Cliente previo',N'Conservado',1,GETDATE());
-                DECLARE @cliente int=SCOPE_IDENTITY();
-                INSERT dbo.Marcas(Nombre,Activo) VALUES(N'Marca previa',1);DECLARE @marca int=SCOPE_IDENTITY();
-                INSERT dbo.Modelos(Nombre,Activo,IdMarca) VALUES(N'Modelo previo',1,@marca);DECLARE @modelo int=SCOPE_IDENTITY();
-                INSERT dbo.Vehiculos(Dominio,Anio,Color,IdModelo,Activo,FechaAlta) VALUES(N'AD789FG',2020,N'Gris',@modelo,1,GETDATE());DECLARE @vehiculo int=SCOPE_IDENTITY();
-                INSERT dbo.Usuarios(NombreUsuario,PasswordHash,Nombre,Apellido,RolId,Activo,FechaAlta) VALUES(N'recepcion-previa',N'hash',N'Recepción',N'Previa',2,1,GETDATE());DECLARE @usuario int=SCOPE_IDENTITY();
-                INSERT dbo.Atenciones(IdCliente,IdVehiculo,IdUsuarioRecepcion,MotivoConsulta,Estado,FechaApertura,TipoSolicitud) VALUES(@cliente,@vehiculo,@usuario,N'Solicitud que debe conservarse',N'Abierta',GETDATE(),N'Problema');DECLARE @atencion int=SCOPE_IDENTITY();
-                INSERT dbo.Categorias(Nombre,Activo) VALUES(N'Categoría previa',1);DECLARE @categoria int=SCOPE_IDENTITY();
-                INSERT dbo.Conceptos(IdCategoria,Tipo,Nombre,Activo,DisponibleParaIngreso) VALUES(@categoria,N'Servicio',N'Trabajo previo',1,0);DECLARE @concepto int=SCOPE_IDENTITY();
-                INSERT dbo.Presupuestos(IdAtencion,Tipo,Estado,IdUsuarioCreacion,FechaCreacion,FechaPresentacion,IdUsuarioDecision,FechaDecision,Vigente,AlcanceValidado) VALUES(@atencion,N'Reparacion',N'Aceptado',@usuario,GETDATE(),GETDATE(),@usuario,GETDATE(),1,1);DECLARE @presupuesto int=SCOPE_IDENTITY();
-                INSERT dbo.PresupuestoDetalles(IdPresupuesto,IdConcepto,Descripcion,Cantidad,PrecioUnitario,EstadoEjecucion,CantidadEjecutada,AceptadoPorCliente) VALUES(@presupuesto,@concepto,N'Ítem previo conservado',1,125,N'NoIniciado',0,1);
-                """, sql).ExecuteNonQueryAsync();
-        }
-
+        await using var b = await BasePrueba.CrearAsync();
         await using var db = b.Contexto();
-        await db.Database.MigrateAsync();
-        var c = await db.Clientes.SingleAsync(x => x.Documento == "34567890");
-        var v = await db.Vehiculos.SingleAsync(x => x.Dominio == "AD789FG");
-        Assert.Equal(8, c.Version.Length);
-        Assert.Equal(8, v.Version.Length);
-        Assert.Equal("Cliente previo", c.Nombre);
-        var previo = await db.PresupuestoDetalles.SingleAsync();
-        Assert.Equal(OrigenMaterial.Taller, previo.OrigenMaterial);
-        Assert.Equal(125, previo.PrecioUnitario);
-        Assert.True(previo.AceptadoPorCliente);
-        Assert.Empty(await db.Set<HallazgoAtencion>().ToListAsync());
-        Assert.Equal("Solicitud que debe conservarse", (await db.Atenciones.SingleAsync()).MotivoConsulta);
+        Assert.Single(db.Database.GetMigrations());
+        await using var sql = new SqlConnection(b.Conexion);
+        await sql.OpenAsync();
+        var comando = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE (object_id = OBJECT_ID(N'dbo.Presupuestos') OR object_id = OBJECT_ID(N'dbo.Diagnosticos')) AND name = N'Tipo' OR object_id = OBJECT_ID(N'dbo.Conceptos') AND name = N'DisponibleParaIngreso'", sql);
+        Assert.Equal(0, (int)(await comando.ExecuteScalarAsync())!);
+        var restricciones = (await db.Database.SqlQueryRaw<string>("SELECT definition AS [Value] FROM sys.check_constraints WHERE name IN (N'CK_Atenciones_Estado', N'CK_HistorialAtenciones_EstadoNuevo', N'CK_HistorialAtenciones_EstadoAnterior')").ToListAsync());
+        Assert.NotEmpty(restricciones);
+        Assert.All(restricciones, texto => { Assert.DoesNotContain("Abierta", texto); Assert.DoesNotContain("PendienteDiagnostico", texto); Assert.DoesNotContain("Pausada", texto); });
     }
 
     [SqlRespaldoFact]
@@ -235,7 +207,7 @@ public sealed class IntegracionSqlPruebas
         var vehiculos = new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso);
         var cliente = await clientes.RegistrarAsync("DNI", "23456789", "Lucía", "Gómez", null, null, null);
         var vehiculo = await vehiculos.RegistrarAsync("AC456DE", 2021, "Blanco", ids.Modelo);
-        var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), usuarios, new ConceptoRepositorio(db), sesion);
+        var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), usuarios, sesion);
         var a = await recepcion.RegistrarRecepcionAsync(new RegistrarRecepcionDto {
             IdCliente = cliente.IdCliente, IdVehiculo = vehiculo.IdVehiculo, IdUsuarioRecepcion = ids.Recepcion,
             Kilometraje = 80000, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "Ruido persistente al frenar" }]
@@ -261,7 +233,7 @@ public sealed class IntegracionSqlPruebas
         foreach (var item in d.Items) item.IdSolicitudAtencion = d.Solicitudes.FirstOrDefault()?.IdSolicitud;
         await evaluacion.GuardarAsync(d, true);
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
-        var p = await db.Presupuestos.AsNoTracking().SingleAsync(x => x.Tipo == TipoPresupuesto.Reparacion);
+        var p = await db.Presupuestos.AsNoTracking().SingleAsync(x => !x.EsAdicional);
         db.ChangeTracker.Clear();
         await evaluacion.PresentarAsync(p.IdPresupuesto, p.Version);
         var presupuestos = new PresupuestoServicio(er, cr, unidad, acceso);
@@ -368,7 +340,7 @@ public sealed class IntegracionSqlPruebas
         var p = new Presupuesto
         {
             IdAtencion = a.IdAtencion,
-            Tipo = TipoPresupuesto.Reparacion,
+
             Estado = EstadoPresupuesto.PendienteDecision,
             IdUsuarioCreacion = ids.Tecnico,
             FechaCreacion = FechaHoraTaller.Ahora,

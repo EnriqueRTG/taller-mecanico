@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Taller.Dominio.Entidades;
 
@@ -17,12 +17,9 @@ public sealed class HistorialAtencionConfiguracion : IEntityTypeConfiguration<Hi
                 """
                 [EstadoAnterior] IS NULL
                 OR [EstadoAnterior] IN (
-                    N'Abierta',
-                    N'PendienteDiagnostico',
                     N'EnEvaluacionTecnica',
                     N'PendienteDecision',
                     N'EnEjecucion',
-                    N'Pausada',
                     N'TrabajoFinalizado',
                     N'PendienteLiquidacion',
                     N'Cerrada',
@@ -34,12 +31,9 @@ public sealed class HistorialAtencionConfiguracion : IEntityTypeConfiguration<Hi
                 "CK_HistorialAtenciones_EstadoNuevo",
                 """
                 [EstadoNuevo] IN (
-                    N'Abierta',
-                    N'PendienteDiagnostico',
                     N'EnEvaluacionTecnica',
                     N'PendienteDecision',
                     N'EnEjecucion',
-                    N'Pausada',
                     N'TrabajoFinalizado',
                     N'PendienteLiquidacion',
                     N'Cerrada',

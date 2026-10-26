@@ -180,6 +180,15 @@ internal static class Program
             formulario.ClientSize = new Size(ancho, 650); Disponer(formulario);
             VerificarDentroDelFormulario(formulario, formulario.Controls.Find("btnFinalizar", true).Single());
         }
+        tipo.GetField("_pausasActivas", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario,
+            new List<Taller.Aplicacion.DTOs.Ejecuciones.PausaConsultaDto> { new() { Id = 1, Motivo = "Detención del cliente" } });
+        tipo.GetMethod("AplicarPausas", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, null);
+        if (!grilla.ReadOnly || item.CantidadEjecutada != 1 || item.Estado != Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.EnCurso)
+            throw new InvalidOperationException("La pausa debe bloquear sin reemplazar la edición local.");
+        tipo.GetField("_pausasActivas", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario,
+            new List<Taller.Aplicacion.DTOs.Ejecuciones.PausaConsultaDto>());
+        tipo.GetMethod("AplicarPausas", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, null);
+        if (grilla.ReadOnly) throw new InvalidOperationException("La continuidad resuelta debe recuperar la edición propia.");
         sesion.Iniciar(new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId });
         using var bandeja = scope.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Ejecuciones.FrmTrabajosEnCurso>();
         using var seguimiento = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(1,

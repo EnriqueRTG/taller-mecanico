@@ -158,6 +158,15 @@ public partial class FrmEjecutarAtencion : Form
         else { btnFinalizar.BackColor = Color.FromArgb(226, 232, 240); btnFinalizar.ForeColor = Color.DimGray; }
     }
 
+    private async void ActualizarSituacion(object? sender, EventArgs e)
+    {
+        if (_ocupado || _cargando) return;
+        if (_sucio && MessageBox.Show(this, "Actualizar reemplaza las ediciones sin guardar por los últimos datos registrados. ¿Continuar?",
+            "Actualizar situación", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+        await RecargarAsync();
+        await VigilarPausasAsync();
+    }
+
     private async void ComprobarPausas(object? sender, EventArgs e) => await VigilarPausasAsync();
 
     private async Task VigilarPausasAsync()

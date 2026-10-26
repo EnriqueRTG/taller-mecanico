@@ -166,6 +166,10 @@ partial class FrmEjecutarAtencion
         txtResumen.Multiline = true;
         txtResumen.ScrollBars = ScrollBars.Vertical;
         txtResumen.TabStop = false;
+        var btnActualizarSituacion = new Button { Text = "Actualizar situación", AutoSize = true };
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnActualizarSituacion);
+        btnActualizarSituacion.Click += ActualizarSituacion;
+        flpAcciones.Controls.Add(btnActualizarSituacion);
         menuOpciones = new ContextMenuStrip(components);
         menuOpciones.Items.Add("Registrar hallazgo / solicitar adicional", null, Hallazgos);
         menuOpciones.Items.Add("Gestionar pausas", null, Pausas);

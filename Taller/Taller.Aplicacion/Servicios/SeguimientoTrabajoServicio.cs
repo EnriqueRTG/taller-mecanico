@@ -63,7 +63,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                     .OrderBy(d => d.IdPresupuestoDetalle).Select(d => new EjecucionItemDto {
                         IdDetalle = d.IdPresupuestoDetalle, Descripcion = d.Descripcion, CantidadAutorizada = d.Cantidad,
                         CantidadEjecutada = d.CantidadEjecutada, Estado = d.EstadoEjecucion, Observaciones = d.ObservacionesEjecucion }).ToList(),
-                PuedePausar = operable,
+                PuedePausar = operable && (u.RolId == RolesSistema.AdministrativoId || a.IdTecnicoEnActividad == null || a.IdTecnicoEnActividad == u.Id),
                 InformeInicial = string.Join("\n\n", informes.Select(d => $"Informe {d.IdDiagnostico} ({d.Tipo}) · {d.FechaDiagnostico:dd/MM/yyyy HH:mm} · Técnico {d.IdTecnicoAutor}\nConclusión: {d.FallaDetectada}\nRecomendación: {d.TrabajoRecomendado}\n{d.Observaciones}")),
                 TrabajosRegistrados = string.Join("\n\n", ps.Where(p => p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0))).Select(d => $"P{d.IdPresupuesto} / Ítem {d.IdPresupuestoDetalle}: {d.Descripcion} · Aporta {d.OrigenMaterial}\nAutorizado {d.Cantidad:N3}; realizado {d.CantidadEjecutada:N3}; estado {new EjecucionItemDto { Estado = d.EstadoEjecucion }.EstadoDescripcion}; técnico {d.IdTecnicoRegistro}; registro {d.FechaRegistroEjecucion:dd/MM/yyyy HH:mm}\n{d.ObservacionesEjecucion}")),
                 Resumen = $"Atención {id:D6} · {a.Vehiculo.Dominio} · {a.Cliente.Apellido}, {a.Cliente.Nombre}",

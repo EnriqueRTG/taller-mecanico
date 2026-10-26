@@ -35,7 +35,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         _configurando = false;
         if (!_servicio.Habilitado)
         {
-            lblEstado.Text = "Configuración técnica pendiente. Instale la base de control y habilite Respaldos en todos los clientes. El agente funciona separado de SGTM. Consulte docs/respaldos-restauracion.md con su técnico.";
+            lblEstado.Text = "Configuración técnica pendiente. Instale la base de control y habilite Respaldos en todos los clientes. El agente funciona separado de SGTM. Consulte docs/respaldos/operacion.md con su técnico.";
             tabs.Enabled = btnActualizar.Enabled = false;
             return;
         }

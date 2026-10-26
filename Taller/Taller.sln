@@ -27,13 +27,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03 Pruebas", "03 Pruebas", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04 Documentacion", "04 Documentacion", "{2F96B0AF-DB60-46A9-8324-4344B30290A4}"
 	ProjectSection(SolutionItems) = preProject
-		..\README.md = ..\README.md
-		..\docs\estructura-solucion.md = ..\docs\estructura-solucion.md
-		..\docs\entornos-demo-e-instalacion.md = ..\docs\entornos-demo-e-instalacion.md
-		..\docs\coloquio-demostracion.md = ..\docs\coloquio-demostracion.md
-		..\docs\circuito-principal-atencion.md = ..\docs\circuito-principal-atencion.md
-		..\docs\reportes-por-rol.md = ..\docs\reportes-por-rol.md
-		..\docs\estados-circuito-actual.md = ..\docs\estados-circuito-actual.md
+		..\docs\README.md = ..\docs\README.md
+		..\docs\instalacion\replicar-demo.txt = ..\docs\instalacion\replicar-demo.txt
+		..\docs\arquitectura\estructura-solucion.md = ..\docs\arquitectura\estructura-solucion.md
 	EndProjectSection
 EndProject
 Global

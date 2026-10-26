@@ -1,107 +1,62 @@
-# Sistema de Gestión de Taller Mecánico — SGTM
+# SGTM — Sistema de Gestión de Taller Mecánico
 
-Aplicación de escritorio para gestionar la atención de vehículos en un taller mecánico. Proyecto académico de **Taller de Programación II**, **Licenciatura en Sistemas de Información, UNNE**.
+Proyecto académico de Taller de Programación II, Licenciatura en Sistemas de Información, UNNE. Aplicación Windows Forms con SQL Server para recepción, preparación técnica, presupuestos, ejecución, liquidación, cobros y entrega.
 
-## Abrir en Visual Studio
+## Ejecutar la demostración
 
-- `Taller/Taller.sln`: solución completa agrupada en Sistema (cuatro capas), Herramientas, Pruebas y Documentación.
-- `Taller/Taller.Sistema.slnf`: vista de las cuatro capas para recorrer y ejecutar la aplicación. Seleccionar Taller.Presentacion como proyecto de inicio.
-- [Organización, referencias y preparación del coloquio](docs/estructura-solucion.md). Las herramientas no son capas adicionales y no se ejecutan al abrir la aplicación.
+1. Descargar main y compilar `Taller/Taller.sln` con el SDK indicado en `global.json`.
+2. Seguir el [instructivo breve de instalación Demo](docs/instalacion/replicar-demo.txt). La base acordada es **SGTM_DB_Demo** y el cargador se ejecuta expresamente antes del primer inicio.
+3. Seleccionar **Taller.Presentacion** como proyecto de inicio. El perfil local debe apuntar a la misma base que se cargó.
 
-## Circuito implementado en esta rama
+El esquema vigente parte de **EsquemaInicialCircuitoActual**. No aplicar esta migración inicial sobre tablas de versiones anteriores. Una base ya creada con este esquema no necesita recrearse por una reorganización de archivos. La instalación real usa SGTM_DB y no carga el lote académico.
 
-1. Identificar cliente y vehículo y abrir una atención por síntoma, servicio definido o solicitud mixta.
-2. La recepción con solicitudes individuales pasa directamente a preparación técnica. No agrega servicios cobrables automáticamente; una inspección extraordinaria requiere presupuesto y autorización específicos.
-3. Reservar una evaluación, guardar avances, registrar un diagnóstico cuando sea necesario y preparar la propuesta económica.
-4. Comunicar el presupuesto y registrar aceptación total, aceptación por ítems o rechazo. Las revisiones previas a la ejecución conservan el documento anterior.
-5. Validar el alcance y registrar cantidades efectivamente realizadas, omisiones justificadas o interrupción del trabajo.
-6. Emitir una liquidación sobre lo autorizado y realizado, registrar pagos parciales con uno o varios medios y conservar recibos/anulaciones.
-7. Registrar la entrega únicamente con actividad técnica terminada y saldo cero.
+## Abrir y recorrer el código
 
-Los listados, ediciones e historiales de clientes y vehículos utilizan persistencia real. Inicio muestra indicadores reales. Reportes genera documentos con indicadores, gráficos y detalle, según los permisos del rol.
-
-La implementación dispone de pruebas automatizadas del circuito, reportes y recuperación, incluyendo pruebas nativas en SQL Server aislado. Todavía requiere validación manual de Windows Forms, impresión y consultas/migraciones en una copia de SQL Server antes de fusionar como versión estable. Las pruebas con EF InMemory no sustituyen las restricciones, transacciones ni rowversion de SQL Server.
-
-## Roles
-
-| Rol | Responsabilidades |
-| --- | --- |
-| Administrador | Usuarios, reportes de gestión, copias completas/diferenciales manuales o programadas y recuperación con doble aprobación. |
-| Administrativo | Clientes, vehículos, recepción, comunicación y decisión de presupuestos, liquidación, cobros, entrega y reportes operativos/económicos. |
-| Técnico | Reserva de actividades, evaluación/informe, propuestas, ejecución y reportes propios; consulta de actividades disponibles. |
-
-Los servicios de reportes y las operaciones del circuito revalidan el usuario activo y su rol en la base. El administrador no opera la caja por el hecho de consultar sus reportes.
-
-## Reportes
-
-Documentos útiles para revisar ingresos de atenciones, decisiones de presupuestos, cobros/anulaciones por medio, saldos pendientes, carga técnica, actividad registrada y conceptos realizados. Distinguen importes presupuestados, autorizados, realizados y cobrados; no estiman rentabilidad ni productividad sin costos u horas registrados.
-
-Se pueden guardar como **HTML autocontenido con gráfico SVG**, exportar el detalle **CSV** o utilizar la vista de **impresión/PDF** con una impresora instalada. [Definiciones, alcance por rol y pruebas](docs/reportes-por-rol.md).
-
-## Arquitectura
+`Taller/Taller.sln` agrupa Sistema (cuatro capas), Herramientas, Pruebas y Documentación. `Taller/Taller.Sistema.slnf` abre solo las cuatro capas sin duplicar archivos. Las herramientas de demostración y pruebas no se ejecutan al abrir la aplicación; el agente de respaldos es independiente.
 
 | Proyecto | Responsabilidad |
-| --- | --- |
-| `Taller.Dominio` | Entidades, estados y constantes del negocio. |
-| `Taller.Aplicacion` | Casos de uso en servicios, validaciones, autorización, DTOs y contratos de persistencia. |
-| `Taller.Infraestructura` | EF Core, configuraciones, migraciones, repositorios, unidad de trabajo, seguridad e inicialización. |
-| `Taller.Presentacion` | Windows Forms, controles y eventos estáticos en Designer, navegación y documentos imprimibles. |
-| `Taller.Pruebas` | Pruebas xUnit del circuito, reportes, autorizaciones, errores y traducción de consultas. |
+|---|---|
+| Taller.Dominio | Entidades, enumeraciones y constantes de negocio. |
+| Taller.Aplicacion | Servicios de casos de uso, validaciones, autorizaciones, DTOs y contratos. |
+| Taller.Infraestructura | Implementaciones EF/SQL, configuraciones, migración, unidad de trabajo, seguridad y respaldos. |
+| Taller.Presentacion | Formularios, navegación, composición de DI e impresión. |
+| Taller.Demostracion | Lote académico generado mediante servicios reales; carga explícita en base _Demo vacía. |
+| Taller.Respaldos | Agente para copias programadas e instalación del control de recuperación. |
+| Taller.Pruebas | Reglas/componentes, arquitectura e integración SQL aislada. |
+| Taller.Pruebas.Interfaz | Construcción de formularios y validación de DI en Windows/STA. |
 
-Reportes utiliza un modelo de lectura: `IReporteRepositorio` proyecta datos sin seguimiento a DTOs; `ReporteServicio` aplica alcance, filtros y cálculos; el formulario presenta el documento y sus exportadores. No necesita modificar entidades ni confirmar una unidad de trabajo para consultar.
+[Índice de documentación](docs/README.md) · [Organización y dependencias](docs/arquitectura/estructura-solucion.md)
 
-Tecnologías: C#, .NET 10, Windows Forms, SQL Server, EF Core 10, inyección de dependencias, configuración JSON, PasswordHasher y xUnit. El SDK se determina en `global.json`.
+## Circuito y roles
 
-## Preparar y ejecutar
+Recepción identifica cliente/vehículo y registra pedidos conocidos o síntomas, sin cargos automáticos. El técnico toma la preparación, documenta diagnóstico cuando corresponde y presupuesta. Recepción comunica y registra la decisión del cliente. La aceptación total habilita ejecución; la selección parcial vuelve a revisión técnica y requiere nueva aceptación. Se registran cantidades realmente ejecutadas y conformidad técnica; luego se liquida, se cobra y se entrega con saldo cero.
 
-Se requiere Windows para ejecutar la interfaz, SDK .NET compatible con `global.json`, SQL Server y dotnet-ef 10.0.11.
+- **Administrador:** usuarios, auditoría, reportes de gestión, respaldos y recuperación con las autorizaciones correspondientes.
+- **Administrativo:** clientes/vehículos, recepción, comunicación y decisión de presupuestos, liquidación, cobros, entrega y reportes de su rol.
+- **Técnico:** informes/propuestas, revisión técnica, ejecución, hallazgos, pausas y materiales del cliente; consulta y reportes de su rol.
 
-1. Guardar los cambios locales y descargar la rama que se quiere probar.
-2. Configurar `ConnectionStrings:Default` en `Taller/Taller.Presentacion/appsettings.Local.json` o la variable `SGTM_CONN`. No publicar credenciales ni copiar una conexión ajena.
-3. Realizar y verificar un respaldo mediante SQL Server Management Studio. Si el módulo SGTM todavía no está instalado y validado, realizar esta copia mediante SQL Server Management Studio.
-4. Preparar una base nueva con `EsquemaInicialCircuitoActual`; no actualizar bases de versiones anteriores. Seguir [la guía de entornos e instalación](docs/entornos-demo-e-instalacion.md).
+La sesión permanece hasta cerrar sesión o salir. Las operaciones revalidan usuario/rol habilitados contra persistencia. Los controles visuales no reemplazan autorización ni concurrencia.
 
-Desde la raíz:
+## Alcance implementado y límites
+
+- Catálogo de consulta con categorías, tipos, disponibilidad, búsqueda y precios de referencia; **no incluye ABM de conceptos, stock, compras ni inventario**. Servicios no representan unidades almacenadas.
+- Hallazgos y presupuestos adicionales independientes, inspecciones extraordinarias previamente autorizadas, pausas por alcance y materiales aportados por el cliente.
+- Revisiones conservan documentos anteriores; no reescriben ítems ya ejecutados. Liquidación sobre cantidades autorizadas y efectivamente realizadas.
+- Pagos parciales y varios medios por cobro; referencias de operaciones electrónicas, recibos y anulaciones justificadas. Entrega explícita con saldo cero.
+- Documentos económicos internos en ARS, **sin validez fiscal**. Sin anticipos, financiación, crédito posterior a la entrega ni devolución bancaria automática.
+- Siete reportes con filtros, gráficos, HTML autocontenido, CSV e impresión/PDF. No calculan rentabilidad ni horas de productividad, porque no se registran esos costos/horas.
+- Respaldos completos/diferenciales, manuales/programados y réplica opcional Azure. Requieren configurar permisos, control y agente; permanecen deshabilitados hasta instalar ese entorno. Recuperación con mantenimiento y doble aprobación; sin promesa de operación sin interrupción ni copias de log.
+
+## Verificaciones
+
+Desde la raíz, en un equipo con el SDK correspondiente:
 
 ```powershell
 dotnet build Taller/Taller.sln --configuration Release
+dotnet build Taller/Taller.Sistema.slnf --configuration Release
 dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj --configuration Release --no-build
-dotnet ef database update --project Taller/Taller.Infraestructura --startup-project Taller/Taller.Infraestructura
-dotnet run --project Taller/Taller.Presentacion
 ```
 
-La fábrica de contexto utiliza la configuración local o `SGTM_CONN`. Los datos iniciales incluyen roles, administrador, marcas/modelos y catálogo de categorías/conceptos. La semilla de catálogo es repetible y no debe sobrescribir indiscriminadamente datos administrados por el usuario.
+Las pruebas SQL requieren una instancia desechable explícitamente autorizada; nunca se dirigen a la base de trabajo. CI construye la solución/filtro en Windows, comprueba formularios con DI validada y ejecuta las pruebas SQL en bases temporales. La comprobación visual del recorrido, escalado e impresión sigue siendo necesaria en la PC/notebook de presentación.
 
-## Alcance y pendientes
-
-- Documentos económicos internos en ARS, sin integración ni validez fiscal.
-- Cobros después de liquidar; no incluye anticipos, financiación ni devolución bancaria automática.
-- Las revisiones formales del presupuesto se realizan antes de comenzar sus trabajos. Los presupuestos adicionales después de iniciar ejecución quedan pendientes de ampliar.
-- Respaldos/restauración requiere instalación técnica explícita de control, permisos y agente. Está deshabilitado por defecto hasta completar esa preparación. La recuperación usa mantenimiento y dos identidades; no ofrece recuperación sin ventana ni backups de log.
-- Los reportes muestran estados actuales o movimientos según su fecha explícita; no reconstruyen una situación histórica completa ni calculan costos/rentabilidad.
-
-## Documentación del circuito
-
-- [Atención, evaluación y propuesta](docs/circuito-atencion-evaluacion.md).
-- [Adenda de presupuestos, ejecución y cobros](docs/ERS/ADENDA-v1.0-presupuestos-cobros.md).
-- [Probar decisiones, ejecución, cobros y entrega](docs/probar-decision-ejecucion-cobros.md).
-- [Reportes por rol y revisión de consistencia](docs/reportes-por-rol.md).
-- [Instalar y operar respaldos y restauración](docs/respaldos-restauracion.md).
-
-El esquema actual parte de una única migración inicial y no conserva compatibilidad con la base anterior. El lote Demo v3 se carga explícitamente; la instalación comercial no incluye atenciones ficticias. Respaldos utiliza una base de control instalada explícitamente mediante el agente, según su guía.
-
-La integración compatible de catálogo, clientes y vehículos se describe en [la guía de integración](docs/integracion-catalogo-maestros.md). Incluye la migración no destructiva de versiones de clientes/vehículos; no aplicar la migración `AjustarCatalogoActual` de la rama paralela sobre el circuito vigente.
-
-- [Hallazgos, adicionales, aceptación parcial y materiales del cliente](docs/hallazgos-adicionales-materiales.md): circuito operativo, responsabilidades, migración y pruebas de aceptación.
-
-## Instalación segura, nube y demostración
-
-- [Seguridad e instalación](docs/seguridad-instalacion.md)
-- [Respaldos en Azure](docs/azure-respaldos.md)
-- [Lote y guion de coloquio](docs/coloquio-demostracion.md)
-
-El lote se carga explícitamente con `scripts/Cargar-Demostracion.ps1`; no se ejecuta al iniciar Windows Forms. Las instalaciones nuevas requieren una contraseña inicial suministrada por el instalador.
-
-- [Criterio de fechas y zona horaria del taller](docs/fechas-y-zona-horaria.md).
-
-Estados y decisiones de limpieza: [estados del circuito actual](docs/estados-circuito-actual.md).
+Los editables de requisitos y casos de uso en `docs/ERS` se preservan para actualización académica. No se presentan los diagramas/exportaciones anteriores como descripción del esquema actual. El alcance operativo vigente y los límites se consultan en [la especificación implementada](docs/especificacion/alcance-implementado.md).

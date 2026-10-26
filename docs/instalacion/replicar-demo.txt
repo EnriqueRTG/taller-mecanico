@@ -1,0 +1,122 @@
+SGTM - REPLICAR LA DEMOSTRACION EN OTRA PC WINDOWS
+Version de referencia: main, esquema EsquemaInicialCircuitoActual, lote Demo v3.
+
+OBJETIVO
+Usar el mismo codigo, esquema y lote en PC y notebooks independientes.
+Base acordada: SGTM_DB_Demo. Base de instalacion real: SGTM_DB (sin lote).
+Cada copia local es independiente: los cambios de una PC no se sincronizan.
+Las fechas del lote son relativas al dia de carga; claves/fechas/contraseñas
+no deben compararse como una copia binaria exacta entre instalaciones.
+
+1. REQUISITOS
+- Windows, Visual Studio compatible con .NET 10 y desarrollo de escritorio .NET.
+- SDK compatible con global.json; comprobar con: dotnet --list-sdks
+- Git y SQL Server en ejecucion. En SSMS comprobar la conexion.
+- Para usar la misma cadena en todos: instancia localhost\SQLEXPRESS y
+  autenticacion de Windows. Si la instancia tiene otro nombre, ajustar Server.
+- No hace falta Azure para probar el circuito; respaldos quedan deshabilitados.
+
+2. DESCARGAR O ACTUALIZAR EL CODIGO (PowerShell)
+Si es la primera descarga, elegir carpeta y ejecutar:
+  git clone https://github.com/EnriqueRTG/taller-mecanico.git
+  cd taller-mecanico
+Si ya existe una copia, abrir PowerShell en esa carpeta y ejecutar:
+  git status
+Guardar cambios locales antes de continuar; no descartarlos automaticamente.
+Con archivos versionados sin cambios pendientes:
+  git fetch origin
+  git switch main
+  git pull --ff-only origin main
+  git rev-parse --short HEAD
+Comparar ese ultimo identificador entre equipos: debe ser la misma version.
+  dotnet build Taller/Taller.sln
+
+3. PREPARAR LA BASE DE DEMOSTRACION
+No iniciar todavia Windows Forms ni ejecutar Update-Database aparte.
+Si SGTM_DB_Demo no existe, el cargador la creara con permisos SQL suficientes.
+Si contiene el esquema/lote anterior y se decidio descartarlo: cerrar SGTM y
+eliminar SOLO SGTM_DB_Demo desde SSMS. Confirmar el nombre; esa eliminacion
+pierde sus registros. No eliminar SGTM_DB ni otras bases por confusion.
+Si ya cargo Demo v3 correctamente, NO repetir la carga: ir al paso 5.
+
+4. CREAR ESQUEMA Y CARGAR LOTE (misma ventana PowerShell, raiz del repositorio)
+Copiar los comandos siguientes, uno por uno:
+
+$env:SGTM_CONN = 'Server=localhost\SQLEXPRESS;Database=SGTM_DB_Demo;Integrated Security=True;Encrypt=True;TrustServerCertificate=True'
+Remove-Item Env:SGTM_ADMIN_INICIAL_PASSWORD -ErrorAction SilentlyContinue
+$claveDemo = Read-Host 'Clave Demo: 12 a 100 caracteres, mayuscula, minuscula, numero y simbolo' -AsSecureString
+$env:SGTM_DEMO_PASSWORD = [System.Net.NetworkCredential]::new('', $claveDemo).Password
+dotnet run --project Taller/Taller.Demostracion -- --cargar-demo
+
+Elegir y conservar la clave: sera la de las cuentas del lote. No compartirla
+por capturas ni subirla a Git. Puede acordarse la misma clave solo para Demo.
+El cargador crea la base/migracion y carga mediante servicios reales. Esperar:
+  Lote DEMO v3 completo: 19 clientes, 48 vehiculos y 48 atenciones...
+Catalogo: 157 conceptos activos y uno inactivo. No administra stock.
+Si hay error, conservar el mensaje y resolverlo antes de repetir.
+Si dice que ya existen registros, no insistir ni borrar tablas aisladas.
+Al terminar correctamente:
+Remove-Item Env:SGTM_DEMO_PASSWORD -ErrorAction SilentlyContinue
+Remove-Variable claveDemo -ErrorAction SilentlyContinue
+
+5. CONFIGURAR VISUAL STUDIO
+Abrir Taller/Taller.sln. Elegir Taller.Presentacion como proyecto de inicio.
+En Taller.Presentacion/Properties/launchSettings.json, dentro del perfil usado,
+agregar o combinar environmentVariables con estas claves:
+
+"environmentVariables": {
+  "SGTM_CONN": "Server=localhost\\SQLEXPRESS;Database=SGTM_DB_Demo;Integrated Security=True;Encrypt=True;TrustServerCertificate=True",
+  "Respaldos__Habilitado": "false"
+}
+
+Si el archivo no existe, crearlo con este contenido completo:
+{
+  "profiles": {
+    "Taller.Presentacion": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SGTM_CONN": "Server=localhost\\SQLEXPRESS;Database=SGTM_DB_Demo;Integrated Security=True;Encrypt=True;TrustServerCertificate=True",
+        "Respaldos__Habilitado": "false"
+      }
+    }
+  }
+}
+Conservar otras opciones propias si el perfil ya existia. No duplicar claves.
+Seleccionar ese perfil junto al boton Ejecutar. La variable de una terminal
+NO modifica un Visual Studio que ya estaba abierto. El perfil local no se
+versiona. En JSON se escribe \\; en la cadena PowerShell se escribe \.
+
+6. EJECUTAR Y COMPROBAR
+Presionar F5. Usar la clave elegida al cargar:
+  admin               Administrador
+  demo.recepcion      Administrativo
+  demo.tecnico        Tecnico
+Otros operativos: demo.recepciondos, demo.tecnicodos, demo.tecnicotres.
+demo.inactivo esta deshabilitado a proposito.
+Confirmar clientes, vehiculos, catalogo y atenciones. Se pueden crear usuarios
+nuevos desde admin; para el recorrido usar una atencion nueva/disponible.
+Una actividad ya reservada pertenece al tecnico que figura en su bandeja.
+
+Recorrido principal:
+Recepcion: alta de atencion -> tecnico: tomar y preparar informe/propuesta ->
+recepcion: informar y aceptar -> tecnico: tomar ejecucion, guardar y finalizar
+con conformidad -> recepcion: liquidar, cobrar, entregar con saldo cero.
+Pagar no entrega automaticamente; el retiro puede registrarse mas tarde.
+Para reportes del lote ampliar el periodo a seis meses cuando corresponda.
+
+En SSMS, actualizar Bases de datos y comprobar:
+USE SGTM_DB_Demo;
+SELECT MigrationId FROM dbo.__EFMigrationsHistory;
+SELECT COUNT(*) AS Clientes FROM dbo.Clientes;
+SELECT COUNT(*) AS Vehiculos FROM dbo.Vehiculos;
+SELECT COUNT(*) AS Atenciones FROM dbo.Atenciones;
+SELECT COUNT(*) AS Conceptos FROM dbo.Conceptos;
+Debe haber una migracion inicial y conteos 19, 48, 48 y 158 antes de operar.
+
+7. REPLICAR Y CONTINUAR
+Repetir los pasos en cada equipo con el mismo main. Para trabajo conjunto
+sobre la MISMA atencion, se requiere una base compartida; localhost no lo hace.
+El agente/Azure se configuran despues con su identidad, permisos y base de
+control. No habilitar respaldos por cambiar solamente una opcion visual.
+Guia completa e indice: docs/README.md. No se necesita otra migracion por
+reorganizar archivos de la solucion. No actualizar una base del esquema viejo.

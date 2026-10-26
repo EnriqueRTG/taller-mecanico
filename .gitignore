@@ -55,3 +55,6 @@ Desktop.ini
 *.cache
 *.dbmdl
 *.db
+
+# Perfil local de inicio de Visual Studio (conexiones por equipo)
+Taller/Taller.Presentacion/Properties/launchSettings.json

@@ -2,6 +2,8 @@ namespace Taller.Presentacion.Impresion;
 /// <summary>Interacción de lectura sobre el control WinForms: no modifica el documento ni la impresión.</summary>
 internal sealed class VistaPreviaNavegable : PrintPreviewControl
 {
+    [System.ComponentModel.Browsable(false)]
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public int TotalPaginas { get; set; } = 1;
     public event Action<int>? SolicitarZoom;
     public VistaPreviaNavegable()

@@ -9,6 +9,29 @@ namespace Taller.Pruebas;
 public sealed class DocumentosOperativosTests
 {
     [Fact]
+    public void PresupuestoParaClienteOmiteCamposInternosYSeccionesVacias()
+    {
+        var datos = new PresupuestoConsultaDto { IdPresupuesto = 7, IdAtencion = 12, Cliente = "Ana Pérez", Vehiculo = "AA111BB",
+            PersonaDecision = "Persona de contacto", MedioDecision = "Teléfono", Estado = EstadoPresupuesto.Aceptado,
+            Items = [new() { Descripcion = "Servicio acordado", Cantidad = 1, PrecioUnitario = 60 }] };
+        var texto = DocumentoOperativoExportador.TextoPresupuesto(datos);
+        var html = DocumentoOperativoExportador.Presupuesto(datos, new());
+        foreach (var documento in new[] { texto, html })
+        {
+            Assert.DoesNotContain("Persona de contacto", documento);
+            Assert.DoesNotContain("Medio:", documento);
+            Assert.DoesNotContain("OBSERVACIONES", documento);
+            Assert.DoesNotContain("Observaciones y condiciones", documento);
+            Assert.Contains("60,00", documento);
+            Assert.Contains("AA111BB", documento);
+        }
+        datos.Observaciones = "Incluye montaje";
+        Assert.Contains("Incluye montaje", DocumentoOperativoExportador.TextoPresupuesto(datos));
+        Assert.Contains("Incluye montaje", DocumentoOperativoExportador.Presupuesto(datos, new()));
+        Assert.Equal("Persona de contacto", datos.PersonaDecision); // Se conserva en el registro interno.
+    }
+
+    [Fact]
     public void PresupuestoConservaAlcanceImportesYIdentidadSinInterpretarHtml()
     {
         var datos = new PresupuestoConsultaDto { IdPresupuesto = 149, IdAtencion = 101, Cliente = "<script>cliente</script>", Vehiculo = "AA111BB", InformeTecnico = new DiagnosticoDetalleDto { FallaDetectada = "Respaldo del diagnóstico" }, Vigente = true, Estado = EstadoPresupuesto.PendienteRevisionTecnica,

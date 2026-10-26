@@ -81,6 +81,7 @@ public partial class FrmPrepararPropuesta : Form
     {
         if (cboConcepto.SelectedItem is ConceptoPropuestaDto c)
         {
+            nudCantidad.Value = 1;
             txtDescripcion.Text = c.Nombre;
             nudPrecio.Value = Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
         }
@@ -137,7 +138,7 @@ public partial class FrmPrepararPropuesta : Form
         try
         {
             int id = _revision != null ? await _servicio.RevisarSeleccionAsync(_revision.IdPresupuesto, _revision.Version, _items.ToList(), txtMotivo.Text) : await _servicio.CrearAdicionalAsync(new PropuestaAdicionalDto { IdAtencion = _atencion, Version = _version, IdHallazgo = _hallazgo, Motivo = txtMotivo.Text, Items = _items.ToList() });
-            MessageBox.Show(this, $"Propuesta {id:D6} preparada. Recepción debe comunicarla y registrar la decisión del cliente.");
+            MessageBox.Show(this, $"Atención {_atencion:D6} · Propuesta {id:D6} preparada. Recepción debe comunicarla y registrar la decisión del cliente.");
             DialogResult = DialogResult.OK;
         }
         catch (Exception ex)

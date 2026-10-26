@@ -16,6 +16,7 @@ public partial class FrmComprobantePagos : Form
     public FrmComprobantePagos(int id, CobroServicio servicio, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
         _id = id;
         _servicio = servicio;
         _empresa = empresa;

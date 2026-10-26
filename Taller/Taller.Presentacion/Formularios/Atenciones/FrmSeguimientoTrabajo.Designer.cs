@@ -34,7 +34,7 @@ partial class FrmSeguimientoTrabajo
             Padding = new Padding(12)
         };
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
@@ -267,13 +267,13 @@ partial class FrmSeguimientoTrabajo
         actualizar.Click += Actualizar;
         var imprimir = new Button
         {
-            Text = "Informe de intervención",
+            Text = "Informe / Imprimir / PDF",
             AutoSize = true
         };
         btnImprimirInforme = imprimir;
         imprimir.Click += Imprimir;
         acciones.Controls.Add(imprimir);
-        var exportar = new Button { Text = "Exportar avance HTML", AutoSize = true };
+        var exportar = new Button { Text = "Exportar HTML (opcional)", AutoSize = true };
         btnExportarAvance = exportar;
         exportar.Click += Exportar;
         acciones.Controls.Add(exportar);

@@ -26,8 +26,8 @@ public static class DocumentoOperativoExportador
         b.Append("<h2>Alcance e importes propuestos</h2><table><thead><tr><th>Solicitud / concepto</th><th>Cantidad</th><th>Aporta</th><th>Precio ARS</th><th>Subtotal ARS</th></tr></thead><tbody>");
         foreach (var i in d.Items)
             b.Append($"<tr><td>{(string.IsNullOrWhiteSpace(i.SolicitudDescripcion) ? "" : "<small>" + H(i.SolicitudDescripcion) + "</small><br>")}{H(i.Descripcion)}</td><td class='numero'>{i.Cantidad.ToString("N3", Cultura)}</td><td>{H(i.OrigenMaterial.ToString())}</td><td class='numero'>{N(i.PrecioUnitario)}</td><td class='numero'>{N(i.Subtotal)}</td></tr>");
-        b.Append($"</tbody></table><h2>Total propuesto: ARS {N(d.Total)}</h2><p class='aviso'>El presupuesto requiere aceptación del cliente antes de ejecutar. Se liquida lo autorizado y efectivamente realizado. Los materiales aportados por el cliente no se cobran como venta del taller.</p><h2>Observaciones y condiciones</h2><p class='texto'>{H(d.Observaciones)}</p>");
-        if (!string.IsNullOrWhiteSpace(d.PersonaDecision)) b.Append($"<h2>Decisión registrada</h2><p>Comunicada por: {H(d.PersonaDecision)} · Medio: {H(d.MedioDecision)}<br>Estado: {H(d.EstadoDescripcion)}</p>");
+        b.Append($"</tbody></table><h2>Total propuesto: ARS {N(d.Total)}</h2><p class='aviso'>El presupuesto requiere aceptación del cliente antes de ejecutar. Se liquida lo autorizado y efectivamente realizado. Los materiales aportados por el cliente no se cobran como venta del taller.</p>");
+        if (!string.IsNullOrWhiteSpace(d.Observaciones)) b.Append($"<h2>Observaciones y condiciones</h2><p class='texto'>{H(d.Observaciones)}</p>");
         if (d.InformeTecnico is { } informe) b.Append("<section style='break-before:page'><h2>Informe técnico de respaldo</h2>").Append(CuerpoDiagnostico(informe)).Append("</section>");
         return b.Append(Fin).ToString();
     }
@@ -54,7 +54,9 @@ public static class DocumentoOperativoExportador
     {
         var b = new StringBuilder($"PRESUPUESTO {d.IdPresupuesto:D6}\nAtención {d.IdAtencion:D6} · {d.Fecha:dd/MM/yyyy HH:mm}\nCliente: {d.Cliente}\nVehículo: {d.Vehiculo}\nEstado: {d.EstadoDescripcion} · {(d.Vigente ? "Vigente" : "Histórico")}\n\nALCANCE PROPUESTO\n\n");
         foreach (var i in d.Items) b.AppendLine($"{i.Descripcion}\n  Solicitud: {i.SolicitudDescripcion}\n  {i.Cantidad.ToString("N3", Cultura)} × {N(i.PrecioUnitario)} ARS = {N(i.Subtotal)} ARS · Aporta: {i.OrigenMaterial}\n");
-        b.AppendLine($"TOTAL PROPUESTO: ARS {N(d.Total)}\n\nOBSERVACIONES\n{d.Observaciones}\n\nDecisión comunicada por: {d.PersonaDecision} · Medio: {d.MedioDecision}\n\nRequiere aceptación previa. Se liquida lo autorizado y ejecutado. No acredita pagos.");
+        b.AppendLine($"TOTAL PROPUESTO: ARS {N(d.Total)}");
+        if (!string.IsNullOrWhiteSpace(d.Observaciones)) b.AppendLine($"\nOBSERVACIONES Y CONDICIONES\n{d.Observaciones}");
+        b.AppendLine("\nLa ejecución requiere aceptación del cliente. Se cobra lo autorizado y efectivamente realizado. No acredita pagos.");
         if (d.InformeTecnico is { } informe) b.AppendLine("\nINFORME TÉCNICO DE RESPALDO\n").AppendLine(TextoDiagnostico(informe));
         return b.ToString();
     }

@@ -511,7 +511,7 @@ public partial class FrmNuevaAtencion : Form
                 IdUsuarioRecepcion = usuario.Id, Solicitudes = editorSolicitudes.Solicitudes,
                 Kilometraje = editorSolicitudes.Kilometraje, ObservacionesRecepcion = editorSolicitudes.Observaciones
             });
-            MessageBox.Show(this, $"Atención {atencion.IdAtencion:D6} recibida. El técnico puede tomarla desde Preparación técnica.", "Ingreso registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(this, $"Atención {atencion.IdAtencion:D6} · Vehículo {_vehiculoSeleccionado.Dominio} recibida. El técnico puede tomarla desde Preparación técnica.", "Ingreso registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }

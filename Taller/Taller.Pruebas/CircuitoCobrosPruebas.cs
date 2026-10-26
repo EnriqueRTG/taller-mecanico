@@ -66,6 +66,28 @@ public sealed class CircuitoCobrosPruebas
         Assert.Contains("Retiro presencial", cerrada.Resumen);
     }
 
+    [Fact]
+    public async Task PagoYEntregaPuedenRealizarseEnMomentosDistintos()
+    {
+        using var c = new Caso();
+        await c.AceptarAsync(); await c.EjecutarAsync(); var documento = await c.LiquidarAsync();
+        Assert.False((await c.Cobros.ObtenerAsync(1)).PuedeRegistrarEntrega);
+        await c.Cobros.RegistrarPagoAsync(Caso.Pago(documento, documento.Total / 2)); await c.VersionesAsync();
+        var cuenta = await c.Cobros.ObtenerAsync(1);
+        Assert.False(cuenta.PuedeRegistrarEntrega);
+        await c.Cobros.RegistrarPagoAsync(Caso.Pago(cuenta.Comprobante!, cuenta.Comprobante!.Saldo)); await c.VersionesAsync();
+        c.Entrar(2); // Recepción vuelve a consultar después: el pago no cerró ni entregó.
+        cuenta = await c.Cobros.ObtenerAsync(1);
+        Assert.True(cuenta.PuedeRegistrarEntrega);
+        Assert.NotEqual(EstadoAtencion.Cerrada, cuenta.Estado);
+        Assert.True((await c.Cobros.ListarAsync()).Single(a => a.IdAtencion == 1).PuedeRegistrarEntrega);
+        Assert.All(cuenta.Comprobante!.Pagos, p => Assert.NotEmpty(p.DetalleMedios));
+        await c.Cobros.EntregarAsync(new RegistrarEntregaDto { IdAtencion = 1, Version = cuenta.VersionAtencion,
+            PersonaRetira = "Ana Pérez", ConformidadRecepcion = true }); await c.VersionesAsync();
+        Assert.False((await c.Cobros.ObtenerAsync(1)).PuedeRegistrarEntrega);
+        Assert.False((await c.Cobros.ListarAsync()).Single(a => a.IdAtencion == 1).PuedeRegistrarEntrega);
+    }
+
     private sealed class Caso : IDisposable
     {
         public TallerDbContext Db { get; }

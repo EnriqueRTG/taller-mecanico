@@ -9,6 +9,25 @@ namespace Taller.Pruebas;
 public sealed class DocumentosOperativosTests
 {
     [Fact]
+    public void LiquidacionYReciboDistinguenDeudaCobroYSaldosHistoricos()
+    {
+        var cuenta = new Taller.Aplicacion.DTOs.Cobros.ComprobanteDto { IdComprobante = 2, IdAtencion = 103, Cliente = "Cliente", Dominio = "AA000AA", Total = 200000, Pagado = 200000 };
+        var pago = new Taller.Aplicacion.DTOs.Cobros.PagoConsultaDto { IdPago = 5, Importe = 120000, SaldoPosterior = 80000,
+            DetalleMedios = [new() { Nombre = "Transferencia", Importe = 120000, Referencia = "OPERACION-01" }] };
+        var liquidacion = DocumentoCuentaExportador.Liquidacion(cuenta);
+        var recibo = DocumentoCuentaExportador.Recibo(cuenta, pago);
+        Assert.Contains("TOTAL LIQUIDADO: 200.000,00", liquidacion);
+        Assert.Contains("No acredita un pago", liquidacion);
+        Assert.Contains("IMPORTE DE ESTE COBRO: 120.000,00", recibo);
+        Assert.Contains("SALDO AL REGISTRAR ESTE COBRO: 80.000,00", recibo);
+        Assert.Contains("Transferencia: 120.000,00", recibo);
+        Assert.Contains("OPERACION-01", recibo);
+        Assert.Contains("no registra la entrega", recibo);
+        pago.Anulado = true; pago.MotivoAnulacion = "Registro duplicado";
+        Assert.Contains("NO COMPUTA COMO COBRO VIGENTE", DocumentoCuentaExportador.Recibo(cuenta, pago));
+    }
+
+    [Fact]
     public void PresupuestoParaClienteOmiteCamposInternosYSeccionesVacias()
     {
         var datos = new PresupuestoConsultaDto { IdPresupuesto = 7, IdAtencion = 12, Cliente = "Ana Pérez", Vehiculo = "AA111BB",

@@ -135,7 +135,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         try
         {
             await _servicio.PresentarAsync(d.IdPresupuesto, d.Version);
-            if (MessageBox.Show(this, "Presupuesto marcado como informado. ¿El cliente ya respondió y desea registrar su decisión ahora? Puede hacerlo después desde Registrar decisión.", "Presentación registrada", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+            if (MessageBox.Show(this, $"Atención {d.IdAtencion:D6} · Dominio {d.Vehiculo} · Presupuesto {d.IdPresupuesto:D6} marcado como informado. ¿El cliente ya respondió y desea registrar su decisión ahora? Puede hacerlo después desde Registrar decisión.", "Presentación registrada", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
             {
                 using var decision = new FrmDecisionPresupuesto(d.IdPresupuesto, _presupuestos);
                 decision.ShowDialog(this);

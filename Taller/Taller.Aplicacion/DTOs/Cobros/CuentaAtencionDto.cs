@@ -9,5 +9,7 @@ public sealed class CuentaAtencionDto
     public string Resumen { get; set; } = string.Empty;
     public List<ComprobanteItemDto> ItemsPorLiquidar { get; set; } = [];
     public decimal TotalPorLiquidar => ItemsPorLiquidar.Sum(x => x.Subtotal);
+    /// <summary>Orientación para la interfaz; EntregarAsync revalida la cuenta y su versión.</summary>
+    public bool PuedeRegistrarEntrega => (Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion) && Comprobante is { Saldo: 0 };
     public ComprobanteDto? Comprobante { get; set; }
 }

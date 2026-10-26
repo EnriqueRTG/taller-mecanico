@@ -4,10 +4,10 @@ partial class FrmRegistrarEntrega
     private Label lblResultado = null!;
     private void InitializeComponent()
     {
-        Text = "Registrar entrega"; Font = new Font("Segoe UI", 10); ClientSize = new Size(720, 390); MinimumSize = new Size(620, 390); StartPosition = FormStartPosition.CenterParent;
+        Text = "Registrar entrega"; Font = new Font("Segoe UI", 10); ClientSize = new Size(820, 440); MinimumSize = new Size(650, 440); StartPosition = FormStartPosition.CenterParent;
         var tabla = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(16), ColumnCount = 1, RowCount = 7 };
         tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        foreach (int alto in new[] { 55, 24, 36, 45, 24 }) tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, alto));
+        foreach (int alto in new[] { 100, 24, 36, 45, 24 }) tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, alto));
         tabla.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); tabla.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
         lblResultado = new Label { Name = "lblResultado", Dock = DockStyle.Fill };
         tabla.Controls.Add(lblResultado, 0, 0);

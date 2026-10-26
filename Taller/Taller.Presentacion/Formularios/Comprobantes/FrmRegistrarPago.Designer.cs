@@ -125,6 +125,8 @@ partial class FrmRegistrarPago
         FormClosing += AlCerrar;
         BackColor=Color.FromArgb(248,250,252);
         btnGuardar.BackColor=Color.FromArgb(30,64,175);btnGuardar.ForeColor=Color.White;btnGuardar.FlatStyle=FlatStyle.Flat;
+        foreach (var boton in new[] { btnAgregar, btnQuitar, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnGuardar);
         CancelButton=btnCerrar;btnCerrar.DialogResult=DialogResult.None;
         ResumeLayout(false);
     }

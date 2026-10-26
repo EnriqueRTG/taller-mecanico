@@ -94,6 +94,10 @@ public partial class FrmDecisionPresupuesto : Form
         try
         {
             await _servicio.DecidirAsync(new DecisionPresupuestoDto { PersonaDecision = txtPersona.Text, MedioDecision = cboMedio.SelectedItem?.ToString() ?? "", IdPresupuesto = _id, Version = _datos.Version, ItemsAceptados = _items.Where(x => x.Aceptar).Select(x => x.IdDetalle).ToList(), Observaciones = txtMotivo.Text });
+            string siguiente = aceptados == _items.Count ? "Aceptación completa registrada. Taller puede iniciar los trabajos autorizados."
+                : aceptados == 0 ? "Rechazo registrado. Recepción debe resolver la cuenta por lo efectivamente realizado y la entrega."
+                : "Selección parcial registrada. El técnico debe revisar la viabilidad y preparar una nueva propuesta; aún no autoriza trabajos.";
+            MessageBox.Show(this, $"Presupuesto {_id:D6} · {_datos.Resumen}\n{siguiente}", "Decisión registrada", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
         }
         catch (Exception ex)

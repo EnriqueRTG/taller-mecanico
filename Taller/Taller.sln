@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.9.12120.119
@@ -9,12 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Dominio", "Taller.Do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Infraestructura", "Taller.Infraestructura\Taller.Infraestructura.csproj", "{01F6802A-F24A-47AE-9513-0895F3B418B0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentacion", "Presentacion", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aplicacion y Dominio", "Aplicacion y Dominio", "{225FEEA5-518A-4600-943A-5475C709FD63}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infraestructura", "Infraestructura", "{1A174151-B47A-448B-8A79-008A7D9545BA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Aplicacion", "Taller.Aplicacion\Taller.Aplicacion.csproj", "{BD62F4EB-2901-4E7D-86A6-1EE30C83BE42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Pruebas", "Taller.Pruebas\Taller.Pruebas.csproj", "{33690F90-813F-4FD8-B2A0-1FCAE6E73047}"
@@ -24,6 +18,23 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Demostracion", "Taller.Demostracion\Taller.Demostracion.csproj", "{E3121E70-D299-4E5F-A1B2-95839066D693}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taller.Pruebas.Interfaz", "Taller.Pruebas.Interfaz\Taller.Pruebas.Interfaz.csproj", "{8E356E5B-CE7C-48BE-B136-41AA83A7E8BA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01 Sistema (cuatro capas)", "01 Sistema (cuatro capas)", "{2F96B0AF-DB60-46A9-8324-4344B30290A1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02 Herramientas", "02 Herramientas", "{2F96B0AF-DB60-46A9-8324-4344B30290A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03 Pruebas", "03 Pruebas", "{2F96B0AF-DB60-46A9-8324-4344B30290A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04 Documentacion", "04 Documentacion", "{2F96B0AF-DB60-46A9-8324-4344B30290A4}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+		..\docs\estructura-solucion.md = ..\docs\estructura-solucion.md
+		..\docs\entornos-demo-e-instalacion.md = ..\docs\entornos-demo-e-instalacion.md
+		..\docs\coloquio-demostracion.md = ..\docs\coloquio-demostracion.md
+		..\docs\circuito-principal-atencion.md = ..\docs\circuito-principal-atencion.md
+		..\docs\reportes-por-rol.md = ..\docs\reportes-por-rol.md
+		..\docs\estados-circuito-actual.md = ..\docs\estados-circuito-actual.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -136,10 +147,14 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{1EA5F2B1-02F4-4B7E-8D6C-41C1A78DE91A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{FAC21C46-02FC-451B-AE5A-19D3A93A6C1D} = {225FEEA5-518A-4600-943A-5475C709FD63}
-		{01F6802A-F24A-47AE-9513-0895F3B418B0} = {1A174151-B47A-448B-8A79-008A7D9545BA}
-		{BD62F4EB-2901-4E7D-86A6-1EE30C83BE42} = {225FEEA5-518A-4600-943A-5475C709FD63}
+		{1EA5F2B1-02F4-4B7E-8D6C-41C1A78DE91A} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
+		{FAC21C46-02FC-451B-AE5A-19D3A93A6C1D} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
+		{01F6802A-F24A-47AE-9513-0895F3B418B0} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
+		{BD62F4EB-2901-4E7D-86A6-1EE30C83BE42} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
+		{E3121E70-D299-4E5F-A1B2-95839066D693} = {2F96B0AF-DB60-46A9-8324-4344B30290A2}
+		{F0D7B01A-EC9C-428E-BCC4-7CE786F4C874} = {2F96B0AF-DB60-46A9-8324-4344B30290A2}
+		{33690F90-813F-4FD8-B2A0-1FCAE6E73047} = {2F96B0AF-DB60-46A9-8324-4344B30290A3}
+		{8E356E5B-CE7C-48BE-B136-41AA83A7E8BA} = {2F96B0AF-DB60-46A9-8324-4344B30290A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {09CAD1BC-1BAC-4C93-9BEF-575657332D18}

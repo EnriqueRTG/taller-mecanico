@@ -7,7 +7,7 @@
 - Contraseñas mediante PasswordHasher de Microsoft Identity; no se almacenan en texto ni se incluyen en la consulta de auditoría.
 - Cinco rechazos de credenciales por identidad normalizada dentro de 15 minutos bloquean nuevos intentos durante 15 minutos. El contador es SQL compartido entre estaciones. No se informa si la cuenta existe.
 - Auditoría de autenticaciones correctas/rechazadas en `EventosAcceso`, consultable exclusivamente por administrador (máximo 500 resultados por período). Los nombres no reconocidos no se guardan en claro; la clave del contador es SHA-256. El registro refleja intentos procesados; solicitudes ya bloqueadas o sintácticamente inválidas no generan nuevos eventos.
-- Sesión con 30 minutos de inactividad y ocho horas de duración máxima. Teclado, clics y rueda de la aplicación renuevan actividad; los temporizadores y consultas automáticas no la renuevan. Vencida, la presentación bloquea la navegación y las operaciones y solicita cerrar sesión para reingresar. Una operación ya iniciada termina con su tratamiento habitual.
+- Sesión sin vencimiento temporal: se conserva hasta cerrar sesión o salir de la aplicación. Los servicios revalidan usuario habilitado y rol persistido antes de autorizar operaciones. Al dejar el puesto sin supervisión, bloquear Windows o cerrar sesión. Las aprobaciones y la vigencia de planes de restauración mantienen sus verificaciones independientes.
 - Restauraciones con ensayo separado, comprobaciones de integridad, doble aprobación y coordinación SQL ya existentes. Credenciales de nube mediante identidad Entra, sin SAS ni claves en el catálogo de copias.
 
 ## Primera instalación

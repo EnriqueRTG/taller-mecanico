@@ -61,15 +61,6 @@ internal static class Program
         }
 
         var aplicacionContexto = scope.ServiceProvider.GetRequiredService<AplicacionContexto>();
-        var filtro = new Taller.Presentacion.Seguridad.ActividadSesion(scope.ServiceProvider.GetRequiredService<Taller.Aplicacion.Servicios.SesionUsuario>());
-        Application.AddMessageFilter(filtro);
-        try
-        {
-            Application.Run(aplicacionContexto);
-        }
-        finally
-        {
-            Application.RemoveMessageFilter(filtro);
-        }
+        Application.Run(aplicacionContexto);
     }
 }

@@ -15,34 +15,14 @@ namespace Taller.Aplicacion.Servicios;
 /// </remarks>
 public sealed class SesionUsuario
 {
-    private readonly TimeProvider _reloj;
     private Usuario? _usuario;
-    private DateTimeOffset _inicio, _actividad;
-    public SesionUsuario(TimeProvider? reloj = null) => _reloj = reloj ?? TimeProvider.System;
-    /// <summary>La actividad no renueva sesiones vencidas. Límite: 30 minutos inactiva u ocho horas totales.</summary>
-    public void RegistrarActividad()
-    {
-        if (UsuarioActual is not null)
-            _actividad = _reloj.GetUtcNow();
-    }
 
     /// <summary>
-    /// Obtiene el usuario actualmente autenticado.
+    /// Usuario autenticado hasta el cierre explícito de sesión o de la aplicación.
+    /// No vence por inactividad. Cada servicio revalida permisos y habilitación
+    /// de la cuenta antes de autorizar sus operaciones.
     /// </summary>
-    /// <value>
-    /// El usuario autenticado o <see langword="null"/> cuando
-    /// no existe una sesión activa.
-    /// </value>
-    public Usuario? UsuarioActual
-    {
-        get
-        {
-            var ahora = _reloj.GetUtcNow();
-            if (_usuario is not null && (ahora - _actividad >= TimeSpan.FromMinutes(30) || ahora - _inicio >= TimeSpan.FromHours(8)))
-                _usuario = null;
-            return _usuario;
-        }
-    }
+    public Usuario? UsuarioActual => _usuario;
 
     /// <summary>
     /// Indica si actualmente existe una sesión autenticada.
@@ -66,7 +46,6 @@ public sealed class SesionUsuario
     public void Iniciar(Usuario usuario)
     {
         ArgumentNullException.ThrowIfNull(usuario);
-        _inicio = _actividad = _reloj.GetUtcNow();
         _usuario = usuario;
     }
 

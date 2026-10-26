@@ -31,11 +31,6 @@ namespace Taller.Presentacion.Formularios.Principal
             pnlMenu = new Panel();
             pnlOpciones = new Panel();
             btnRespaldo = new Button();
-            relojSesion = new System.Windows.Forms.Timer(components)
-            {
-                Interval = 5000
-            };
-            relojSesion.Tick += RelojSesion_Tick;
             btnCatalogo = new Button();
             btnAuditoria = new Button
             {
@@ -534,7 +529,6 @@ namespace Taller.Presentacion.Formularios.Principal
         private Button btnInicio;
         private Button btnRespaldo;
         private Button btnAuditoria;
-        private System.Windows.Forms.Timer relojSesion;
         private Button btnCatalogo;
         private Button btnReportes;
         private Button btnComprobantes;

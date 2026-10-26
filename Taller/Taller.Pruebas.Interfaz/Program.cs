@@ -29,7 +29,7 @@ internal static class Program
         servicios.AddSingleton<IConfiguration>(config);
         servicios.AddLogging();
         servicios.AddAplicacion().AddInfraestructura(config).AddPresentacion();
-        using var proveedor=servicios.BuildServiceProvider();
+        using var proveedor=servicios.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
         foreach(int rol in new[]{1,2,3})
         {
             using var scope=proveedor.CreateScope();

@@ -52,9 +52,42 @@ internal static class Program
         VerificarEditorPresupuesto(proveedor);
         VerificarEjecucionYConsulta(proveedor);
         VerificarCobroRestanteYEntrega(proveedor);
+        VerificarContextoSeguimiento(proveedor);
         VerificarNavegacionDocumento();
         return 0;
     }
+    private static void VerificarContextoSeguimiento(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var f = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(1,
+            scope.ServiceProvider.GetRequiredService<SeguimientoTrabajoServicio>(), scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(),
+            scope.ServiceProvider.GetRequiredService<PresupuestoServicio>(), scope.ServiceProvider.GetRequiredService<EmpresaDocumentoDto>());
+        object Campo(string n) => f.GetType().GetField(n, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        void Aplicar() => f.GetType().GetMethod("ActualizarContexto", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [null, EventArgs.Empty]);
+        var datos = new Taller.Aplicacion.DTOs.Ejecuciones.SeguimientoTrabajoDto {
+            PuedeRegistrar = true, PuedePausar = true, Estado = Taller.Dominio.Enumeraciones.EstadoAtencion.EnEjecucion };
+        f.GetType().GetField("_datos", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(f, datos);
+        var tabs = (TabControl)Campo("tabs");
+        var panel = (TableLayoutPanel)Campo("panelContexto");
+        tabs.SelectedTab = tabs.TabPages["tabAvance"];
+        Aplicar();
+        if (panel.RowStyles[1].Height != 0) throw new InvalidOperationException("Avance no debe mostrar selector de operaciones.");
+        tabs.SelectedTab = tabs.TabPages["tabHallazgos"];
+        Aplicar();
+        if (panel.RowStyles[1].Height == 0 || ((Button)Campo("btnAdicional")).Enabled)
+            throw new InvalidOperationException("Hallazgo requiere alcance contextual y selección para adicional.");
+        tabs.SelectedTab = tabs.TabPages["tabMateriales"];
+        Aplicar();
+        if (panel.RowStyles[1].Height != 0 || ((Button)Campo("btnRecibir")).Enabled)
+            throw new InvalidOperationException("Materiales requiere seleccionar su fila.");
+        datos.PuedeRegistrar = false;
+        tabs.SelectedTab = tabs.TabPages["tabPausas"];
+        Aplicar();
+        if (panel.RowStyles[1].Height != 0 || !((Button)Campo("btnPausar")).Text.Contains("cliente") || ((Button)Campo("btnResolver")).Enabled)
+            throw new InvalidOperationException("Recepción solo debe registrar detención general del cliente.");
+        Console.WriteLine("Seguimiento: alcance contextual, selección obligatoria y detención administrativa explícita.");
+    }
+
     private static void VerificarFiltrosListados(IServiceProvider proveedor)
     {
         foreach (Type tipo in new[] {
@@ -147,6 +180,15 @@ internal static class Program
             formulario.ClientSize = new Size(ancho, 650); Disponer(formulario);
             VerificarDentroDelFormulario(formulario, formulario.Controls.Find("btnFinalizar", true).Single());
         }
+        tipo.GetField("_pausasActivas", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario,
+            new List<Taller.Aplicacion.DTOs.Ejecuciones.PausaConsultaDto> { new() { Id = 1, Motivo = "Detención del cliente" } });
+        tipo.GetMethod("AplicarPausas", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, null);
+        if (!grilla.ReadOnly || item.CantidadEjecutada != 1 || item.Estado != Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.EnCurso)
+            throw new InvalidOperationException("La pausa debe bloquear sin reemplazar la edición local.");
+        tipo.GetField("_pausasActivas", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario,
+            new List<Taller.Aplicacion.DTOs.Ejecuciones.PausaConsultaDto>());
+        tipo.GetMethod("AplicarPausas", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(formulario, null);
+        if (grilla.ReadOnly) throw new InvalidOperationException("La continuidad resuelta debe recuperar la edición propia.");
         sesion.Iniciar(new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId });
         using var bandeja = scope.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Ejecuciones.FrmTrabajosEnCurso>();
         using var seguimiento = new Taller.Presentacion.Formularios.Atenciones.FrmSeguimientoTrabajo(1,

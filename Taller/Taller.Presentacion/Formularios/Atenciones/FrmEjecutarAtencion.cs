@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.DTOs.Ejecuciones;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Enumeraciones;
@@ -14,6 +15,9 @@ public partial class FrmEjecutarAtencion : Form
     private EjecucionAtencionDto? _datos;
     private BindingList<EjecucionItemDto> _items = [];
     private bool _ocupado, _sucio, _cargando, _sincronizando;
+    private bool _consultandoPausas, _controlNoDisponible;
+    private List<PausaConsultaDto> _pausasActivas = [];
+    private string _ultimaAlerta = "";
     public FrmEjecutarAtencion(int id, EjecucionServicio servicio, SesionUsuario sesion, IServiceProvider proveedor)
     {
         InitializeComponent();
@@ -27,6 +31,8 @@ public partial class FrmEjecutarAtencion : Form
     {
         Taller.Presentacion.Estilos.DisposicionVentanas.AjustarAlAreaDisponible(this);
         await RecargarAsync();
+        await VigilarPausasAsync();
+        if (!IsDisposed) temporizadorPausas.Start();
     }
 
     private async Task RecargarAsync()
@@ -65,6 +71,7 @@ public partial class FrmEjecutarAtencion : Form
         {
             _cargando = false;
             tlpPrincipal.Enabled = true;
+            AplicarPausas();
         }
     }
 
@@ -141,7 +148,7 @@ public partial class FrmEjecutarAtencion : Form
     private void ActualizarConformidad(object? sender, EventArgs e)
     {
         bool propia = _datos?.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
-        bool resueltos = _items.Count > 0 && _items.All(i => i.Estado is EstadoEjecucionDetalle.Completado or EstadoEjecucionDetalle.Omitido);
+        bool resueltos = !_controlNoDisponible && _pausasActivas.Count == 0 && _items.Count > 0 && _items.All(i => i.Estado is EstadoEjecucionDetalle.Completado or EstadoEjecucionDetalle.Omitido);
         chkConformidad.Visible = propia && resueltos;
         btnFinalizar.Visible = propia && resueltos;
         chkConformidad.Enabled = propia && resueltos;
@@ -149,6 +156,71 @@ public partial class FrmEjecutarAtencion : Form
         btnFinalizar.Enabled = propia && resueltos && chkConformidad.Checked;
         if (btnFinalizar.Enabled) { Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnFinalizar); Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnGuardar); }
         else { btnFinalizar.BackColor = Color.FromArgb(226, 232, 240); btnFinalizar.ForeColor = Color.DimGray; }
+    }
+
+    private async void ActualizarSituacion(object? sender, EventArgs e)
+    {
+        if (_ocupado || _cargando) return;
+        if (_sucio && MessageBox.Show(this, "Actualizar reemplaza las ediciones sin guardar por los últimos datos registrados. ¿Continuar?",
+            "Actualizar situación", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+        await RecargarAsync();
+        await VigilarPausasAsync();
+    }
+
+    private async void ComprobarPausas(object? sender, EventArgs e) => await VigilarPausasAsync();
+
+    private async Task VigilarPausasAsync()
+    {
+        if (_consultandoPausas || _ocupado || _cargando || IsDisposed || Disposing) return;
+        _consultandoPausas = true;
+        try
+        {
+            // Consulta con contexto independiente: no descarta ni reemplaza las ediciones locales.
+            using var scope = _proveedor.CreateScope();
+            var seguimiento = await scope.ServiceProvider.GetRequiredService<SeguimientoTrabajoServicio>().ObtenerAsync(_id);
+            if (IsDisposed || Disposing || _ocupado) return;
+            _controlNoDisponible = false;
+            _pausasActivas = seguimiento.Pausas.Where(p => p.FechaResolucion == null).ToList();
+            AplicarPausas();
+            var firma = string.Join(",", _pausasActivas.Select(p => p.Id).OrderBy(i => i));
+            if (firma.Length > 0 && firma != _ultimaAlerta && Visible)
+            {
+                _ultimaAlerta = firma;
+                MessageBox.Show(this, "Existe una detención activa: " + string.Join("; ", _pausasActivas.Select(p => p.Motivo)) +
+                    "\nDetenga de forma segura el alcance indicado y coordine con recepción. No se reemplazaron los datos escritos en esta pantalla. Consulte Otras acciones → Gestionar pausas.",
+                    "Detención de trabajos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            if (firma.Length == 0) _ultimaAlerta = "";
+        }
+        catch (Exception)
+        {
+            if (!IsDisposed && !Disposing)
+            {
+                _controlNoDisponible = true;
+                AplicarPausas();
+            }
+        }
+        finally { _consultandoPausas = false; }
+    }
+
+    private void AplicarPausas()
+    {
+        bool propia = _datos?.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
+        bool general = _controlNoDisponible || _pausasActivas.Any(p => p.IdDetalle == null);
+        dgvItems.ReadOnly = !propia || general;
+        foreach (DataGridViewRow fila in dgvItems.Rows)
+        {
+            bool bloqueada = general || fila.DataBoundItem is EjecucionItemDto i && _pausasActivas.Any(p => p.IdDetalle == i.IdDetalle);
+            fila.ReadOnly = !propia || bloqueada;
+            fila.DefaultCellStyle.BackColor = !propia || bloqueada ? Color.FromArgb(241, 245, 249) : Color.White;
+        }
+        btnGuardar.Enabled = propia && !general;
+        btnTomar.Enabled = _datos?.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null && !general;
+        lblAviso.ForeColor = general || _pausasActivas.Count > 0 ? Color.Firebrick : SystemColors.ControlText;
+        lblAviso.Text = _controlNoDisponible ? "No se pudo verificar la continuidad. Se reintentará automáticamente; las ediciones se conservan."
+            : _pausasActivas.Count > 0 ? "DETENCIÓN ACTIVA: " + string.Join("; ", _pausasActivas.Select(p => p.Alcance + ": " + p.Motivo))
+            : "Solo trabajos autorizados. Guarde los avances; cerrar conserva la reserva. Control de pausas cada 10 segundos.";
+        ActualizarConformidad(null, EventArgs.Empty);
     }
 
     private void ConfirmarEstado(object? s, EventArgs e)
@@ -205,6 +277,8 @@ public partial class FrmEjecutarAtencion : Form
     private void MostrarOpciones(object? s, EventArgs e)
     {
         foreach (ToolStripItem item in menuOpciones.Items) item.Enabled = btnGuardar.Enabled;
+        // Permite consultar/resolver la pausa aunque la edición esté bloqueada.
+        foreach (ToolStripItem item in menuOpciones.Items) item.Enabled = !_controlNoDisponible;
         menuOpciones.Show(btnOtrasAcciones, new Point(0, btnOtrasAcciones.Height));
     }
     private void Hallazgos(object? s, EventArgs e) { _destinoSeguimiento = "tabHallazgos"; Seguimiento(s, e); }

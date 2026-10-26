@@ -96,7 +96,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         lblAyuda.Text = Fila is null ? "Seleccione un presupuesto. Los borradores se continúan en Preparación técnica. Las acciones dependen del estado y del rol."
             : Fila.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? "Selección parcial: el técnico debe comprobar su viabilidad. Luego recepción presenta la nueva versión y registra otra decisión. Aún no autoriza trabajos."
             : Fila.Estado == EstadoPresupuesto.Borrador ? "Borrador: el técnico debe continuarlo y enviarlo desde Preparación técnica antes de informar al cliente."
-            : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Recepción informa el alcance y los importes al cliente. Solicitar revisión devuelve los cambios al técnico sin autorizar trabajos."
+            : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Propuesta emitida: informe al cliente. Si detecta una falta o error, Pedir corrección técnica devuelve la propuesta al técnico; no modifica ni autoriza trabajos."
             : "Solicitar revisión conserva esta versión y pide otra al técnico; solo es posible sin ejecución ni liquidación. La ejecución requiere aceptación del cliente.";
         btnDecidir.Enabled = !_ocupado && recepcion && Fila is { Vigente: true, Tipo: TipoPresupuesto.Reparacion, Estado: EstadoPresupuesto.PendienteDecision };
         btnDecidir.Visible = recepcion && Fila is { Estado: EstadoPresupuesto.PendienteDecision, Vigente: true };

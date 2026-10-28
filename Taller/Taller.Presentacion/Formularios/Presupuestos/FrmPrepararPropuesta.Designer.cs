@@ -16,6 +16,7 @@ partial class FrmPrepararPropuesta
     private ComboBox cboConcepto = null!, cboOrigen = null!;
     private NumericUpDown nudCantidad = null!, nudPrecio = null!;
     private DataGridView dgvItems = null!;
+    private CheckBox chkCondiciones = null!;
     private Button btnAgregar = null!, btnQuitar = null!, btnGuardar = null!, btnCerrar = null!;
     private void InitializeComponent()
     {
@@ -24,7 +25,7 @@ partial class FrmPrepararPropuesta
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 7,
+            RowCount = 8,
             Padding = new Padding(12)
         };
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -34,6 +35,7 @@ partial class FrmPrepararPropuesta
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
         lblAyuda = new Label
         {
@@ -141,6 +143,8 @@ partial class FrmPrepararPropuesta
             MaxLength = 1000,
             PlaceholderText = "Justificación técnica de viabilidad, condiciones y motivo de la propuesta (obligatorio)"
         };
+        chkCondiciones = new CheckBox { Name = "chkCondiciones", Text = "Se modifican condiciones del acuerdo: requiere nueva aceptación", Dock = DockStyle.Fill, AutoSize = true };
+        chkCondiciones.CheckedChanged += (_, _) => ActualizarTotal();
         var acciones = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
@@ -169,7 +173,8 @@ partial class FrmPrepararPropuesta
         tlpPrincipal.Controls.Add(dgvItems, 0, 3);
         tlpPrincipal.Controls.Add(lblTotal, 0, 4);
         tlpPrincipal.Controls.Add(Campo("Justificación técnica de la propuesta (obligatoria)", txtMotivo), 0, 5);
-        tlpPrincipal.Controls.Add(acciones, 0, 6);
+        tlpPrincipal.Controls.Add(chkCondiciones, 0, 6);
+        tlpPrincipal.Controls.Add(acciones, 0, 7);
         tlpPrincipal.AutoScroll = true;
         dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;

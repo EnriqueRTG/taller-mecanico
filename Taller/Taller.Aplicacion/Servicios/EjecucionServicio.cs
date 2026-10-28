@@ -63,7 +63,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             var detalles = propuestas.SelectMany(p => p.Detalles).ToList();
             if (a.Estado != EstadoAtencion.EnEjecucion || a.IdTecnicoEnActividad != null || await circuito.ObtenerPorAtencionAsync(id) != null)
                 throw new ValidacionException("La ejecución no está disponible para tomar.");
-            var motivo = AutorizacionOperativa.Texto(observaciones, detalles.Any(d => d.AceptadoPorCliente != true));
+            var motivo = AutorizacionOperativa.Texto(observaciones, detalles.Any(d => d.AceptadoPorCliente != true) && propuestas.Any(p => !p.AlcanceValidado));
             a.IdTecnicoEnActividad = u.Id;
             a.ActividadTecnica = ActividadTecnica.Ejecucion;
             foreach (var p in propuestas)

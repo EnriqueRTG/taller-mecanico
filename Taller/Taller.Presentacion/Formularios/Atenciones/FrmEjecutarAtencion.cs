@@ -58,7 +58,7 @@ public partial class FrmEjecutarAtencion : Form
             btnCompletar.Enabled = propia;
             btnGuardar.Enabled = btnFinalizar.Enabled = btnLiberar.Enabled = propia;
             btnTomar.Enabled = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
-            lblAviso.Text = _datos.TieneExclusiones ? "El cliente excluyó ítems. Antes de tomar confirme que el alcance restante es viable y explique su revisión abajo." : "Revise el alcance antes de tomar. Solo se muestran ítems aceptados. Cerrar conserva su reserva.";
+            lblAviso.Text = _datos.TieneExclusiones ? "Se muestran solo los ítems elegidos por el cliente. La selección ya pasó por revisión técnica; inicie la ejecución para registrar avances." : "Revise el alcance antes de tomar. Solo se muestran ítems aceptados. Cerrar conserva su reserva.";
             chkConformidad.Enabled = propia;
             chkConformidad.Checked = false;
             _sucio = false;

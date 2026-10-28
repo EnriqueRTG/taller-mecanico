@@ -54,6 +54,8 @@ public partial class FrmPrepararPropuesta : Form
             else
                 lblAyuda.Text = inspeccion ? "Ampliación de inspección: presupueste solo servicios necesarios para determinar la causa, fuera del alcance habitual. Recepción debe informar y obtener autorización antes de realizarlos. La reparación se presupuesta por separado." : "Adicional independiente: no sustituye lo autorizado. Incluya solo trabajos/materiales nuevos. Recepción comunicará esta propuesta; no se ejecuta hasta su aceptación.";
             if (inspeccion) _catalogo = _catalogo.Where(c => c.Tipo == TipoConcepto.Servicio).ToList();
+            chkCondiciones.Visible = _revision != null;
+            tlpPrincipal.RowStyles[6].Height = _revision != null ? 30 : 0;
             dgvItems.DataSource = _items;
             Filtrar(s, e);
             ActualizarTotal();
@@ -120,7 +122,7 @@ public partial class FrmPrepararPropuesta : Form
         }
     }
 
-    private bool ConservaSeleccion => _revision != null && _revision.Items.Any(i => !i.Aceptar)
+    private bool ConservaSeleccion => !chkCondiciones.Checked && _revision != null && _revision.Items.Any(i => !i.Aceptar)
         && _items.Count == _revision.Items.Count(i => i.Aceptar)
         && _items.All(i => _revision.Items.Any(d => d.Aceptar && d.IdConcepto == i.IdConcepto && d.IdSolicitudAtencion == i.IdSolicitudAtencion
             && d.Descripcion == i.Descripcion && d.Cantidad == i.Cantidad && d.PrecioUnitario == i.PrecioUnitario && d.OrigenMaterial == i.OrigenMaterial));
@@ -148,7 +150,7 @@ public partial class FrmPrepararPropuesta : Form
         tlpPrincipal.Enabled = false;
         try
         {
-            int id = _revision != null ? await _servicio.RevisarSeleccionAsync(_revision.IdPresupuesto, _revision.Version, _items.ToList(), txtMotivo.Text) : await _servicio.CrearAdicionalAsync(new PropuestaAdicionalDto { IdAtencion = _atencion, Version = _version, IdHallazgo = _hallazgo, Motivo = txtMotivo.Text, Items = _items.ToList() });
+            int id = _revision != null ? await _servicio.RevisarSeleccionAsync(_revision.IdPresupuesto, _revision.Version, _items.ToList(), txtMotivo.Text, chkCondiciones.Checked) : await _servicio.CrearAdicionalAsync(new PropuestaAdicionalDto { IdAtencion = _atencion, Version = _version, IdHallazgo = _hallazgo, Motivo = txtMotivo.Text, Items = _items.ToList() });
             MessageBox.Show(this, $"Atención {_atencion:D6} · Presupuesto {id:D6}\n" + (_revision != null && id == _revision.IdPresupuesto ? "Selección del cliente validada sin cambios. Puede continuar con los trabajos autorizados; si es una inspección, continúe desde Preparación técnica." : "Nueva propuesta preparada. Recepción debe comunicarla y registrar la decisión del cliente."));
             DialogResult = DialogResult.OK;
         }

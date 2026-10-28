@@ -23,3 +23,5 @@ Usar [actualización y Demo v4](../instalacion/actualizacion-coloquio.md). Las c
 | Reportes | Comparar detalle, indicadores, gráfico, HTML/CSV/PDF. Si hay Resto, su composición/valores aparecen en metodología. |
 
 El cierre con interrupción y el inventario no forman parte de esta entrega. Los cargos se calculan desde cantidad efectivamente ejecutada y precio acordado, no desde el precio actual del catálogo. No se afirma que la compilación sustituya la aceptación visual ni la prueba en dos equipos.
+
+Si cambian condiciones del acuerdo aunque los ítems sean iguales, marcar Se modifican condiciones del acuerdo y describirlas en la justificación: la propuesta vuelve a recepción para otra aceptación. La justificación de viabilidad sin cambios solo documenta la revisión técnica.

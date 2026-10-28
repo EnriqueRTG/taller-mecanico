@@ -246,7 +246,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
         }
     }
 
-    public async Task<int> RevisarSeleccionAsync(int id, byte[] version, List<ItemPropuestaDto> items, string justificacion)
+    public async Task<int> RevisarSeleccionAsync(int id, byte[] version, List<ItemPropuestaDto> items, string justificacion, bool condicionesModificadas = false)
     {
         try
         {
@@ -264,7 +264,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var seleccion = p.Detalles.Where(d => d.AceptadoPorCliente == true).ToList();
             // Solo una selección parcial real del cliente puede autorizarse sin otra decisión.
             // Cambiar importe, cantidad, descripción, origen o solicitud exige una propuesta nueva.
-            bool mismaSeleccion = seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
+            bool mismaSeleccion = !condicionesModificadas && seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
                 && p.FechaDecision.HasValue && p.IdUsuarioDecision.HasValue
                 && items.Count == seleccion.Count
                 && items.Select(i => (i.IdConcepto, i.IdSolicitudAtencion)).Distinct().Count() == items.Count

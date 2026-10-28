@@ -432,6 +432,7 @@ public sealed class IntegracionSqlPruebas
             item.Estado = EstadoEjecucionDetalle.Completado;
         }
 
+        e.ConformidadTecnica = true;
         await ejec.GuardarAsync(e, true);
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
         var cuenta = await cobro.ObtenerAsync(a.IdAtencion);
@@ -439,7 +440,8 @@ public sealed class IntegracionSqlPruebas
         cuenta = await cobro.ObtenerAsync(a.IdAtencion);
         Assert.Equal(150, cuenta.Comprobante!.Total);
         Assert.Equal(2, cuenta.Comprobante.Items.Count);
-        Assert.False((await ps.ObtenerAsync(p.IdPresupuesto)).Vigente);
+        Assert.Equal(p.IdPresupuesto, revisado);
+        Assert.True((await ps.ObtenerAsync(p.IdPresupuesto)).Vigente);
         Assert.True((await ps.ObtenerAsync(revisado)).Vigente);
         Assert.True((await ps.ObtenerAsync(adicional)).Vigente);
         Assert.Single(await db.Set<HallazgoAtencion>().ToListAsync());

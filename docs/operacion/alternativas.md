@@ -74,3 +74,5 @@ SQL conserva claves externas sin borrado en cascada, restricciones de textos, ca
 ## Verificación
 
 Preparar la base siguiendo [entornos](../instalacion/entornos.md). Las pruebas SQL ejercitan el recorrido selección parcial → hallazgo → adicional → material del cliente → resolución → ejecución → liquidación con rowversion nativa. Las pruebas de reglas verifican aceptación/autorización, permisos, pausas y cantidades. Repetir manualmente con dos roles, cierre/reapertura y documentos de varias páginas; comprobar que la pausa administrativa se avisa también directamente al taller.
+
+Si cambian condiciones del acuerdo aunque los ítems sean iguales, marcar Se modifican condiciones del acuerdo y describirlas en la justificación: la propuesta vuelve a recepción para otra aceptación. La justificación de viabilidad sin cambios solo documenta la revisión técnica.

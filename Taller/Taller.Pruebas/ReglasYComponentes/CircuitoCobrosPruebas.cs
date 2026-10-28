@@ -498,6 +498,7 @@ public sealed class CircuitoCobrosPruebas
     [InlineData("Cantidad")]
     [InlineData("Descripcion")]
     [InlineData("Origen")]
+    [InlineData("Condiciones")]
     public async Task ModificarSeleccion_NoReutilizaLaAutorizacionDelCliente(string cambio)
     {
         using var c = new Caso();
@@ -511,7 +512,7 @@ public sealed class CircuitoCobrosPruebas
         if (cambio == "Cantidad") item.Cantidad += 1;
         if (cambio == "Descripcion") item.Descripcion += " modificado";
         if (cambio == "Origen") { item.OrigenMaterial = OrigenMaterial.Cliente; item.PrecioUnitario = 0; }
-        var nuevo = await c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, p.Version, [item], "Se modifica la propuesta y debe consultarse al cliente");
+        var nuevo = await c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, p.Version, [item], "Se modifica la propuesta y debe consultarse al cliente", condicionesModificadas: cambio == "Condiciones");
         await c.VersionesAsync();
         Assert.NotEqual(p.IdPresupuesto, nuevo);
         Assert.Equal(EstadoPresupuesto.PendientePresentacion, (await c.Presupuestos.ObtenerAsync(nuevo)).Estado);
@@ -543,6 +544,10 @@ public sealed class CircuitoCobrosPruebas
         Assert.Single((await c.Ejecucion.ObtenerAsync(1)).Items);
         Assert.Contains(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(), h => h.Accion == "SeleccionClienteValidada" && h.IdUsuario == 1);
         await Assert.ThrowsAsync<ValidacionException>(() => c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, guardado.Version, seleccion, "Reintento"));
+        var ejecucion = await c.Ejecucion.ObtenerAsync(1);
+        await c.Ejecucion.TomarAsync(1, ejecucion.Version, "");
+        await c.VersionesAsync();
+        Assert.Equal(1, (await c.Ejecucion.ObtenerAsync(1)).IdTecnico);
         c.Entrar(2);
         await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.PresentarAsync(validado, guardado.Version));
     }

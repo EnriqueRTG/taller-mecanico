@@ -48,6 +48,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             _configurando = false;
             OperacionEnCurso = false;
             pnlFiltros.Enabled = flpAcciones.Enabled = true;
+            CargarEstados();
             ConfigurarPeriodo();
             Invalidar();
         }
@@ -56,6 +57,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     private sealed record Opcion(TipoReporte Tipo, string Nombre);
     private void ConfigurarPeriodo()
     {
+        lblEstado.Text = (cboTipo.SelectedItem as Opcion)?.Tipo == TipoReporte.ActividadTecnica ? "Acción" : "Estado";
         bool periodo = (cboTipo.SelectedItem as Opcion)?.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica);
         dtpDesde.Enabled = dtpHasta.Enabled = periodo;
         lblMetodo.Text = periodo ? "El período utiliza la fecha del registro indicada en cada reporte. Presione Generar para consultar." : "Situación actual completa, incluyendo registros antiguos. Este reporte no utiliza filtro de fechas.";
@@ -79,13 +81,23 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     {
         if (_configurando)
             return;
-        _configurando = true;
-        cboEstado.Items.Clear();
-        cboEstado.Items.Add("Todos");
-        cboEstado.SelectedIndex = 0;
-        _configurando = false;
+        CargarEstados();
         ConfigurarPeriodo();
         Invalidar();
+    }
+
+    private void CargarEstados()
+    {
+        _configurando = true;
+        try
+        {
+            cboEstado.Items.Clear();
+            cboEstado.Items.Add("Todos");
+            if (cboTipo.SelectedItem is Opcion opcion)
+                foreach (var estado in ReporteServicio.EstadosPara(opcion.Tipo)) cboEstado.Items.Add(estado);
+            cboEstado.SelectedIndex = 0;
+        }
+        finally { _configurando = false; }
     }
 
     private async void BtnGenerar_Click(object? sender, EventArgs e)
@@ -99,19 +111,6 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             flpAcciones.Enabled = false;
             Cursor = Cursors.WaitCursor;
             _documento = await _servicio.GenerarAsync(new SolicitudReporteDto { Tipo = opcion.Tipo, Desde = dtpDesde.Value.Date, Hasta = dtpHasta.Value.Date, Busqueda = txtBuscar.Text, Estado = cboEstado.SelectedItem?.ToString() ?? "Todos" });
-            // Actualiza opciones sin cambiar el filtro elegido ni regenerar con parámetros distintos.
-            _configurando = true;
-            string estado = cboEstado.SelectedItem?.ToString() ?? "Todos";
-            cboEstado.Items.Clear();
-            cboEstado.Items.Add("Todos");
-            foreach (var valor in _documento.EstadosDisponibles)
-                cboEstado.Items.Add(valor);
-            // Conserva un filtro elegido aunque el nuevo período no contenga ese estado.
-            if (estado != "Todos" && !cboEstado.Items.Contains(estado))
-                cboEstado.Items.Add(estado);
-            cboEstado.SelectedItem = estado;
-
-            _configurando = false;
             dgvDetalle.DataSource = _documento.Registros.Select(x => new { x.Codigo, Atencion = x.IdAtencion, x.Fecha, x.Descripcion, x.Responsable, Estado = ReporteServicio.Legible(x.Estado), x.Cantidad, x.Importe, x.ImporteAceptado }).ToList();
             dgvDetalle.ClearSelection();
             txtResumen.Text = string.Join("   |   ", _documento.Indicadores.Select(x => x.Nombre + ": " + x.Valor)) + Environment.NewLine + _documento.Recomendacion + Environment.NewLine + _documento.Metodologia;

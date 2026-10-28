@@ -55,6 +55,24 @@ public sealed class ReportesPruebas
         public void Dispose() => Db.Dispose();
     }
     [Fact]
+    public async Task OpcionesDeEstadoExistenSinFilasYNoDependenDelPeriodo()
+    {
+        using var c = new Caso();
+        foreach (var tipo in Enum.GetValues<TipoReporte>())
+        {
+            var opciones = ReporteServicio.EstadosPara(tipo);
+            Assert.NotEmpty(opciones);
+            var vacio = await c.Generar(tipo, "SIN-COINCIDENCIAS");
+            Assert.Equal(opciones, vacio.EstadosDisponibles);
+            Assert.Empty(vacio.Registros);
+        }
+        Assert.Contains("En preparación técnica", ReporteServicio.EstadosPara(TipoReporte.Atenciones));
+        Assert.Contains("Cancelada", ReporteServicio.EstadosPara(TipoReporte.Atenciones));
+        Assert.Contains("Completado", ReporteServicio.EstadosPara(TipoReporte.ConceptosRealizados));
+        Assert.DoesNotContain("No Iniciado", ReporteServicio.EstadosPara(TipoReporte.ConceptosRealizados));
+    }
+
+    [Fact]
     public async Task GraficoConResto_IdentificaCadaCategoriaYConservaTodosLosRegistros()
     {
         using var c = new Caso();
@@ -101,7 +119,8 @@ public sealed class ReportesPruebas
         var completo = await c.Generar(TipoReporte.Presupuestos);
         var filtrado = await c.Generar(TipoReporte.Presupuestos, estado: "Aceptado parcialmente");
         var vacio = await c.Generar(TipoReporte.Presupuestos, busqueda: "ZZZ-SIN-RESULTADOS");
-        Assert.Equal(2, completo.EstadosDisponibles.Count);
+        Assert.Equal(ReporteServicio.EstadosPara(TipoReporte.Presupuestos), completo.EstadosDisponibles);
+        Assert.Contains("Borrador", completo.EstadosDisponibles);
         Assert.Equal(completo.EstadosDisponibles.ToArray(), filtrado.EstadosDisponibles.ToArray());
         Assert.Equal(completo.EstadosDisponibles.ToArray(), vacio.EstadosDisponibles.ToArray());
         Assert.Empty(vacio.Registros);

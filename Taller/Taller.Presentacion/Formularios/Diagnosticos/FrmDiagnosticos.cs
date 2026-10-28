@@ -19,6 +19,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
     public FrmDiagnosticos(EvaluacionServicio servicio, DiagnosticoServicio diagnosticos, SesionUsuario sesion, IServiceProvider proveedor)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.ValoresGrilla.Aplicar(dgvDatos);
         _proveedor = proveedor;
         _servicio = servicio;
         _diagnosticos = diagnosticos;

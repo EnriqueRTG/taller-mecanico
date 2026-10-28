@@ -85,11 +85,11 @@ partial class FrmDiagnosticos
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colIdAtencion", DataPropertyName = "IdAtencion", HeaderText = "Atención", FillWeight = 65, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCliente", DataPropertyName = "Cliente", HeaderText = "Cliente", FillWeight = 130, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colVehiculo", DataPropertyName = "Vehiculo", HeaderText = "Vehículo", FillWeight = 110, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
-        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTipoSolicitud", DataPropertyName = "TipoSolicitud", HeaderText = "Solicitud", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTipoSolicitud", DataPropertyName = "TipoSolicitud", HeaderText = "Tipo de solicitud", ToolTipText = "Clasificación del motivo de ingreso, no del avance del trabajo.", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colMotivo", DataPropertyName = "Motivo", HeaderText = "Motivo", FillWeight = 180, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "Fecha", HeaderText = "Último movimiento", FillWeight = 105, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" } });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTecnico", DataPropertyName = "Tecnico", HeaderText = "Reserva", FillWeight = 100, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
-        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFinalizada", DataPropertyName = "Finalizada", HeaderText = "Finalizada", FillWeight = 65, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFinalizada", DataPropertyName = "Finalizada", HeaderText = "Preparación finalizada", ToolTipText = "Indica si la evaluación técnica terminó; no significa que el vehículo fue entregado.", FillWeight = 100, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         btnTrabajar.Text = "Tomar y evaluar";
         btnTrabajar.AutoSize = true;
         btnTrabajar.Height = 34;

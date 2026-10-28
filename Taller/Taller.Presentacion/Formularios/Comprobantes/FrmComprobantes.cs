@@ -16,6 +16,7 @@ public partial class FrmComprobantes : Form, IFormularioConOperacion
     public FrmComprobantes(CobroServicio servicio, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.ValoresGrilla.Aplicar(dgvDatos);
         _servicio = servicio;
         _empresa = empresa;
     }

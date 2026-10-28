@@ -16,6 +16,7 @@ public partial class FrmComprobantePagos : Form
     public FrmComprobantePagos(int id, CobroServicio servicio, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
+        Taller.Presentacion.Estilos.ValoresGrilla.Aplicar(dgvPagos);
         Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
         Button[] orden = [btnEmitir, btnPago, btnEntregar, btnImprimir, btnRecibo, btnActualizar, btnAnular, btnCerrar];
         for (int i = 0; i < orden.Length; i++) flpAcciones.Controls.SetChildIndex(orden[i], i);
@@ -153,7 +154,7 @@ public partial class FrmComprobantePagos : Form
         {
             var cuenta = await _servicio.ObtenerAsync(_id);
             if (cuenta.Comprobante is { } d)
-                ImpresionDocumento.Mostrar(this, TextoDocumentos.Liquidacion(d), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Liquidacion-" + d.Numero, d.Fecha));
+                ImpresionComercial.Mostrar(this, Taller.Aplicacion.Reportes.DocumentoCuentaExportador.LiquidacionEstructurada(d), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Liquidacion-" + d.Numero, d.Fecha));
         });
     }
 
@@ -165,7 +166,7 @@ public partial class FrmComprobantePagos : Form
         {
             var cuenta = await _servicio.ObtenerAsync(_id);
             if (cuenta.Comprobante is { } d && d.Pagos.SingleOrDefault(p => p.IdPago == seleccionado.IdPago)is { } p)
-                ImpresionDocumento.Mostrar(this, TextoDocumentos.Recibo(d, p), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Recibo-" + p.Numero, p.Fecha));
+                ImpresionComercial.Mostrar(this, Taller.Aplicacion.Reportes.DocumentoCuentaExportador.ReciboEstructurado(d, p), _empresa, Taller.Aplicacion.Reportes.DocumentoReporteExportador.NombreArchivo("Recibo-" + p.Numero, p.Fecha));
         });
     }
 

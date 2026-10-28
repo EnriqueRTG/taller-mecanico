@@ -89,7 +89,7 @@ partial class FrmPresupuestos
         cboEstado.Items.AddRange(new object[] { "Todos", "Por presentar", "Borradores", "Esperando decisión", "Revisión técnica de selección" });
         cboEstado.SelectedIndexChanged += Filtrar;
         dgvDatos.Columns.Add(new DataGridViewCheckBoxColumn { Name = "colVigente", DataPropertyName = "Vigente", HeaderText = "Vigente", FillWeight = 60, ReadOnly = true });
-        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAceptado", DataPropertyName = "TotalAceptado", HeaderText = "Aceptado", FillWeight = 90, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAceptado", DataPropertyName = "TotalAceptado", HeaderText = "Autorizado ARS", FillWeight = 90, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         dgvDatos.SelectionChanged += Seleccion;
         dgvDatos.AutoGenerateColumns = false;
         dgvDatos.AllowUserToAddRows = false;
@@ -107,10 +107,10 @@ partial class FrmPresupuestos
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colIdAtencion", DataPropertyName = "IdAtencion", HeaderText = "Atención", FillWeight = 60, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCliente", DataPropertyName = "Cliente", HeaderText = "Cliente", FillWeight = 150, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colVehiculo", DataPropertyName = "Vehiculo", HeaderText = "Vehículo", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
-        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTipo", DataPropertyName = "TipoDescripcion", HeaderText = "Tipo", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTipo", DataPropertyName = "TipoDescripcion", HeaderText = "Tipo de propuesta", ToolTipText = "Propuesta de trabajo, inspección adicional o adicional de reparación.", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colEstado", DataPropertyName = "EstadoDescripcion", HeaderText = "Estado", FillWeight = 150, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "Fecha", HeaderText = "Último movimiento", FillWeight = 115, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" } });
-        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTotal", DataPropertyName = "Total", HeaderText = "Total", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
+        dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTotal", DataPropertyName = "Total", HeaderText = "Propuesto ARS", FillWeight = 90, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
         btnValidarSeleccion = new Button
         {
             Name = "btnValidarSeleccion",

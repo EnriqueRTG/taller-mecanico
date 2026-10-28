@@ -26,7 +26,7 @@ public partial class FrmConsultarPropuesta : Form
     }
     private void Imprimir(object? s, EventArgs e)
     {
-        try { Taller.Presentacion.Impresion.ImpresionDocumento.Mostrar(this, Taller.Aplicacion.Reportes.DocumentoOperativoExportador.TextoPresupuesto(_datos), _empresa, NombreArchivo); }
+        try { Taller.Presentacion.Impresion.ImpresionComercial.Mostrar(this, Taller.Aplicacion.Reportes.DocumentoOperativoExportador.PresupuestoEstructurado(_datos), _empresa, NombreArchivo); }
         catch (Exception ex) { Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Imprimir presupuesto"); }
     }
     private void Cerrar(object? s, EventArgs e) => Close();

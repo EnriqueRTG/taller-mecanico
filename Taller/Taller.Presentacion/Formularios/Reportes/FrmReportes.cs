@@ -69,6 +69,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         dgvDetalle.DataSource = null;
         txtResumen.Clear();
         pnlGrafico.Invalidate();
+        btnExportar.Visible = btnCsv.Visible = btnImprimir.Visible = false;
         btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = false;
         lblCantidad.Text = "Configure los filtros y genere el documento.";
     }
@@ -116,6 +117,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             txtResumen.Text = string.Join("   |   ", _documento.Indicadores.Select(x => x.Nombre + ": " + x.Valor)) + Environment.NewLine + _documento.Recomendacion + Environment.NewLine + _documento.Metodologia;
             lblMetodo.Text = _documento.Alcance + " · " + _documento.Filtros;
             lblCantidad.Text = $"{_documento.Registros.Count} registros · generado {_documento.Generado:dd/MM/yyyy HH:mm:ss} · gráfico en {_documento.UnidadGrafico}";
+            btnExportar.Visible = btnCsv.Visible = btnImprimir.Visible = true;
             btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = true;
             CboGrafico_SelectedIndexChanged(null, EventArgs.Empty);
         }

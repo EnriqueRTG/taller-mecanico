@@ -20,7 +20,7 @@ Remove-Item Env:SGTM_DEMO_PASSWORD
 
 Elegir mínimo 12 caracteres con mayúsculas, minúsculas, número y símbolo, hasta 100. La credencial se usa únicamente en este entorno académico. No se imprime ni se incluye en Git. Si existe una variable `SGTM_ADMIN_INICIAL_PASSWORD` de una instalación anterior, retirarla antes de cargar para que el administrador inicial de esta base utilice la contraseña del lote.
 
-El cargador debe terminar indicando `Lote DEMO v3 completo`. Si falla, no continúe operando con un lote incompleto; capture el error. El comando puede crear la base si la identidad SQL tiene permiso. No use el nombre de la base real ni renombre una copia real para pasar esta protección.
+El cargador debe terminar indicando `Lote DEMO v4 completo`. Si falla, no continúe operando con un lote incompleto; capture el error. El comando puede crear la base si la identidad SQL tiene permiso. No use el nombre de la base real ni renombre una copia real para pasar esta protección.
 
 ## Contenido
 
@@ -44,7 +44,7 @@ Los primeros 16 marcadores se repiten en grupos posteriores, con diferentes usua
 | DEMO-004 | Propuesta con inspección extraordinaria ya autorizada y realizada | Comunicación al cliente |
 | DEMO-005 | Presupuesto presentado | Registrar aceptación o rechazo |
 | DEMO-006 | Presupuesto rechazado tras inspección autorizada | Cobrar solo inspección realizada, no reparación rechazada |
-| DEMO-007 | Selección parcial | Revisión técnica antes de nueva aceptación |
+| DEMO-007 | Selección parcial | Revisión técnica: validar selección exacta o reformular para otra aceptación |
 | DEMO-008 | Alcance aceptado | Iniciar ejecución |
 | DEMO-009 | Ejecución en curso | Registrar avances y completar |
 | DEMO-010 | Hallazgo bloqueante y adicional | Presentar adicional y resolver causa de pausa |
@@ -74,6 +74,6 @@ Configure el perfil F5 con `SGTM_CONN` hacia `SGTM_DB_Demo`, mantenimiento hacia
 
 Tras verificar el lote, cree un respaldo completo de `SGTM_DB_Demo` desde SSMS y consérvelo como punto de partida. Antes de restaurarlo para otra práctica, cierre la aplicación y confirme explícitamente el destino Demo. No restaure ese archivo sobre su base real. Conserve además el código y el identificador de la migración para saber qué versión corresponde al respaldo.
 
-## Lote v3 y precios
+## Lote v4 y precios
 
-El lote v3 se construye íntegramente en una base nueva y usa solicitudes individuales, conceptos coherentes con cada motivo y precios de referencia del catálogo. Incluye inspecciones autorizadas realizadas, un rechazo posterior, ejecución en curso, cierres parciales/interrupciones en grupos posteriores y un pago total aún pendiente de entrega. No crea atenciones actuales en Abierta, PendienteDiagnostico ni Pausada. Ver [estados](../arquitectura/estados-circuito-actual.md), [catálogo Demo](catalogo-demo.md) y [entornos](../instalacion/entornos.md). Los importes y resultados cuantitativos de reportes del lote anterior ya no son valores de aceptación del lote nuevo. La base existente no se modifica al actualizar main.
+El lote v4 se construye íntegramente en una base nueva y usa solicitudes individuales, conceptos coherentes con cada motivo y precios de referencia del catálogo. Incluye inspecciones autorizadas realizadas, un rechazo posterior, ejecución en curso, selección validada sin cambios y trabajos completados y un pago total aún pendiente de entrega. No crea atenciones actuales en Abierta, PendienteDiagnostico ni Pausada. Ver [estados](../arquitectura/estados-circuito-actual.md), [catálogo Demo](catalogo-demo.md) y [entornos](../instalacion/entornos.md). Los importes y resultados cuantitativos de reportes del lote anterior ya no son valores de aceptación del lote nuevo. La base existente no se modifica al actualizar main.

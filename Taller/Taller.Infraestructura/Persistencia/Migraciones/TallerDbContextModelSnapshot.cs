@@ -1113,7 +1113,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         {
                             t.HasCheckConstraint("CK_Detalles_MaterialCliente", "[OrigenMaterial] IN (N'Taller', N'Cliente') AND [CantidadRecibidaCliente] >= 0 AND [CantidadRecibidaCliente] <= [Cantidad] AND ([OrigenMaterial] <> N'Cliente' OR [PrecioUnitario] = 0) AND ([MaterialClienteConforme] = 0 OR ([OrigenMaterial] = N'Cliente' AND [CantidadRecibidaCliente] > 0 AND [IdTecnicoMaterial] IS NOT NULL AND [FechaRecepcionMaterial] IS NOT NULL))");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_Avance", "(\n    [EstadoEjecucion] IN (N'NoIniciado', N'Omitido')\n    AND [CantidadEjecutada] = 0\n)\nOR\n(\n    [EstadoEjecucion] IN (N'EnCurso', N'Parcial')\n    AND [CantidadEjecutada] < [Cantidad]\n)\nOR\n(\n    [EstadoEjecucion] = N'Completado'\n    AND [CantidadEjecutada] = [Cantidad]\n)");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_Avance", "(\n    [EstadoEjecucion] = N'NoIniciado'\n    AND [CantidadEjecutada] = 0\n)\nOR\n(\n    [EstadoEjecucion] = N'EnCurso'\n    AND [CantidadEjecutada] < [Cantidad]\n)\nOR\n(\n    [EstadoEjecucion] = N'Completado'\n    AND [CantidadEjecutada] = [Cantidad]\n)");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_Cantidad", "[Cantidad] > 0");
 
@@ -1121,9 +1121,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_Descripcion", "LEN(LTRIM(RTRIM([Descripcion]))) > 0");
 
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_EstadoEjecucion", "[EstadoEjecucion] IN (\n    N'NoIniciado',\n    N'EnCurso',\n    N'Parcial',\n    N'Completado',\n    N'Omitido'\n)");
-
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_Justificacion", "[EstadoEjecucion] NOT IN (N'Parcial', N'Omitido')\nOR (\n    [ObservacionesEjecucion] IS NOT NULL\n    AND LEN(LTRIM(RTRIM([ObservacionesEjecucion]))) > 0\n)");
+                            t.HasCheckConstraint("CK_PresupuestoDetalles_EstadoEjecucion", "[EstadoEjecucion] IN (\n    N'NoIniciado',\n    N'EnCurso',\n    N'Completado'\n)");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_PrecioUnitario", "[PrecioUnitario] >= 0");
 

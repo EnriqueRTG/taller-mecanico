@@ -36,8 +36,6 @@ partial class FrmEjecutarAtencion
         btnLiberar.Name = "btnLiberar";
         btnFinalizar = new Button();
         btnFinalizar.Name = "btnFinalizar";
-        btnInterrumpir = new Button();
-        btnInterrumpir.Name = "btnInterrumpir";
         btnCerrar = new Button();
         btnCerrar.Name = "btnCerrar";
         SuspendLayout();
@@ -72,7 +70,7 @@ partial class FrmEjecutarAtencion
         dgvItems.Dock = DockStyle.Fill;
         var notas = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
         notas.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
-        notas.Controls.Add(new Label { Text = "Resumen de intervención / motivo si termina con interrupción", Dock = DockStyle.Fill }, 0, 0);
+        notas.Controls.Add(new Label { Text = "Observaciones y resultado de la intervención", Dock = DockStyle.Fill }, 0, 0);
         notas.Controls.Add(txtObservaciones, 0, 1);
         tlpPrincipal.Controls.Add(notas, 0, 3);
         txtObservaciones.Dock = DockStyle.Fill;
@@ -104,7 +102,7 @@ partial class FrmEjecutarAtencion
         txtObservaciones.Multiline = true;
         txtObservaciones.MaxLength = 1000;
         txtObservaciones.ScrollBars = ScrollBars.Vertical;
-        txtObservaciones.PlaceholderText = "Revisión del alcance, resultado del trabajo o motivo de interrupción.";
+        txtObservaciones.PlaceholderText = "Revisión del alcance, resultado del trabajo o observaciones del avance.";
         txtObservaciones.TextChanged += TextoCambiado;
         btnTomar.Text = "Iniciar ejecución";
         btnTomar.AutoSize = true;
@@ -129,10 +127,6 @@ partial class FrmEjecutarAtencion
         btnFinalizar.Height = 34;
         btnFinalizar.Click += Finalizar;
         flpAcciones.Controls.Add(btnFinalizar);
-        btnInterrumpir.Text = "Terminar con interrupción";
-        btnInterrumpir.AutoSize = true;
-        btnInterrumpir.Height = 34;
-        btnInterrumpir.Click += Interrumpir;
 
         btnSeguimiento = new Button
         {
@@ -177,20 +171,19 @@ partial class FrmEjecutarAtencion
         menuOpciones.Items.Add("Registrar material del cliente", null, Materiales);
         menuOpciones.Items.Add(new ToolStripSeparator());
         menuOpciones.Items.Add("Dejar disponible para otro técnico", null, Liberar);
-        menuOpciones.Items.Add("Terminar con interrupción (excepción)", null, Interrumpir);
         btnOtrasAcciones = new Button { Name = "btnOtrasAcciones", Text = "Otras acciones…", AutoSize = true, Height = 34 };
         btnOtrasAcciones.Click += MostrarOpciones;
         flpAcciones.Controls.Add(btnOtrasAcciones);
         flpAcciones.Controls.SetChildIndex(btnCerrar, flpAcciones.Controls.Count - 1);
         Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnOtrasAcciones);
+        foreach (var boton in new[] { btnTomar, btnGuardar, btnLiberar, btnSeguimiento, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
         Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnTomar);
         flpAcciones.AutoScroll = true;
         var ayuda = new ToolTip(components) { AutoPopDelay = 20000 };
-        ayuda.SetToolTip(dgvItems, "Completado aplica toda la cantidad autorizada. Alcanzar esa cantidad también marca Completado. En curso admite cero mientras se trabaja. Parcial es un cierre incompleto y exige motivo; Omitido exige cantidad cero y motivo. Guardar hace visible el avance a recepción.");
+        ayuda.SetToolTip(dgvItems, "Completado aplica toda la cantidad autorizada. Alcanzar esa cantidad también marca Completado. En curso admite cero mientras se trabaja. Guardar hace visible el avance a recepción.");
         ayuda.SetToolTip(chkConformidad, "Confirma, bajo responsabilidad del técnico, que comprobó el resultado final. Solo se requiere al finalizar normalmente; no para guardar avances.");
-        ayuda.SetToolTip(txtObservaciones, "Resumen general opcional al guardar avances. Obligatorio al terminar con interrupción. Las causas de cada tarea parcial u omitida se escriben en la columna Motivo / registro técnico.");
+        ayuda.SetToolTip(txtObservaciones, "Resumen general opcional de los avances y de la comprobación final. Si falta material, guarde el avance y registre una pausa.");
         ayuda.SetToolTip(btnLiberar, "Conserva los avances guardados y deja la ejecución disponible para otro técnico. Cerrar la ventana conserva la reserva.");
-        foreach (var boton in new[] { btnTomar, btnGuardar, btnLiberar, btnInterrumpir, btnSeguimiento, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(boton);
         Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnFinalizar);
         ResumeLayout(false);
     }
@@ -209,7 +202,6 @@ partial class FrmEjecutarAtencion
     private Button btnGuardar = null!;
     private Button btnLiberar = null!;
     private Button btnFinalizar = null!;
-    private Button btnInterrumpir = null!;
     private Button btnSeguimiento = null!;
     private Button btnCerrar = null!;
 }

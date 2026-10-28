@@ -7,7 +7,7 @@ using Taller.Dominio.Enumeraciones;
 using Taller.Presentacion.Errores;
 
 namespace Taller.Presentacion.Formularios.Presupuestos;
-/// <summary>El técnico prepara el alcance viable; recepción deberá presentarlo y registrar nueva aceptación.</summary>
+/// <summary>Valida la selección exacta del cliente o prepara una reformulación que requiere nueva aceptación.</summary>
 public partial class FrmPrepararPropuesta : Form
 {
     private readonly int _atencion;
@@ -42,17 +42,18 @@ public partial class FrmPrepararPropuesta : Form
             var expediente = await _servicio.ObtenerAsync(_atencion);
             _version = expediente.Version;
             bool inspeccion = expediente.Estado == EstadoAtencion.EnEvaluacionTecnica;
-            if (inspeccion) _catalogo = _catalogo.Where(c => c.Tipo == TipoConcepto.Servicio).ToList();
             if (_presupuesto is int id)
             {
                 _revision = await _presupuestos.ObtenerAsync(id);
                 if (_revision.Estado != EstadoPresupuesto.PendienteRevisionTecnica || !_revision.Vigente)
                     throw new InvalidOperationException("La selección ya no espera revisión.");
+                inspeccion = _revision.EsInspeccion;
                 _items = new(_revision.Items.Where(i => i.Aceptar).Select(i => new ItemPropuestaDto { IdSolicitudAtencion = i.IdSolicitudAtencion, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList());
-                lblAyuda.Text = "Selección solicitada por el cliente. Revise dependencias, quite o agregue tareas y justifique la viabilidad. Se conservará el original y se requerirá una nueva aceptación. Solicitud: " + _revision.Observaciones;
+                lblAyuda.Text = "Selección solicitada por el cliente. Revise dependencias, quite o agregue tareas y justifique la viabilidad. Sin cambios, su validación habilita el trabajo sin otra aceptación. Si modifica el alcance se enviará otra propuesta a recepción. Solicitud: " + _revision.Observaciones;
             }
             else
                 lblAyuda.Text = inspeccion ? "Ampliación de inspección: presupueste solo servicios necesarios para determinar la causa, fuera del alcance habitual. Recepción debe informar y obtener autorización antes de realizarlos. La reparación se presupuesta por separado." : "Adicional independiente: no sustituye lo autorizado. Incluya solo trabajos/materiales nuevos. Recepción comunicará esta propuesta; no se ejecuta hasta su aceptación.";
+            if (inspeccion) _catalogo = _catalogo.Where(c => c.Tipo == TipoConcepto.Servicio).ToList();
             dgvItems.DataSource = _items;
             Filtrar(s, e);
             ActualizarTotal();
@@ -119,7 +120,17 @@ public partial class FrmPrepararPropuesta : Form
         }
     }
 
-    private void ActualizarTotal() => lblTotal.Text = $"Total propuesto: {_items.Sum(i => i.Subtotal):N2} ARS · Materiales del cliente sin cargo de venta.";
+    private bool ConservaSeleccion => _revision != null && _revision.Items.Any(i => !i.Aceptar)
+        && _items.Count == _revision.Items.Count(i => i.Aceptar)
+        && _items.All(i => _revision.Items.Any(d => d.Aceptar && d.IdConcepto == i.IdConcepto && d.IdSolicitudAtencion == i.IdSolicitudAtencion
+            && d.Descripcion == i.Descripcion && d.Cantidad == i.Cantidad && d.PrecioUnitario == i.PrecioUnitario && d.OrigenMaterial == i.OrigenMaterial));
+
+    private void ActualizarTotal()
+    {
+        lblTotal.Text = $"Total propuesto: {_items.Sum(i => i.Subtotal):N2} ARS · Materiales del cliente sin cargo de venta.";
+        btnGuardar.Text = ConservaSeleccion ? "Validar selección del cliente" : "Enviar nueva propuesta a recepción";
+        btnQuitar.Visible = _items.Count > 0;
+    }
     private void CambiarOrigen(object? s, EventArgs e)
     {
         nudPrecio.Enabled = cboOrigen.SelectedIndex != 1;
@@ -131,14 +142,14 @@ public partial class FrmPrepararPropuesta : Form
     {
         if (_ocupado)
             return;
-        if (MessageBox.Show(this, "¿Confirmar alcance técnico y enviarlo a recepción para presentación?", "Preparar propuesta", MessageBoxButtons.YesNo) != DialogResult.Yes)
+        if (MessageBox.Show(this, ConservaSeleccion ? "¿Confirma que la selección del cliente es viable sin modificar conceptos, cantidades, precios ni condiciones? No requerirá otra aceptación." : "¿Confirmar el nuevo alcance y enviarlo a recepción para que el cliente lo acepte?", "Preparar propuesta", MessageBoxButtons.YesNo) != DialogResult.Yes)
             return;
         _ocupado = true;
         tlpPrincipal.Enabled = false;
         try
         {
             int id = _revision != null ? await _servicio.RevisarSeleccionAsync(_revision.IdPresupuesto, _revision.Version, _items.ToList(), txtMotivo.Text) : await _servicio.CrearAdicionalAsync(new PropuestaAdicionalDto { IdAtencion = _atencion, Version = _version, IdHallazgo = _hallazgo, Motivo = txtMotivo.Text, Items = _items.ToList() });
-            MessageBox.Show(this, $"Atención {_atencion:D6} · Propuesta {id:D6} preparada. Recepción debe comunicarla y registrar la decisión del cliente.");
+            MessageBox.Show(this, $"Atención {_atencion:D6} · Presupuesto {id:D6}\n" + (_revision != null && id == _revision.IdPresupuesto ? "Selección del cliente validada sin cambios. Puede continuar con los trabajos autorizados; si es una inspección, continúe desde Preparación técnica." : "Nueva propuesta preparada. Recepción debe comunicarla y registrar la decisión del cliente."));
             DialogResult = DialogResult.OK;
         }
         catch (Exception ex)

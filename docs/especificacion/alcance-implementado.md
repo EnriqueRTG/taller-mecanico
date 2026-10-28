@@ -13,13 +13,13 @@ Este documento describe el comportamiento vigente. Los DOCX académicos de `../E
 
 ## Alternativas
 
-- Selección parcial: queda pendiente de revisión técnica. Se elabora una versión viable nueva y se solicita otra aceptación. No autoriza ejecución prematuramente.
+- Selección parcial: queda pendiente de revisión técnica. Si el técnico valida exactamente lo elegido, queda aceptada sin otra comunicación obligatoria. Si modifica el alcance, genera una propuesta nueva para otra aceptación. La selección por sí sola no habilita ejecución.
 - Corrección de propuesta: recepción solicita corrección sobre una propuesta formalizada, vigente y sin ejecución, con las restricciones de reserva/liquidación. No equivale a editar importes ni a aceptar por el cliente.
 - Rechazo: no autoriza tareas rechazadas. Una inspección previamente autorizada y efectivamente realizada puede tener cargo; sin cargos se justifica liquidación cero, sin pago ficticio.
 - Inspección extraordinaria: tiene su propio presupuesto limitado a servicios y aceptación previa; se registra en Inspecciones autorizadas antes de la propuesta de reparación.
 - Hallazgo en ejecución: informe puntual, pausa por alcance si impide continuar y presupuesto adicional independiente cuando corresponde. No reescribe lo ya aceptado. Aceptar un adicional no resuelve automáticamente una pausa.
 - Material del cliente: repuesto/consumible a precio de venta cero, recepción y conformidad técnica antes de utilizarse. Los servicios los ofrece el taller. No supone compras/inventario del negocio.
-- Liberar actividad conserva avances guardados. Interrumpir exige causa y cantidades/omisiones justificadas; se cobra lo efectivamente realizado.
+- Liberar actividad conserva avances guardados. Una cantidad parcial sigue EnCurso. No se permite el cierre definitivo con trabajos incompletos.
 - Anular un cobro conserva su recibo marcado, usuario/motivo y recompone el saldo antes de la entrega. No devuelve dinero por un banco.
 
 ## Documentos, seguridad y consultas
@@ -30,10 +30,10 @@ Los siete reportes aplican alcance por rol, filtros, indicadores, gráficos y de
 
 ## Fuera del alcance actual
 
-ABM de catálogo desde formularios, inventario, compras/proveedores, reposición por mínimos, turnos/capacidad, integración fiscal/bancaria, anticipos, financiación y devolución bancaria automática. Los respaldos reales requieren configuración local/SQL y, para nube, identidad/contenedor Azure; disponer del formulario no significa que ese entorno ya esté instalado.
+Cierre con interrupción, ABM de catálogo desde formularios, inventario, compras/proveedores, reposición por mínimos, turnos/capacidad, integración fiscal/bancaria, anticipos, financiación y devolución bancaria automática. Los respaldos reales requieren configuración local/SQL y, para nube, identidad/contenedor Azure; disponer del formulario no significa que ese entorno ya esté instalado.
 
 ## Esquema y evidencia
 
-Una migración inicial, EsquemaInicialCircuitoActual, crea el modelo vigente. No existe una cadena de conversión de bases anteriores. Atención es el expediente principal; no se agrega una orden de trabajo paralela. Se preservan claves/rowversion y documentos asociados; las pausas se representan por alcance, no por el antiguo estado general Pausada.
+EsquemaInicialCircuitoActual crea el modelo y SimplificarEjecucionTresEstados lo acota a tres estados de ejecución. No existe una cadena de conversión de bases anteriores. Atención es el expediente principal; no se agrega una orden de trabajo paralela. Se preservan claves/rowversion y documentos asociados; las pausas se representan por alcance, no por el antiguo estado general Pausada.
 
 Las pruebas de reglas/componentes, SQL aislado y Windows/STA están en los proyectos de pruebas. La revisión visual del circuito y de impresión se realiza en la instalación de presentación. Ver [estados](../arquitectura/estados-circuito-actual.md), [alternativas](../operacion/alternativas.md) y [reportes](../reportes/reportes-por-rol.md).

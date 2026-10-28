@@ -33,7 +33,7 @@ public partial class FrmDecisionPresupuesto : Form
             _datos = await (_servicio ?? throw new InvalidOperationException("Seleccione una propuesta real.")).ObtenerAsync(_id);
             if (!_datos.Vigente || _datos.Estado != EstadoPresupuesto.PendienteDecision)
                 throw new InvalidOperationException("La propuesta no está esperando una decisión.");
-            lblResumen.Text = $"Presupuesto {_id:D6} · {_datos.Resumen}\nRevise el presupuesto con el cliente. Todas las marcas: aceptación completa. Quitar marcas solicita revisión técnica; no autoriza una reparación parcial.";
+            lblResumen.Text = $"Presupuesto {_id:D6} · {_datos.Resumen}\nRevise el presupuesto con el cliente. Todas las marcas: aceptación completa. Al quitar marcas, el cliente autoriza esa selección si el técnico confirma su viabilidad sin modificarla.";
             _items = new BindingList<DecisionItemDto>(_datos.Items);
             dgvItems.DataSource = _items;
             ActualizarTotal();
@@ -86,7 +86,7 @@ public partial class FrmDecisionPresupuesto : Form
             return;
         dgvItems.EndEdit();
         int aceptados = _items.Count(i => i.Aceptar);
-        string confirmacion = aceptados == _items.Count ? "¿Registrar la aceptación completa del presupuesto? Habilita los trabajos acordados." : aceptados == 0 ? "¿Registrar el rechazo completo? No se autorizan los trabajos propuestos." : "¿Solicitar revisión técnica de la selección parcial? Aún no autoriza trabajos y requerirá nueva aceptación.";
+        string confirmacion = aceptados == _items.Count ? "¿Registrar la aceptación completa del presupuesto? Habilita los trabajos acordados." : aceptados == 0 ? "¿Registrar el rechazo completo? No se autorizan los trabajos propuestos." : "¿Registrar que el cliente autoriza esta selección, condicionada a su viabilidad técnica? Si el técnico la valida sin cambios no se pedirá otra aceptación.";
         if (MessageBox.Show(this, confirmacion, "Registrar decisión", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             return;
         _ocupado = true;
@@ -96,7 +96,7 @@ public partial class FrmDecisionPresupuesto : Form
             await _servicio.DecidirAsync(new DecisionPresupuestoDto { PersonaDecision = txtPersona.Text, MedioDecision = cboMedio.SelectedItem?.ToString() ?? "", IdPresupuesto = _id, Version = _datos.Version, ItemsAceptados = _items.Where(x => x.Aceptar).Select(x => x.IdDetalle).ToList(), Observaciones = txtMotivo.Text });
             string siguiente = aceptados == _items.Count ? "Aceptación completa registrada. Taller puede iniciar los trabajos autorizados."
                 : aceptados == 0 ? "Rechazo registrado. Recepción debe resolver la cuenta por lo efectivamente realizado y la entrega."
-                : "Selección parcial registrada. El técnico debe revisar la viabilidad y preparar una nueva propuesta; aún no autoriza trabajos.";
+                : "Selección parcial registrada. El técnico debe validar la viabilidad. Sin cambios habilita los trabajos; una reformulación requiere nueva aceptación.";
             MessageBox.Show(this, $"Presupuesto {_id:D6} · {_datos.Resumen}\n{siguiente}", "Decisión registrada", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
         }

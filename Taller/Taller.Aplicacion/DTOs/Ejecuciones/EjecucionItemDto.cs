@@ -10,7 +10,6 @@ public sealed class EjecucionItemDto
     public EstadoEjecucionDetalle Estado { get; set; } = EstadoEjecucionDetalle.NoIniciado;
     public string EstadoDescripcion => Estado switch {
         EstadoEjecucionDetalle.NoIniciado => "No iniciado", EstadoEjecucionDetalle.EnCurso => "En curso",
-        EstadoEjecucionDetalle.Parcial => "Finalizado parcial", EstadoEjecucionDetalle.Completado => "Completado",
-        EstadoEjecucionDetalle.Omitido => "Omitido", _ => Estado.ToString() };
+        EstadoEjecucionDetalle.Completado => "Completado", _ => Estado.ToString() };
     public string? Observaciones { get; set; }
 }

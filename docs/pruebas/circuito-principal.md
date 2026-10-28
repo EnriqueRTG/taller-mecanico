@@ -3,7 +3,7 @@
 ## Preparar la rama en Windows
 
 1. Guardar cambios locales, descargar la versión actual y abrir `Taller/Taller.sln` con el SDK indicado por global.json.
-2. Preparar una base nueva siguiendo [entornos e instalación](../instalacion/entornos.md). No actualizar ni restaurar sobre ella el esquema anterior. La única migración es `EsquemaInicialCircuitoActual`.
+2. Preparar una base nueva siguiendo [entornos e instalación](../instalacion/entornos.md). No actualizar ni restaurar sobre ella el esquema anterior. El esquema incluye `EsquemaInicialCircuitoActual` y `SimplificarEjecucionTresEstados`.
 3. Para el coloquio ejecutar el cargador Demo antes de abrir la aplicación. Para instalación real usar inicialización mínima y cuentas propias.
 4. Configurar la misma conexión en Visual Studio y en las herramientas. Reconstruir y ejecutar.
 
@@ -30,7 +30,7 @@ Usar cuentas activas de Administrativo y Técnico. El rol Administrador administ
 | Liberar y tomar con otra cuenta técnica | Continúa el avance; historial y autoría final identifican a cada participante |
 | Intentar tomar/guardar una actividad ajena | Rechaza la operación |
 | Finalizar problema sin conclusión o sin ítems/motivo | No finaliza |
-| Finalizar con inspecciones autorizadas todavía pendientes | Exige indicar realizados u omitidos con justificación |
+| Finalizar con inspecciones autorizadas todavía pendientes | Exige completar todas las inspecciones autorizadas |
 | Finalizar servicio definido con ítems y sin diagnóstico | Presupuesto real relacionado a atención, sin diagnóstico ficticio |
 | Finalizar sin propuesta y con motivo | Conserva informe, elimina solo borrador sin presentar y pasa a pendiente de liquidación |
 | Recepción consulta y registra comunicación | Propuesta pasa a pendiente de decisión; no autoriza ejecución ni registra aceptación |

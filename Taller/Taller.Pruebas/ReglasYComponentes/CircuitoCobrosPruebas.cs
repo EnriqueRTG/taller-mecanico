@@ -244,13 +244,9 @@ public sealed class CircuitoCobrosPruebas
                 var original = await Presupuestos.ObtenerAsync(d.IdPresupuesto);
                 var id = await Seguimiento.RevisarSeleccionAsync(original.IdPresupuesto, original.Version, [new ItemPropuestaDto { IdConcepto = original.Items[0].IdConcepto, Descripcion = original.Items[0].Descripcion, Cantidad = original.Items[0].Cantidad, PrecioUnitario = original.Items[0].PrecioUnitario }], "La tarea seleccionada puede ejecutarse de forma independiente.");
                 await VersionesAsync();
+                Assert.Equal(original.IdPresupuesto, id);
+                Assert.Equal(EstadoPresupuesto.Aceptado, (await Presupuestos.ObtenerAsync(id)).Estado);
                 Entrar(2);
-                var nueva = await Presupuestos.ObtenerAsync(id);
-                await Evaluacion.PresentarAsync(id, nueva.Version);
-                await VersionesAsync();
-                nueva = await Presupuestos.ObtenerAsync(id);
-                await Presupuestos.DecidirAsync(new() { IdPresupuesto = id, Version = nueva.Version, ItemsAceptados = nueva.Items.Select(x => x.IdDetalle).ToList(), Observaciones = "Acepta alcance definitivo revisado" });
-                await VersionesAsync();
             }
 
             return d;
@@ -270,6 +266,7 @@ public sealed class CircuitoCobrosPruebas
                 i.Estado = EstadoEjecucionDetalle.Completado;
             }
 
+            d.ConformidadTecnica = true;
             await Ejecucion.GuardarAsync(d, true);
             await VersionesAsync();
             Entrar(2);
@@ -378,7 +375,7 @@ public sealed class CircuitoCobrosPruebas
     }
 
     [Fact]
-    public async Task SeleccionParcial_NoAutorizaHastaRevisionTecnicaYNuevaAceptacion()
+    public async Task SeleccionParcial_ReformuladaExigeNuevaAceptacion()
     {
         using var c = new Caso();
         var p = await c.PropuestaAsync();
@@ -476,28 +473,78 @@ public sealed class CircuitoCobrosPruebas
     }
 
     [Fact]
-    public async Task Interrupcion_LiquidaCantidadRealYNoCantidadPresupuestada()
+    public async Task AvanceParcial_SeConservaEnCursoYNoPermiteCerrarNiLiquidar()
     {
         using var c = new Caso();
-        await c.AceptarAsync();
-        c.Entrar(1);
+        await c.AceptarAsync(); c.Entrar(1);
         var e = await c.Ejecucion.ObtenerAsync(1);
-        await c.Ejecucion.TomarAsync(1, e.Version, "");
-        await c.VersionesAsync();
+        await c.Ejecucion.TomarAsync(1, e.Version, ""); await c.VersionesAsync();
         e = await c.Ejecucion.ObtenerAsync(1);
         e.Items[0].CantidadEjecutada = 1;
-        e.Items[0].Estado = EstadoEjecucionDetalle.Parcial;
-        e.Items[0].Observaciones = "Solo se realizó la mitad.";
-        e.Items[1].Estado = EstadoEjecucionDetalle.Omitido;
-        e.Items[1].Observaciones = "Cliente desiste antes de instalar.";
-        e.Observaciones = "Se interrumpe y se entrega sin reparar por completo.";
-        await c.Ejecucion.GuardarAsync(e, true, true);
-        await c.VersionesAsync();
+        e.Items[0].Estado = EstadoEjecucionDetalle.EnCurso;
+        await c.Ejecucion.GuardarAsync(e, false); await c.VersionesAsync();
+        e = await c.Ejecucion.ObtenerAsync(1); e.ConformidadTecnica = true;
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Ejecucion.GuardarAsync(e, true));
+        Assert.Equal(EstadoAtencion.EnEjecucion, (await c.Db.Atenciones.AsNoTracking().SingleAsync()).Estado);
+        Assert.Equal(1, (await c.Ejecucion.ObtenerAsync(1)).Items[0].CantidadEjecutada);
         c.Entrar(2);
-        var d = await c.LiquidarAsync();
-        Assert.Equal(100, d.Total);
-        Assert.Single(d.Items);
-        Assert.Equal(1, d.Items[0].Cantidad);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Cobros.ObtenerAsync(1));
+        var version = (await c.Db.Atenciones.AsNoTracking().SingleAsync()).Version;
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Cobros.LiquidarAsync(1, version, "Intento antes de terminar"));
+    }
+
+    [Theory]
+    [InlineData("Precio")]
+    [InlineData("Cantidad")]
+    [InlineData("Descripcion")]
+    [InlineData("Origen")]
+    public async Task ModificarSeleccion_NoReutilizaLaAutorizacionDelCliente(string cambio)
+    {
+        using var c = new Caso();
+        var p = await c.PropuestaAsync();
+        await c.Presupuestos.DecidirAsync(new() { IdPresupuesto = p.IdPresupuesto, Version = p.Version, ItemsAceptados = [p.Items[1].IdDetalle], Observaciones = "Solo repuesto" });
+        await c.VersionesAsync(); c.Entrar(1);
+        p = await c.Presupuestos.ObtenerAsync(p.IdPresupuesto);
+        var d = p.Items.Single(i => i.Aceptar);
+        var item = new ItemPropuestaDto { IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, OrigenMaterial = d.OrigenMaterial };
+        if (cambio == "Precio") item.PrecioUnitario += 1;
+        if (cambio == "Cantidad") item.Cantidad += 1;
+        if (cambio == "Descripcion") item.Descripcion += " modificado";
+        if (cambio == "Origen") { item.OrigenMaterial = OrigenMaterial.Cliente; item.PrecioUnitario = 0; }
+        var nuevo = await c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, p.Version, [item], "Se modifica la propuesta y debe consultarse al cliente");
+        await c.VersionesAsync();
+        Assert.NotEqual(p.IdPresupuesto, nuevo);
+        Assert.Equal(EstadoPresupuesto.PendientePresentacion, (await c.Presupuestos.ObtenerAsync(nuevo)).Estado);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Ejecucion.ObtenerAsync(1));
+    }
+
+    [Fact]
+    public async Task SeleccionExactaValidada_HabilitaEjecucionYPreservaDecisionDelCliente()
+    {
+        using var c = new Caso();
+        var p = await c.PropuestaAsync();
+        await c.Presupuestos.DecidirAsync(new() { IdPresupuesto = p.IdPresupuesto, Version = p.Version,
+            ItemsAceptados = [p.Items[0].IdDetalle], PersonaDecision = "Ana Pérez", MedioDecision = "Teléfono", Observaciones = "Autoriza solo mano de obra si es viable" });
+        await c.VersionesAsync();
+        var decision = await c.Db.Presupuestos.AsNoTracking().SingleAsync(x => x.IdPresupuesto == p.IdPresupuesto);
+        p = await c.Presupuestos.ObtenerAsync(p.IdPresupuesto);
+        var seleccion = p.Items.Where(i => i.Aceptar).Select(i => new ItemPropuestaDto { IdSolicitudAtencion = i.IdSolicitudAtencion,
+            IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList();
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, p.Version, seleccion, "Viable"));
+        c.Entrar(1);
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, new byte[8], seleccion, "Viable"));
+        int validado = await c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, p.Version, seleccion, "La tarea puede hacerse sin las excluidas");
+        await c.VersionesAsync();
+        Assert.Equal(p.IdPresupuesto, validado);
+        var guardado = await c.Db.Presupuestos.AsNoTracking().SingleAsync(x => x.IdPresupuesto == validado);
+        Assert.Equal(EstadoPresupuesto.Aceptado, guardado.Estado); Assert.True(guardado.AlcanceValidado);
+        Assert.Equal(decision.FechaDecision, guardado.FechaDecision); Assert.Equal(decision.IdUsuarioDecision, guardado.IdUsuarioDecision);
+        Assert.Equal("Ana Pérez", guardado.PersonaDecision); Assert.Equal("Teléfono", guardado.MedioDecision);
+        Assert.Single((await c.Ejecucion.ObtenerAsync(1)).Items);
+        Assert.Contains(await c.Db.HistorialAtenciones.AsNoTracking().ToListAsync(), h => h.Accion == "SeleccionClienteValidada" && h.IdUsuario == 1);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Seguimiento.RevisarSeleccionAsync(p.IdPresupuesto, guardado.Version, seleccion, "Reintento"));
+        c.Entrar(2);
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Evaluacion.PresentarAsync(validado, guardado.Version));
     }
 
     [Fact]
@@ -511,7 +558,7 @@ public sealed class CircuitoCobrosPruebas
         await c.VersionesAsync();
         e = await c.Ejecucion.ObtenerAsync(1);
         e.Items[0].CantidadEjecutada = 1;
-        e.Items[0].Estado = EstadoEjecucionDetalle.Parcial;
+        e.Items[0].Estado = EstadoEjecucionDetalle.EnCurso;
         e.Items[0].Observaciones = "Avance";
         await c.Ejecucion.GuardarAsync(e, false);
         await c.VersionesAsync();
@@ -846,6 +893,7 @@ public sealed class CircuitoCobrosPruebas
             item.CantidadEjecutada = item.CantidadAutorizada;
         }
 
+        e.ConformidadTecnica = true;
         await c.Ejecucion.GuardarAsync(e, true);
         Assert.Equal(EstadoAtencion.TrabajoFinalizado, (await c.Db.Atenciones.SingleAsync()).Estado);
     }

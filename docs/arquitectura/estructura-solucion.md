@@ -32,7 +32,7 @@ La sesión no vence por tiempo ni inactividad. Termina por Cerrar sesión o sali
 ## Preparación para el coloquio
 
 1. Descargar la misma versión de main en ambos equipos.
-2. Preparar la base nueva con la guía de entornos y cargar Demo v3 antes de abrir la aplicación. No aplicar el esquema inicial sobre la base anterior.
+2. Preparar la base nueva con la guía de entornos y cargar Demo v4 antes de abrir la aplicación. No aplicar el esquema inicial sobre la base anterior.
 3. Configurar en cada equipo la conexión al destino elegido y seleccionar Taller.Presentacion como inicio.
 4. Ejecutar el recorrido principal con cuentas de recepción y técnico. Si ambas máquinas colaboran sobre el mismo circuito, deben usar la misma instancia/base accesible; localhost de cada equipo representa bases diferentes.
 5. Las configuraciones de Azure y del agente se realizan después. Este cambio no modifica el esquema ni el lote; no requiere otra migración sobre una base ya creada con EsquemaInicialCircuitoActual.

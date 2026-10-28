@@ -265,6 +265,7 @@ public partial class FrmUsuarios : Form
         btnCambiarEstado.Text = usuarioActivo ? "Deshabilitar usuario" : "Habilitar usuario";
         btnCambiarEstado.ForeColor = usuarioActivo ? Color.FromArgb(185, 28, 28) : Color.FromArgb(30, 64, 175);
         btnCambiarEstado.FlatAppearance.BorderColor = usuarioActivo ? Color.FromArgb(185, 28, 28) : Color.FromArgb(30, 64, 175);
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnEditarUsuario, btnGestionarCredenciales, btnCambiarEstado);
     }
 
     /// <summary>

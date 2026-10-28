@@ -24,34 +24,24 @@ public sealed class PresupuestoDetalleConfiguracion : IEntityTypeConfiguration<P
                 [EstadoEjecucion] IN (
                     N'NoIniciado',
                     N'EnCurso',
-                    N'Parcial',
-                    N'Completado',
-                    N'Omitido'
+                    N'Completado'
                 )
                 """);
             // Mantiene coherencia entre el avance y las cantidades.
             tabla.HasCheckConstraint("CK_PresupuestoDetalles_Avance", """
                 (
-                    [EstadoEjecucion] IN (N'NoIniciado', N'Omitido')
+                    [EstadoEjecucion] = N'NoIniciado'
                     AND [CantidadEjecutada] = 0
                 )
                 OR
                 (
-                    [EstadoEjecucion] IN (N'EnCurso', N'Parcial')
+                    [EstadoEjecucion] = N'EnCurso'
                     AND [CantidadEjecutada] < [Cantidad]
                 )
                 OR
                 (
                     [EstadoEjecucion] = N'Completado'
                     AND [CantidadEjecutada] = [Cantidad]
-                )
-                """);
-            // Las omisiones y terminaciones parciales se justifican.
-            tabla.HasCheckConstraint("CK_PresupuestoDetalles_Justificacion", """
-                [EstadoEjecucion] NOT IN (N'Parcial', N'Omitido')
-                OR (
-                    [ObservacionesEjecucion] IS NOT NULL
-                    AND LEN(LTRIM(RTRIM([ObservacionesEjecucion]))) > 0
                 )
                 """);
             tabla.HasCheckConstraint("CK_PresupuestoDetalles_RegistroTecnico", """

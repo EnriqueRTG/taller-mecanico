@@ -104,6 +104,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
         btnLiberar.Enabled = !_ocupado && tech && d is { Finalizada: false } && d.IdTecnico == _sesion.UsuarioActual?.Id;
         btnInforme.Enabled = !_ocupado && d?.IdDiagnostico != null;
         lblEstado.Text = d is null ? "Seleccione una atención. Mis actividades primero; disponibles por antigüedad; finalizadas al final." : d.Finalizada ? "Evaluación finalizada. Consulte la propuesta en Presupuestos." : d.IdTecnico == null ? "Disponible para tomar." : $"Reservada por {d.Tecnico}. Cerrar el formulario no la libera.";
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnTrabajar, btnLiberar, btnInforme);
     }
 
     private async void Trabajar(object? s, EventArgs e)

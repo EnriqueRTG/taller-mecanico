@@ -4,6 +4,10 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 
 | Necesidad | Documento |
 |---|---|
+| Aplicar esta actualización y sus migraciones | [Actualización](instalacion/actualizacion-coloquio.md) |
+| Compartir una base entre dos notebooks | [Red privada](instalacion/red-privada.md) |
+| Comprobar respaldo y recuperación en Demo | [Prueba local](instalacion/respaldos-locales-demo.md) |
+| Estudiar recorridos entre capas | [Defensa del circuito](pruebas/defensa-circuito.md) |
 | Replicar el sistema y el lote en otra PC | [Instructivo TXT](instalacion/replicar-demo.txt) |
 | Distinguir instalación real y Demo | [Entornos y base de datos](instalacion/entornos.md) |
 | Referencias entre capas y DI | [Organización](arquitectura/estructura-solucion.md) |

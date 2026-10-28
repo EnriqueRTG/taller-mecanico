@@ -30,7 +30,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
             throw new ValidacionException("Resuelva las pausas antes de liquidar.");
         var autorizados = presupuestos.Where(p => p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0))).ToList();
         if (autorizados.Any(d => d.EstadoEjecucion is EstadoEjecucionDetalle.NoIniciado or EstadoEjecucionDetalle.EnCurso))
-            throw new ValidacionException("Hay servicios autorizados pendientes de resolver. El técnico debe registrar lo realizado u omitido.");
+            throw new ValidacionException("Hay trabajos autorizados pendientes. El técnico debe completar todos antes de liquidar.");
         if (autorizados.Any(d => d.CantidadEjecutada > 0 && (d.CantidadEjecutada > d.Cantidad || d.PrecioUnitario > Maximo / d.CantidadEjecutada)))
             throw new ValidacionException("Hay cantidades o importes ejecutados fuera del límite de liquidación.");
         return autorizados.Where(d => d.CantidadEjecutada > 0 && d.OrigenMaterial != OrigenMaterial.Cliente).ToList();

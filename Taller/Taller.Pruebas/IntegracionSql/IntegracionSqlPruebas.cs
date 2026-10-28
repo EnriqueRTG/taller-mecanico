@@ -149,11 +149,33 @@ public sealed class IntegracionSqlPruebas
     }
 
     [SqlRespaldoFact]
+    public async Task MigracionTresEstados_RechazaOmisionesAnterioresSinAlterarlas()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var db = b.Contexto();
+        var migrador = db.GetService<IMigrator>();
+        await migrador.MigrateAsync("20261026155115_EsquemaInicialCircuitoActual");
+        var p = new Presupuesto { IdUsuarioCreacion = ids.Tecnico, FechaCreacion = FechaHoraTaller.Ahora,
+            Atencion = new Atencion { IdUsuarioRecepcion = ids.Recepcion, MotivoConsulta = "Comprobar conservación de dato anterior",
+                Cliente = new Cliente { TipoDocumento = "DNI", Documento = "33999111", Nombre = "Demo", Apellido = "Migración" },
+                Vehiculo = new Vehiculo { IdModelo = ids.Modelo, Dominio = "ZZ987XY", Color = "Gris" } },
+            Detalles = [new PresupuestoDetalle { IdConcepto = ids.Concepto, Descripcion = "Caso anterior", Cantidad = 1, PrecioUnitario = 100 }] };
+        db.Add(p); await db.SaveChangesAsync(); db.ChangeTracker.Clear();
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.PresupuestoDetalles SET EstadoEjecucion=N'Omitido', ObservacionesEjecucion=N'Caso anterior' WHERE IdPresupuesto={p.IdPresupuesto}");
+        var error = await Assert.ThrowsAsync<SqlException>(() => migrador.MigrateAsync());
+        Assert.Equal(51140, error.Number);
+        Assert.Single(await db.Database.GetAppliedMigrationsAsync());
+        var estados = await db.Database.SqlQueryRaw<string>("SELECT EstadoEjecucion AS [Value] FROM dbo.PresupuestoDetalles").ToListAsync();
+        Assert.Equal("Omitido", Assert.Single(estados));
+    }
+
+    [SqlRespaldoFact]
     public async Task BaseNuevaSoloAdmiteEstadosVigentesYNoContieneClasificadoresObsoletos()
     {
         await using var b = await BasePrueba.CrearAsync();
         await using var db = b.Contexto();
-        Assert.Single(db.Database.GetMigrations());
+        Assert.Equal(2, db.Database.GetMigrations().Count());
         await using var sql = new SqlConnection(b.Conexion);
         await sql.OpenAsync();
         var comando = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE (object_id = OBJECT_ID(N'dbo.Presupuestos') OR object_id = OBJECT_ID(N'dbo.Diagnosticos')) AND name = N'Tipo' OR object_id = OBJECT_ID(N'dbo.Conceptos') AND name = N'DisponibleParaIngreso'", sql);
@@ -374,12 +396,14 @@ public sealed class IntegracionSqlPruebas
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         await Assert.ThrowsAsync<ValidacionException>(() => ejec.ObtenerAsync(a.IdAtencion));
         original = await ps.ObtenerAsync(p.IdPresupuesto);
-        int revisado = await seg.RevisarSeleccionAsync(p.IdPresupuesto, original.Version, [new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo principal viable", Cantidad = 1, PrecioUnitario = 100 }], "Es técnicamente viable ejecutar por separado");
-        sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+        var elegido = original.Items.Single(i => i.Aceptar);
+        int revisado = await seg.RevisarSeleccionAsync(p.IdPresupuesto, original.Version,
+            [new() { IdSolicitudAtencion = elegido.IdSolicitudAtencion, IdConcepto = elegido.IdConcepto, Descripcion = elegido.Descripcion,
+                Cantidad = elegido.Cantidad, PrecioUnitario = elegido.PrecioUnitario, OrigenMaterial = elegido.OrigenMaterial }], "Es técnicamente viable ejecutar por separado");
+        Assert.Equal(p.IdPresupuesto, revisado);
         var rev = await ps.ObtenerAsync(revisado);
-        await ev.PresentarAsync(revisado, rev.Version);
-        rev = await ps.ObtenerAsync(revisado);
-        await ps.DecidirAsync(new() { IdPresupuesto = revisado, Version = rev.Version, ItemsAceptados = rev.Items.Select(i => i.IdDetalle).ToList() });
+        Assert.Equal(EstadoPresupuesto.Aceptado, rev.Estado);
+        await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.PresupuestoDetalles SET EstadoEjecucion=N'Omitido', ObservacionesEjecucion=N'No permitido' WHERE IdPresupuestoDetalle={elegido.IdDetalle}"));
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         var e = await ejec.ObtenerAsync(a.IdAtencion);
         await ejec.TomarAsync(a.IdAtencion, e.Version, "");

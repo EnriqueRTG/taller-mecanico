@@ -403,7 +403,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnRegistrarDiagnostico.Text = puedeRegistrarDiagnostico ? "Continuar" : fila.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido ? "Preparar presupuesto" : "Diagnosticar y presupuestar";
             btnRegistrarDiagnostico.Enabled = !_tomandoDiagnostico && puedeConsultarComoTecnico && (puedeTomarDiagnostico || puedeRegistrarDiagnostico);
             btnFinalizarTrabajo.Enabled = puedeConsultarComoTecnico && fila.EstadoValor == EstadoAtencion.EnEjecucion && (fila.IdTecnicoEnActividad == null || fila.IdTecnicoEnActividad == usuario.Id);
-        }
+            Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnVerDetalle, btnCancelarAtencion, btnRegistrarEntrega, btnEntregaDirecta, btnVerHistorial, btnRegistrarDiagnostico, btnFinalizarTrabajo);
+    }
 
         private void DeshabilitarAcciones()
         {
@@ -414,7 +415,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnVerHistorial.Enabled = false;
             btnRegistrarDiagnostico.Enabled = false;
             btnFinalizarTrabajo.Enabled = false;
-        }
+            Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnVerDetalle, btnCancelarAtencion, btnRegistrarEntrega, btnEntregaDirecta, btnVerHistorial, btnRegistrarDiagnostico, btnFinalizarTrabajo);
+    }
 
 #endregion
 #region Eventos de filtros y grilla

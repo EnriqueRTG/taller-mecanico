@@ -55,6 +55,22 @@ public sealed class ReportesPruebas
         public void Dispose() => Db.Dispose();
     }
     [Fact]
+    public async Task GraficoConResto_IdentificaCadaCategoriaYConservaTodosLosRegistros()
+    {
+        using var c = new Caso();
+        string[] acciones = ["EvaluacionTomada", "EvaluacionLiberada", "EvaluacionAvanceGuardado", "EvaluacionFinalizada",
+            "EjecucionLiberada", "EjecucionAvanceGuardado", "TrabajoFinalizado", "HallazgoRegistrado", "PausaResuelta", "SeleccionClienteValidada"];
+        c.Db.AddRange(acciones.Select(a => new HistorialAtencion { IdAtencion = 1, IdUsuario = 3, Fecha = c.Hoy, Accion = a, EstadoNuevo = EstadoAtencion.EnEjecucion }));
+        await c.Db.SaveChangesAsync(); c.Db.ChangeTracker.Clear();
+        var d = await c.Generar(TipoReporte.ActividadTecnica);
+        Assert.Equal(12, d.Registros.Count);
+        Assert.Equal(8, d.Grafico.Count);
+        Assert.StartsWith("Resto (", d.Grafico.Last().Etiqueta);
+        foreach (var accion in acciones) Assert.True(d.Grafico.Any(g => g.Etiqueta == ReporteServicio.Legible(accion)) || d.Metodologia.Contains(ReporteServicio.Legible(accion)));
+        Assert.Equal(d.Registros.Count, d.Grafico.Sum(p => p.Valor));
+    }
+
+    [Fact]
     public void ExportacionesIdentificanEmpresaYConsulta_SinInyectarHtmlNiFormulas()
     {
         var d = new ReporteDocumentoDto {

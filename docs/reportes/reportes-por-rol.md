@@ -44,7 +44,7 @@ El documento contiene datos de clientes y del taller; quien exporta es responsab
 
 ## Instalación y pruebas
 
-Usar main y el esquema EsquemaInicialCircuitoActual siguiendo [instalación](../instalacion/entornos.md). Sobre Demo v3 ya preparada no se requiere recrear la base para probar los reportes. No aplicar migraciones de ramas retiradas.
+Usar main y el esquema EsquemaInicialCircuitoActual siguiendo [instalación](../instalacion/entornos.md). La Demo v4 usa los tres estados. Prepararla siguiendo la guía de actualización. No aplicar migraciones de ramas retiradas.
 
 ```powershell
 dotnet build Taller/Taller.sln --configuration Release
@@ -67,3 +67,5 @@ Pruebas manuales antes de fusionar:
 10. Cancelar una apertura nueva y verificar su historial. Intentarlo después del ingreso técnico: debe bloquearse.
 
 Las pruebas automáticas no reemplazan la inspección visual de Windows Forms, la impresión ni la ejecución de consultas/migraciones en SQL Server.
+
+El gráfico conserva siete categorías principales y resume el resto cuando supera ocho. La metodología identifica cada categoría resumida con su valor; el detalle conserva todos los registros. No es un estado ni un filtro del dominio.

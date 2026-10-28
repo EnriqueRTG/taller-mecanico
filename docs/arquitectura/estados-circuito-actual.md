@@ -8,16 +8,18 @@ La base se construye desde cero mediante EsquemaInicialCircuitoActual. No se con
 | PendienteDecision | Propuesta principal informada, esperando respuesta; una selección parcial sigue sin autorizar ejecución. |
 | EnEjecucion | Reparación autorizada; permite trabajo, pausas y adicionales sin borrar el acuerdo original. |
 | TrabajoFinalizado | Terminación normal y conformidad técnica. Recepción liquida/cobra/entrega. |
-| PendienteLiquidacion | Rechazo, cierre sin reparación completa o interrupción. Se cobra solo lo autorizado y realizado, incluso si el resultado es cero. |
+| PendienteLiquidacion | Rechazo de reparación o evaluación sin propuesta de reparación. Se cobra solo lo autorizado y realizado, incluso si el resultado es cero. |
 | Cerrada | Entrega registrada con liquidación saldada. |
 | Cancelada | Desistimiento previo a actividad técnica, presupuestos o servicios autorizados; conserva motivo e historial. |
 
 
 ## Presupuesto y ejecución
 
-Los seis EstadoPresupuesto tienen funciones diferentes y se conservan: Borrador, PendientePresentacion, PendienteDecision, PendienteRevisionTecnica, Aceptado y Rechazado. Vigente distingue la versión aplicable sin inventar un estado de reemplazo. Una revisión conserva el original y genera otra propuesta. El presupuesto aceptado no equivale a trabajo ejecutado ni cobro recibido.
+Los seis EstadoPresupuesto tienen funciones diferentes y se conservan: Borrador, PendientePresentacion, PendienteDecision, PendienteRevisionTecnica, Aceptado y Rechazado. Vigente distingue la versión aplicable sin inventar un estado de reemplazo. Una reformulación conserva el original y genera otra propuesta. Validar sin cambios la selección del cliente conserva el mismo presupuesto y su decisión original. El presupuesto aceptado no equivale a trabajo ejecutado ni cobro recibido.
 
-Los cinco EstadoEjecucionDetalle son necesarios: NoIniciado, EnCurso, Completado, Parcial y Omitido. Parcial significa fin incompleto justificado, no un porcentaje intermedio; exige cantidad positiva y se utiliza en interrupción. Omitido exige cero y motivo. Completado exige la cantidad autorizada; no permite disminuir lo registrado. El lote nuevo muestra los cinco.
+Los tres EstadoEjecucionDetalle son NoIniciado, EnCurso y Completado. Una cantidad realizada menor que la autorizada permanece EnCurso; no es un cierre definitivo. Completado exige toda la cantidad autorizada. No se disminuye el avance registrado ni se revierte un completado. Finalizar exige todos los ítems autorizados completados y conformidad técnica. Una pausa conserva el avance y bloquea el alcance; no es otro estado de ejecución. El cierre con interrupción queda fuera de esta entrega.
+
+La migración SimplificarEjecucionTresEstados retira las restricciones antiguas sin reinterpretar datos: si existen Parcial/Omitido rechaza la actualización. Ver [actualización](../instalacion/actualizacion-coloquio.md).
 
 ## Otras enumeraciones y atributos
 

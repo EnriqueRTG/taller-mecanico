@@ -21,6 +21,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             return new PresupuestoGestionDto
             {
                 EsAdicional = p.EsAdicional,
+                EsInspeccion = p.EsInspeccion,
                 IdPresupuesto = id,
                 IdAtencion = p.IdAtencion,
                 Estado = p.Estado,
@@ -123,7 +124,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             }
 
             if (p.Estado == EstadoPresupuesto.PendienteRevisionTecnica || !p.Vigente || p.Estado == EstadoPresupuesto.Borrador || p.Atencion.IdTecnicoEnActividad != null || p.Atencion.Estado is EstadoAtencion.Cerrada or EstadoAtencion.Cancelada || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
-                throw new ValidacionException("Solo puede revisar una propuesta vigente, sin reserva, sin ejecución ni liquidación. Con trabajos iniciados use el registro técnico de omisiones/interrupción.");
+                throw new ValidacionException("Solo puede revisar una propuesta vigente, sin reserva, sin ejecución ni liquidación. Con trabajos iniciados conserve el avance y resuelva las pausas o adicionales antes de continuar.");
             p.Vigente = false;
             var nueva = new Presupuesto
             {

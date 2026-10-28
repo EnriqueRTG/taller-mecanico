@@ -161,6 +161,8 @@ partial class FrmPrepararPropuesta
         };
         btnCerrar.Click += Cerrar;
         acciones.Controls.AddRange(new Control[] { btnGuardar, btnCerrar });
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnGuardar);
+        foreach (var b in new[] { btnAgregar, btnQuitar, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(b);
         tlpPrincipal.Controls.Add(lblAyuda, 0, 0);
         tlpPrincipal.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 0, 1);
         tlpPrincipal.Controls.Add(entrada, 0, 2);

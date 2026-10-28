@@ -6,6 +6,7 @@ using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Excepciones;
 using Taller.Dominio.Constantes;
+using Taller.Dominio.Enumeraciones;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Servicios;
@@ -25,6 +26,12 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         _ => throw new ValidacionException("Tipo de reporte inválido.")};
     public static string Legible(string valor) => valor switch
     {
+        "EnEvaluacionTecnica" => "En preparación técnica",
+        "PendienteRevisionTecnica" => "Revisión técnica pendiente",
+        "PendientePresentacion" => "Por presentar",
+        "PendienteDecision" => "Esperando decisión",
+        "True" or "true" => "Sí",
+        "False" or "false" => "No",
         "SeleccionClienteValidada" => "Selección del cliente validada",
         "SeleccionParcialRevisada" => "Selección reformulada por el técnico",
         "EjecucionAvanceGuardado" => "Avance de ejecución guardado",
@@ -32,6 +39,29 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         "PausaResuelta" => "Pausa resuelta",
         _ => Regex.Replace(valor, "([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])", "$1 $2")
     };
+    /// <summary>Opciones del dominio de cada reporte; no dependen de generar un documento ni de que existan filas.</summary>
+    public static IReadOnlyList<string> EstadosPara(TipoReporte tipo)
+    {
+        IEnumerable<string> valores = tipo switch
+        {
+        TipoReporte.Atenciones => Enum.GetNames<EstadoAtencion>(),
+        TipoReporte.Presupuestos => Enum.GetNames<EstadoPresupuesto>().Append("Aceptado parcialmente"),
+        TipoReporte.MovimientosCobro => new[] { "Cobro", "Anulación" },
+        TipoReporte.SaldosPendientes => new[] { "Sin cobros", "Cobrado parcialmente" },
+        TipoReporte.CargaTecnica => new[] { "Disponible para tomar", "Reservada", "Con pausas pendientes" },
+        TipoReporte.ConceptosRealizados => Enum.GetNames<EstadoEjecucionDetalle>().Where(e => e != nameof(EstadoEjecucionDetalle.NoIniciado)),
+        TipoReporte.ActividadTecnica => AccionesActividadTecnica,
+        _ => throw new ValidacionException("Tipo de reporte inválido.")
+        };
+        return valores.Select(Legible).Distinct().Order().ToArray();
+    }
+
+    public static IReadOnlyList<string> AccionesActividadTecnica { get; } = Array.AsReadOnly(new[] {
+        "ActividadTomada", "ActividadLiberada", "DiagnosticoRegistrado", "EvaluacionTomada", "EvaluacionLiberada",
+        "EvaluacionAvanceGuardado", "EvaluacionFinalizada", "EjecucionTomada", "EjecucionLiberada", "EjecucionAvanceGuardado",
+        "TrabajoFinalizado", "HallazgoRegistrado", "PausaResuelta", "MaterialClienteRevisado", "PresupuestoAdicionalPreparado",
+        "SeleccionParcialRevisada", "SeleccionClienteValidada" });
+
     public static IReadOnlyList<TipoReporte> TiposParaRol(int rol) => rol switch
     {
         RolesSistema.AdministradorId => Enum.GetValues<TipoReporte>(),
@@ -72,7 +102,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             TipoReporte.ActividadTecnica => await reportes.ListarActividadAsync(desde, hasta, tecnico),
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
             _ => throw new ValidacionException("Tipo de reporte inválido.")};
-        var estadosDisponibles = registros.Select(x => Legible(x.Estado)).Distinct().Order().ToList();
+        var estadosDisponibles = EstadosPara(solicitud.Tipo);
         string texto = (solicitud.Busqueda ?? "").Trim();
         registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
         if (solicitud.Tipo == TipoReporte.SaldosPendientes)

@@ -44,6 +44,7 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        VerificarFiltrosReportes(proveedor);
         VerificarAccionesContextuales();
         VerificarFiltrosListados(proveedor);
         VerificarUniformidadListados(proveedor);
@@ -59,6 +60,30 @@ internal static class Program
         VerificarNavegacionDocumento();
         return 0;
     }
+    private static void VerificarFiltrosReportes(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var f = scope.ServiceProvider.GetRequiredService<FrmReportes>();
+        f.BindingContext = new BindingContext();
+        var tipo = typeof(FrmReportes);
+        var combo = (ComboBox)tipo.GetField("cboTipo", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        var estados = (ComboBox)tipo.GetField("cboEstado", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        var opcion = tipo.GetNestedType("Opcion", BindingFlags.NonPublic)!;
+        combo.DisplayMember = "Nombre";
+        foreach (var reporte in Enum.GetValues<TipoReporte>())
+            combo.Items.Add(Activator.CreateInstance(opcion, reporte, ReporteServicio.Nombre(reporte))!);
+        for (int i = 0; i < combo.Items.Count; i++)
+        {
+            combo.SelectedIndex = i;
+            var esperados = ReporteServicio.EstadosPara((TipoReporte)i).Prepend("Todos").ToArray();
+            if (!esperados.SequenceEqual(estados.Items.Cast<string>())) throw new InvalidOperationException("Estados incompletos antes de generar el reporte.");
+            estados.SelectedIndex = estados.Items.Count - 1;
+            tipo.GetMethod("BtnLimpiar_Click", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [null, EventArgs.Empty]);
+            if (estados.SelectedIndex != 0 || !esperados.SequenceEqual(estados.Items.Cast<string>())) throw new InvalidOperationException("Limpiar debe conservar todas las opciones del tipo actual.");
+        }
+        Console.WriteLine("Reportes: estados completos antes de generar, al cambiar de tipo y después de limpiar.");
+    }
+
     private static void VerificarAccionesContextuales()
     {
         using var panel = new Panel { Enabled = false };

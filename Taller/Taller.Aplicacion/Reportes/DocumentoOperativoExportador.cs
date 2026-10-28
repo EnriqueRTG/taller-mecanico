@@ -14,7 +14,7 @@ public static class DocumentoOperativoExportador
     private static string N(decimal valor) => valor.ToString("N2", Cultura);
     private static string Inicio(string titulo, EmpresaDocumentoDto empresa) =>
         "<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>" + H(titulo)
-        + "</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1000px;margin:24px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:9px;border:1px solid #cbd5e1;text-align:left;overflow-wrap:anywhere}th{background:#eff6ff}.numero{text-align:right;white-space:nowrap}.texto{white-space:pre-wrap;overflow-wrap:anywhere}.aviso{background:#f1f5f9;padding:12px}tr{break-inside:avoid}thead{display:table-header-group}h2{break-after:avoid}footer{color:#475569}@page{size:A4;margin:16mm}@media print{body{margin:0;padding:0}}</style></head><body>"
+        + "</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1000px;margin:24px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:9px;border:1px solid #cbd5e1;text-align:left;overflow-wrap:anywhere}th{background:#eff6ff}.numero{text-align:right;white-space:nowrap}.totales{margin:16px 0 16px auto;width:55%}.totales th{text-align:right}.totales td{font-size:18px;font-weight:bold}.texto{white-space:pre-wrap;overflow-wrap:anywhere}.aviso{background:#f1f5f9;padding:12px}tr{break-inside:avoid}thead{display:table-header-group}h2{break-after:avoid}footer{color:#475569}@page{size:A4;margin:16mm}@media print{body{margin:0;padding:0}}</style></head><body>"
         + DocumentoReporteExportador.Cabecera(empresa) + "<h1>" + H(titulo) + "</h1>";
     private const string Fin = "<footer><p>SGTM · Documento interno sin validez fiscal. La emisión no registra autorización ni pago.</p></footer></body></html>";
 
@@ -26,7 +26,7 @@ public static class DocumentoOperativoExportador
         b.Append("<h2>Alcance e importes propuestos</h2><table><thead><tr><th>Solicitud / concepto</th><th>Cantidad</th><th>Aporta</th><th>Precio ARS</th><th>Subtotal ARS</th></tr></thead><tbody>");
         foreach (var i in d.Items)
             b.Append($"<tr><td>{(string.IsNullOrWhiteSpace(i.SolicitudDescripcion) ? "" : "<small>" + H(i.SolicitudDescripcion) + "</small><br>")}{H(i.Descripcion)}</td><td class='numero'>{i.Cantidad.ToString("N3", Cultura)}</td><td>{H(i.OrigenMaterial.ToString())}</td><td class='numero'>{N(i.PrecioUnitario)}</td><td class='numero'>{N(i.Subtotal)}</td></tr>");
-        b.Append($"</tbody></table><h2>Total propuesto: ARS {N(d.Total)}</h2><p class='aviso'>El presupuesto requiere aceptación del cliente antes de ejecutar. Se liquida lo autorizado y efectivamente realizado. Los materiales aportados por el cliente no se cobran como venta del taller.</p>");
+        b.Append($"</tbody></table><table class='totales'><tr><th>Total propuesto ARS</th><td class='numero'>{N(d.Total)}</td></tr></table><p class='aviso'>El presupuesto requiere aceptación del cliente antes de ejecutar. Se liquida lo autorizado y efectivamente realizado. Los materiales aportados por el cliente no se cobran como venta del taller.</p>");
         if (!string.IsNullOrWhiteSpace(d.Observaciones)) b.Append($"<h2>Observaciones y condiciones</h2><p class='texto'>{H(d.Observaciones)}</p>");
         if (d.InformeTecnico is { } informe) b.Append("<section style='break-before:page'><h2>Informe técnico de respaldo</h2>").Append(CuerpoDiagnostico(informe)).Append("</section>");
         return b.Append(Fin).ToString();
@@ -49,6 +49,19 @@ public static class DocumentoOperativoExportador
         Inicio($"Informe técnico {d.IdDiagnostico:D6}", empresa) + CuerpoDiagnostico(d) + Fin;
     private static string CuerpoDiagnostico(DiagnosticoDetalleDto d) => $"<p>Atención {d.IdAtencion:D6} · Fecha: {d.FechaDiagnostico:dd/MM/yyyy HH:mm}<br>Técnico responsable: {H(d.TecnicoAutor)}<br>Kilometraje: {H(d.Kilometraje?.ToString(Cultura) ?? "No registrado")}</p>"
         + $"<h2>Hallazgo / conclusión</h2><p class='texto'>{H(d.FallaDetectada)}</p><h2>Trabajo recomendado</h2><p class='texto'>{H(d.TrabajoRecomendado)}</p><h2>Observaciones</h2><p class='texto'>{H(d.Observaciones ?? "Sin observaciones")}</p><p class='aviso'>Este informe fundamenta la propuesta; no autoriza trabajos adicionales.</p>";
+
+    public static DocumentoComercialDto PresupuestoEstructurado(PresupuestoConsultaDto d) => new(
+        $"PRESUPUESTO {d.IdPresupuesto:D6}", $"{d.TipoDescripcion} · {d.EstadoDescripcion} · {(d.Vigente ? "Vigente" : "Histórico")} · {d.Fecha:dd/MM/yyyy HH:mm}",
+        $"Atención {d.IdAtencion:D6}\nCliente: {d.Cliente}\nVehículo: {d.Vehiculo}",
+        ["Concepto / alcance", "Cantidad", "Precio unitario ARS", "Subtotal ARS"],
+        d.Items.Select(i => (IReadOnlyList<string>)new[] { i.Descripcion
+            + (string.IsNullOrWhiteSpace(i.SolicitudDescripcion) ? "" : "\nSolicitud: " + i.SolicitudDescripcion)
+            + (i.OrigenMaterial == Taller.Dominio.Enumeraciones.OrigenMaterial.Cliente ? "\nMaterial aportado por el cliente" : ""),
+            i.Cantidad.ToString("N3", Cultura), N(i.PrecioUnitario), N(i.Subtotal) }).ToList(),
+        [new("TOTAL PROPUESTO · ARS", N(d.Total))],
+        (string.IsNullOrWhiteSpace(d.Observaciones) ? "" : "Observaciones y condiciones: " + d.Observaciones + "\n\n")
+        + "Requiere aceptación del cliente antes de ejecutar. Se liquida lo autorizado y efectivamente realizado. No acredita pagos."
+        + (d.InformeTecnico is { } informe ? "\n\nINFORME TÉCNICO DE RESPALDO\n" + TextoDiagnostico(informe) : ""));
 
     public static string TextoPresupuesto(PresupuestoConsultaDto d)
     {

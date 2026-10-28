@@ -9,6 +9,30 @@ namespace Taller.Pruebas;
 public sealed class DocumentosOperativosPruebas
 {
     [Fact]
+    public void DocumentosTabuladosConservanImportesIdentidadYDistincionEntreDeudaYCobro()
+    {
+        var cuenta = new Taller.Aplicacion.DTOs.Cobros.ComprobanteDto { IdAtencion = 49, Dominio = "AA000AA", Cliente = "Ana", Total = 25, Pagado = 10,
+            Items = [new() { Descripcion = "Filtro", Cantidad = 2, PrecioUnitario = 12.5m, Subtotal = 25 }] };
+        var pago = new Taller.Aplicacion.DTOs.Cobros.PagoConsultaDto { Importe = 10, SaldoPosterior = 15, DetalleMedios = [new() { Nombre = "Transferencia", Importe = 10, Referencia = "OP-123" }] };
+        var liquidacion = DocumentoCuentaExportador.LiquidacionEstructurada(cuenta);
+        Assert.Contains("AA000AA", liquidacion.Identidad);
+        Assert.Equal(new[] { "Filtro", "2,000", "12,50", "25,00" }, liquidacion.Filas.Single());
+        Assert.Equal("25,00", liquidacion.Totales[0].Value);
+        Assert.Equal("15,00", liquidacion.Totales.Last().Value);
+        var recibo = DocumentoCuentaExportador.ReciboEstructurado(cuenta, pago);
+        Assert.Contains("RECIBO", recibo.Titulo);
+        Assert.Contains("OP-123", recibo.Filas[0][0]);
+        Assert.Equal("10,00", recibo.Totales[0].Value);
+        Assert.Contains("histórico", recibo.Notas);
+        pago.Anulado = true;
+        Assert.Contains("ANULADO", DocumentoCuentaExportador.ReciboEstructurado(cuenta, pago).Titulo);
+        var presupuesto = DocumentoOperativoExportador.PresupuestoEstructurado(new() {
+            Items = [new() { Descripcion = "Aceite cliente", Cantidad = 4, PrecioUnitario = 0, OrigenMaterial = OrigenMaterial.Cliente }] });
+        Assert.Contains("aportado por el cliente", presupuesto.Filas.Single()[0]);
+        Assert.Equal("0,00", presupuesto.Totales.Single().Value);
+    }
+
+    [Fact]
     public void LiquidacionYReciboDistinguenDeudaCobroYSaldosHistoricos()
     {
         var cuenta = new Taller.Aplicacion.DTOs.Cobros.ComprobanteDto { IdComprobante = 2, IdAtencion = 103, Cliente = "Cliente", Dominio = "AA000AA", Total = 200000, Pagado = 200000 };

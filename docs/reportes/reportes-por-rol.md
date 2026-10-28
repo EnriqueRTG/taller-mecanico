@@ -69,3 +69,15 @@ Pruebas manuales antes de fusionar:
 Las pruebas automáticas no reemplazan la inspección visual de Windows Forms, la impresión ni la ejecución de consultas/migraciones en SQL Server.
 
 El gráfico conserva siete categorías principales y resume el resto cuando supera ocho. La metodología identifica cada categoría resumida con su valor; el detalle conserva todos los registros. No es un estado ni un filtro del dominio.
+
+## Filtros disponibles antes de generar
+
+Cada tipo ofrece todas sus opciones válidas al abrir o cambiar el reporte. No se deducen del resultado de una consulta: fechas, búsquedas y ausencia de registros no reducen el desplegable. Limpiar restablece «Todos» y conserva las opciones del tipo seleccionado. Una opción sin coincidencias genera un documento sin registros, nunca datos de ejemplo. En actividad técnica el filtro se identifica como «Acción».
+
+Comprobación: entrar como administrador y administrativo, elegir Atenciones sin generar, revisar los estados; elegir Presupuestos y comprobar sus opciones; buscar un texto inexistente, generar y limpiar; confirmar que siguen disponibles todos los estados. Repetir en los tipos autorizados para el técnico.
+
+## Documentos económicos
+
+La impresión/PDF de presupuestos y liquidaciones utiliza columnas de concepto, cantidad, precio unitario y subtotal; importes alineados a la derecha y totales separados. El recibo identifica el cobro concreto, sus medios y referencias, y el saldo histórico al registrarlo. No confundir ese saldo con el saldo actual de la liquidación. Conservan identidad de empresa, logo, atención, cliente y vehículo; son documentos internos sin validez fiscal.
+
+Comprobación visual en Windows: imprimir un presupuesto con más de una página y descripciones extensas, una liquidación con varios conceptos, un recibo con dos medios y un recibo anulado. Revisar repetición del encabezado, continuidad de filas sin perder texto, importes a la derecha y diferencias entre total propuesto, liquidado y cobrado. No se agregan impuestos, descuentos ni subtotales ficticios.

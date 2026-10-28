@@ -6,10 +6,18 @@ using Taller.Infraestructura;
 using Taller.Infraestructura.Respaldos;
 using Taller.Respaldos;
 
-var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = args.Where(a => a != "--instalar-control" && a != "--estado-control").ToArray(), ContentRootPath = AppContext.BaseDirectory });
+var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = args.Where(a => a != "--instalar-control" && a != "--estado-control" && a != "--verificar-base").ToArray(), ContentRootPath = AppContext.BaseDirectory });
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false).AddEnvironmentVariables();
 builder.Services.AddAplicacion();
 builder.Services.AddInfraestructura(builder.Configuration);
+if (args.Contains("--verificar-base", StringComparer.Ordinal))
+{
+    using var verificacion = builder.Build();
+    await verificacion.Services.GetRequiredService<RegistroRespaldosSql>().VerificarBaseAsync();
+    Console.WriteLine("Base SGTM accesible y estructura inicial presente. No se modificaron datos. La copia real verificará los permisos de respaldo sobre SQL y archivos.");
+    return;
+}
+
 if (args.Contains("--instalar-control", StringComparer.Ordinal))
 {
     using var instalador = builder.Build();

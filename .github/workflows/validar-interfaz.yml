@@ -13,6 +13,14 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Validar sintaxis de herramientas PowerShell sin ejecutarlas
+        shell: pwsh
+        run: |
+          foreach ($archivo in Get-ChildItem scripts/*.ps1) {
+            $tokens = $null; $errores = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($archivo.FullName, [ref]$tokens, [ref]$errores) | Out-Null
+            if ($errores.Count) { throw ($errores | Out-String) }
+          }
       - name: Construir solución
         run: dotnet build Taller/Taller.sln --configuration Release --nologo
       - name: Construir vista de las cuatro capas

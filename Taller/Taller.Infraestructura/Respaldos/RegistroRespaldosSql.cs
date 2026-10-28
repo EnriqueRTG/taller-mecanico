@@ -14,9 +14,25 @@ public sealed class RegistroRespaldosSql(OpcionesRespaldos opciones)
         IF COL_LENGTH(N'dbo.EventosSGTM',N'Operacion') IS NULL ALTER TABLE dbo.EventosSGTM ADD Operacion uniqueidentifier NULL;
         IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE name=N'UX_EventosSGTM_Operacion' AND object_id=OBJECT_ID(N'dbo.EventosSGTM')) CREATE UNIQUE INDEX UX_EventosSGTM_Operacion ON dbo.EventosSGTM(Operacion) WHERE Operacion IS NOT NULL;
         """;
+    /// <summary>Prevalidación de instalación: comprueba la base SGTM sin crear ni modificar registros.</summary>
+    public async Task VerificarBaseAsync(CancellationToken ct = default)
+    {
+        await using var master = await SqlRespaldos.AbrirAsync(opciones.Master(), ct);
+        int accesible = await SqlRespaldos.EscalarAsync<int>(master,
+            "SELECT CASE WHEN DB_ID(@db) IS NOT NULL AND HAS_DBACCESS(@db)=1 THEN 1 ELSE 0 END", ct, ("@db", opciones.BaseDatos));
+        if (accesible != 1)
+            throw new InvalidOperationException("La base SGTM no existe o la cuenta Windows/SQL no tiene acceso. Prepare la base y revise la conexión antes de instalar respaldos.");
+        string db = SqlRespaldos.Identificador(opciones.BaseDatos);
+        int tablas = await SqlRespaldos.EscalarAsync<int>(master,
+            $"SELECT COUNT(*) FROM {db}.sys.tables WHERE name IN (N'Usuarios',N'Roles',N'Atenciones',N'__EFMigrationsHistory') AND schema_id=SCHEMA_ID(N'dbo')", ct);
+        if (tablas != 4)
+            throw new InvalidOperationException("La base no contiene el esquema SGTM esperado. Aplique las migraciones del sistema antes de preparar respaldos.");
+    }
+
     /// <summary>Instalación explícita por personal con permisos SQL. Nunca se ejecuta al iniciar un cliente.</summary>
     public async Task InstalarAsync(CancellationToken ct = default)
     {
+        await VerificarBaseAsync(ct);
         await using (var master = await SqlRespaldos.AbrirAsync(opciones.Master(), ct))
         {
             int existe = await SqlRespaldos.EscalarAsync<int>(master, "SELECT COUNT(*) FROM sys.databases WHERE name=@db", ct, ("@db", opciones.BaseControl));

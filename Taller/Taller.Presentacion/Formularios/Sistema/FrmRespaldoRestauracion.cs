@@ -35,7 +35,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         _configurando = false;
         if (!_servicio.Habilitado)
         {
-            lblEstado.Text = "Configuración técnica pendiente. Instale la base de control y habilite Respaldos en todos los clientes. El agente funciona separado de SGTM. Consulte docs/respaldos/operacion.md con su técnico.";
+            lblEstado.Text = "Configuración técnica pendiente. Para Demo local, cierre SGTM y ejecute scripts/Preparar-RespaldosDemo.ps1 en el servidor como administrador de Windows. Luego reinicie Visual Studio. Para otras instalaciones consulte docs/respaldos/operacion.md.";
             tabs.Enabled = btnActualizar.Enabled = false;
             return;
         }
@@ -63,7 +63,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         {
             if (ex is Microsoft.Data.SqlClient.SqlException or Microsoft.EntityFrameworkCore.DbUpdateException)
             {
-                lblEstado.Text = "No se completó la operación SQL. Consulte la referencia de asistencia y el estado de control antes de repetir una recuperación.";
+                lblEstado.Text = "SQL Server no completó la operación. Compruebe la base de control, permisos SQL y permisos de la cuenta del servicio SQL sobre la carpeta del servidor. Consulte la referencia de asistencia antes de repetir una recuperación.";
                 Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Respaldos y recuperación");
             }
             else

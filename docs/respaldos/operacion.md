@@ -1,5 +1,7 @@
 # Respaldos y restauración de SGTM
 
+Para la demostración Windows local, existe una [preparación asistida](../instalacion/respaldos-locales-demo.md#preparación-asistida-de-demo-en-un-solo-equipo-windows) que habilita la configuración sin restaurar ni cargar datos.
+
 ## Alcance y decisiones
 
 El administrador dispone de cuatro apartados en **Respaldos y recuperación**: copias manuales, programación automática, restaurar e historial/aprobaciones. La misma pantalla muestra resultado, archivos del servidor y estado del agente. Los controles y eventos están en Designer; los servicios concentran autorización y reglas; Infraestructura ejecuta SQL nativo con conexiones independientes del contexto de negocio.

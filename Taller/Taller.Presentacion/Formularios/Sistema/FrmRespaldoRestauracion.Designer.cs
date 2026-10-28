@@ -155,7 +155,7 @@ partial class FrmRespaldoRestauracion
         tlpCopias.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tabCopias.Controls.Add(tlpCopias);
         lblManual.Dock = DockStyle.Fill;
-        lblManual.Text = "Carpeta absoluta del SERVIDOR SQL (no de esta PC). SQL Server debe poder escribir en ella. Completa crea una nueva base; diferencial necesita su completa base. Fechas de las copias: hora informada por SQL Server. No se eliminan copias automáticamente.";
+        lblManual.Text = "Carpeta absoluta del SERVIDOR SQL (no de esta PC). SQL Server debe poder escribir en ella. Completa copia toda la base de datos; diferencial copia los cambios desde su completa base. Fechas de las copias: hora informada por SQL Server. No se eliminan copias automáticamente.";
         tlpCopias.Controls.Add(lblManual, 0, 0);
         tlpCopias.Controls.Add(flpManual, 0, 1);
         tlpCopias.Controls.Add(dgvCopias, 0, 2);

@@ -26,3 +26,31 @@ Publicar e instalar un solo servicio de Windows siguiendo [operación](../respal
 ## Nube después de la prueba local
 
 Azure Blob Storage es réplica opcional de archivos, no el alojamiento de la base. Seguir [Azure](../respaldos/azure.md): contenedor privado, identidad Entra autorizada y ContenedorUri sin secretos. Probar copia local+remota verificada, fallo de transferencia y reintento. La identidad desatendida del servicio es distinta de una sesión interactiva de Visual Studio. No se afirma que exista una cuenta/contenedor real por disponer de las clases implementadas.
+
+## Preparación asistida de Demo en un solo equipo Windows
+
+Esta herramienta está limitada a `SGTM_DB_Demo` e instancia SQL local con autenticación Windows. No usarla para configurar producción ni para reemplazar datos. Cerrar SGTM, agente y Visual Studio. Actualizar main antes de ejecutarla.
+
+Abrir **Windows PowerShell como administrador de Windows**, entrar en la raíz del repositorio y ejecutar:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Preparar-RespaldosDemo.ps1
+```
+
+`Bypass` se limita a ese proceso; no cambia permanentemente la política del equipo. Revisar el script antes de ejecutarlo. La cuenta Windows debe tener acceso SQL a la Demo y permisos de crear la base de control; ser administrador de Windows no concede automáticamente permisos en SQL Server.
+
+La herramienta verifica acceso/esquema de Demo sin modificarlo, detecta la cuenta real del servicio SQL, crea `C:\SGTM\Respaldos` y concede a esa cuenta permiso Modify en esa carpeta. Instala y consulta `SGTM_DB_Demo_Control`; solo después habilita los perfiles Project F5 y prepara la configuración local del agente. Conserva las configuraciones anteriores fuera del repositorio, en `%LOCALAPPDATA%\SGTM\Configuracion`. No elimina copias, no restaura, no carga registros de negocio y no activa Azure. Si falla puede quedar la carpeta o la base de control creada; corregir el problema y repetir es admisible. No borre bases para resolver un fallo de preparación.
+
+Reabrir Visual Studio, reconstruir y ejecutar el perfil Project. Entrar como `demo.admin` y abrir Respaldos y recuperación. Crear una **Completa**, carpeta `C:\SGTM\Respaldos`, Azure desmarcado. Comprobar el mensaje, el archivo `.bak` y el catálogo. Esta copia real es la que comprueba los permisos efectivos de respaldo SQL y del sistema de archivos. Una carpeta creada o control consultable por sí solos no garantizan una copia correcta.
+
+### Comprobación de programación antes de instalar un servicio
+
+En otra PowerShell, con la misma cuenta Windows autorizada, desde la raíz:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Iniciar-AgenteDemo.ps1
+```
+
+Dejar esa terminal abierta. Como administrador SGTM, guardar un plan diario completo a unos minutos de la hora actual, zona Argentina y carpeta anterior. Actualizar estado hasta ver señal reciente y comprobar que aparece una copia nueva al llegar el horario, incluso cerrando SGTM. El agente consulta cada minuto. `Ctrl+C` o cerrar esa terminal detiene este modo de demostración; no presentarlo como servicio permanente. Para ejecución automática al arrancar Windows sin terminal, publicar e instalar el servicio con `Instalar-AgenteRespaldos.ps1` y su cuenta técnica, según la guía de operación.
+
+Para probar recuperación, seguir «Aceptación manual y recuperación» de esta guía. Primero ensayo sobre base temporal; después, si se decide reemplazar la Demo, doble aprobación y ventana de mantenimiento. No ejecutar una restauración mientras la segunda PC opera. En dos equipos, solo el servidor prepara carpeta/control/agente; todas las aplicaciones deben tener la misma base compartida y coordinación de mantenimiento activada. La configuración local F5 no configura conexiones de una aplicación publicada.

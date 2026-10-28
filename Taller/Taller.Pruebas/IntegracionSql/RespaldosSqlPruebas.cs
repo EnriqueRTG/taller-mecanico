@@ -33,6 +33,29 @@ public sealed class RespaldosSqlPruebas
     }
 
     [SqlRespaldoFact]
+    public async Task Preparacion_RechazaBaseInexistenteSinCrearControl()
+    {
+        await using var c = await Caso.CrearAsync();
+        string nombre = c.Nombre + "_Faltante", control = nombre + "_Control";
+        var conexion = new SqlConnectionStringBuilder(c.Conexion) { InitialCatalog = nombre }.ConnectionString;
+        var registro = new RegistroRespaldosSql(new OpcionesRespaldos(conexion, conexion, control, false));
+        try
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() => registro.InstalarAsync());
+            await using var master = new SqlConnection(c.Master);
+            await master.OpenAsync();
+            using var consulta = new SqlCommand("SELECT COUNT(*) FROM sys.databases WHERE name=@nombre", master);
+            consulta.Parameters.AddWithValue("@nombre", control);
+            Assert.Equal(0, Convert.ToInt32(await consulta.ExecuteScalarAsync()));
+        }
+        finally
+        {
+            // Limpieza exclusiva de un nombre aleatorio de esta prueba, aun si la aserción detecta una regresión.
+            await c.SqlAsync($"IF DB_ID(N'{control}') IS NOT NULL DROP DATABASE {SqlRespaldos.Identificador(control)}");
+        }
+    }
+
+    [SqlRespaldoFact]
     public async Task Azure_FalloDeReplica_ConservaCopiaVerificadaYPermiteReintentar()
     {
         await using var c = await Caso.CrearAsync();
@@ -80,6 +103,7 @@ public sealed class RespaldosSqlPruebas
                 INSERT dbo.__EFMigrationsHistory VALUES(N'PruebaAislada_1',N'10.0.11');
                 CREATE TABLE dbo.Roles(Id int PRIMARY KEY,Nombre nvarchar(50),Activo bit);INSERT dbo.Roles VALUES(1,N'Administrador',1),(2,N'Administrativo',1);
                 CREATE TABLE dbo.Usuarios(Id int PRIMARY KEY,RolId int,Activo bit,PasswordHash nvarchar(500));INSERT dbo.Usuarios VALUES(1,1,1,N'hash-admin'),(2,2,1,N'hash-recepcion');
+                CREATE TABLE dbo.Atenciones(IdAtencion int PRIMARY KEY);
                 CREATE TABLE dbo.DatosPrueba(Id int PRIMARY KEY,Valor nvarchar(100));INSERT dbo.DatosPrueba VALUES(1,N'Original');
                 """);
             c.Opciones = new OpcionesRespaldos(c.Conexion, c.Conexion, c.Nombre + "_Control", true)

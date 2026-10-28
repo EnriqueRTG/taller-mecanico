@@ -311,7 +311,7 @@ partial class FrmEvaluarAtencion
         tabIniciales.Controls.Add(tlpIniciales);
         tlpIniciales.Controls.Add(lblIniciales, 0, 0);
         lblIniciales.Dock = DockStyle.Fill;
-        lblIniciales.Text = "Aquí se registra la inspección extraordinaria previamente aceptada por el cliente: completada u omitida con motivo. Luego continúe el informe y presupuesto de reparación. No duplique este costo en la reparación.";
+        lblIniciales.Text = "Aquí se registra la inspección extraordinaria previamente aceptada por el cliente: no iniciada, en curso o completada; debe completarse antes de finalizar la evaluación. Luego continúe el informe y presupuesto de reparación. No duplique este costo en la reparación.";
         tlpIniciales.Controls.Add(dgvIniciales, 0, 1);
         dgvIniciales.Dock = DockStyle.Fill;
         dgvIniciales.AutoGenerateColumns = false;
@@ -330,7 +330,7 @@ partial class FrmEvaluarAtencion
         dgvIniciales.Columns.Add(new DataGridViewTextBoxColumn { Name = "colObservaciones", DataPropertyName = "Observaciones", HeaderText = "Justificación / observaciones", FillWeight = 160, MinimumWidth = 65, SortMode = DataGridViewColumnSortMode.NotSortable });
         dgvIniciales.ReadOnly = false;
         dgvIniciales.Columns[0].ReadOnly = true;
-        dgvIniciales.Columns.Add(new DataGridViewComboBoxColumn { Name = "colEstado", DataPropertyName = "Estado", HeaderText = "Ejecución", DataSource = new[] { Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.NoIniciado, Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.Completado, Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.Omitido }, FillWeight = 100 });
+        dgvIniciales.Columns.Add(new DataGridViewComboBoxColumn { Name = "colEstado", DataPropertyName = "Estado", HeaderText = "Ejecución", DataSource = new[] { Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.NoIniciado, Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.EnCurso, Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.Completado }, FillWeight = 100 });
         dgvIniciales.CellValueChanged += InicialModificado;
         dgvIniciales.DataError += ErrorGrilla;
         btnGuardar.Text = "Guardar avance";

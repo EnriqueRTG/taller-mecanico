@@ -53,12 +53,12 @@ public partial class FrmEjecutarAtencion : Form
             btnCompletar.Visible = false; // La selección de Completado ya sincroniza la cantidad.
             btnOtrasAcciones.Visible = propia;
             btnTomar.Visible = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
-            btnGuardar.Visible = btnFinalizar.Visible = btnInterrumpir.Visible = btnLiberar.Visible = chkConformidad.Visible = propia;
+            btnGuardar.Visible = btnFinalizar.Visible = btnLiberar.Visible = chkConformidad.Visible = propia;
             txtObservaciones.ReadOnly = !propia && _datos.IdTecnico != null;
             btnCompletar.Enabled = propia;
-            btnGuardar.Enabled = btnFinalizar.Enabled = btnInterrumpir.Enabled = btnLiberar.Enabled = propia;
+            btnGuardar.Enabled = btnFinalizar.Enabled = btnLiberar.Enabled = propia;
             btnTomar.Enabled = _datos.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == null;
-            lblAviso.Text = _datos.TieneExclusiones ? "El cliente excluyó ítems. Antes de tomar confirme que el alcance restante es viable y explique su revisión abajo." : "Revise el alcance antes de tomar. Solo se muestran ítems aceptados. Cerrar conserva su reserva.";
+            lblAviso.Text = _datos.TieneExclusiones ? "Se muestran solo los ítems elegidos por el cliente. La selección ya pasó por revisión técnica; inicie la ejecución para registrar avances." : "Revise el alcance antes de tomar. Solo se muestran ítems aceptados. Cerrar conserva su reserva.";
             chkConformidad.Enabled = propia;
             chkConformidad.Checked = false;
             _sucio = false;
@@ -136,7 +136,7 @@ public partial class FrmEjecutarAtencion : Form
             else if (columna == "colCantidadEjecutada")
             {
                 if (item.CantidadEjecutada == item.CantidadAutorizada) item.Estado = EstadoEjecucionDetalle.Completado;
-                else if (item.CantidadEjecutada >= 0 && item.CantidadEjecutada < item.CantidadAutorizada && item.Estado is not (EstadoEjecucionDetalle.Parcial or EstadoEjecucionDetalle.Omitido))
+                else if (item.CantidadEjecutada >= 0 && item.CantidadEjecutada < item.CantidadAutorizada)
                     item.Estado = EstadoEjecucionDetalle.EnCurso;
             }
             _items.ResetItem(e.RowIndex);
@@ -149,9 +149,9 @@ public partial class FrmEjecutarAtencion : Form
     private void ActualizarConformidad(object? sender, EventArgs e)
     {
         bool propia = _datos?.Estado == EstadoAtencion.EnEjecucion && _datos.IdTecnico == _sesion.UsuarioActual?.Id;
-        bool resueltos = !_controlNoDisponible && _pausasActivas.Count == 0 && _items.Count > 0 && _items.All(i => i.Estado is EstadoEjecucionDetalle.Completado or EstadoEjecucionDetalle.Omitido);
+        bool resueltos = !_controlNoDisponible && _pausasActivas.Count == 0 && _items.Count > 0 && _items.All(i => i.Estado == EstadoEjecucionDetalle.Completado);
         chkConformidad.Visible = propia && resueltos;
-        btnFinalizar.Visible = propia && resueltos;
+        btnFinalizar.Visible = propia && resueltos && chkConformidad.Checked;
         chkConformidad.Enabled = propia && resueltos;
         if (!resueltos) chkConformidad.Checked = false;
         btnFinalizar.Enabled = propia && resueltos && chkConformidad.Checked;
@@ -221,6 +221,8 @@ public partial class FrmEjecutarAtencion : Form
         lblAviso.Text = _controlNoDisponible ? "No se pudo verificar la continuidad. Se reintentará automáticamente; las ediciones se conservan."
             : _pausasActivas.Count > 0 ? "DETENCIÓN ACTIVA: " + string.Join("; ", _pausasActivas.Select(p => p.Alcance + ": " + p.Motivo))
             : "Solo trabajos autorizados. Guarde los avances; cerrar conserva la reserva. Control de pausas cada 10 segundos.";
+        btnGuardar.Visible = btnGuardar.Enabled;
+        btnTomar.Visible = btnTomar.Enabled;
         ActualizarConformidad(null, EventArgs.Empty);
     }
 
@@ -244,8 +246,7 @@ public partial class FrmEjecutarAtencion : Form
 
     private async void Guardar(object? s, EventArgs e) => await PersistirAsync(false);
     private async void Finalizar(object? s, EventArgs e) => await PersistirAsync(true);
-    private async void Interrumpir(object? s, EventArgs e) => await PersistirAsync(true, true);
-    private async Task PersistirAsync(bool finalizar, bool interrumpir = false)
+    private async Task PersistirAsync(bool finalizar)
     {
         if (_ocupado || _datos == null)
             return;
@@ -253,10 +254,10 @@ public partial class FrmEjecutarAtencion : Form
             return;
         if (dgvItems.DataSource != null)
             BindingContext?[dgvItems.DataSource]?.EndCurrentEdit();
-        if (finalizar && MessageBox.Show(this, interrumpir ? "¿Terminar como reparación interrumpida? Solo se liquidará lo autorizado y efectivamente realizado. Debe explicar la causa." : "¿Finalizar el trabajo? Resuelva todos los ítems como completados u omitidos con motivo.", "Terminar ejecución", MessageBoxButtons.YesNo) != DialogResult.Yes)
+        if (finalizar && MessageBox.Show(this, "¿Finalizar el trabajo? Todos los ítems autorizados deben estar completados y comprobados.", "Terminar ejecución", MessageBoxButtons.YesNo) != DialogResult.Yes)
             return;
         _datos.Items = _items.ToList();
-        if (finalizar && !interrumpir && !chkConformidad.Checked)
+        if (finalizar && !chkConformidad.Checked)
         {
             MessageBox.Show(this, "Compruebe el resultado y marque la conformidad técnica antes de finalizar.");
             return;
@@ -264,7 +265,7 @@ public partial class FrmEjecutarAtencion : Form
         _datos.ConformidadTecnica = chkConformidad.Checked;
         _datos.Observaciones = txtObservaciones.Text;
         bool guardado = false;
-        await OperarAsync(async () => { await _servicio.GuardarAsync(_datos, finalizar, interrumpir); guardado = true; });
+        await OperarAsync(async () => { await _servicio.GuardarAsync(_datos, finalizar); guardado = true; });
         if (guardado && finalizar)
         {
             _sucio = false;
@@ -277,9 +278,8 @@ public partial class FrmEjecutarAtencion : Form
     private string _destinoSeguimiento = "tabHallazgos";
     private void MostrarOpciones(object? s, EventArgs e)
     {
-        foreach (ToolStripItem item in menuOpciones.Items) item.Enabled = btnGuardar.Enabled;
-        // Permite consultar/resolver la pausa aunque la edición esté bloqueada.
-        foreach (ToolStripItem item in menuOpciones.Items) item.Enabled = !_controlNoDisponible;
+        // La pausa puede consultarse y resolverse aunque bloquee la edición.
+        foreach (ToolStripItem item in menuOpciones.Items) item.Visible = item.Enabled = !_controlNoDisponible;
         menuOpciones.Show(btnOtrasAcciones, new Point(0, btnOtrasAcciones.Height));
     }
     private void Hallazgos(object? s, EventArgs e) { _destinoSeguimiento = "tabHallazgos"; Seguimiento(s, e); }

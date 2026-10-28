@@ -37,10 +37,10 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             throw new ValidacionException("Otro técnico tiene reservada la actividad. Debe liberarla antes de esta intervención.");
     }
 
-    private async Task GuardarAsync(Atencion a, Usuario u, string accion, string nota)
+    private async Task GuardarAsync(Atencion a, Usuario u, string accion, string nota, EstadoAtencion? anterior = null)
     {
         repositorio.PrepararVersion(a, a.Version);
-        repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Accion = accion, EstadoAnterior = a.Estado, EstadoNuevo = a.Estado, Observaciones = nota.Length > 2000 ? nota[..2000] : nota });
+        repositorio.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = u.Id, Fecha = FechaHoraTaller.Ahora, Accion = accion, EstadoAnterior = anterior ?? a.Estado, EstadoNuevo = a.Estado, Observaciones = nota.Length > 2000 ? nota[..2000] : nota });
         await unidad.GuardarCambiosAsync();
     }
 
@@ -246,7 +246,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
         }
     }
 
-    public async Task<int> RevisarSeleccionAsync(int id, byte[] version, List<ItemPropuestaDto> items, string justificacion)
+    public async Task<int> RevisarSeleccionAsync(int id, byte[] version, List<ItemPropuestaDto> items, string justificacion, bool condicionesModificadas = false)
     {
         try
         {
@@ -261,6 +261,28 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             if (items is null || items.Any(i => i is null || i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
                 throw new ValidacionException("Revise las solicitudes asociadas a los ítems de la revisión.");
             justificacion = AutorizacionOperativa.Texto(justificacion);
+            var seleccion = p.Detalles.Where(d => d.AceptadoPorCliente == true).ToList();
+            // Solo una selección parcial real del cliente puede autorizarse sin otra decisión.
+            // Cambiar importe, cantidad, descripción, origen o solicitud exige una propuesta nueva.
+            bool mismaSeleccion = !condicionesModificadas && seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
+                && p.FechaDecision.HasValue && p.IdUsuarioDecision.HasValue
+                && items.Count == seleccion.Count
+                && items.Select(i => (i.IdConcepto, i.IdSolicitudAtencion)).Distinct().Count() == items.Count
+                && items.All(i => seleccion.Any(d => d.IdConcepto == i.IdConcepto && d.IdSolicitudAtencion == i.IdSolicitudAtencion
+                    && d.Descripcion == i.Descripcion && d.Cantidad == i.Cantidad
+                    && d.PrecioUnitario == i.PrecioUnitario && d.OrigenMaterial == i.OrigenMaterial));
+            if (mismaSeleccion)
+            {
+                if (p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado))
+                    throw new ValidacionException("La propuesta ya tiene ejecución registrada.");
+                var anterior = a.Estado;
+                p.Estado = EstadoPresupuesto.Aceptado;
+                p.AlcanceValidado = true;
+                if (!p.EsAdicional) a.Estado = EstadoAtencion.EnEjecucion;
+                // La decisión original conserva persona, medio, fecha y usuario de recepción.
+                await GuardarAsync(a, u, "SeleccionClienteValidada", $"Presupuesto {id}: selección del cliente validada sin cambios; no requiere nueva aceptación. {justificacion}", anterior);
+                return p.IdPresupuesto;
+            }
             p.Vigente = false;
             var nueva = new Presupuesto
             {

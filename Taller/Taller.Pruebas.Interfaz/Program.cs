@@ -44,6 +44,7 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        VerificarAccionesContextuales();
         VerificarFiltrosListados(proveedor);
         VerificarUniformidadListados(proveedor);
         VerificarRecorridoTecnico(proveedor);
@@ -58,6 +59,22 @@ internal static class Program
         VerificarNavegacionDocumento();
         return 0;
     }
+    private static void VerificarAccionesContextuales()
+    {
+        using var panel = new Panel { Enabled = false };
+        using var boton = new Button { Enabled = true };
+        panel.Controls.Add(boton);
+        var metodo = typeof(FrmPrincipal).Assembly.GetType("Taller.Presentacion.Estilos.AccionesContextuales")!.GetMethod("Actualizar")!;
+        metodo.Invoke(null, [new Control[] { boton }]);
+        panel.Enabled = true;
+        if (!boton.Visible) throw new InvalidOperationException("Recargar un panel no debe ocultar una acción que vuelve a estar disponible.");
+        boton.Enabled = false; metodo.Invoke(null, [new Control[] { boton }]);
+        if (boton.Visible) throw new InvalidOperationException("Una acción sin selección/etapa no debe quedar visible deshabilitada.");
+        boton.Enabled = true; metodo.Invoke(null, [new Control[] { boton }]);
+        if (!boton.Visible) throw new InvalidOperationException("La acción debe reaparecer al cumplirse la condición.");
+        Console.WriteLine("Acciones contextuales: ocultas sin condición y recuperadas después de una recarga.");
+    }
+
     private static void VerificarContextoSeguimiento(IServiceProvider proveedor)
     {
         using var scope = proveedor.CreateScope();
@@ -213,6 +230,8 @@ internal static class Program
         _ = formulario.Handle;
         var grilla = (DataGridView)formulario.Controls.Find("dgvItems", true).Single();
         _ = grilla.Handle;
+        var opciones = (System.Collections.IEnumerable)((DataGridViewComboBoxColumn)grilla.Columns["colEstado"]!).DataSource!;
+        if (opciones.Cast<object>().Count() != 3) throw new InvalidOperationException("La ejecución debe ofrecer solo tres estados.");
         grilla.DataSource = lista;
         tipo.GetField("_cargando", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(formulario, false);
         item.Estado = Taller.Dominio.Enumeraciones.EstadoEjecucionDetalle.Completado;

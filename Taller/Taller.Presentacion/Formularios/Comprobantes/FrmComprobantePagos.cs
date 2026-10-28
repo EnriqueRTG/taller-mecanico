@@ -79,6 +79,7 @@ public partial class FrmComprobantePagos : Form
         btnRecibo.Enabled = PagoSeleccionado != null;
         btnAnular.Visible = _datos?.Comprobante?.Pagos.Any(p => !p.Anulado) == true && (_datos.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion);
         btnAnular.Enabled = PagoSeleccionado is { Anulado: false } && (_datos?.Estado is EstadoAtencion.TrabajoFinalizado or EstadoAtencion.PendienteLiquidacion);
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnRecibo, btnAnular);
     }
 
     private async Task OperarAsync(Func<Task> accion)

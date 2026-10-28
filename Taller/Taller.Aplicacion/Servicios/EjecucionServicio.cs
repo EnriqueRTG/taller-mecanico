@@ -63,7 +63,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             var detalles = propuestas.SelectMany(p => p.Detalles).ToList();
             if (a.Estado != EstadoAtencion.EnEjecucion || a.IdTecnicoEnActividad != null || await circuito.ObtenerPorAtencionAsync(id) != null)
                 throw new ValidacionException("La ejecución no está disponible para tomar.");
-            var motivo = AutorizacionOperativa.Texto(observaciones, detalles.Any(d => d.AceptadoPorCliente != true));
+            var motivo = AutorizacionOperativa.Texto(observaciones, detalles.Any(d => d.AceptadoPorCliente != true) && propuestas.Any(p => !p.AlcanceValidado));
             a.IdTecnicoEnActividad = u.Id;
             a.ActividadTecnica = ActividadTecnica.Ejecucion;
             foreach (var p in propuestas)
@@ -104,7 +104,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             throw new ValidacionException("Debe tomar esta ejecución con su usuario antes de modificarla.");
     }
 
-    public async Task GuardarAsync(EjecucionAtencionDto datos, bool finalizar, bool interrumpir = false)
+    public async Task GuardarAsync(EjecucionAtencionDto datos, bool finalizar)
     {
         ArgumentNullException.ThrowIfNull(datos);
         try
@@ -120,10 +120,10 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             var items = detalles.Where(d => d.AceptadoPorCliente == true).ToDictionary(d => d.IdPresupuestoDetalle);
             if (datos.Items is null || datos.Items.Any(d => d is null) || datos.Items.Count != items.Count || datos.Items.Select(d => d.IdDetalle).Distinct().Count() != items.Count)
                 throw new ValidacionException("Los ítems autorizados cambiaron. Actualice la ejecución.");
-            if (finalizar && !interrumpir && a.Solicitudes.Count > 0 && !datos.ConformidadTecnica)
+            if (finalizar && !datos.ConformidadTecnica)
                 throw new ValidacionException("Confirme la comprobación final y la conformidad técnica antes de finalizar.");
-            var motivo = AutorizacionOperativa.Texto(datos.Observaciones, interrumpir);
-            if (finalizar && !interrumpir && datos.ConformidadTecnica)
+            var motivo = AutorizacionOperativa.Texto(datos.Observaciones, false);
+            if (finalizar && datos.ConformidadTecnica)
                 motivo = "El técnico comprobó el resultado y dio su conformidad sobre los trabajos realizados. " + motivo;
             foreach (var registro in datos.Items)
             {
@@ -131,16 +131,20 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
                     throw new ValidacionException("No puede ejecutar un ítem excluido o ajeno.");
                 var q = registro.CantidadEjecutada;
                 var estado = registro.Estado;
-                if (!Enum.IsDefined(estado) || estado == EstadoEjecucionDetalle.Parcial && q <= 0 || q < d.CantidadEjecutada || q < 0 || q > d.Cantidad || decimal.Round(q, 3) != q || estado == EstadoEjecucionDetalle.Completado && q != d.Cantidad || estado is EstadoEjecucionDetalle.NoIniciado or EstadoEjecucionDetalle.Omitido && q != 0 || estado is EstadoEjecucionDetalle.Parcial or EstadoEjecucionDetalle.EnCurso && q >= d.Cantidad || d.EstadoEjecucion == EstadoEjecucionDetalle.Omitido && estado != EstadoEjecucionDetalle.Omitido)
+                if (!Enum.IsDefined(estado) || q < d.CantidadEjecutada || q < 0 || q > d.Cantidad || decimal.Round(q, 3) != q
+                    || estado == EstadoEjecucionDetalle.Completado && q != d.Cantidad
+                    || estado == EstadoEjecucionDetalle.NoIniciado && q != 0
+                    || estado == EstadoEjecucionDetalle.EnCurso && q >= d.Cantidad
+                    || d.EstadoEjecucion == EstadoEjecucionDetalle.Completado && estado != EstadoEjecucionDetalle.Completado)
                     throw new ValidacionException($"Revise estado y cantidad de «{d.Descripcion}». No puede disminuir lo registrado ni superar lo autorizado.");
                 var cambia = q != d.CantidadEjecutada || estado != d.EstadoEjecucion;
-                if (cambia && estado != EstadoEjecucionDetalle.Omitido && a.Pausas.Any(p => p.FechaResolucion == null && (p.IdDetalle == null || p.IdDetalle == d.IdPresupuestoDetalle)))
+                if (cambia && a.Pausas.Any(p => p.FechaResolucion == null && (p.IdDetalle == null || p.IdDetalle == d.IdPresupuestoDetalle)))
                     throw new ValidacionException($"La tarea «{d.Descripcion}» está pausada. Resuelva la causa antes de continuar.");
                 if (d.OrigenMaterial == OrigenMaterial.Cliente && (q > d.CantidadRecibidaCliente || (q > 0 || estado == EstadoEjecucionDetalle.EnCurso) && !d.MaterialClienteConforme))
                     throw new ValidacionException("El material del cliente debe estar recibido y conforme antes de utilizarlo.");
-                var nota = AutorizacionOperativa.Texto(registro.Observaciones, estado is EstadoEjecucionDetalle.Omitido or EstadoEjecucionDetalle.Parcial);
-                if (finalizar && (estado is EstadoEjecucionDetalle.NoIniciado or EstadoEjecucionDetalle.EnCurso || !interrumpir && estado == EstadoEjecucionDetalle.Parcial))
-                    throw new ValidacionException("Antes de terminar resuelva cada ítem: completado u omitido con motivo. Una interrupción admite cantidades parciales justificadas.");
+                var nota = AutorizacionOperativa.Texto(registro.Observaciones, false);
+                if (finalizar && estado != EstadoEjecucionDetalle.Completado)
+                    throw new ValidacionException("Para finalizar debe completar todos los ítems autorizados. Guarde el avance o registre una pausa si todavía no puede continuar.");
                 if (d.CantidadEjecutada != q || d.EstadoEjecucion != estado || (d.ObservacionesEjecucion ?? "") != nota)
                 {
                     Evento(a, u, "ItemEjecucionActualizado", a.Estado,
@@ -158,13 +162,13 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             var anterior = a.Estado;
             if (finalizar)
             {
-                a.Estado = interrumpir ? EstadoAtencion.PendienteLiquidacion : EstadoAtencion.TrabajoFinalizado;
+                a.Estado = EstadoAtencion.TrabajoFinalizado;
                 a.IdTecnicoEnActividad = null;
                 a.ActividadTecnica = null;
             }
 
             repositorio.PrepararVersion(a, datos.Version);
-            Evento(a, u, finalizar ? (interrumpir ? "EjecucionInterrumpida" : "TrabajoFinalizado") : "EjecucionAvanceGuardado", anterior, motivo.Length > 0 ? motivo : "Se registró el avance de los ítems autorizados.");
+            Evento(a, u, finalizar ? "TrabajoFinalizado" : "EjecucionAvanceGuardado", anterior, motivo.Length > 0 ? motivo : "Se registró el avance de los ítems autorizados.");
             await unidad.GuardarCambiosAsync();
         }
         finally

@@ -5,6 +5,7 @@ namespace Taller.Aplicacion.DTOs.Presupuestos;
 public sealed class PresupuestoGestionDto
 {
     public bool EsAdicional { get; set; }
+    public bool EsInspeccion { get; set; }
     public int IdPresupuesto { get; set; }
     public int IdAtencion { get; set; }
     public EstadoPresupuesto Estado { get; set; }

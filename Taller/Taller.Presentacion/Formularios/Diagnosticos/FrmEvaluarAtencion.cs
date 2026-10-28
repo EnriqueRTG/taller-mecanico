@@ -98,8 +98,8 @@ public partial class FrmEvaluarAtencion : Form
         btnSeguimiento.Visible = informe;
         chkSinPropuesta.Enabled = informe && _items.Count == 0;
         if (!informe) chkSinPropuesta.Checked = false;
-        btnAgregar.Enabled = !chkSinPropuesta.Checked;
-        btnQuitar.Enabled = !chkSinPropuesta.Checked && _items.Count > 0;
+        btnAgregar.Visible = btnAgregar.Enabled = !chkSinPropuesta.Checked;
+        btnQuitar.Visible = btnQuitar.Enabled = !chkSinPropuesta.Checked && _items.Count > 0;
         lblAviso.Text = informe ? "Complete el informe y el presupuesto. Guarde un borrador para continuar después." : "Presupueste lo solicitado. Enviar a recepción no autoriza ejecutar trabajos.";
         // La clasificación de recepción orienta, pero no obliga a inventar un diagnóstico.
         if (_datos.TipoSolicitud == TipoSolicitudAtencion.ServicioDefinido) tabs.SelectedTab = tabPropuesta;
@@ -181,7 +181,7 @@ public partial class FrmEvaluarAtencion : Form
     {
         lblTotal.Text = $"{_items.Count} ítems · Total propuesto: {_items.Sum(i => i.Subtotal):N2} ARS · Cantidad y precio editables en la lista.";
         chkSinPropuesta.Enabled = chkInforme.Checked && _items.Count == 0;
-        btnQuitar.Enabled = _items.Count > 0;
+        btnQuitar.Visible = btnQuitar.Enabled = _items.Count > 0;
     }
 
     private void ValidarItem(object? s, DataGridViewCellValidatingEventArgs e)

@@ -124,6 +124,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
     {
         btnEnsayar.Enabled = dgvCopias.SelectedRows.Count == 1;
         btnRestaurar.Enabled = _plan != null;
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnEnsayar, btnRestaurar);
     }
 
     private void DgvCopias_SelectionChanged(object? sender, EventArgs e)

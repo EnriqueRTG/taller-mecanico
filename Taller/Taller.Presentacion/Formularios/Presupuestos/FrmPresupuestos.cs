@@ -94,7 +94,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         flpAcciones.Controls.SetChildIndex(btnRevision, flpAcciones.Controls.Count - 1);
         btnSeguimiento.Text = recepcion ? "Consultar seguimiento" : "Seguimiento y hallazgos";
         lblAyuda.Text = Fila is null ? "Seleccione un presupuesto. Los borradores se continúan en Preparación técnica. Las acciones dependen del estado y del rol."
-            : Fila.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? "Selección parcial: el técnico debe comprobar su viabilidad. Luego recepción presenta la nueva versión y registra otra decisión. Aún no autoriza trabajos."
+            : Fila.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? "Selección parcial: el técnico debe comprobar su viabilidad. Sin cambios, la validación habilita los ítems elegidos. Si se reformula, recepción presenta otra propuesta para su aceptación."
             : Fila.Estado == EstadoPresupuesto.Borrador ? "Borrador: el técnico debe continuarlo y enviarlo desde Preparación técnica antes de informar al cliente."
             : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Propuesta emitida: informe al cliente. Si detecta una falta o error, Pedir corrección técnica devuelve la propuesta al técnico; no modifica ni autoriza trabajos."
             : "Solicitar revisión conserva esta versión y pide otra al técnico; solo es posible sin ejecución ni liquidación. La ejecución requiere aceptación del cliente.";
@@ -107,6 +107,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         btnVer.Enabled = btnSeguimiento.Enabled = !_ocupado && Fila != null;
         btnValidarSeleccion.Enabled = !_ocupado && tecnico && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
         btnPresentar.Enabled = !_ocupado && _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendientePresentacion };
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnPresentar, btnDecidir, btnRevision, btnValidarSeleccion, btnVer, btnSeguimiento);
     }
 
     private void Ver(object? s, EventArgs e)

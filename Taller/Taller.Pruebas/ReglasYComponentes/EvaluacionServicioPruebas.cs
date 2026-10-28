@@ -223,19 +223,19 @@ public sealed class EvaluacionServicioPruebas
     }
 
     [Fact]
-    public async Task ServicioInicialOmitido_ExigeJustificacionYConservaCantidadEjecutadaCero()
+    public async Task InspeccionEnCurso_NoPermiteFinalizarHastaCompletarse()
     {
         using var e = new Escenario();
         await AutorizarInspeccionAsync(e);
         e.Entrar(1); await e.Servicio.TomarAsync(1); var d = await e.Servicio.ObtenerAsync(1);
-        d.InspeccionesAutorizadas[0].Estado = EstadoEjecucionDetalle.Omitido;
-        await Assert.ThrowsAsync<ValidacionException>(() => e.Servicio.GuardarAsync(d, false));
-        d.InspeccionesAutorizadas[0].Observaciones = "No fue necesario realizarlo.";
+        d.InspeccionesAutorizadas[0].Estado = EstadoEjecucionDetalle.EnCurso;
         await e.Servicio.GuardarAsync(d, false);
-        var detalle = await e.Db.PresupuestoDetalles.SingleAsync();
-        Assert.Equal(EstadoEjecucionDetalle.Omitido, detalle.EstadoEjecucion);
-        Assert.Equal(0, detalle.CantidadEjecutada);
-        Assert.Equal("No fue necesario realizarlo.", detalle.ObservacionesEjecucion);
+        d = await e.Servicio.ObtenerAsync(1);
+        d.FallaDetectada = "Resultado de inspección"; d.TrabajoRecomendado = "Reparación necesaria"; d.Items.Add(Escenario.Item());
+        await Assert.ThrowsAsync<ValidacionException>(() => e.Servicio.GuardarAsync(d, true));
+        d.InspeccionesAutorizadas[0].Estado = EstadoEjecucionDetalle.Completado;
+        await e.Servicio.GuardarAsync(d, true);
+        Assert.Equal(EstadoEjecucionDetalle.Completado, (await e.Db.PresupuestoDetalles.FirstAsync()).EstadoEjecucion);
     }
 
     [Fact]

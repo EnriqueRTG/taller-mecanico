@@ -92,7 +92,7 @@ public static class CargadorDemostracion
             if (i % 3 == 2) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Control preventivo de niveles y luces solicitado por el cliente" });
             var atencion = await recepcionServicio.RegistrarRecepcionAsync(new() {
                 IdCliente = idsClientes[i % idsClientes.Count], IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
-                Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Recepción DEMO v3: ingreso documentado, sin cargos automáticos.", Solicitudes = solicitudes
+                Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Recepción DEMO v4: ingreso documentado, sin cargos automáticos.", Solicitudes = solicitudes
             });
             int id = atencion.IdAtencion;
             if (etapa == 0)
@@ -201,6 +201,16 @@ public static class CargadorDemostracion
 
             var gestion = await Actual(propuesta.IdPresupuesto);
             await presupuestos.DecidirAsync(new() { PersonaDecision = nombreCliente, MedioDecision = "Presencial", IdPresupuesto = gestion.IdPresupuesto, Version = gestion.Version, ItemsAceptados = etapa == 5 ? [] : etapa == 6 ? [gestion.Items[0].IdDetalle] : gestion.Items.Select(x => x.IdDetalle).ToList(), Observaciones = etapa == 5 ? "Cliente rechaza la propuesta y solicita coordinar el retiro." : etapa == 6 ? "Cliente solicita solo una parte; requiere revisión técnica." : "Cliente acepta el alcance y sus importes." });
+            if (etapa == 6 && i == 22)
+            {
+                await Entrar(tecnico);
+                var seleccion = await presupuestos.ObtenerAsync(gestion.IdPresupuesto);
+                await seguimiento.RevisarSeleccionAsync(seleccion.IdPresupuesto, seleccion.Version,
+                    seleccion.Items.Where(x => x.Aceptar).Select(x => new ItemPropuestaDto { IdSolicitudAtencion = x.IdSolicitudAtencion,
+                        IdConcepto = x.IdConcepto, Descripcion = x.Descripcion, Cantidad = x.Cantidad,
+                        PrecioUnitario = x.PrecioUnitario, OrigenMaterial = x.OrigenMaterial }).ToList(),
+                    "Se verificó que el servicio elegido puede realizarse de forma independiente, sin modificar lo autorizado.");
+            }
             if (etapa == 6 && i >= 32)
             {
                 await Entrar(tecnico);
@@ -265,16 +275,6 @@ public static class CargadorDemostracion
             }
 
             trabajo = await ejecucion.ObtenerAsync(id);
-            if (etapa == 11 && i >= 32)
-            {
-                trabajo.Items[0].Estado = EstadoEjecucionDetalle.Parcial;
-                trabajo.Items[0].CantidadEjecutada = 0.5m;
-                trabajo.Items[0].Observaciones = "Intervención parcialmente realizada; se documenta el alcance efectivo antes de detener definitivamente.";
-                foreach (var pendiente in trabajo.Items.Skip(1)) { pendiente.Estado = EstadoEjecucionDetalle.Omitido; pendiente.CantidadEjecutada = 0; pendiente.Observaciones = "No realizado por interrupción solicitada."; }
-                trabajo.Observaciones = "El cliente desiste de continuar; se documenta interrupción sin afirmar reparación completa.";
-                await ejecucion.GuardarAsync(trabajo, true, true);
-                await FecharAsync(db, id, i); continue;
-            }
             foreach (var item in trabajo.Items)
             {
                 item.Estado = EstadoEjecucionDetalle.Completado;

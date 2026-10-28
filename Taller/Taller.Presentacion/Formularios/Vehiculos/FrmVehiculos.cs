@@ -121,6 +121,7 @@ public partial class FrmVehiculos : Form, IFormularioConOperacion
         btnCambiarEstado.Text = activo ? "Deshabilitar vehículo" : "Habilitar vehículo";
         btnCambiarEstado.ForeColor = activo ? Color.FromArgb(185, 28, 28) : Color.FromArgb(30, 64, 175);
         btnCambiarEstado.FlatAppearance.BorderColor = btnCambiarEstado.ForeColor;
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnEditarUsuario, btnGestionarCredenciales, btnCambiarEstado);
     }
 
     private async void BtnNuevoVehiculo_Click(object? sender, EventArgs e)

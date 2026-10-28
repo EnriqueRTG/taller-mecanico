@@ -119,6 +119,10 @@ public partial class FrmSeguimientoTrabajo : Form
             && dgvHallazgos.CurrentRow?.DataBoundItem is HallazgoConsultaDto;
         btnResolver.Enabled = _datos.PuedeRegistrar && dgvPausas.CurrentRow?.DataBoundItem is PausaConsultaDto { FechaResolucion: null };
         btnRecibir.Enabled = _datos.PuedeRegistrar && dgvMateriales.CurrentRow?.DataBoundItem is MaterialTrabajoDto;
+        btnHallazgo.Visible = btnHallazgo.Enabled = _datos.PuedeRegistrar && pestana == "tabHallazgos";
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnAdicional, btnResolver, btnRecibir, btnExportarAvance, btnImprimirInforme);
+        btnPausar.Visible = btnPausar.Enabled = _datos.PuedePausar && pestana == "tabPausas";
+
     }
 
     private int? Tarea => cboTarea.SelectedItem is MaterialTrabajoDto { IdDetalle: > 0 } i ? i.IdDetalle : null;
@@ -172,7 +176,7 @@ public partial class FrmSeguimientoTrabajo : Form
     {
         if (_datos == null || _ocupado || dgvPausas.CurrentRow?.DataBoundItem is not PausaConsultaDto p || p.FechaResolucion != null)
             return;
-        using var f = new FrmSolicitarMotivo("Resolver pausa bajo responsabilidad técnica", "Explique si ya puede retomar, continuar solo otras tareas o terminar con interrupción justificada. Resolver la pausa no ejecuta ni autoriza trabajos adicionales.");
+        using var f = new FrmSolicitarMotivo("Resolver pausa bajo responsabilidad técnica", "Explique si ya puede retomar, continuar solo otras tareas o coordinar las tareas pendientes. Resolver la pausa no ejecuta ni autoriza trabajos adicionales.");
         if (f.ShowDialog(this) == DialogResult.OK)
             await OperarAsync(() => _servicio.ResolverPausaAsync(_id, _datos.Version, p.Id, f.Motivo));
     }

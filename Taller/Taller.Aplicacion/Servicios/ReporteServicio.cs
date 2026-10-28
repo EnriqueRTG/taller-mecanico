@@ -23,7 +23,15 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         TipoReporte.ActividadTecnica => "Actividad técnica registrada",
         TipoReporte.ConceptosRealizados => "Conceptos realizados registrados",
         _ => throw new ValidacionException("Tipo de reporte inválido.")};
-    public static string Legible(string valor) => Regex.Replace(valor, "([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])", "$1 $2");
+    public static string Legible(string valor) => valor switch
+    {
+        "SeleccionClienteValidada" => "Selección del cliente validada",
+        "SeleccionParcialRevisada" => "Selección reformulada por el técnico",
+        "EjecucionAvanceGuardado" => "Avance de ejecución guardado",
+        "EvaluacionAvanceGuardado" => "Avance de evaluación guardado",
+        "PausaResuelta" => "Pausa resuelta",
+        _ => Regex.Replace(valor, "([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])", "$1 $2")
+    };
     public static IReadOnlyList<TipoReporte> TiposParaRol(int rol) => rol switch
     {
         RolesSistema.AdministradorId => Enum.GetValues<TipoReporte>(),
@@ -98,7 +106,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             int decididos = registros.Count(x => x.Grupo is "Aceptado" or "Rechazado"), aceptados = registros.Count(x => x.Grupo == "Aceptado");
             indicadores.Add(new("Aceptación entre decididos", decididos == 0 ? "Sin decisiones" : ((decimal)aceptados / decididos).ToString("P1", Cultura)));
             indicadores.Add(new("Importe autorizado · ARS", Dinero(registros.Sum(x => x.ImporteAceptado ?? 0))));
-            metodologia = "Cohorte por fecha de creación: solo propuestas de reparación vigentes; excluye servicios iniciales y versiones reemplazadas. Estado actual al generar. Aceptación = propuestas aceptadas total o parcialmente / aceptadas y rechazadas; no incluye pendientes. Importe autorizado conserva precios de la propuesta y no representa cobros.";
+            metodologia = "Cohorte por fecha de creación: propuestas vigentes, incluidas inspecciones y adicionales; excluye versiones reemplazadas. Estado actual al generar. Aceptación = propuestas aceptadas total o parcialmente / aceptadas y rechazadas; no incluye pendientes. Importe autorizado conserva precios de la propuesta y no representa cobros.";
             recomendacion = "Revisar propuestas pendientes de presentación o decisión y las exclusiones antes de ejecutar.";
         }
         else if (solicitud.Tipo == TipoReporte.ConceptosRealizados)
@@ -117,7 +125,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         else if (solicitud.Tipo == TipoReporte.ActividadTecnica)
         {
             metodologia = "Eventos del historial realizados por usuarios técnicos durante el período. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos.";
-            recomendacion = "Identificar interrupciones y liberaciones frecuentes para revisar causas y coordinar continuidad de las atenciones.";
+            recomendacion = "Identificar pausas y liberaciones frecuentes para revisar causas y coordinar continuidad de las atenciones.";
         }
         else
         {
@@ -128,7 +136,12 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
 
         var grafico = registros.GroupBy(x => Legible(x.Grupo)).Select(g => new PuntoReporteDto(g.Key, monetario ? g.Sum(x => x.Importe ?? 0) : g.Count())).OrderByDescending(x => Math.Abs(x.Valor)).ThenBy(x => x.Etiqueta).ToList();
         if (grafico.Count > 8)
-            grafico = grafico.Take(7).Append(new PuntoReporteDto("Otras categorías", grafico.Skip(7).Sum(x => x.Valor))).ToList();
+        {
+            var resto = grafico.Skip(7).ToList();
+            metodologia += " El gráfico muestra siete categorías principales y un resto desglosado: "
+                + string.Join("; ", resto.Select(p => $"{p.Etiqueta}: {p.Valor.ToString(monetario ? "N2" : "N0", Cultura)} {(monetario ? "ARS" : "registros")}")) + ". Todos los registros se conservan en el detalle.";
+            grafico = grafico.Take(7).Append(new PuntoReporteDto($"Resto ({resto.Count} categorías; ver desglose)", resto.Sum(x => x.Valor))).ToList();
+        }
         return new ReporteDocumentoDto
         {
             EstadosDisponibles = estadosDisponibles,

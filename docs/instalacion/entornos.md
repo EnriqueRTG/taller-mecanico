@@ -9,7 +9,7 @@ Los nombres SGTM_Pruebas_* son bases temporales de CI, no instalaciones que deba
 
 ## Preparar una base nueva (cambio de esquema)
 
-Esta versión elimina la cadena de migraciones anterior y la reemplaza por una única migración inicial. **No ejecutar Update-Database sobre una base creada por versiones anteriores ni restaurar un respaldo de esa versión para usarlo con este código.** Se retiraron columnas, clasificaciones y rutas antiguas por decisión de alcance del proyecto.
+El esquema vigente parte de EsquemaInicialCircuitoActual y agrega SimplificarEjecucionTresEstados. Ver [actualización](actualizacion-coloquio.md) antes de cambiar una base existente. **No ejecutar Update-Database sobre una base creada por versiones anteriores ni restaurar un respaldo de esa versión para usarlo con este código.** Se retiraron columnas, clasificaciones y rutas antiguas por decisión de alcance del proyecto.
 
 1. Guardar y actualizar el código. Cerrar aplicación y agente de respaldos del entorno que va a reemplazarse.
 2. En SSMS confirmar la instancia y base Demo. Para los equipos de demostración se usa SGTM_DB_Demo. Si aún contiene el esquema anterior y se decidió descartar ese lote, eliminar únicamente esa base desde SSMS, confirmando el destino. El cargador la recrea; no hace falta inventar otro nombre.
@@ -45,7 +45,7 @@ El sistema de negocio sigue conectado a SQL Server. Los archivos de respaldo se 
 
 ## Verificación antes de F5
 
-El cargador informa DEMO v3 completo: 19 clientes (3 inactivos), 48 vehículos (2 inactivos) y 48 atenciones. El catálogo contiene 157 conceptos de oferta más uno inactivo para filtros. Cada precio y unidad se define expresamente, sin precios genéricos heredados del catálogo mínimo.
+El cargador informa DEMO v4 completo: 19 clientes (3 inactivos), 48 vehículos (2 inactivos) y 48 atenciones. El catálogo contiene 157 conceptos de oferta más uno inactivo para filtros. Cada precio y unidad se define expresamente, sin precios genéricos heredados del catálogo mínimo.
 
 En SSMS, sobre la base elegida:
 
@@ -55,6 +55,6 @@ SELECT Estado, COUNT(*) AS Cantidad FROM dbo.Atenciones GROUP BY Estado;
 SELECT COUNT(*) AS Conceptos FROM dbo.Conceptos;
 ```
 
-Debe existir únicamente la migración terminada en _EsquemaInicialCircuitoActual y siete estados admitidos por las restricciones. No necesita crear otra migración en su PC. Al abrir Visual Studio configurar la misma base del cargador, reconstruir y ejecutar. La producción vacía lleva solo inicialización mínima y cuentas reales, no el lote académico.
+Deben existir las migraciones EsquemaInicialCircuitoActual y SimplificarEjecucionTresEstados y siete estados admitidos por las restricciones. No debe generar migraciones nuevas en su PC: aplicar las existentes. Al abrir Visual Studio configurar la misma base del cargador, reconstruir y ejecutar. La producción vacía lleva solo inicialización mínima y cuentas reales, no el lote académico.
 
 Los respaldos anteriores no corresponden al esquema actual. El registro y la base técnica de respaldos se configurarán para este entorno nuevo al preparar Azure. La conexión a SQL Server y la identidad/contenedor de Azure son configuraciones distintas.

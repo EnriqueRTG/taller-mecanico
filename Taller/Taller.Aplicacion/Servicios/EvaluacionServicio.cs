@@ -238,17 +238,15 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             foreach (var registro in datos.InspeccionesAutorizadas)
             {
                 var detalle = iniciales.SingleOrDefault(d => d.IdPresupuestoDetalle == registro.IdDetalle) ?? throw new ValidacionException("Inspección autorizada inválida.");
-                if (registro.Estado != EstadoEjecucionDetalle.NoIniciado && registro.Estado != EstadoEjecucionDetalle.Completado && registro.Estado != EstadoEjecucionDetalle.Omitido)
-                    throw new ValidacionException("Indique pendiente, completado u omitido para los inspecciones autorizadas.");
-                if (detalle.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado && (detalle.EstadoEjecucion != registro.Estado || detalle.ObservacionesEjecucion != registro.Observaciones?.Trim()))
-                    throw new ValidacionException("No puede revertir una ejecución registrada desde esta pantalla.");
+                if (!Enum.IsDefined(registro.Estado))
+                    throw new ValidacionException("Estado de inspección inválido.");
+                if (detalle.EstadoEjecucion == EstadoEjecucionDetalle.Completado && registro.Estado != EstadoEjecucionDetalle.Completado)
+                    throw new ValidacionException("No puede revertir una inspección completada.");
                 ValidarTexto(registro.Observaciones);
-                if (registro.Estado == EstadoEjecucionDetalle.Omitido && string.IsNullOrWhiteSpace(registro.Observaciones))
-                    throw new ValidacionException("Justifique cada servicio omitido.");
-                if (finalizar && registro.Estado == EstadoEjecucionDetalle.NoIniciado)
-                    throw new ValidacionException("Resuelva los inspecciones autorizadas: completados u omitidos con justificación.");
-                if (registro.Estado != detalle.EstadoEjecucion && registro.Estado != EstadoEjecucionDetalle.Omitido && a.Pausas.Any(p => p.FechaResolucion == null && (p.IdDetalle == null || p.IdDetalle == detalle.IdPresupuestoDetalle)))
-                    throw new ValidacionException("El servicio inicial está pausado. Resuelva su causa antes de ejecutarlo.");
+                if (finalizar && registro.Estado != EstadoEjecucionDetalle.Completado)
+                    throw new ValidacionException("Complete todas las inspecciones autorizadas antes de finalizar la evaluación. Puede guardar el avance y continuar después.");
+                if (registro.Estado != detalle.EstadoEjecucion && a.Pausas.Any(p => p.FechaResolucion == null && (p.IdDetalle == null || p.IdDetalle == detalle.IdPresupuestoDetalle)))
+                    throw new ValidacionException("La inspección está pausada. Resuelva su causa antes de continuar.");
                 if (detalle.EstadoEjecucion != registro.Estado || detalle.ObservacionesEjecucion != registro.Observaciones?.Trim())
                 {
                     detalle.EstadoEjecucion = registro.Estado;

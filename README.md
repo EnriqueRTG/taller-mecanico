@@ -29,7 +29,7 @@ El esquema vigente parte de **EsquemaInicialCircuitoActual**. No aplicar esta mi
 
 ## Circuito y roles
 
-Recepción identifica cliente/vehículo y registra pedidos conocidos o síntomas, sin cargos automáticos. El técnico toma la preparación, documenta diagnóstico cuando corresponde y presupuesta. Recepción comunica y registra la decisión del cliente. La aceptación total habilita ejecución; la selección parcial vuelve a revisión técnica y requiere nueva aceptación. Se registran cantidades realmente ejecutadas y conformidad técnica; luego se liquida, se cobra y se entrega con saldo cero.
+Recepción identifica cliente/vehículo y registra pedidos conocidos o síntomas, sin cargos automáticos. El técnico toma la preparación, documenta diagnóstico cuando corresponde y presupuesta. Recepción comunica y registra la decisión del cliente. La aceptación total habilita ejecución; la selección parcial exige validación técnica; sin cambios habilita ejecución, mientras que una reformulación requiere nueva aceptación. Se registran cantidades realmente ejecutadas y conformidad técnica; luego se liquida, se cobra y se entrega con saldo cero.
 
 - **Administrador:** usuarios, auditoría, reportes de gestión, respaldos y recuperación con las autorizaciones correspondientes.
 - **Administrativo:** clientes/vehículos, recepción, comunicación y decisión de presupuestos, liquidación, cobros, entrega y reportes de su rol.
@@ -60,3 +60,5 @@ dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj --configuration Release 
 Las pruebas SQL requieren una instancia desechable explícitamente autorizada; nunca se dirigen a la base de trabajo. CI construye la solución/filtro en Windows, comprueba formularios con DI validada y ejecuta las pruebas SQL en bases temporales. La comprobación visual del recorrido, escalado e impresión sigue siendo necesaria en la PC/notebook de presentación.
 
 Los editables de requisitos y casos de uso en `docs/ERS` se preservan para actualización académica. No se presentan los diagramas/exportaciones anteriores como descripción del esquema actual. El alcance operativo vigente y los límites se consultan en [la especificación implementada](docs/especificacion/alcance-implementado.md).
+
+Esta versión incorpora SimplificarEjecucionTresEstados y Demo v4. Antes de abrir una base existente, seguir [actualización](docs/instalacion/actualizacion-coloquio.md). Para dos puestos, [red privada](docs/instalacion/red-privada.md); para copias, [prueba local de recuperación](docs/instalacion/respaldos-locales-demo.md).

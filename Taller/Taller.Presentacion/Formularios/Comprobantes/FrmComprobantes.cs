@@ -72,7 +72,7 @@ public partial class FrmComprobantes : Form, IFormularioConOperacion
         Seleccion(null, EventArgs.Empty);
     }
 
-    private void Seleccion(object? s, EventArgs e) => btnGestionar.Enabled = dgvDatos.CurrentRow?.DataBoundItem is AtencionCobroDto;
+    private void Seleccion(object? s, EventArgs e) => btnGestionar.Visible = btnGestionar.Enabled = dgvDatos.CurrentRow?.DataBoundItem is AtencionCobroDto;
     private void AbrirConDobleClick(object? s, DataGridViewCellEventArgs e) { if (e.RowIndex >= 0) Gestionar(s, EventArgs.Empty); }
     private async void Gestionar(object? s, EventArgs e)
     {

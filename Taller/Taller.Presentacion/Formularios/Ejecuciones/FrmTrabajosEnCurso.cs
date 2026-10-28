@@ -44,6 +44,7 @@ public partial class FrmTrabajosEnCurso : Form, Navegacion.IFormularioConOperaci
         btnProgreso.Enabled = !OperacionEnCurso && Fila != null;
         lblAyuda.Text = Fila is null ? "Mis trabajos primero, luego disponibles. Seleccione una atención; los avances guardados se consultan desde Ver progreso. Cerradas y canceladas no se incluyen."
             : $"{Fila.Progreso}. {(Fila.Pausas > 0 ? "Hay pausas: consulte sus causas antes de continuar." : "Cerrar la ejecución conserva la reserva del técnico.")}";
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnGestionar, btnProgreso);
     }
     private async void Gestionar(object? s, EventArgs e)
     {

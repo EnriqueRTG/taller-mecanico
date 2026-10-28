@@ -117,6 +117,7 @@ public partial class FrmClientes : Form, IFormularioConOperacion
         btnCambiarEstado.Text = activo ? "Deshabilitar cliente" : "Habilitar cliente";
         btnCambiarEstado.ForeColor = activo ? Color.FromArgb(185, 28, 28) : Color.FromArgb(30, 64, 175);
         btnCambiarEstado.FlatAppearance.BorderColor = btnCambiarEstado.ForeColor;
+        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnEditarUsuario, _btnVerHistorial, btnCambiarEstado);
     }
 
     private async void BtnNuevoCliente_Click(object? sender, EventArgs e)

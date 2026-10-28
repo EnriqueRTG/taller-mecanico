@@ -23,11 +23,11 @@ Los servicios revalidan usuario/rol activos contra la base. La interfaz no susti
 
 ## Selección parcial
 
-1. Recepción comunica el presupuesto y registra los ítems que el cliente solicita conservar, con motivo.
-2. La propuesta pasa a `PendienteRevisionTecnica`. Esa selección **no es autorización de ejecución**.
-3. En **Presupuestos → Revisar selección parcial**, el técnico evalúa dependencias y condiciones. Puede quitar, reemplazar o agregar conceptos y ajustar cantidades/precios antes de confirmar.
-4. Se conserva el documento anterior y se crea una propuesta nueva, vinculada por `IdPresupuestoAnterior`, con justificación técnica obligatoria.
-5. Recepción vuelve a comunicar el alcance y precio definitivos y registra la aceptación. Una nueva selección parcial vuelve a revisión; un rechazo no autoriza trabajos.
+1. Recepción informa y registra que el cliente autoriza los ítems elegidos, a cantidades/precios ofrecidos, condicionado a viabilidad técnica. Se conserva persona que decide, medio y usuario que registró.
+2. La propuesta queda PendienteRevisionTecnica: aún no puede ejecutarse.
+3. El técnico abre Revisar selección parcial. Si conserva exactamente conceptos, descripciones, cantidades, precios, origen de material y solicitudes, usa Validar selección del cliente. Queda Aceptado con AlcanceValidado; no se pide otra aceptación y se registra el técnico en el historial. Los ítems excluidos siguen conservados y no se ejecutan ni cobran.
+4. Si modifica la selección, la acción cambia a Enviar nueva propuesta a recepción. Se crea otra versión enlazada, con justificación, pendiente de presentación y decisión. Tampoco se acepta automáticamente cuando el técnico cambió el origen a material del cliente.
+5. Una corrección técnica no es una decisión del cliente. Las solicitudes de corrección sin selección parcial real siempre producen otra propuesta para presentar y aceptar.
 
 La viabilidad es una decisión del técnico registrada explícitamente; no se pretende deducir automáticamente dependencias mecánicas desde nombres de conceptos.
 
@@ -43,7 +43,7 @@ Desde **Atenciones → Ver detalle → Ver progreso y seguimiento**, o desde la 
 
 La acción **Informe de intervención** permite previsualizar e imprimir el diagnóstico disponible, los trabajos autorizados y su ejecución, los hallazgos/recomendaciones, las pausas y los materiales aportados. También se puede guardar como PDF mediante una impresora PDF de Windows. Es una consulta del expediente, no una nueva autorización ni un recibo.
 
-Las tareas independientes pueden continuar con otra tarea pausada. Para terminar técnicamente se deben resolver las pausas y todas las propuestas pendientes. Para interrumpir definitivamente: registrar la decisión pendiente (por ejemplo, rechazo del adicional), resolver la pausa explicando el cierre sin continuar, omitir las tareas no realizadas o registrar cantidades parciales justificadas y **Terminar con interrupción**. Eso conserva y liquida lo realizado.
+Las tareas independientes pueden continuar con otra tarea pausada. Para finalizar se resuelven pausas y propuestas pendientes y se completan todos los ítems autorizados. No existe cierre con interrupción en esta entrega; no se simula una tarea completada ni una entrega para resolver un faltante.
 
 Durante la ejecución, el técnico puede preparar un presupuesto adicional vinculado al hallazgo seleccionado. Se incluyen **solo conceptos nuevos**, sin duplicar lo ya autorizado. Recepción comunica y registra su decisión de manera independiente. Aceptarlo agrega sus ítems a la ejecución; rechazarlo conserva los presupuestos anteriores. La pausa no se resuelve automáticamente al aceptar: el técnico debe verificar que efectivamente puede continuar.
 
@@ -63,7 +63,7 @@ No se incorpora inventario, compras ni deuda del taller con el proveedor del cli
 
 La ejecución reúne todos los presupuestos de reparación vigentes y aceptados; los servicios de inspección se registran durante la evaluación. Las propuestas pendientes o rechazadas no aparecen como trabajo autorizado.
 
-Se liquida únicamente cantidad efectivamente realizada de ítems autorizados, excluyendo materiales aportados por el cliente. No se cobra lo omitido ni lo pendiente. Los pagos parciales/mixtos y comprobantes internos conservan su funcionamiento. La entrega exige liquidación, pagos consistentes, saldo cero y conformidad registrada por recepción. **Finalizar trabajo** registra la conformidad del técnico; no equivale a entregar el vehículo.
+Se liquida únicamente cantidad efectivamente realizada de ítems autorizados, excluyendo materiales aportados por el cliente. No se cobra lo pendiente. La liquidación normal se habilita tras completar el alcance autorizado. Los pagos parciales/mixtos y comprobantes internos conservan su funcionamiento. La entrega exige liquidación, pagos consistentes, saldo cero y conformidad registrada por recepción. **Finalizar trabajo** registra la conformidad del técnico; no equivale a entregar el vehículo.
 
 ## Integridad y concurrencia
 
@@ -74,3 +74,5 @@ SQL conserva claves externas sin borrado en cascada, restricciones de textos, ca
 ## Verificación
 
 Preparar la base siguiendo [entornos](../instalacion/entornos.md). Las pruebas SQL ejercitan el recorrido selección parcial → hallazgo → adicional → material del cliente → resolución → ejecución → liquidación con rowversion nativa. Las pruebas de reglas verifican aceptación/autorización, permisos, pausas y cantidades. Repetir manualmente con dos roles, cierre/reapertura y documentos de varias páginas; comprobar que la pausa administrativa se avisa también directamente al taller.
+
+Si cambian condiciones del acuerdo aunque los ítems sean iguales, marcar Se modifican condiciones del acuerdo y describirlas en la justificación: la propuesta vuelve a recepción para otra aceptación. La justificación de viabilidad sin cambios solo documenta la revisión técnica.

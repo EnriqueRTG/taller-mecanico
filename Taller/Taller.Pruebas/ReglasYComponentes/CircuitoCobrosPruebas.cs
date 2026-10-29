@@ -162,7 +162,7 @@ public sealed class CircuitoCobrosPruebas
             Seguimiento = new SeguimientoTrabajoServicio(evaluacion, circuito, unidad, acceso);
             Ejecucion = new EjecucionServicio(evaluacion, circuito, unidad, acceso);
             Cobros = new CobroServicio(circuito, evaluacion, unidad, acceso);
-            Recepcion = new AtencionServicio(new AtencionRepositorio(Db), new ClienteRepositorio(Db), new VehiculoRepositorio(Db), usuarios, new Taller.Aplicacion.Seguridad.AutorizacionOperativa(usuarios, Sesion));
+            Recepcion = new AtencionServicio(new AtencionRepositorio(Db), new ClienteRepositorio(Db), new VehiculoRepositorio(Db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(usuarios, Sesion));
             Entrar(2);
         }
 

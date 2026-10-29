@@ -17,18 +17,16 @@ public sealed class AtencionServicio
     private readonly IAtencionRepositorio _atencionRepositorio;
     private readonly IClienteRepositorio _clienteRepositorio;
     private readonly IVehiculoRepositorio _vehiculoRepositorio;
-    private readonly IUsuarioRepositorio _usuarioRepositorio;
     private readonly AutorizacionOperativa _acceso;
     /// <summary>
     /// Inicializa el servicio con los repositorios necesarios
     /// para gestionar una atención.
     /// </summary>
-    public AtencionServicio(IAtencionRepositorio atencionRepositorio, IClienteRepositorio clienteRepositorio, IVehiculoRepositorio vehiculoRepositorio, IUsuarioRepositorio usuarioRepositorio, AutorizacionOperativa acceso)
+    public AtencionServicio(IAtencionRepositorio atencionRepositorio, IClienteRepositorio clienteRepositorio, IVehiculoRepositorio vehiculoRepositorio, AutorizacionOperativa acceso)
     {
         _atencionRepositorio = atencionRepositorio;
         _clienteRepositorio = clienteRepositorio;
         _vehiculoRepositorio = vehiculoRepositorio;
-        _usuarioRepositorio = usuarioRepositorio;
         _acceso = acceso;
     }
 
@@ -134,7 +132,6 @@ public sealed class AtencionServicio
         motivoConsulta = NormalizarMotivoConsulta(motivoConsulta);
         await ValidarClienteAsync(idCliente);
         await ValidarVehiculoAsync(idVehiculo);
-        await ValidarUsuarioRecepcionAsync(idUsuarioRecepcion);
         if (await _atencionRepositorio.ExisteAtencionActivaParaVehiculoAsync(idVehiculo))
         {
             throw new ValidacionException("El vehículo ya posee una atención activa.");
@@ -190,24 +187,6 @@ public sealed class AtencionServicio
         if (!vehiculo.Activo)
         {
             throw new ValidacionException("El vehículo seleccionado se encuentra inactivo.");
-        }
-    }
-
-    /// <summary>
-    /// Verifica que el usuario de recepción exista y
-    /// se encuentre activo.
-    /// </summary>
-    private async Task ValidarUsuarioRecepcionAsync(int idUsuarioRecepcion)
-    {
-        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(idUsuarioRecepcion);
-        if (usuario is null)
-        {
-            throw new ValidacionException("El usuario de recepción no existe.");
-        }
-
-        if (!UsuarioAutorizado.EstaHabilitado(usuario) || usuario.RolId != RolesSistema.AdministrativoId)
-        {
-            throw new ValidacionException("El usuario de recepción se encuentra inactivo.");
         }
     }
 

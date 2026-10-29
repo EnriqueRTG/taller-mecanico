@@ -333,7 +333,7 @@ public sealed class IntegracionSqlPruebas
         var vehiculos = new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso);
         var cliente = await clientes.RegistrarAsync("DNI", "23456789", "Lucía", "Gómez", "3794123456", null, null);
         var vehiculo = await vehiculos.RegistrarAsync("AC456DE", 2021, "Blanco", ids.Modelo);
-        var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), usuarios, new Taller.Aplicacion.Seguridad.AutorizacionOperativa(usuarios, sesion));
+        var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(usuarios, sesion));
         var a = await recepcion.RegistrarRecepcionAsync(new RegistrarRecepcionDto {
             IdCliente = cliente.IdCliente, IdVehiculo = vehiculo.IdVehiculo, IdUsuarioRecepcion = ids.Recepcion,
             Kilometraje = 80000, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "Ruido persistente al frenar" }]

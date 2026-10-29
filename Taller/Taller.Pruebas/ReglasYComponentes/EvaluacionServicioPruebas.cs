@@ -81,7 +81,7 @@ public sealed class EvaluacionServicioPruebas
         anterior.FechaCierre = FechaHoraTaller.Ahora;
         await e.Db.SaveChangesAsync(); e.Db.ChangeTracker.Clear();
         var servicio = new AtencionServicio(new AtencionRepositorio(e.Db), new ClienteRepositorio(e.Db),
-            new VehiculoRepositorio(e.Db), new UsuarioRepositorio(e.Db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(e.Db), e.Sesion));
+            new VehiculoRepositorio(e.Db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(e.Db), e.Sesion));
         var creada = await servicio.RegistrarRecepcionAsync(new() { IdCliente = 1, IdVehiculo = 1, IdUsuarioRecepcion = 2, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Cambiar discos y pastillas delanteras" }] });
         e.Db.ChangeTracker.Clear();
         var guardada = await e.Db.Atenciones.Include(a => a.Historial).SingleAsync(a => a.IdAtencion == creada.IdAtencion);
@@ -199,7 +199,7 @@ public sealed class EvaluacionServicioPruebas
     }
     private static AtencionServicio Recepcion(Escenario e) => new(
         new AtencionRepositorio(e.Db), new ClienteRepositorio(e.Db), new VehiculoRepositorio(e.Db),
-        new UsuarioRepositorio(e.Db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(e.Db), e.Sesion));
+        new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(e.Db), e.Sesion));
 
     [Fact]
     public async Task InspeccionesAutorizadas_AutorizacionNoEquivaleAEjecucionNiDiagnostico()

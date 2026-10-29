@@ -8,7 +8,7 @@ using Taller.Dominio.Entidades;
 
 namespace Taller.Infraestructura.Persistencia.Repositorios;
 
-// <summary>
+/// <summary>
 /// Implementa las operaciones de persistencia relacionadas con los
 /// usuarios mediante Entity Framework Core y procedimientos almacenados
 /// de SQL Server.

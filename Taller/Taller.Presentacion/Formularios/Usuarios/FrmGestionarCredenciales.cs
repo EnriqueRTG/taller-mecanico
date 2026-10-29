@@ -52,6 +52,7 @@ public partial class FrmGestionarCredenciales : Form
         txtNombreCompleto.TabStop = false;
         txtNombreUsuario.MaxLength = UsuarioRestricciones.NombreUsuarioMaximo;
         txtNuevaPassword.MaxLength = UsuarioRestricciones.PasswordMaximo;
+        txtNuevaPassword.PlaceholderText = $"Entre {UsuarioRestricciones.PasswordMinimo} y {UsuarioRestricciones.PasswordMaximo} caracteres";
         txtConfirmarPassword.MaxLength = UsuarioRestricciones.PasswordMaximo;
         txtNuevaPassword.UseSystemPasswordChar = true;
         txtConfirmarPassword.UseSystemPasswordChar = true;
@@ -72,9 +73,9 @@ public partial class FrmGestionarCredenciales : Form
             txtNuevaPassword.Clear();
             txtConfirmarPassword.Clear();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show("No fue posible cargar los datos del usuario.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación de usuarios");
             DialogResult = DialogResult.Cancel;
             Close();
         }
@@ -154,9 +155,9 @@ public partial class FrmGestionarCredenciales : Form
         {
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudieron actualizar las credenciales");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show("Ocurrió un error al actualizar las credenciales. " + "Inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación de usuarios");
         }
         finally
         {

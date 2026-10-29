@@ -329,7 +329,7 @@ public static class CargadorDemostracion
         // Registros inactivos para filtros. Solo maestros sin atenciones asociadas.
         for (int i = 0; i < 3; i++)
         {
-            var c = await clientes.RegistrarAsync("DNI", (49000000 + i).ToString(), "Cliente", "Inactivo", null, null, null);
+            var c = await clientes.RegistrarAsync("DNI", (49000000 + i).ToString(), "Cliente", "Inactivo", "379400" + (2000 + i), null, null);
             var actual = await clientes.ObtenerPorIdAsync(c.IdCliente);
             await clientes.DarDeBajaAsync(c.IdCliente, actual!.Version);
         }

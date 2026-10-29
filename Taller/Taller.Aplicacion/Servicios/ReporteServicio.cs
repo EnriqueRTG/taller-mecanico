@@ -1,3 +1,4 @@
+using Taller.Aplicacion.Consultas;
 using Taller.Dominio.Tiempo;
 using Taller.Aplicacion.Seguridad;
 using System.Globalization;
@@ -50,17 +51,13 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         TipoReporte.SaldosPendientes => new[] { "Sin cobros", "Cobrado parcialmente" },
         TipoReporte.CargaTecnica => new[] { "Disponible para tomar", "Reservada", "Con pausas pendientes" },
         TipoReporte.ConceptosRealizados => Enum.GetNames<EstadoEjecucionDetalle>().Where(e => e != nameof(EstadoEjecucionDetalle.NoIniciado)),
-        TipoReporte.ActividadTecnica => AccionesActividadTecnica,
+        TipoReporte.ActividadTecnica => ActividadTecnicaReporte.Acciones,
         _ => throw new ValidacionException("Tipo de reporte inválido.")
         };
         return valores.Select(Legible).Distinct().Order().ToArray();
     }
 
-    public static IReadOnlyList<string> AccionesActividadTecnica { get; } = Array.AsReadOnly(new[] {
-        "ActividadTomada", "ActividadLiberada", "DiagnosticoRegistrado", "EvaluacionTomada", "EvaluacionLiberada",
-        "EvaluacionAvanceGuardado", "EvaluacionFinalizada", "EjecucionTomada", "EjecucionLiberada", "EjecucionAvanceGuardado",
-        "TrabajoFinalizado", "HallazgoRegistrado", "PausaResuelta", "MaterialClienteRevisado", "PresupuestoAdicionalPreparado",
-        "SeleccionParcialRevisada", "SeleccionClienteValidada" });
+
 
     public static IReadOnlyList<TipoReporte> TiposParaRol(int rol) => rol switch
     {

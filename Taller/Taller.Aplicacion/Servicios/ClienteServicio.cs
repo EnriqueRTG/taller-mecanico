@@ -55,9 +55,7 @@ public sealed class ClienteServicio(IClienteRepositorio clientes, AutorizacionOp
         c.Documento = DatosMaestros.Documento(c.TipoDocumento, documento);
         c.Nombre = DatosMaestros.Texto(nombre, 80, "Nombre");
         c.Apellido = DatosMaestros.Texto(apellido, 80, "Apellido");
-        c.Telefono = DatosMaestros.Opcional(telefono, 30, "Teléfono");
-        if (c.Telefono != null && (!c.Telefono.Any(char.IsAsciiDigit) || c.Telefono.Any(x => !char.IsAsciiDigit(x) && !" +()-".Contains(x))))
-            throw new ValidacionException("Ingrese un teléfono válido o déjelo vacío.");
+        c.Telefono = DatosMaestros.Telefono(telefono);
         c.Email = DatosMaestros.Email(email);
         c.Direccion = DatosMaestros.Opcional(direccion, 200, "Dirección");
     }

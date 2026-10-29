@@ -43,3 +43,7 @@ Esta es una aplicación de escritorio que se conecta directamente a SQL Server: 
 ## Verificación
 
 Hay pruebas de sesión sin vencimiento temporal y revocación de autorización, instalación sin contraseña fija, validación del destino Azure y pruebas SQL del contador persistente y lote completo. La autorización, integridad del circuito y concurrencia cuentan además con las pruebas de integración existentes. La cuenta Azure real y la aceptación visual en Windows deben probarse en la instalación; compilar no demuestra seguridad absoluta.
+
+## Política común de contraseñas
+
+Alta y gestión de credenciales utilizan `UsuarioServicio.ValidarPassword`: contraseña no vacía, de 8 a 100 caracteres, conservada exactamente como fue ingresada. No se exige una composición específica. Los dos formularios usan los mismos límites y generador; las contraseñas se almacenan mediante hash. Modificar únicamente el nombre de acceso no obliga a reemplazar la contraseña.

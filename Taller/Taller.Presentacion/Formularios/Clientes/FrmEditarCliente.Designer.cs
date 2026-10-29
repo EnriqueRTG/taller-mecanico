@@ -263,7 +263,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             label1.Name = "label1";
             label1.Size = new Size(74, 20);
             label1.TabIndex = 14;
-            label1.Text = "Teléfono:";
+            label1.Text = "Teléfono *";
             label1.TextAlign = ContentAlignment.MiddleLeft;
             //
             // txtApellidoCliente

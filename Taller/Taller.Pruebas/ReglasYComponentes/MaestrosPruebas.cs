@@ -71,6 +71,37 @@ public sealed class MaestrosPruebas
             Assert.Throws<ValidacionException>(() => DatosMaestros.Email(correo));
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData("123")]
+    [InlineData("1234567890123456")]
+    [InlineData("379-ABC-1234")]
+    [InlineData("379+4123456")]
+    [InlineData("++543794123456")]
+    public async Task TelefonoObligatorioSeValidaEnAltaYEdicion(string? telefono)
+    {
+        using var c = new Caso();
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", "Ana", "Pérez", telefono, null, null));
+        Assert.Empty(await c.Db.Clientes.ToListAsync());
+        var cliente = await c.Clientes.RegistrarAsync("DNI", "12345678", "Ana", "Pérez", "3794123456", null, null);
+        // InMemory no genera rowversion: se asigna una versión para ejercitar la validación de edición.
+        (await c.Db.Clientes.SingleAsync()).Version = new byte[8];
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.ModificarAsync(cliente.IdCliente, "DNI", "12345678", "Ana", "Pérez", telefono, null, null, new byte[8]));
+        c.Db.ChangeTracker.Clear();
+        Assert.Equal("3794123456", (await c.Clientes.ObtenerPorIdAsync(cliente.IdCliente))!.Telefono);
+    }
+
+    [Theory]
+    [InlineData("  +54 (379) 412-3456  ", "+54 (379) 412-3456")]
+    [InlineData("3794123456", "3794123456")]
+    [InlineData("1234567", "1234567")]
+    public void TelefonoConservaFormatoLegibleSinAlterarDigitos(string entrada, string esperado)
+        => Assert.Equal(esperado, DatosMaestros.Telefono(entrada));
+
     [Fact]
     public async Task AltaClienteConservaDatosRealesYRechazaDuplicadoInactivo()
     {
@@ -81,14 +112,14 @@ public sealed class MaestrosPruebas
         d.Activo = false;
         await c.Db.SaveChangesAsync();
         c.Db.ChangeTracker.Clear();
-        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", "Otra", "Persona", null, null, null));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", "Otra", "Persona", "3794123456", null, null));
     }
 
     [Fact]
     public async Task ServicioValidaLongitudesAunqueNoSeUseElFormulario()
     {
         using var c = new Caso();
-        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", new string ('a', 81), "Apellido", null, null, null));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", new string ('a', 81), "Apellido", "3794123456", null, null));
         await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", "Nombre", "Apellido", "abc", null, null));
         Assert.Empty(await c.Db.Clientes.ToListAsync());
     }
@@ -98,7 +129,7 @@ public sealed class MaestrosPruebas
     {
         using var c = new Caso();
         c.Entrar(92);
-        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", "Nombre", "Apellido", null, null, null));
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.RegistrarAsync("DNI", "12345678", "Nombre", "Apellido", "3794123456", null, null));
         await Assert.ThrowsAsync<ValidacionException>(() => c.Vehiculos.RegistrarAsync("AA123BB", 2020, "Azul", 91));
         c.Sesion.UsuarioActual!.RolId = 2;
         await Assert.ThrowsAsync<ValidacionException>(() => c.Clientes.ListarActivosAsync());
@@ -132,7 +163,7 @@ public sealed class MaestrosPruebas
     public async Task VersionObsoletaNoModificaClienteNiVehiculo()
     {
         using var c = new Caso();
-        var a = await c.Clientes.RegistrarAsync("DNI", "12345678", "Ana", "Pérez", null, null, null);
+        var a = await c.Clientes.RegistrarAsync("DNI", "12345678", "Ana", "Pérez", "3794123456", null, null);
         await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => c.Clientes.ModificarAsync(a.IdCliente, "DNI", "12345678", "Cambio", "Pérez", null, null, null, new byte[8]));
         Assert.Equal("Ana", (await c.Clientes.ObtenerPorIdAsync(a.IdCliente))!.Nombre);
         var v = await c.Vehiculos.RegistrarAsync("AA123BB", 2020, "Azul", 91);

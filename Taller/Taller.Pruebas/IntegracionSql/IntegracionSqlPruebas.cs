@@ -133,7 +133,7 @@ public sealed class IntegracionSqlPruebas
         {
             try
             {
-                await new ClienteRepositorio(db).AgregarAsync(new Cliente { TipoDocumento = "DNI", Documento = "45678901", Nombre = "Alta concurrente", Apellido = "Prueba" });
+                await new ClienteRepositorio(db).AgregarAsync(new Cliente { Telefono = "3794123456", TipoDocumento = "DNI", Documento = "45678901", Nombre = "Alta concurrente", Apellido = "Prueba" });
                 return null;
             }
             catch (Exception e)
@@ -158,7 +158,7 @@ public sealed class IntegracionSqlPruebas
         await migrador.MigrateAsync("20261026155115_EsquemaInicialCircuitoActual");
         var p = new Presupuesto { IdUsuarioCreacion = ids.Tecnico, FechaCreacion = FechaHoraTaller.Ahora,
             Atencion = new Atencion { IdUsuarioRecepcion = ids.Recepcion, MotivoConsulta = "Comprobar conservación de dato anterior",
-                Cliente = new Cliente { TipoDocumento = "DNI", Documento = "33999111", Nombre = "Demo", Apellido = "Migración" },
+                Cliente = new Cliente { Telefono = "3794123456", TipoDocumento = "DNI", Documento = "33999111", Nombre = "Demo", Apellido = "Migración" },
                 Vehiculo = new Vehiculo { IdModelo = ids.Modelo, Dominio = "ZZ987XY", Color = "Gris" } },
             Detalles = [new PresupuestoDetalle { IdConcepto = ids.Concepto, Descripcion = "Caso anterior", Cantidad = 1, PrecioUnitario = 100 }] };
         db.Add(p); await db.SaveChangesAsync(); db.ChangeTracker.Clear();
@@ -181,7 +181,7 @@ public sealed class IntegracionSqlPruebas
         var atencion = new Atencion
         {
             IdUsuarioRecepcion = ids.Recepcion, MotivoConsulta = "Preservar vínculo antiguo",
-            Cliente = new Cliente { TipoDocumento = "DNI", Documento = "33999112", Nombre = "Prueba", Apellido = "Limpieza" },
+            Cliente = new Cliente { Telefono = "3794123456", TipoDocumento = "DNI", Documento = "33999112", Nombre = "Prueba", Apellido = "Limpieza" },
             Vehiculo = new Vehiculo { IdModelo = ids.Modelo, Dominio = "ZZ988XY", Color = "Gris" }
         };
         var primero = new Presupuesto { Atencion = atencion, IdUsuarioCreacion = ids.Tecnico,
@@ -198,8 +198,28 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(segundo.IdPresupuesto, vinculo);
         await db.Database.ExecuteSqlRawAsync("UPDATE dbo.PresupuestoDetalles SET IdPresupuestoCambio=NULL");
         await migrador.MigrateAsync();
-        Assert.Equal(3, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Equal(4, (await db.Database.GetAppliedMigrationsAsync()).Count());
         Assert.Single(await db.PresupuestoDetalles.AsNoTracking().ToListAsync());
+    }
+
+    [SqlRespaldoFact]
+    public async Task TelefonoObligatorio_NoInventaDatosYProtegeEscriturasDirectas()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        await using var db = b.Contexto();
+        var migrador = db.GetService<IMigrator>();
+        await migrador.MigrateAsync("20261029090000_RetirarVinculoCambioSinUso");
+        await db.Database.ExecuteSqlRawAsync("INSERT INTO dbo.Clientes (TipoDocumento, Documento, Nombre, Apellido, Telefono, Activo, FechaAlta) VALUES (N'DNI', N'45678902', N'Ana', N'Prueba', NULL, 1, GETDATE())");
+        var error = await Assert.ThrowsAsync<SqlException>(() => migrador.MigrateAsync());
+        Assert.Equal(51142, error.Number);
+        Assert.Equal(3, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Null(await db.Clientes.AsNoTracking().Select(c => c.Telefono).SingleAsync());
+        await db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'+54 (379) 412-3456'");
+        await migrador.MigrateAsync();
+        Assert.Equal(4, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        var invalido = await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'abc'"));
+        Assert.Equal(547, invalido.Number);
+        Assert.Equal("+54 (379) 412-3456", await db.Clientes.AsNoTracking().Select(c => c.Telefono).SingleAsync());
     }
 
     [SqlRespaldoFact]
@@ -207,7 +227,7 @@ public sealed class IntegracionSqlPruebas
     {
         await using var b = await BasePrueba.CrearAsync();
         await using var db = b.Contexto();
-        Assert.Equal(3, db.Database.GetMigrations().Count());
+        Assert.Equal(4, db.Database.GetMigrations().Count());
         await using var sql = new SqlConnection(b.Conexion);
         await sql.OpenAsync();
         var comando = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE (object_id = OBJECT_ID(N'dbo.Presupuestos') OR object_id = OBJECT_ID(N'dbo.Diagnosticos')) AND name = N'Tipo' OR object_id = OBJECT_ID(N'dbo.Conceptos') AND name = N'DisponibleParaIngreso'", sql);
@@ -228,7 +248,7 @@ public sealed class IntegracionSqlPruebas
         await using var dos = b.Contexto();
         var s1 = new ClienteServicio(new ClienteRepositorio(uno), Acceso(uno, ids.Recepcion, out _));
         var s2 = new ClienteServicio(new ClienteRepositorio(dos), Acceso(dos, ids.Recepcion, out _));
-        var c = await s1.RegistrarAsync("DNI", "12345678", "Ana", "Pérez", null, null, null);
+        var c = await s1.RegistrarAsync("DNI", "12345678", "Ana", "Pérez", "3794123456", null, null);
         var inicial = await s2.ObtenerPorIdAsync(c.IdCliente);
         var version = c.Version.ToArray();
         Assert.Equal(8, version.Length);
@@ -242,7 +262,7 @@ public sealed class IntegracionSqlPruebas
         await v1.ModificarAsync(v.IdVehiculo, v.Dominio, 2020, "Gris", ids.Modelo, v.Version);
         await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => v2.DarDeBajaAsync(v.IdVehiculo, anterior!.Version));
         Assert.Equal("Gris", (await v2.ObtenerPorIdAsync(v.IdVehiculo))!.Color);
-        await Assert.ThrowsAsync<ValidacionException>(() => s2.RegistrarAsync("DNI", "12345678", "Otro", "Cliente", null, null, null));
+        await Assert.ThrowsAsync<ValidacionException>(() => s2.RegistrarAsync("DNI", "12345678", "Otro", "Cliente", "3794123456", null, null));
         Assert.Empty(await uno.Diagnosticos.ToListAsync());
         Assert.Empty(await uno.Presupuestos.ToListAsync());
         Assert.False(uno.Database.HasPendingModelChanges());
@@ -261,7 +281,7 @@ public sealed class IntegracionSqlPruebas
         var unidad = new UnidadDeTrabajo(db);
         var clientes = new ClienteServicio(new ClienteRepositorio(db), acceso);
         var vehiculos = new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso);
-        var cliente = await clientes.RegistrarAsync("DNI", "23456789", "Lucía", "Gómez", null, null, null);
+        var cliente = await clientes.RegistrarAsync("DNI", "23456789", "Lucía", "Gómez", "3794123456", null, null);
         var vehiculo = await vehiculos.RegistrarAsync("AC456DE", 2021, "Blanco", ids.Modelo);
         var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), usuarios, sesion);
         var a = await recepcion.RegistrarRecepcionAsync(new RegistrarRecepcionDto {
@@ -369,7 +389,7 @@ public sealed class IntegracionSqlPruebas
         var er = new EvaluacionRepositorio(db);
         var cr = new CircuitoRepositorio(db);
         var unidad = new UnidadDeTrabajo(db);
-        var cliente = await new ClienteServicio(new ClienteRepositorio(db), acceso).RegistrarAsync("DNI", "34567890", "Ana", "Prueba", null, null, null);
+        var cliente = await new ClienteServicio(new ClienteRepositorio(db), acceso).RegistrarAsync("DNI", "34567890", "Ana", "Prueba", "3794123456", null, null);
         var vehiculo = await new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso).RegistrarAsync("AD789FG", 2020, "Gris", ids.Modelo);
         var concepto = await db.Conceptos.SingleAsync(c => c.IdConcepto == ids.Concepto);
         var repuesto = new Concepto

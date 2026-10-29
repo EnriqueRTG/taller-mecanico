@@ -28,7 +28,7 @@ public sealed class EvaluacionServicioPruebas
             Db.Database.EnsureCreated();
             var marca = new Marca { IdMarca = 1, Nombre = "Marca", Activo = true };
             var modelo = new Modelo { IdModelo = 1, IdMarca = 1, Marca = marca, Nombre = "Modelo", Activo = true };
-            var cliente = new Cliente { IdCliente = 1, Nombre = "Ana", Apellido = "Pérez", Documento = "123", TipoDocumento = "DNI" };
+            var cliente = new Cliente { Telefono = "3794123456", IdCliente = 1, Nombre = "Ana", Apellido = "Pérez", Documento = "123", TipoDocumento = "DNI" };
             var vehiculo = new Vehiculo { IdVehiculo = 1, Dominio = "AB123CD", Color = "Gris", IdModelo = 1, Modelo = modelo };
             Db.AddRange(new Usuario { Id = 1, RolId = RolesSistema.TecnicoId, Activo = true },
                 new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId, Activo = true },

@@ -179,6 +179,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("Telefono")
+                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
@@ -198,7 +199,10 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.HasIndex("TipoDocumento", "Documento")
                         .IsUnique();
 
-                    b.ToTable("Clientes", (string)null);
+                    b.ToTable("Clientes", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Clientes_TelefonoContacto", "[Telefono] COLLATE Latin1_General_100_BIN2 NOT LIKE N'%[^0-9 +()-]%' AND LEN(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE([Telefono], N' ', N''), N'+', N''), N'(', N''), N')', N''), N'-', N'')) BETWEEN 7 AND 15 AND (CHARINDEX(N'+', [Telefono]) = 0 OR (LEFT(LTRIM([Telefono]), 1) = N'+' AND CHARINDEX(N'+', LTRIM([Telefono]), 2) = 0))");
+                        });
                 });
 
             modelBuilder.Entity("Taller.Dominio.Entidades.Comprobante", b =>

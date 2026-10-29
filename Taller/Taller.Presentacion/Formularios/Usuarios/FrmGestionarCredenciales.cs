@@ -13,6 +13,7 @@ public partial class FrmGestionarCredenciales : Form
     private readonly UsuarioServicio _usuarioServicio;
     private readonly SesionUsuario _sesionUsuario;
     private int _usuarioId;
+    private byte[] _version = [];
     private bool _guardando;
     public FrmGestionarCredenciales(UsuarioServicio usuarioServicio, SesionUsuario sesionUsuario)
     {
@@ -66,6 +67,7 @@ public partial class FrmGestionarCredenciales : Form
                 throw new InvalidOperationException("El usuario seleccionado ya no existe.");
             }
 
+            _version = usuario.Version.ToArray();
             txtId.Text = usuario.Id.ToString();
             txtNombreCompleto.Text = $"{usuario.Apellido}, {usuario.Nombre}";
             txtNombreUsuario.Text = usuario.NombreUsuario;
@@ -135,7 +137,7 @@ public partial class FrmGestionarCredenciales : Form
         try
         {
             CambiarEstadoGuardado(true);
-            await _usuarioServicio.ActualizarCredencialesAsync(_usuarioId, txtNombreUsuario.Text, txtNuevaPassword.Text, txtConfirmarPassword.Text, ejecutor.Id);
+            await _usuarioServicio.ActualizarCredencialesAsync(_usuarioId, txtNombreUsuario.Text, txtNuevaPassword.Text, txtConfirmarPassword.Text, ejecutor.Id, _version);
             CambiarEstadoGuardado(false);
             MessageBox.Show("Las credenciales se actualizaron correctamente.", "Credenciales actualizadas", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

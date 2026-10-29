@@ -199,6 +199,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 throw new ValidacionException("Complete el hallazgo/conclusión y el trabajo recomendado.");
             if (datos.SoloEvaluacion && (string.IsNullOrWhiteSpace(datos.Observaciones) || datos.Items.Count > 0))
                 throw new ValidacionException("Para finalizar sin propuesta, quite los ítems y explique el motivo en observaciones.");
+            if (a.Solicitudes.Count == 0) throw new ValidacionException("La atención no tiene solicitudes registradas. Corrija su recepción antes de preparar una propuesta.");
             if (finalizar && !datos.SoloEvaluacion && datos.Items.Count == 0)
                 throw new ValidacionException("Agregue la propuesta o indique que finaliza sin propuesta, con su motivo.");
             var presupuestos = await repositorio.ObtenerPresupuestosAsync(a.IdAtencion);
@@ -208,7 +209,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                 throw new ValidacionException("Resuelva pausas y propuestas adicionales de inspección antes de finalizar la evaluación.");
             if (datos.Items.Any(i => i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
                 throw new ValidacionException("Un ítem refiere a una solicitud ajena a esta atención.");
-            if (finalizar && a.Solicitudes.Count > 0 && !datos.SoloEvaluacion && datos.Items.Any(i => !i.IdSolicitudAtencion.HasValue))
+            if (finalizar && !datos.SoloEvaluacion && datos.Items.Any(i => !i.IdSolicitudAtencion.HasValue))
                 throw new ValidacionException("Indique a qué solicitud responde cada ítem del presupuesto.");
             if (finalizar && !datos.SoloEvaluacion && !presupuestos.Any(p => p.Vigente && p.IdPresupuestoAnterior.HasValue) && a.Solicitudes.Any(s => !datos.Items.Any(i => i.IdSolicitudAtencion == s.IdSolicitudAtencion)))
                 throw new ValidacionException("El presupuesto debe responder a cada solicitud del cliente. Revise los pedidos antes de enviarlo.");

@@ -33,7 +33,7 @@ public sealed class EvaluacionServicioPruebas
             Db.AddRange(new Usuario { Id = 1, RolId = RolesSistema.TecnicoId, Activo = true },
                 new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId, Activo = true },
                 new Usuario { Id = 3, RolId = RolesSistema.TecnicoId, Activo = true });
-            Db.Add(new Atencion { IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = vehiculo,
+            Db.Add(new Atencion { Solicitudes = [new SolicitudAtencion { IdSolicitudAtencion = 1, Orden = 1, Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "Solicitud del escenario" }], IdAtencion = 1, IdCliente = 1, Cliente = cliente, IdVehiculo = 1, Vehiculo = vehiculo,
                 IdUsuarioRecepcion = 2, MotivoConsulta = "Solicitud del cliente", TipoSolicitud = tipo,
                 FechaApertura = FechaHoraTaller.Ahora, Estado = EstadoAtencion.EnEvaluacionTecnica, Version = new byte[8] });
             Db.Add(new Concepto { IdConcepto = 1, IdCategoria = 1, Categoria = new Categoria { IdCategoria = 1, Nombre = "Mantenimiento", Activo = true },
@@ -50,7 +50,7 @@ public sealed class EvaluacionServicioPruebas
             Entrar(1); await Servicio.TomarAsync(1);
             return await Servicio.ObtenerAsync(1);
         }
-        public static ItemPropuestaDto Item() => new() { IdConcepto = 1, Descripcion = "Servicio solicitado", Cantidad = 1, PrecioUnitario = 100 };
+        public static ItemPropuestaDto Item() => new() { IdConcepto = 1, Descripcion = "Servicio solicitado", Cantidad = 1, PrecioUnitario = 100 , IdSolicitudAtencion = 1 };
         public void Dispose() => Db.Dispose();
     }
 
@@ -68,7 +68,7 @@ public sealed class EvaluacionServicioPruebas
         await Assert.ThrowsAsync<ValidacionException>(() => servicio.RegistrarRecepcionAsync(new() {
             Solicitudes = [new() { Tipo = (TipoSolicitudIngreso)99, Descripcion = "Pedido inválido" }] }));
         Assert.Single(await e.Db.Atenciones.ToListAsync());
-        Assert.Empty(await e.Db.Set<SolicitudAtencion>().ToListAsync());
+        Assert.Single(await e.Db.Set<SolicitudAtencion>().ToListAsync());
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class EvaluacionServicioPruebas
         anterior.FechaCierre = FechaHoraTaller.Ahora;
         await e.Db.SaveChangesAsync(); e.Db.ChangeTracker.Clear();
         var servicio = new AtencionServicio(new AtencionRepositorio(e.Db), new ClienteRepositorio(e.Db),
-            new VehiculoRepositorio(e.Db), new UsuarioRepositorio(e.Db), e.Sesion);
+            new VehiculoRepositorio(e.Db), new UsuarioRepositorio(e.Db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(e.Db), e.Sesion));
         var creada = await servicio.RegistrarRecepcionAsync(new() { IdCliente = 1, IdVehiculo = 1, IdUsuarioRecepcion = 2, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Cambiar discos y pastillas delanteras" }] });
         e.Db.ChangeTracker.Clear();
         var guardada = await e.Db.Atenciones.Include(a => a.Historial).SingleAsync(a => a.IdAtencion == creada.IdAtencion);
@@ -199,7 +199,7 @@ public sealed class EvaluacionServicioPruebas
     }
     private static AtencionServicio Recepcion(Escenario e) => new(
         new AtencionRepositorio(e.Db), new ClienteRepositorio(e.Db), new VehiculoRepositorio(e.Db),
-        new UsuarioRepositorio(e.Db), e.Sesion);
+        new UsuarioRepositorio(e.Db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(e.Db), e.Sesion));
 
     [Fact]
     public async Task InspeccionesAutorizadas_AutorizacionNoEquivaleAEjecucionNiDiagnostico()
@@ -268,7 +268,7 @@ public sealed class EvaluacionServicioPruebas
         // El circuito de autorización se ejercita íntegramente en CircuitoCobrosPruebas.
         e.Db.Add(new Presupuesto { IdAtencion = 1, EsAdicional = true, EsInspeccion = true, Estado = EstadoPresupuesto.Aceptado,
             IdUsuarioCreacion = 1, IdUsuarioDecision = 2, FechaCreacion = FechaHoraTaller.Ahora, FechaPresentacion = FechaHoraTaller.Ahora, FechaDecision = FechaHoraTaller.Ahora,
-            Detalles = [new() { IdConcepto = 1, Descripcion = "Inspección autorizada", Cantidad = 1, PrecioUnitario = 100, AceptadoPorCliente = true }] });
+            Detalles = [new() { IdConcepto = 1, Descripcion = "Inspección autorizada", Cantidad = 1, PrecioUnitario = 100, AceptadoPorCliente = true , IdSolicitudAtencion = 1 }] });
         await e.Db.SaveChangesAsync(); e.Db.ChangeTracker.Clear();
     }
 }

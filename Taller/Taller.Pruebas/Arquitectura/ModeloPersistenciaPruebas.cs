@@ -18,6 +18,6 @@ public sealed class ModeloPersistenciaPruebas
         Assert.DoesNotContain("IdPresupuestoCambio", sql);
         Assert.Contains("FK_Presupuestos_Diagnosticos_IdDiagnostico_IdAtencion", sql);
         Assert.Contains("CK_Clientes_TelefonoContacto", sql);
-        Assert.Equal(4, db.Database.GetMigrations().Count());
+        Assert.Equal(5, db.Database.GetMigrations().Count());
     }
 }

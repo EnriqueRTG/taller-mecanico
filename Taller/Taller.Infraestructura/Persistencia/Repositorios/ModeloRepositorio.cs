@@ -20,20 +20,7 @@ public sealed class ModeloRepositorio : IModeloRepositorio
         _contexto = contexto;
     }
 
-    /// <summary>
-    /// Lista todos los modelos activos en la base de datos.
-    /// </summary>
-    /// <returns>Lista de modelos activos</returns>
-    public async Task<List<Modelo>> ListarActivosPorMarcaAsync(int idMarca)
-    {
-        return await _contexto.Modelos.AsNoTracking().Where(m => m.Activo && m.IdMarca == idMarca).OrderBy(m => m.Nombre).ToListAsync();
-    }
-
-    /// <summary>
-    /// Obtiene un modelo por su ID.
-    /// </summary>
-    /// <param name = "idModelo"></param>
-    /// <returns>Modelo encontrado o null</returns>
+    /// <summary>Lista modelos habilitados y conserva el modelo actual aunque haya sido inhabilitado.</summary>
     public Task<List<Modelo>> ListarParaEdicionAsync(int actual) => _contexto.Modelos.AsNoTracking().Include(m => m.Marca).Where(m => m.IdModelo == actual || m.Activo && m.Marca.Activo).OrderBy(m => m.Marca.Nombre).ThenBy(m => m.Nombre).ToListAsync();
     public async Task<Modelo?> ObtenerPorIdAsync(int idModelo)
     {

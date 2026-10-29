@@ -3,462 +3,62 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Excepciones;
-using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
+using Taller.Dominio.Constantes;
 
 namespace Taller.Infraestructura.Persistencia.Repositorios;
 
-/// <summary>
-/// Implementa las operaciones de persistencia relacionadas con los
-/// usuarios mediante Entity Framework Core y procedimientos almacenados
-/// de SQL Server.
-/// </summary>
-/// <remarks>
-/// Las operaciones de consulta se realizan mediante Entity Framework Core.
-/// Las operaciones de creación y modificación se delegan en procedimientos
-/// almacenados.
-///
-/// Este repositorio es responsable del acceso a datos, de construir los
-/// parámetros SQL y de traducir errores conocidos de SQL Server a
-/// excepciones comprensibles para la capa de aplicación.
-///
-/// Las validaciones de entrada y las reglas de negocio deben realizarse
-/// principalmente en los servicios de aplicación. Las restricciones
-/// críticas también pueden estar protegidas en la base de datos para
-/// preservar su integridad.
-/// </remarks>
-public sealed class UsuarioRepositorio : IUsuarioRepositorio
+/// <summary>Consulta usuarios con EF y confirma altas/ediciones mediante SP parametrizados.</summary>
+/// <remarks>Las actualizaciones exigen la versión leída; SQL protege también al último administrador activo.</remarks>
+public sealed class UsuarioRepositorio(TallerDbContext contexto) : IUsuarioRepositorio
 {
-    private readonly TallerDbContext _contexto;
+    public Task<Usuario?> ObtenerPorIdAsync(int id) => contexto.Usuarios.AsNoTracking().Include(u => u.Rol).SingleOrDefaultAsync(u => u.Id == id);
+    public Task<Usuario?> ObtenerPorNombreUsuarioAsync(string nombreUsuario) => contexto.Usuarios.AsNoTracking().Include(u => u.Rol).SingleOrDefaultAsync(u => u.NombreUsuario == nombreUsuario);
+    public Task<List<Usuario>> ListarAsync() => contexto.Usuarios.AsNoTracking().Include(u => u.Rol).OrderBy(u => u.Apellido).ThenBy(u => u.Nombre).ToListAsync();
+    public Task<bool> ExisteNombreUsuarioAsync(string nombreUsuario) => contexto.Usuarios.AsNoTracking().AnyAsync(u => u.NombreUsuario == nombreUsuario);
 
-    /// <summary>
-    /// Inicializa una nueva instancia del repositorio.
-    /// </summary>
-    /// <param name="contexto">
-    /// Contexto de Entity Framework Core utilizado para acceder
-    /// a la base de datos.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Se produce cuando el contexto recibido es nulo.
-    /// </exception>
-    public UsuarioRepositorio(
-        TallerDbContext contexto)
+    private static SqlParameter Texto(string nombre, int longitud, string? valor) => new(nombre, SqlDbType.NVarChar, longitud) { Value = (object?)valor ?? DBNull.Value };
+    private static SqlParameter Numero(string nombre, int valor) => new(nombre, SqlDbType.Int) { Value = valor };
+    private static SqlParameter Version(byte[] version)
     {
-        _contexto =
-            contexto
-            ?? throw new ArgumentNullException(
-                nameof(contexto));
+        if (version is null || version.Length != 8) throw new ConflictoConcurrenciaException("La versión del usuario no es válida. Actualice los datos.");
+        return new SqlParameter("@Version", SqlDbType.Binary, 8) { Value = version };
     }
 
-    /// <summary>
-    /// Obtiene un usuario mediante su identificador,
-    /// incluyendo la información de su rol.
-    /// </summary>
-    /// <param name="id">
-    /// Identificador del usuario buscado.
-    /// </param>
-    /// <returns>
-    /// El usuario encontrado o <see langword="null"/>
-    /// cuando no existe.
-    /// </returns>
-    public async Task<Usuario?> ObtenerPorIdAsync(
-        int id)
-    {
-        return await _contexto.Usuarios
-            .AsNoTracking()
-            .Include(usuario => usuario.Rol)
-            .SingleOrDefaultAsync(
-                usuario => usuario.Id == id);
-    }
-
-    /// <summary>
-    /// Obtiene un usuario mediante su nombre de acceso,
-    /// incluyendo la información necesaria de su rol.
-    /// </summary>
-    /// <param name="nombreUsuario">
-    /// Nombre de usuario que debe buscarse.
-    /// </param>
-    /// <returns>
-    /// El usuario encontrado o <see langword="null"/>
-    /// cuando no existe.
-    /// </returns>
-    /// <remarks>
-    /// Esta operación se utiliza durante la autenticación.
-    /// La inclusión explícita del rol permite verificar que
-    /// se encuentre activo y correctamente configurado.
-    /// </remarks>
-    public async Task<Usuario?> ObtenerPorNombreUsuarioAsync(
-        string nombreUsuario)
-    {
-        return await _contexto.Usuarios
-            .AsNoTracking()
-            .Include(usuario => usuario.Rol)
-            .SingleOrDefaultAsync(
-                usuario =>
-                    usuario.NombreUsuario == nombreUsuario);
-    }
-
-    /// <summary>
-    /// Obtiene todos los usuarios junto con sus roles,
-    /// ordenados por apellido y nombre.
-    /// </summary>
-    /// <returns>
-    /// Lista de usuarios registrados.
-    /// </returns>
-    public async Task<List<Usuario>> ListarAsync()
-    {
-        return await _contexto.Usuarios
-            .AsNoTracking()
-            .Include(usuario => usuario.Rol)
-            .OrderBy(usuario => usuario.Apellido)
-            .ThenBy(usuario => usuario.Nombre)
-            .ToListAsync();
-    }
-
-    /// <summary>
-    /// Determina si existe un usuario registrado con el nombre
-    /// de acceso especificado.
-    /// </summary>
-    /// <param name="nombreUsuario">
-    /// Nombre de usuario que debe buscarse.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> cuando existe una coincidencia;
-    /// de lo contrario, <see langword="false"/>.
-    /// </returns>
-    public async Task<bool> ExisteNombreUsuarioAsync(
-        string nombreUsuario)
-    {
-        return await _contexto.Usuarios
-            .AsNoTracking()
-            .AnyAsync(
-                usuario =>
-                    usuario.NombreUsuario == nombreUsuario);
-    }
-
-    /// <summary>
-    /// Registra un nuevo usuario mediante el procedimiento almacenado
-    /// <c>dbo.Usuario_Crear</c>.
-    /// </summary>
-    /// <param name="usuario">
-    /// Usuario que contiene el nombre de acceso, el hash de la contraseña,
-    /// los datos personales, el rol y la fecha de alta que deben almacenarse.
-    /// </param>
-    /// <remarks>
-    /// El procedimiento crea al usuario en estado activo y devuelve el
-    /// identificador generado mediante el parámetro de salida <c>@Id</c>.
-    /// Una vez finalizada la operación, dicho identificador se asigna a
-    /// <see cref="Usuario.Id"/>.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException">
-    /// Se produce cuando <paramref name="usuario"/> es
-    /// <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ValidacionException">
-    /// Se produce cuando ya existe un usuario con el mismo nombre de acceso.
-    /// </exception>
-    public async Task AgregarAsync(
-        Usuario usuario)
+    public async Task AgregarAsync(Usuario usuario)
     {
         ArgumentNullException.ThrowIfNull(usuario);
-
-        var nombreUsuario = new SqlParameter(
-                "@NombreUsuario", 
-                SqlDbType.NVarChar,
-                UsuarioRestricciones.NombreUsuarioMaximo)
-        { Value = usuario.NombreUsuario };
-
-        var passwordHash = new SqlParameter(
-                "@PasswordHash", 
-                SqlDbType.NVarChar,
-                UsuarioRestricciones.PasswordHashMaximo)
-        { Value = usuario.PasswordHash };
-
-        var nombre = new SqlParameter(
-                "@Nombre", 
-                SqlDbType.NVarChar,
-                UsuarioRestricciones.NombreMaximo)
-        { Value = usuario.Nombre};
-
-        var apellido = new SqlParameter(
-                "@Apellido", 
-                SqlDbType.NVarChar,
-                UsuarioRestricciones.ApellidoMaximo)
-        { Value = usuario.Apellido };
-
-        var rolId = new SqlParameter(
-                "@RolId", 
-                SqlDbType.Int)
-        { Value = usuario.RolId};
-
-        var fechaAlta = new SqlParameter(
-                "@FechaAlta", 
-                SqlDbType.DateTime2)
-        { Value = usuario.FechaAlta};
-
-        var id = new SqlParameter(
-                "@Id", 
-                SqlDbType.Int)
-        { Direction = ParameterDirection.Output };
-
-        try
-        {
-            await _contexto.Database.ExecuteSqlRawAsync(
-                    """
-                    EXEC dbo.Usuario_Crear
-                        @NombreUsuario = @NombreUsuario,
-                        @PasswordHash = @PasswordHash,
-                        @Nombre = @Nombre, 
-                        @Apellido = @Apellido,
-                        @RolId = @RolId,
-                        @FechaAlta = @FechaAlta,
-                        @Id = @Id OUTPUT
-                    """,
-                    nombreUsuario,
-                    passwordHash,
-                    nombre,
-                    apellido,
-                    rolId,
-                    fechaAlta,
-                    id
-                );
-
-            usuario.Id = (int)id.Value;
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51001)
-        {
-            throw new ValidacionException(
-                "Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", nameof(Usuario.NombreUsuario));
-        }
+        var id = new SqlParameter("@Id", SqlDbType.Int) { Direction = ParameterDirection.Output };
+        await EjecutarAsync("EXEC dbo.Usuario_Crear @NombreUsuario, @PasswordHash, @Nombre, @Apellido, @RolId, @FechaAlta, @Id OUTPUT",
+            Texto("@NombreUsuario", UsuarioRestricciones.NombreUsuarioMaximo, usuario.NombreUsuario), Texto("@PasswordHash", UsuarioRestricciones.PasswordHashMaximo, usuario.PasswordHash),
+            Texto("@Nombre", UsuarioRestricciones.NombreMaximo, usuario.Nombre), Texto("@Apellido", UsuarioRestricciones.ApellidoMaximo, usuario.Apellido), Numero("@RolId", usuario.RolId),
+            new SqlParameter("@FechaAlta", SqlDbType.DateTime2) { Value = usuario.FechaAlta }, id);
+        usuario.Id = (int)id.Value;
+        usuario.Version = (await ObtenerPorIdAsync(usuario.Id))!.Version.ToArray();
     }
 
-    /// <summary>
-    /// Actualiza los datos personales y el rol de un usuario mediante el
-    /// procedimiento almacenado <c>dbo.Usuario_ActualizarDatos</c>.
-    /// </summary>
-    /// <param name="id">
-    /// Identificador del usuario que debe actualizarse.
-    /// </param>
-    /// <param name="nombre">
-    /// Nuevo nombre del usuario.
-    /// </param>
-    /// <param name="apellido">
-    /// Nuevo apellido del usuario.
-    /// </param>
-    /// <param name="rolId">
-    /// Identificador del nuevo rol asignado al usuario.
-    /// </param>
-    /// <remarks>
-    /// Esta operación modifica únicamente el nombre, el apellido y el rol.
-    /// No modifica el nombre de acceso, la contraseña, el estado ni la fecha
-    /// de alta del usuario.
-    ///
-    /// El procedimiento también protege la existencia de al menos un
-    /// administrador activo en el sistema.
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">
-    /// Se produce cuando el usuario indicado ya no existe en la base de datos.
-    /// </exception>
-    /// <exception cref="ValidacionException">
-    /// Se produce cuando la modificación dejaría al sistema sin ningún
-    /// administrador activo.
-    /// </exception>
-    public async Task ActualizarDatosAsync(
-        int id,
-        string nombre,
-        string apellido,
-        int rolId)
+    public Task ActualizarDatosAsync(int id, string nombre, string apellido, int rolId, byte[] version) =>
+        EjecutarAsync("EXEC dbo.Usuario_ActualizarDatos @Id, @Nombre, @Apellido, @RolId, @Version",
+            Numero("@Id", id), Texto("@Nombre", UsuarioRestricciones.NombreMaximo, nombre), Texto("@Apellido", UsuarioRestricciones.ApellidoMaximo, apellido), Numero("@RolId", rolId), Version(version));
+
+    public Task ActualizarCredencialesAsync(int id, string nombreUsuario, string? passwordHash, byte[] version) =>
+        EjecutarAsync("EXEC dbo.Usuario_ActualizarCredenciales @Id, @NombreUsuario, @PasswordHash, @Version",
+            Numero("@Id", id), Texto("@NombreUsuario", UsuarioRestricciones.NombreUsuarioMaximo, nombreUsuario), Texto("@PasswordHash", UsuarioRestricciones.PasswordHashMaximo, passwordHash), Version(version));
+
+    public Task CambiarEstadoAsync(int id, bool activo, byte[] version) =>
+        EjecutarAsync("EXEC dbo.Usuario_CambiarEstado @Id, @Activo, @Version",
+            Numero("@Id", id), new SqlParameter("@Activo", SqlDbType.Bit) { Value = activo }, Version(version));
+
+    private async Task EjecutarAsync(string sql, params object[] parametros)
     {
-        var parametroId = new SqlParameter(
-            "@Id", 
-            SqlDbType.Int)
-        { Value = id };
-
-        var parametroNombre = new SqlParameter(
-            "@Nombre", 
-            SqlDbType.NVarChar,
-            UsuarioRestricciones.NombreMaximo)
-        { Value = nombre };
-
-        var parametroApellido = new SqlParameter(
-            "@Apellido", 
-            SqlDbType.NVarChar,
-            UsuarioRestricciones.ApellidoMaximo)
-        { Value = apellido };
-
-        var parametroRolId = new SqlParameter(
-            "@RolId", 
-            SqlDbType.Int)
-        { Value = rolId };
-
-        try
-        {
-            await _contexto.Database.ExecuteSqlRawAsync(
-                """
-                EXEC dbo.Usuario_ActualizarDatos
-                    @Id = @Id,
-                    @Nombre = @Nombre,
-                    @Apellido = @Apellido,
-                    @RolId = @RolId
-                """,
-                parametroId,
-                parametroNombre,
-                parametroApellido,
-                parametroRolId
-                );
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51002)
-        {
-            throw new InvalidOperationException(
-                "El usuario que desea actualizar ya no existe.",
-                excepcion);
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51003)
-        {
-            throw new ValidacionException(
-                 "No se puede cambiar el rol del último administrador activo.");
-        }
-
-    }
-
-    /// <summary>
-    /// Actualiza las credenciales de acceso de un usuario mediante el
-    /// procedimiento almacenado <c>dbo.Usuario_ActualizarCredenciales</c>.
-    /// </summary>
-    /// <param name="id">
-    /// Identificador del usuario cuyas credenciales deben actualizarse.
-    /// </param>
-    /// <param name="nombreUsuario">
-    /// Nuevo nombre utilizado para iniciar sesión.
-    /// </param>
-    /// <param name="passwordHash">
-    /// Nuevo hash de contraseña. Cuando es <see langword="null"/>,
-    /// se conserva el hash almacenado actualmente.
-    /// </param>
-    /// <remarks>
-    /// Este método recibe únicamente el hash de la contraseña.
-    /// La contraseña en texto plano debe ser validada y procesada
-    /// previamente por el servicio de aplicación.
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">
-    /// Se produce cuando el usuario indicado ya no existe.
-    /// </exception>
-    /// <exception cref="ValidacionException">
-    /// Se produce cuando el nombre de usuario ya está registrado.
-    /// </exception>
-    public async Task ActualizarCredencialesAsync(
-        int id, 
-        string nombreUsuario, 
-        string? passwordHash)
-    {
-        var parametroId = new SqlParameter(
-            "@Id",
-            SqlDbType.Int) 
-        { Value = id };
-
-        var parametroNombreUsuario = new SqlParameter(
-            "@NombreUsuario",
-            SqlDbType.NVarChar,
-            UsuarioRestricciones.NombreUsuarioMaximo)
-        { Value = nombreUsuario };
-
-        var parametroPasswordHash = new SqlParameter(
-            "@PasswordHash",
-            SqlDbType.NVarChar,
-            UsuarioRestricciones.PasswordHashMaximo)
-        { Value =  (object?)passwordHash ?? DBNull.Value };
-
-        try 
-        {
-            await _contexto.Database.ExecuteSqlRawAsync(
-                """
-                EXEC dbo.Usuario_ActualizarCredenciales
-                    @Id = @Id,
-                    @NombreUsuario = @NombreUsuario,
-                    @PasswordHash = @PasswordHash
-                """,
-                parametroId,
-                parametroNombreUsuario,
-                parametroPasswordHash
-                );
-                
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51001)
-        {
-            throw new ValidacionException(
-                 "Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", nameof(Usuario.NombreUsuario));
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51002)
-        {
-            throw new InvalidOperationException(
-                "El usuario cuyas credenciales desea actualizar ya no existe.",
-                excepcion);
-        }
-    }
-
-    /// <summary>
-    /// Activa o desactiva un usuario mediante el procedimiento almacenado
-    /// <c>dbo.Usuario_CambiarEstado</c>.
-    /// </summary>
-    /// <param name="id">
-    /// Identificador del usuario cuyo estado debe modificarse.
-    /// </param>
-    /// <param name="activo">
-    /// <see langword="true"/> para activar al usuario;
-    /// <see langword="false"/> para desactivarlo.
-    /// </param>
-    /// <remarks>
-    /// Esta operación modifica únicamente el estado del usuario. El
-    /// procedimiento protege la existencia de al menos un administrador
-    /// activo en el sistema.
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">
-    /// Se produce cuando el usuario indicado ya no existe en la base de datos.
-    /// </exception>
-    /// <exception cref="ValidacionException">
-    /// Se produce cuando se intenta desactivar al último administrador activo.
-    /// </exception>
-    public async Task CambiarEstadoAsync(int id, bool activo)
-    {
-        var parametroId = new SqlParameter(
-            "@Id",
-            SqlDbType.Int)
-        { Value = id };
-
-        var parametroActivo = new SqlParameter(
-            "@Activo",
-            SqlDbType.Bit)
-        { Value = activo };
-
-        try
-        {
-            await _contexto.Database.ExecuteSqlRawAsync(
-                """
-                EXEC dbo.Usuario_CambiarEstado
-                    @Id = @Id,
-                    @Activo = @Activo
-                """,
-                parametroId,
-                parametroActivo
-                );
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51002)
-        {
-            throw new InvalidOperationException(
-                "El usuario cuyo estado desea cambiar ya no existe.",
-                excepcion);
-        }
-        catch (SqlException excepcion)
-            when (excepcion.Number == 51004)
-        {
-            throw new ValidacionException(
-                "No se puede desactivar al último administrador activo.");
-        }
+        try { await contexto.Database.ExecuteSqlRawAsync(sql, parametros); }
+        catch (SqlException ex) when (ex.Number == 51001)
+        { throw new ValidacionException("Ese nombre de usuario ya está registrado. Ingrese otro nombre de usuario.", "nombreUsuario"); }
+        catch (SqlException ex) when (ex.Number == 51002)
+        { throw new ValidacionException("El usuario seleccionado ya no existe. Actualice el listado."); }
+        catch (SqlException ex) when (ex.Number is 51003 or 51004)
+        { throw new ValidacionException("La operación dejaría al sistema sin un administrador activo."); }
+        catch (SqlException ex) when (ex.Number == 51005)
+        { throw new ConflictoConcurrenciaException("El usuario cambió desde que se consultó. Actualice antes de continuar.", ex); }
     }
 }

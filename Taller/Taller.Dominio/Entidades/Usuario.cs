@@ -13,6 +13,8 @@ public sealed class Usuario
     public string Apellido { get; set; } = string.Empty;
     public bool Activo { get; set; } = true;
     public DateTime FechaAlta {  get; set; } = FechaHoraTaller.Ahora;
+    /// <summary>Token de edición optimista generado por SQL Server.</summary>
+    public byte[] Version { get; set; } = [];
     public int RolId { get; set; }
 
     /// <summary>

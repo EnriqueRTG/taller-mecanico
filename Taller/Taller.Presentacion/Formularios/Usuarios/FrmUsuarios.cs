@@ -81,11 +81,11 @@ public partial class FrmUsuarios : Form
             _usuarios = await _usuarioServicio.ListarAsync();
             AplicarFiltros();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _usuarios = [];
             AplicarFiltros();
-            MessageBox.Show("No fue posible cargar los usuarios. " + "Verifique la conexión e inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación");
         }
         finally
         {
@@ -113,7 +113,7 @@ public partial class FrmUsuarios : Form
             2 => consulta.Where(usuario => !usuario.Activo),
             _ => consulta
         };
-        List<UsuarioFila> filas = consulta.Select(usuario => new UsuarioFila { Id = usuario.Id, NombreUsuario = usuario.NombreUsuario, NombreCompleto = $"{usuario.Apellido}, {usuario.Nombre}", Rol = usuario.Rol?.Nombre ?? "Rol no disponible", Estado = usuario.Activo ? "Activo" : "Inactivo", FechaAlta = usuario.FechaAlta }).ToList();
+        List<UsuarioFila> filas = consulta.Select(usuario => new UsuarioFila { Id = usuario.Id, NombreUsuario = usuario.NombreUsuario, NombreCompleto = $"{usuario.Apellido}, {usuario.Nombre}", Rol = usuario.Rol?.Nombre ?? "Rol no disponible", Estado = usuario.Activo ? "Activo" : "Inactivo", FechaAlta = usuario.FechaAlta, Version = usuario.Version.ToArray() }).ToList();
         dgvUsuarios.DataSource = null;
         dgvUsuarios.DataSource = filas;
         dgvUsuarios.ClearSelection();
@@ -137,9 +137,9 @@ public partial class FrmUsuarios : Form
                 await CargarUsuariosAsync();
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show("No fue posible abrir el formulario " + "de alta de usuarios.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación");
         }
     }
 
@@ -205,6 +205,7 @@ public partial class FrmUsuarios : Form
     private sealed class UsuarioFila
     {
         public int Id { get; init; }
+        public byte[] Version { get; init; } = [];
         public string NombreUsuario { get; init; } = string.Empty;
         public string NombreCompleto { get; init; } = string.Empty;
         public string Rol { get; init; } = string.Empty;
@@ -276,9 +277,9 @@ public partial class FrmUsuarios : Form
                 await CargarUsuariosAsync();
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show("No fue posible abrir el formulario " + "de edición del usuario.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación");
         }
     }
 
@@ -321,16 +322,16 @@ public partial class FrmUsuarios : Form
         try
         {
             CambiarEstadoCarga(true);
-            await _usuarioServicio.CambiarEstadoAsync(fila.Id, habilitar, ejecutor.Id);
+            await _usuarioServicio.CambiarEstadoAsync(fila.Id, habilitar, ejecutor.Id, fila.Version);
             await CargarUsuariosAsync();
         }
         catch (InvalidOperationException ex)
         {
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo cambiar el estado");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show("No fue posible cambiar el estado del usuario. " + "Inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación");
         }
         finally
         {

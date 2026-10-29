@@ -61,8 +61,6 @@ public static class DependencyInjection
         services.AddScoped<IProteccionAcceso, ProteccionAccesoSql>();
         // Registra el servicio concreto utilizado para las operaciones de persistencia de clientes.
         services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
-        // Registra el servicio concreto utilizado para las operaciones de persistencia de marcas.
-        services.AddScoped<IMarcaRepositorio, MarcaRepositorio>();
         // Registra el servicio concreto utilizado para las operaciones de persistencia de modelos.
         services.AddScoped<IModeloRepositorio, ModeloRepositorio>();
         // Registra el servicio concreto utilizado para las operaciones de persistencia de vehículos.

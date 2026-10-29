@@ -29,7 +29,7 @@ public static class CargadorDemostracion
         var usuarios = sp.GetRequiredService<UsuarioServicio>();
         await usuarios.CrearAsync("demo.admin", clave, "Laura", "Gómez", 1);
         var inactivo = await usuarios.CrearAsync("demo.inactivo", clave, "Mario", "Giménez", 3);
-        await usuarios.CambiarEstadoAsync(inactivo.Id, false, admin.Id);
+        await usuarios.CambiarEstadoAsync(inactivo.Id, false, admin.Id, inactivo.Version);
         var recepcion = await usuarios.CrearAsync("demo.recepcion", clave, "Ana", "Pérez", 2);
         var recepcionDos = await usuarios.CrearAsync("demo.recepciondos", clave, "Martín", "López", 2);
         var tecnicos = new List<int>();

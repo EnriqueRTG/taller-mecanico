@@ -90,20 +90,7 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
         return await _contexto.Vehiculos.AsNoTracking().Include(v => v.Modelo).ThenInclude(m => m.Marca).Where(v => v.Activo).OrderBy(v => v.Dominio).ToListAsync();
     }
 
-    /// <summary>
-    /// Lista todos los vehículos inactivos en la base de datos
-    /// </summary>
-    /// <returns>Lista de vehículos</returns>
-    public async Task<List<Vehiculo>> ListarInactivosAsync()
-    {
-        return await _contexto.Vehiculos.AsNoTracking().Include(v => v.Modelo).ThenInclude(m => m.Marca).Where(v => !v.Activo).OrderBy(v => v.Dominio).ToListAsync();
-    }
 
-    /// <summary>
-    /// Obtiene un vehículo por su dominio
-    /// </summary>
-    /// <param name = "dominio"></param>
-    /// <returns>Vehículo o null si no se encuentra</returns>
     public async Task<Vehiculo?> ObtenerPorDominioAsync(string dominio)
     {
         return await _contexto.Vehiculos.AsNoTracking().Include(v => v.Modelo).ThenInclude(m => m.Marca).FirstOrDefaultAsync(v => v.Dominio == dominio);

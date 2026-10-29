@@ -9,5 +9,5 @@ public interface IModeloRepositorio
 {
     Task<List<Modelo>> ListarParaEdicionAsync(int actual);
     Task<Modelo?> ObtenerPorIdAsync(int idModelo);
-    Task<List<Modelo>> ListarActivosPorMarcaAsync(int idMarca);
+
 }

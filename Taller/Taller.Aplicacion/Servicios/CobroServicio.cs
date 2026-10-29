@@ -278,10 +278,10 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
         if (!datos.ConformidadRecepcion) throw new ValidacionException("Registre la conformidad de recepción del vehículo.");
         var observaciones = AutorizacionOperativa.Texto(datos.Observaciones, false);
         if (observaciones.Length > 500) throw new ValidacionException("Las observaciones de entrega admiten hasta 500 caracteres.");
-        return EntregarAsync(datos.IdAtencion, datos.Version, $"Retira: {persona}. Conformidad de recepción registrada. {observaciones}");
+        return ConfirmarEntregaAsync(datos.IdAtencion, datos.Version, $"Retira: {persona}. Conformidad de recepción registrada. {observaciones}");
     }
 
-    public async Task EntregarAsync(int idAtencion, byte[] version, string condicion)
+    private async Task ConfirmarEntregaAsync(int idAtencion, byte[] version, string condicion)
     {
         try
         {

@@ -9,13 +9,11 @@ namespace Taller.Aplicacion.Servicios;
 public sealed class DiagnosticoServicio
 {
     private readonly IDiagnosticoRepositorio _diagnosticoRepositorio;
-    private readonly IUsuarioRepositorio _usuarioRepositorio;
-    private readonly SesionUsuario _sesionUsuario;
-    public DiagnosticoServicio(IDiagnosticoRepositorio diagnosticoRepositorio, IUsuarioRepositorio usuarioRepositorio, SesionUsuario sesionUsuario)
+    private readonly AutorizacionOperativa _acceso;
+    public DiagnosticoServicio(IDiagnosticoRepositorio diagnosticoRepositorio, AutorizacionOperativa acceso)
     {
         _diagnosticoRepositorio = diagnosticoRepositorio;
-        _usuarioRepositorio = usuarioRepositorio;
-        _sesionUsuario = sesionUsuario;
+        _acceso = acceso;
     }
 
     /// <summary>Obtiene un informe definitivo sin habilitar su edición.</summary>
@@ -26,17 +24,7 @@ public sealed class DiagnosticoServicio
             throw new ValidacionException("Debe seleccionar un diagnóstico válido.");
         }
 
-        var usuarioSesion = _sesionUsuario.UsuarioActual;
-        if (usuarioSesion is null)
-        {
-            throw new ValidacionException("Debe iniciar sesión para consultar el diagnóstico.");
-        }
-
-        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioSesion.Id);
-        if (!UsuarioAutorizado.EstaHabilitado(usuario) || (usuario.RolId != RolesSistema.TecnicoId && usuario.RolId != RolesSistema.AdministrativoId))
-        {
-            throw new ValidacionException("No tiene permisos para consultar el diagnóstico.");
-        }
+        await _acceso.ExigirRolesAsync(RolesSistema.TecnicoId, RolesSistema.AdministrativoId);
 
         var detalle = await _diagnosticoRepositorio.ObtenerDetalleAsync(idDiagnostico);
         if (detalle is null)

@@ -23,11 +23,6 @@ public sealed class ClienteServicio(IClienteRepositorio clientes, AutorizacionOp
         return await clientes.ListarActivosAsync();
     }
 
-    public async Task<List<Cliente>> ListarInactivosAsync()
-    {
-        await AutorizarAsync();
-        return await clientes.ListarInactivosAsync();
-    }
 
     public async Task<Cliente?> ObtenerPorIdAsync(int id)
     {

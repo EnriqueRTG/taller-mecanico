@@ -1,6 +1,6 @@
 # Prueba local de respaldo y recuperación
 
-Usar Demo v4 y el servidor seleccionado. Azure no es requisito para este recorrido. Distinguir usuarios internos SGTM de identidades SQL, servicio Windows y permisos de archivos. Estos pasos requieren acceso técnico al servidor, no se ejecutan automáticamente al actualizar Git.
+Usar Demo v5 y el servidor seleccionado. Azure no es requisito para este recorrido. Distinguir usuarios internos SGTM de identidades SQL, servicio Windows y permisos de archivos. Estos pasos requieren acceso técnico al servidor, no se ejecutan automáticamente al actualizar Git.
 
 ## Preparación técnica
 

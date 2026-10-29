@@ -23,7 +23,7 @@ var cadena = new SqlConnectionStringBuilder(conexion);
 if (!cadena.InitialCatalog.EndsWith("_Demo", StringComparison.OrdinalIgnoreCase))
     throw new InvalidOperationException("La carga solo admite una base cuyo nombre termine en _Demo. No use SGTM_DB ni la copia de sus datos reales.");
 var clave = Environment.GetEnvironmentVariable("SGTM_DEMO_PASSWORD") ?? "";
-if (clave.Length < 12 || !clave.Any(char.IsUpper) || !clave.Any(char.IsLower) || !clave.Any(char.IsDigit) || !clave.Any(c => !char.IsLetterOrDigit(c)))
+if (clave.Length < 12 || clave.Length > 100 || !clave.Any(char.IsUpper) || !clave.Any(char.IsLower) || !clave.Any(char.IsDigit) || !clave.Any(c => !char.IsLetterOrDigit(c)))
     throw new InvalidOperationException("Defina SGTM_DEMO_PASSWORD: mínimo 12 caracteres, mayúscula, minúscula, número y símbolo. No se imprimirá ni guardará en un archivo.");
 var builder = Host.CreateApplicationBuilder();
 builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["ConnectionStrings:Default"] = conexion, ["Respaldos:Habilitado"] = "false", ["Instalacion:ClaveAdministrador"] = clave });
@@ -32,14 +32,7 @@ using var host = builder.Build();
 using var scope = host.Services.CreateScope();
 var sp = scope.ServiceProvider;
 var db = sp.GetRequiredService<TallerDbContext>();
-await db.Database.MigrateAsync();
-// Una única transacción revierte TODO el lote si se interrumpe. Segunda ejecución no agrega duplicados.
-await using var transaccion = await db.Database.BeginTransactionAsync();
-await db.Database.ExecuteSqlRawAsync("DECLARE @r int; EXEC @r=sys.sp_getapplock @Resource=N'SGTM:CargaDemostracion', @LockMode=N'Exclusive', @LockOwner=N'Transaction', @LockTimeout=0; IF @r<0 THROW 51130,'Existe otra carga de demostración en curso.',1;");
-if (await db.Clientes.AnyAsync() || await db.Vehiculos.AnyAsync() || await db.Atenciones.AnyAsync() || await db.Usuarios.AnyAsync())
-    throw new InvalidOperationException("La base ya contiene registros. La herramienta no mezcla lotes ni elimina datos; utilice una base _Demo nueva o restaure su punto de partida.");
-await sp.GetRequiredService<InicializadorDatos>().InicializarAsync();
-await CargadorDemostracion.CargarAsync(sp, clave);
-await transaccion.CommitAsync();
-Console.WriteLine("Lote DEMO v4 completo: 19 clientes, 48 vehículos y 48 atenciones, con catálogo ampliado y precios ARS orientativos. Consulte docs/pruebas/coloquio.md. Contraseña: la suministrada en SGTM_DEMO_PASSWORD. Retire esa variable al terminar.");
+var resumen = await PreparadorDemostracion.CargarAsync(sp, clave);
+Console.WriteLine($"Lote DEMO {PreparadorDemostracion.Version} completo: {resumen.Clientes} clientes, {resumen.Vehiculos} vehículos, {resumen.Atenciones} atenciones, {resumen.Marcas} marcas, {resumen.Modelos} modelos, {resumen.Categorias} categorías y {resumen.Conceptos} conceptos.");
+Console.WriteLine($"Operaciones: {resumen.Presupuestos} presupuestos, {resumen.Liquidaciones} liquidaciones y {resumen.Cobros} cobros. Consulte docs/pruebas/catalogo-demo.md. Retire SGTM_DEMO_PASSWORD al terminar.");
 return 0;

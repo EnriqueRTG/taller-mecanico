@@ -209,7 +209,7 @@ public sealed class ReportesPruebas
     [Fact]
     public void TortaNoOcultaAnulacionesNegativas_YColumnasLasConservan()
     {
-        var d = new ReporteDocumentoDto { Grafico = [new PuntoReporteDto("Cobros", 100), new PuntoReporteDto("Anulaciones", -20)] };
+        var d = new ReporteDocumentoDto { UnidadGrafico = "ARS", Grafico = [new PuntoReporteDto("Cobros", 100), new PuntoReporteDto("Anulaciones", -20)] };
         Assert.Equal(DocumentoReporteExportador.Svg(d), DocumentoReporteExportador.Svg(d, TipoGraficoReporte.Torta));
         string columnas = DocumentoReporteExportador.Html(d, TipoGraficoReporte.Columnas);
         Assert.Contains("Anulaciones", columnas);
@@ -229,6 +229,38 @@ public sealed class ReportesPruebas
         {
             Tipo = TipoReporte.Atenciones, Desde = c.Hoy, Hasta = c.Hoy, Estado = estado!
         }));
+    }
+
+    [Fact]
+    public void DetalleTabularOmiteMagnitudesInexistentesYPreservaPrecision()
+    {
+        var soloEstados = DocumentoReporteExportador.Tabular(new() { Registros = [new() { Codigo = "A-1", Descripcion = "Ingreso", Estado = "EnEvaluacionTecnica" }] });
+        Assert.Equal(4, soloEstados.Columnas.Count);
+        Assert.DoesNotContain("Importe ARS", soloEstados.Columnas);
+        var d = new ReporteDocumentoDto { Registros = [new() { Codigo = "ITEM-1", Cantidad = 1.235m, Importe = 123.45m, Descripcion = "Filtro <especial>" }] };
+        var detalle = DocumentoReporteExportador.Tabular(d);
+        Assert.Equal(6, detalle.Columnas.Count);
+        Assert.Equal("1,235", detalle.Filas.Single()[4]);
+        Assert.Equal("123,45", detalle.Filas.Single()[5]);
+        var html = DocumentoReporteExportador.Html(d);
+        Assert.Contains("Filtro &lt;especial&gt;", html);
+        Assert.Contains("class='numero'", html);
+        Assert.DoesNotContain("<th>Autorizado ARS</th>", html);
+    }
+
+    [Fact]
+    public void ReporteExtensoConservaTodoElDetalleYLaMetodologia()
+    {
+        var d = new ReporteDocumentoDto { Metodologia = "Método verificable de prueba", Registros = Enumerable.Range(1, 300)
+            .Select(i => new ReporteRegistroDto { Codigo = "COD-" + i, IdAtencion = i,
+                Descripcion = new string('A', 500) + " FIN-" + i, Responsable = "Responsable de prueba" }).ToList() };
+        var tabla = DocumentoReporteExportador.Tabular(d);
+        Assert.Equal(300, tabla.Filas.Count);
+        Assert.Contains("FIN-300", tabla.Filas.Last()[1]);
+        Assert.Contains(d.Metodologia, tabla.Notas);
+        var html = DocumentoReporteExportador.Html(d);
+        Assert.Contains("FIN-300", html);
+        Assert.Contains("thead{display:table-header-group}", html);
     }
 
 }

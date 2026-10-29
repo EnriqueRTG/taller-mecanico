@@ -15,7 +15,7 @@ FROM dbo.PresupuestoDetalles GROUP BY EstadoEjecucion;
 
 El esquema actual tiene seis migraciones. Las dos primeras son EsquemaInicialCircuitoActual y SimplificarEjecucionTresEstados; las restantes se detallan más abajo. Si existen Parcial u Omitido, la segunda migración rechaza la actualización antes de cambiar datos. No se convierten en Completado ni se reabren atenciones cerradas silenciosamente.
 
-- **Demo anterior descartable:** conservar una copia si interesa y, confirmado el destino, eliminar únicamente SGTM_DB_Demo desde SSMS y cargar el lote v4 según [replicar Demo](replicar-demo.txt). Se mantiene el nombre acordado, no crear otra base para cada prueba. La eliminación pierde los registros propios; no es necesaria si ya tiene v4.
+- **Demo anterior descartable:** conservar una copia si interesa y, confirmado el destino, eliminar únicamente SGTM_DB_Demo desde SSMS y cargar el lote v5 según [replicar Demo](replicar-demo.txt). Se mantiene el nombre acordado, no crear otra base para cada prueba. La eliminación pierde los registros propios; no es necesaria para actualizar el código; solo para sustituir el lote anterior por v5.
 - **Base con información que se quiere conservar y sin estados retirados:** aplicar todas las migraciones pendientes existentes. Revisar primero sobre una copia. Desde la raíz, con SGTM_CONN hacia el destino correcto y dotnet-ef instalado en la versión del proyecto:
 
 ```powershell
@@ -24,19 +24,19 @@ dotnet ef database update --project Taller/Taller.Infraestructura --startup-proj
 
 - **Datos reales con estados retirados:** detener la actualización y definir una conversión supervisada de esos casos. No borrar datos comerciales para hacer pasar una migración.
 
-En Demo v4 el cargador aplica las seis migraciones antes del lote. Mantiene 19 clientes, 48 vehículos, 48 atenciones y 158 conceptos. Incluye selección validada sin cambios, reformulaciones, tres estados de ejecución, inspecciones y pagos. Los conteos de reportes pueden variar respecto de v3. No volver a cargar sobre una base poblada.
+En Demo v5 el cargador aplica las seis migraciones antes del lote. Mantiene 88 clientes, 256 vehículos, 240 atenciones y 354 conceptos. Incluye selección validada sin cambios, reformulaciones, tres estados de ejecución, inspecciones y pagos. Los conteos de reportes pueden variar respecto de v3. No volver a cargar sobre una base poblada.
 
 ## Respaldos y todas las estaciones
 
 Actualizar el esquema una sola vez desde el servidor, con los clientes cerrados. La aplicación de escritorio no aplica migraciones al arrancar. Actualizar después todos los ejecutables/perfiles antes de reanudar operaciones. No mezclar clientes de las dos versiones.
 
-Si se recreó Demo, sus respaldos previos pertenecen a otra familia/esquema: no restaurarlos sobre v4. Si ya se instaló una base de control de Demo, conservar su copia/catálogo anterior y coordinar su preparación con el responsable técnico antes de habilitar el módulo para la base recreada. No borrar ni reutilizar a ciegas una base de control real. Ver [respaldos](respaldos-locales-demo.md).
+Si se recreó Demo, sus respaldos previos pertenecen a otra familia/esquema: no restaurarlos sobre una base recreada. Si ya se instaló una base de control de Demo, conservar su copia/catálogo anterior y coordinar su preparación con el responsable técnico antes de habilitar el módulo para la base recreada. No borrar ni reutilizar a ciegas una base de control real. Ver [respaldos](respaldos-locales-demo.md).
 
 Los tres DOCX académicos y los diagramas v2.0 describen las reglas actuales; ver la matriz de trazabilidad.
 
 ## Limpieza documental y de esquema del 29/10/2026
 
-La tercera migración `20261029090000_RetirarVinculoCambioSinUso` retira únicamente IdPresupuestoCambio, su FK, índice y CHECK. Las revisiones válidas usan Presupuesto.IdPresupuestoAnterior. No cambia estados, precios, solicitudes, cobros ni el lote Demo v4.
+La tercera migración `20261029090000_RetirarVinculoCambioSinUso` retira únicamente IdPresupuestoCambio, su FK, índice y CHECK. Las revisiones válidas usan Presupuesto.IdPresupuestoAnterior. No cambia estados, precios, solicitudes ni cobros del lote.
 
 Para una base ya actualizada a tres estados: respaldar, cerrar todos los puestos y agente, confirmar destino y aplicar `dotnet ef database update` con los proyectos indicados arriba. No crear otra migración ni recrear la base por esta limpieza. Si hay vínculos antiguos no nulos, la migración se detiene sin borrarlos; solicitar revisión de esos registros. La reversión técnica reconstruye la columna nullable, no recupera valores descartados; por eso se impide descartarlos en Up.
 
@@ -78,3 +78,11 @@ AND (PersonaDecision IS NULL OR LEN(LTRIM(RTRIM(PersonaDecision)))=0
 ```
 
 Cerrar clientes y agente, respaldar, confirmar el destino y ejecutar la actualización completa una sola vez. Verificar seis filas en __EFMigrationsHistory, actualizar todos los ejecutables y crear una completa nueva tras comprobar el circuito. Las copias con un esquema anterior se conservan identificadas para recuperación técnica, no se presentan como compatibles con el nuevo esquema.
+
+## Lote ampliado Demo v5
+
+La ampliación del lote no agrega una migración: se mantienen las seis del esquema actual. No borrar la base para actualizar el programa. Una Demo ya poblada conserva sus datos y no se mezcla con el lote nuevo.
+
+Para sustituir voluntariamente una Demo v4 descartable por v5, respaldar, cerrar puestos/agente y confirmar en SSMS que se trata únicamente de SGTM_DB_Demo. Solo entonces eliminar esa Demo y ejecutar el cargador de la guía de réplica para que la cree con el mismo nombre. Esta decisión pierde las operaciones de prueba anteriores; no aplicarla a SGTM_DB ni a información real. Si ya existe un control de respaldos, su catálogo conserva otra familia de base: coordinar con el responsable técnico su configuración y conservar las copias anteriores identificadas, sin reutilizarlo a ciegas.
+
+La preparación v5 corrige la coordinación con transacciones explícitas del cargador, que ahora utiliza el mismo recorrido que la prueba SQL. Los cambios no alteran estados, relaciones ni reglas de presupuesto/pago/entrega.

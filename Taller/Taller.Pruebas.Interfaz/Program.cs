@@ -99,7 +99,19 @@ internal static class Program
             tipo.GetMethod("BtnLimpiar_Click", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [null, EventArgs.Empty]);
             if (estados.SelectedIndex != 0 || !esperados.SequenceEqual(estados.Items.Cast<string>())) throw new InvalidOperationException("Limpiar debe conservar todas las opciones del tipo actual.");
         }
-        Console.WriteLine("Reportes: estados completos antes de generar, al cambiar de tipo y después de limpiar.");
+        var panel = (Panel)tipo.GetField("pnlGrafico", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        var lienzo = (Panel)tipo.GetField("lienzoGrafico", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        tipo.GetField("_documento", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(f,
+            new ReporteDocumentoDto { UnidadGrafico = "Registros", Grafico = Enumerable.Range(1, 8)
+                .Select(i => new PuntoReporteDto("Categoría de comprobación " + i, i)).ToList() });
+        f.ClientSize = new Size(1000, 600);
+        f.PerformLayout();
+        tipo.GetMethod("AjustarGrafico", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, null);
+        if (!panel.AutoScroll || lienzo.Height < 8 * 38)
+            throw new InvalidOperationException("Las series del reporte deben conservar un área legible y desplazable.");
+        using var imagen = new Bitmap(Math.Max(100, lienzo.Width), lienzo.Height);
+        lienzo.DrawToBitmap(imagen, new Rectangle(Point.Empty, imagen.Size));
+        Console.WriteLine("Reportes: estados completos y gráfico desplazable construido sin comprimir las series.");
     }
 
     private static void VerificarAccionesContextuales()

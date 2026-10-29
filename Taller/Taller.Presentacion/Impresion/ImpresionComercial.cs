@@ -5,7 +5,9 @@ namespace Taller.Presentacion.Impresion;
 /// <summary>Imprime documentos comerciales en tablas. Repite identidad y columnas; divide filas extensas sin perder texto.</summary>
 internal static class ImpresionComercial
 {
-    public static void Mostrar(Form propietario, DocumentoComercialDto datos, EmpresaDocumentoDto empresa, string nombreArchivo)
+    public static void Mostrar(Form propietario, DocumentoComercialDto datos, EmpresaDocumentoDto empresa, string nombreArchivo,
+        bool horizontal = false, float[]? pesosColumnas = null, ISet<int>? columnasNumericas = null,
+        string introduccion = "", Action<Graphics, Rectangle>? graficoPrimeraPagina = null, int altoGrafico = 0)
     {
         if (PrinterSettings.InstalledPrinters.Count == 0)
         {
@@ -13,6 +15,7 @@ internal static class ImpresionComercial
             return;
         }
         using var documento = new PrintDocument { DocumentName = nombreArchivo };
+        documento.DefaultPageSettings.Landscape = horizontal;
         documento.DefaultPageSettings.PaperSize = new PaperSize("A4", 827, 1169);
         documento.DefaultPageSettings.Margins = new Margins(50, 50, 45, 45);
         using var fuente = new Font("Segoe UI", 9);
@@ -40,8 +43,20 @@ internal static class ImpresionComercial
             Parrafo(datos.Referencia, fuente);
             Parrafo(datos.Identidad, fuente);
             y += 5;
-            float[] pesos = datos.Columnas.Count == 2 ? [0.76f, 0.24f] : [0.49f, 0.13f, 0.19f, 0.19f];
-            float[] anchos = pesos.Select(p => p * area.Width).ToArray();
+            if (pagina == 1)
+            {
+                if (!string.IsNullOrWhiteSpace(introduccion)) Parrafo(introduccion, fuente);
+                if (graficoPrimeraPagina is not null && altoGrafico > 0)
+                {
+                    graficoPrimeraPagina(g, new Rectangle(area.Left, (int)y, area.Width, altoGrafico));
+                    y += altoGrafico + 12;
+                }
+            }
+            float[] pesos = pesosColumnas ?? (datos.Columnas.Count == 2 ? [0.76f, 0.24f] : [0.49f, 0.13f, 0.19f, 0.19f]);
+            if (pesos.Length != datos.Columnas.Count || pesos.Any(p => p <= 0))
+                throw new InvalidOperationException("La distribución de columnas no corresponde al documento.");
+            float[] anchos = pesos.Select(p => p / pesos.Sum() * area.Width).ToArray();
+            bool Numerica(int columna) => columnasNumericas?.Contains(columna) ?? columna > 0;
             var cabeceras = datos.Columnas.Select((t, i) => Envolver(g, t, fuente, anchos[i] - 12)).ToArray();
             float altoCabecera = cabeceras.Max(c => c.Count) * altoLinea + 12;
             g.FillRectangle(Brushes.AliceBlue, area.Left, y, area.Width, altoCabecera);
@@ -49,12 +64,13 @@ internal static class ImpresionComercial
             for (int c = 0; c < cabeceras.Length; c++)
             {
                 for (int l = 0; l < cabeceras[c].Count; l++)
-                    g.DrawString(cabeceras[c][l], fuente, Brushes.Black, new RectangleF(x + 6, y + 6 + l * altoLinea, anchos[c] - 12, altoLinea), c == 0 ? izquierda : derecha);
+                    g.DrawString(cabeceras[c][l], fuente, Brushes.Black, new RectangleF(x + 6, y + 6 + l * altoLinea, anchos[c] - 12, altoLinea), Numerica(c) ? derecha : izquierda);
                 x += anchos[c];
             }
             y += altoCabecera;
             float inicioContenido = y, limite = area.Bottom - 30;
             bloques ??= Construir(g, datos, fuente, area.Width, anchos);
+            int filaInicial = fila, lineaInicial = linea;
             while (fila < bloques.Count)
             {
                 var b = bloques[fila];
@@ -71,7 +87,7 @@ internal static class ImpresionComercial
                 {
                     for (int l = 0; l < tomar && linea + l < b.Celdas[c].Count; l++)
                         g.DrawString(b.Celdas[c][linea + l], fuente, Brushes.Black,
-                            new RectangleF(x + 6, y + 6 + l * altoLinea, b.Anchos[c] - 12, altoLinea), c > 0 ? derecha : izquierda);
+                            new RectangleF(x + 6, y + 6 + l * altoLinea, b.Anchos[c] - 12, altoLinea), (b.Total ? c > 0 : Numerica(c)) ? derecha : izquierda);
                     x += b.Anchos[c];
                 }
                 y += alto;
@@ -80,6 +96,8 @@ internal static class ImpresionComercial
                 if (linea >= totalLineas) { fila++; linea = 0; }
             }
             g.DrawString($"SGTM · Documento interno sin validez fiscal · Página {pagina}", fuente, Brushes.DimGray, area.Left, area.Bottom - 20);
+            if (pagina > 1 && fila == filaInicial && linea == lineaInicial && fila < bloques.Count)
+                throw new InvalidOperationException("El encabezado no deja espacio para el detalle. Use A4 y márgenes normales.");
             e.HasMorePages = fila < bloques.Count;
         };
         using var vista = new VistaPreviaDocumento(documento, () => pagina);
@@ -106,8 +124,15 @@ internal static class ImpresionComercial
             if (resto.Length == 0) { lineas.Add(""); continue; }
             while (resto.Length > 0)
             {
-                int largo = resto.Length;
-                while (largo > 1 && g.MeasureString(resto[..largo], fuente).Width > ancho) largo--;
+                int minimo = 1, maximo = resto.Length, largo = 1;
+                while (minimo <= maximo)
+                {
+                    int medio = (minimo + maximo) / 2;
+                    if (g.MeasureString(resto[..medio], fuente).Width <= ancho)
+                    { largo = medio; minimo = medio + 1; }
+                    else maximo = medio - 1;
+                }
+                if (largo > 1 && largo < resto.Length && char.IsHighSurrogate(resto[largo - 1])) largo--;
                 if (largo < resto.Length && resto.LastIndexOf(' ', largo - 1, largo) is var espacio && espacio > 0) largo = espacio;
                 lineas.Add(resto[..largo]);
                 resto = resto[largo..].TrimStart();

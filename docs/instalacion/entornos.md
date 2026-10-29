@@ -45,7 +45,7 @@ El sistema de negocio sigue conectado a SQL Server. Los archivos de respaldo se 
 
 ## Verificación antes de F5
 
-El cargador informa DEMO v4 completo: 19 clientes (3 inactivos), 48 vehículos (2 inactivos) y 48 atenciones. El catálogo contiene 157 conceptos de oferta más uno inactivo para filtros. Cada precio y unidad se define expresamente, sin precios genéricos heredados del catálogo mínimo.
+El cargador informa DEMO v5 completo: 88 clientes (8 inactivos), 256 vehículos (2 inactivos) y 240 atenciones. El catálogo contiene 353 conceptos de oferta más uno inactivo para filtros. Cada precio y unidad se define expresamente, sin precios genéricos heredados del catálogo mínimo.
 
 En SSMS, sobre la base elegida:
 

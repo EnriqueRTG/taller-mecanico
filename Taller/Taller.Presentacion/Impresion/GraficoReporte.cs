@@ -13,7 +13,7 @@ internal static class GraficoReporte
             return;
         }
         decimal max = d.Grafico.Max(x => Math.Abs(x.Valor)); if (max == 0) max = 1;
-        float alto = Math.Min(32, (float)area.Height / d.Grafico.Count); float etiquetas = area.Width * .35f, ancho = area.Width * .48f;
+        float alto = Math.Min(38, (float)area.Height / d.Grafico.Count); float etiquetas = area.Width * .35f, ancho = area.Width * .48f;
         bool negativos = d.Grafico.Any(x => x.Valor < 0); float origen = area.X + etiquetas + (negativos ? ancho / 2 : 0); float escala = negativos ? ancho / 2 : ancho;
         for (int i = 0; i < d.Grafico.Count; i++)
         {
@@ -55,7 +55,7 @@ internal static class GraficoReporte
             float alto = Math.Min(28, (float)area.Height / d.Grafico.Count);
             float x = area.X + anchoGrafico + 12, y = area.Y + i * alto;
             g.FillRectangle(pincel, x, y + 3, 12, 12);
-            g.DrawString($"{i + 1}. {p.Etiqueta}: {p.Valor:N2}", fuente, Brushes.Black, new RectangleF(x + 18, y, area.Width - anchoGrafico - 32, alto), formato);
+            g.DrawString($"{i + 1}. {p.Etiqueta}: {p.Valor.ToString(d.UnidadGrafico == "ARS" ? "N2" : "N0", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))}", fuente, Brushes.Black, new RectangleF(x + 18, y, area.Width - anchoGrafico - 32, alto), formato);
         }
     }
 

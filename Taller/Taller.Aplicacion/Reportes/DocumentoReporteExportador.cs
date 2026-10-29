@@ -13,15 +13,55 @@ public static class DocumentoReporteExportador
     {
         empresa ??= new EmpresaDocumentoDto();
         var b = new StringBuilder("<!doctype html><html lang='es'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>");
-        b.Append(H(d.Titulo)).Append("</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1120px;margin:32px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}.meta,footer{color:#475569}.indicadores{display:flex;flex-wrap:wrap;gap:12px}.indicador{padding:12px;background:#eff6ff;border:1px solid #cbd5e1;min-width:140px}.indicador strong{display:block;font-size:22px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left;overflow-wrap:anywhere}th{background:#e2e8f0}svg{width:100%;height:auto}tr,.indicador{break-inside:avoid}thead{display:table-header-group}@media print{body{margin:0;padding:0;max-width:none}svg{max-height:320px}a{color:inherit}h2{break-after:avoid}}@page{size:A4 landscape;margin:14mm}</style><body>")
+        b.Append(H(d.Titulo)).Append("</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1120px;margin:32px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}.meta,footer{color:#475569}.indicadores{display:flex;flex-wrap:wrap;gap:12px}.indicador{padding:12px;background:#eff6ff;border:1px solid #cbd5e1;min-width:140px}.indicador strong{display:block;font-size:22px}.detalle{overflow-x:auto}.numero{text-align:right;white-space:nowrap}th.numero{white-space:normal;min-width:70px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left;overflow-wrap:anywhere}th{background:#e2e8f0}th:first-child{min-width:105px}th:nth-child(4){min-width:100px}svg{width:100%;height:auto}tr,.indicador{break-inside:avoid}thead{display:table-header-group}@media print{body{margin:0;padding:0;max-width:none}svg{max-height:320px}.detalle{overflow:visible}a{color:inherit}h2{break-after:avoid}}@page{size:A4 landscape;margin:14mm}</style><body>")
             .Append(Cabecera(empresa)).Append("<h1>")
             .Append(H(d.Titulo)).Append("</h1><p class='meta'>SGTM · Informe de gestión interno<br>Generado: ").Append(d.Generado.ToString("dd/MM/yyyy HH:mm:ss")).Append(" · Por: ").Append(H(d.EmitidoPor)).Append("<br>").Append(H(d.Alcance)).Append("<br>").Append(H(d.Filtros)).Append("</p><div class='indicadores'>");
         foreach (var i in d.Indicadores) b.Append("<div class='indicador'>").Append(H(i.Nombre)).Append("<strong>").Append(H(i.Valor)).Append("</strong></div>");
-        b.Append("</div><h2>Distribución · ").Append(H(d.UnidadGrafico)).Append("</h2>").Append(Svg(d, tipo)).Append("<h2>Lectura para la gestión</h2><p>").Append(H(d.Recomendacion)).Append("</p><h2>Alcance y método</h2><p>").Append(H(d.Metodologia)).Append("</p><h2>Detalle · ").Append(d.Registros.Count).Append(" registros</h2><table><thead><tr><th>Código</th><th>Atención</th><th>Fecha</th><th>Descripción</th><th>Responsable</th><th>Estado</th><th>Cantidad realizada</th><th>Importe ARS</th><th>Autorizado ARS</th></tr></thead><tbody>");
-        foreach (var x in d.Registros) b.Append("<tr><td>").Append(H(x.Codigo)).Append("</td><td>").Append(x.IdAtencion).Append("</td><td>").Append(x.Fecha.ToString("dd/MM/yyyy HH:mm")).Append("</td><td>").Append(H(x.Descripcion)).Append("</td><td>").Append(H(x.Responsable)).Append("</td><td>").Append(H(Servicios.ReporteServicio.Legible(x.Estado))).Append("</td><td>").Append(N(x.Cantidad)).Append("</td><td>").Append(N(x.Importe)).Append("</td><td>").Append(N(x.ImporteAceptado)).Append("</td></tr>");
-        if (d.Registros.Count == 0) b.Append("<tr><td colspan='9'>Sin registros para el alcance consultado.</td></tr>");
-        return b.Append("</tbody></table><footer><p>Documento de gestión. Sin validez fiscal. La situación de los registros puede cambiar después de su generación.</p></footer></body></html>").ToString();
+        b.Append("</div><h2>Distribución · ").Append(H(d.UnidadGrafico)).Append("</h2>").Append(Svg(d, tipo))
+            .Append("<h2>Lectura para la gestión</h2><p>").Append(H(d.Recomendacion))
+            .Append("</p><h2>Alcance y método</h2><p>").Append(H(d.Metodologia))
+            .Append("</p><h2>Detalle · ").Append(d.Registros.Count).Append(" registros</h2><div class='detalle'><table><thead><tr>");
+        var tabla = Tabular(d);
+        for (int i = 0; i < tabla.Columnas.Count; i++)
+            b.Append("<th").Append(i >= 4 ? " class='numero'" : "").Append(">").Append(H(tabla.Columnas[i])).Append("</th>");
+        b.Append("</tr></thead><tbody>");
+        foreach (var fila in tabla.Filas)
+        {
+            b.Append("<tr>");
+            for (int i = 0; i < fila.Count; i++)
+                b.Append("<td").Append(i >= 4 ? " class='numero'" : "").Append(">").Append(H(fila[i]).Replace("\n", "<br>")) .Append("</td>");
+            b.Append("</tr>");
+        }
+        return b.Append("</tbody></table></div><footer><p>Documento de gestión. Sin validez fiscal. La situación de los registros puede cambiar después de su generación.</p></footer></body></html>").ToString();
     }
+
+    /// <summary>Detalle compartido por HTML e impresión: solo incluye magnitudes presentes,
+    /// preserva precisión de cantidades y mantiene los valores monetarios a la derecha.</summary>
+    public static DocumentoComercialDto Tabular(ReporteDocumentoDto d)
+    {
+        bool cantidad = d.Registros.Any(x => x.Cantidad.HasValue);
+        bool importe = d.Registros.Any(x => x.Importe.HasValue);
+        bool autorizado = d.Registros.Any(x => x.ImporteAceptado.HasValue);
+        var columnas = new List<string> { "Referencia / fecha", "Descripción", "Responsable", "Estado / acción" };
+        if (cantidad) columnas.Add("Cantidad realizada");
+        if (importe) columnas.Add("Importe ARS");
+        if (autorizado) columnas.Add("Autorizado ARS");
+        var filas = new List<IReadOnlyList<string>>();
+        foreach (var x in d.Registros)
+        {
+            var fila = new List<string> { $"{x.Codigo} · A-{x.IdAtencion}\n{x.Fecha:dd/MM/yyyy HH:mm}", x.Descripcion,
+                x.Responsable, Servicios.ReporteServicio.Legible(x.Estado) };
+            if (cantidad) fila.Add(x.Cantidad?.ToString("N3", Cultura) ?? "—");
+            if (importe) fila.Add(N(x.Importe));
+            if (autorizado) fila.Add(N(x.ImporteAceptado));
+            filas.Add(fila);
+        }
+        if (filas.Count == 0) filas.Add(["Sin registros", "No hay datos para el alcance consultado.", "", ""]);
+        return new(d.Titulo, $"Generado {d.Generado:dd/MM/yyyy HH:mm:ss} · {d.EmitidoPor}",
+            d.Alcance + "\n" + d.Filtros, columnas, filas, [],
+            "LECTURA PARA LA GESTIÓN\n" + d.Recomendacion + "\n\nALCANCE Y MÉTODO\n" + d.Metodologia);
+    }
+
     public static string Svg(ReporteDocumentoDto d, TipoGraficoReporte tipo = TipoGraficoReporte.Barras)
     {
         if (tipo != TipoGraficoReporte.Barras && d.Grafico.Count > 0)
@@ -65,7 +105,7 @@ public static class DocumentoReporteExportador
                 double ancho = 420d / d.Grafico.Count, origen = negativos ? 220 : 390, alto = Math.Abs((double)punto.Valor) / maximo * (negativos ? 160 : 330);
                 b.Append($"<line x1='40' y1='{F(origen)}' x2='480' y2='{F(origen)}' stroke='#475569'/><rect x='{F(45 + i * ancho)}' y='{F(punto.Valor < 0 ? origen : origen - alto)}' width='{F(ancho * .7)}' height='{F(alto)}' fill='{color}'/><text x='{F(45 + i * ancho)}' y='425' font-size='13'>{i + 1}</text>");
             }
-            b.Append($"<rect x='510' y='{20 + i * 28}' width='14' height='14' fill='{color}'/><text x='535' y='{32 + i * 28}' font-size='13'>{i + 1}. {H(punto.Etiqueta)}: {H(punto.Valor.ToString("N2", Cultura))}</text>");
+            b.Append($"<rect x='510' y='{20 + i * 28}' width='14' height='14' fill='{color}'/><text x='535' y='{32 + i * 28}' font-size='13'>{i + 1}. {H(punto.Etiqueta)}: {H(punto.Valor.ToString(d.UnidadGrafico == "ARS" ? "N2" : "N0", Cultura))}</text>");
         }
         return b.Append("</svg>").ToString();
     }

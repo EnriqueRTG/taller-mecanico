@@ -64,7 +64,7 @@ Prueba con dos roles: técnico inicia y guarda una tarea En curso; recepción ac
 7. Usar restante completa saldo menos los medios preparados en ese cobro; no redondea, no cobra ni omite referencias. La referencia electrónica identifica la operación de pago (transferencia/billetera o cupón/autorización de tarjeta), no una factura ni datos completos de tarjeta. Efectivo puede dejarla vacía.
 8. La entrega pide solo persona que retira (prefijada con el cliente), conformidad y observación opcional. El resultado procede del cierre técnico. El servicio valida responsable, conformidad, estado, versión y saldo; el registro queda en el historial de la atención sin duplicar tablas. Después se confirma el cierre y se conserva una cuenta de consulta e impresión con datos de entrega.
 
-El cargador crea Demo v4 íntegramente mediante el circuito vigente en una base vacía. Los ejemplos cancelados corresponden a cancelación actual previa a actividad, no a aperturas de un circuito retirado. Una base Demo ya cargada no se mezcla ni se vuelve a sembrar desde el arranque de la aplicación.
+El cargador crea Demo v5 íntegramente mediante el circuito vigente en una base vacía. Los ejemplos cancelados corresponden a cancelación actual previa a actividad, no a aperturas de un circuito retirado. Una base Demo ya cargada no se mezcla ni se vuelve a sembrar desde el arranque de la aplicación.
 
 ## Seguimiento contextual y detenciones
 

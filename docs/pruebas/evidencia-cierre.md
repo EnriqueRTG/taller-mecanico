@@ -24,3 +24,10 @@ Se retira IdPresupuestoCambio del dominio/configuración/snapshot mediante migra
 Demostración prepara el lote explícito; Respaldos ejecuta calendario y control; ambos proyectos de pruebas verifican capacidades distintas. Tienen uso y las capas no dependen de ellos. No se eliminan archivos por carecer de un botón directo cuando sirven a migración, composición, pruebas o herramientas.
 
 Se retiran las notas de análisis anteriores y los DOCX del repositorio reemplazados por v2.0. Las guías vigentes describen el mismo alcance. No se afirma ausencia universal de fallos ni se reemplaza la aceptación manual del taller por esta revisión.
+
+## Verificación remota del código revisado
+
+El commit 5cadd901e2f86d51eda7992cbada1262ad50927d del PR #59 obtuvo resultado satisfactorio en los tres trabajos de CI: validar, respaldos-sql y formularios. El segundo ejecutó pruebas de circuito, migraciones y recuperación sobre SQL Server 2022 desechable; el tercero construyó solución/filtro y formularios reales en Windows/STA. Los ajustes posteriores de esta revisión son documentales; comprobar también el resultado del último head del PR antes de integrar.
+
+- [Compilación, reglas y SQL](https://github.com/EnriqueRTG/taller-mecanico/actions/runs/40827280626)
+- [Construcción WinForms y scripts](https://github.com/EnriqueRTG/taller-mecanico/actions/runs/40827280697)

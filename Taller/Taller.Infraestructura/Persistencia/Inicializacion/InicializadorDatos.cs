@@ -39,7 +39,10 @@ public sealed class InicializadorDatos
             return;
         }
 
-        await using var transaccion = await _contexto.Database.BeginTransactionAsync();
+        // Un instalador/cargador puede coordinar una transacción mayor: no abrir
+        // otra transacción local ni confirmar la que pertenece al llamador.
+        await using var transaccion = _contexto.Database.CurrentTransaction is null
+            ? await _contexto.Database.BeginTransactionAsync() : null;
         try
         {
             // Dos puestos pueden arrancar juntos: la segunda consulta debe ver lo
@@ -54,7 +57,8 @@ public sealed class InicializadorDatos
                 """);
             await InicializarAdministradorAsync();
             await InicializarCatalogoVehiculosAsync();
-            await transaccion.CommitAsync();
+            if (transaccion is not null)
+                await transaccion.CommitAsync();
         }
         finally
         {

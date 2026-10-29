@@ -41,10 +41,18 @@ public sealed class DemostracionSqlPruebas
             using var scope = proveedor.CreateScope();
             var sp = scope.ServiceProvider;
             var db = sp.GetRequiredService<TallerDbContext>();
-            await db.Database.MigrateAsync();
-            await sp.GetRequiredService<InicializadorDatos>().InicializarAsync();
-            await CargadorDemostracion.CargarAsync(sp, clave);
-            Assert.Equal(48, await db.Atenciones.CountAsync());
+            // Mismo punto de entrada que la consola: migración + una transacción
+            // de lote que incluye inicialización, consultas de cobros y entrega.
+            var resumen = await PreparadorDemostracion.CargarAsync(sp, clave);
+            Assert.Equal(PreparadorDemostracion.Atenciones, resumen.Atenciones);
+            Assert.Equal(PreparadorDemostracion.Atenciones, await db.Atenciones.CountAsync());
+            Assert.Equal(31, resumen.Marcas);
+            Assert.Equal(209, resumen.Modelos);
+            Assert.Equal(17, resumen.Categorias);
+            Assert.Equal(354, resumen.Conceptos);
+            Assert.True(resumen.Presupuestos > 200);
+            Assert.True(resumen.Liquidaciones > 100);
+            Assert.True(resumen.Cobros > 150);
             foreach (var estado in Enum.GetValues<EstadoAtencion>())
                 Assert.True(await db.Atenciones.AnyAsync(a => a.Estado == estado), "Falta etapa de atención: " + estado);
             await db.Database.MigrateAsync(); // Repetir preparación no reintroduce conceptos del catálogo mínimo.
@@ -61,8 +69,8 @@ public sealed class DemostracionSqlPruebas
             sp.GetRequiredService<SesionUsuario>().Iniciar(receptor);
             Assert.Contains(await sp.GetRequiredService<CobroServicio>().ListarAsync(), c => c.PuedeRegistrarEntrega);
 
-            Assert.Equal(19, await db.Clientes.CountAsync());
-            Assert.Equal(3, await db.Clientes.CountAsync(x => !x.Activo));
+            Assert.Equal(PreparadorDemostracion.ClientesActivos + PreparadorDemostracion.ClientesInactivos, await db.Clientes.CountAsync());
+            Assert.Equal(PreparadorDemostracion.ClientesInactivos, await db.Clientes.CountAsync(x => !x.Activo));
             Assert.Equal(2, await db.Vehiculos.CountAsync(x => !x.Activo));
             Assert.False(await db.Atenciones.AnyAsync(a=>a.FechaApertura<a.Cliente.FechaAlta||a.FechaApertura<a.Vehiculo.FechaAlta));
             Assert.True(await db.Atenciones.AnyAsync(x => x.Estado == EstadoAtencion.Cerrada));
@@ -73,6 +81,11 @@ public sealed class DemostracionSqlPruebas
             Assert.True(await db.PresupuestoDetalles.AnyAsync(p => p.OrigenMaterial == OrigenMaterial.Cliente && p.MaterialClienteConforme));
             Assert.Equal(5, await db.PagoMedios.Select(p => p.IdMedioPago).Distinct().CountAsync());
             Assert.True(await db.Pagos.AnyAsync());
+            Assert.Equal(PreparadorDemostracion.Vehiculos, await db.Vehiculos.CountAsync());
+            Assert.True(await db.Atenciones.CountAsync(a => a.Estado == EstadoAtencion.Cerrada) > 90);
+            Assert.True(await db.PresupuestoDetalles.Select(d => d.IdConcepto).Distinct().CountAsync() >= 25);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => PreparadorDemostracion.CargarAsync(sp, clave));
+            Assert.Equal(PreparadorDemostracion.Atenciones, await db.Atenciones.CountAsync());
             Assert.False(await db.Comprobantes.AnyAsync(x => x.TotalPagado > x.Total));
             Assert.False(await db.Atenciones.Where(x => x.Estado == EstadoAtencion.Cerrada).AnyAsync(a => db.Comprobantes.Any(c => c.IdAtencion == a.IdAtencion && c.Total != c.TotalPagado)));
             // La bandeja nueva debe ejecutar consultas SQL reales, incluir pendientes antiguos y respetar permisos.

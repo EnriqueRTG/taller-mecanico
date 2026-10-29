@@ -12,7 +12,7 @@ using Taller.Infraestructura.Persistencia;
 
 namespace Taller.Demostracion;
 /// <summary>Fixtures académicos generados por servicios reales. No invoca respaldos ni simula una auditoría de acceso.</summary>
-public static class CargadorDemostracion
+internal static class CargadorDemostracion
 {
     public static async Task CargarAsync(IServiceProvider sp, string clave)
     {
@@ -32,12 +32,16 @@ public static class CargadorDemostracion
         await usuarios.CambiarEstadoAsync(inactivo.Id, false, admin.Id, inactivo.Version);
         var recepcion = await usuarios.CrearAsync("demo.recepcion", clave, "Ana", "Pérez", 2);
         var recepcionDos = await usuarios.CrearAsync("demo.recepciondos", clave, "Martín", "López", 2);
+        var recepcionTres = await usuarios.CrearAsync("demo.recepciontres", clave, "Paula", "Vera", 2);
+        int[] recepcionistas = [recepcion.Id, recepcionDos.Id, recepcionTres.Id];
         var tecnicos = new List<int>();
         foreach (var(login, nombre, apellido)in new[]
         {
             ("demo.tecnico", "Carlos", "Díaz"),
             ("demo.tecnicodos", "Lucía", "Romero"),
-            ("demo.tecnicotres", "Diego", "Silva")
+            ("demo.tecnicotres", "Diego", "Silva"),
+            ("demo.tecnicocuatro", "Natalia", "Benítez"),
+            ("demo.tecnicocinco", "Andrés", "Acosta")
         }
 
         )
@@ -45,18 +49,25 @@ public static class CargadorDemostracion
         await Entrar(recepcion.Id);
         var clientes = sp.GetRequiredService<ClienteServicio>();
         var vehiculos = sp.GetRequiredService<VehiculoServicio>();
-        string[] nombres = ["María", "José", "Elena", "Pablo", "Sofía", "Pedro", "Valeria", "Jorge"];
-        string[] apellidos = ["Fernández", "Torres", "Pérez", "García", "Romero"];
+        string[] nombres = ["María", "José", "Elena", "Pablo", "Sofía", "Pedro", "Valeria", "Jorge", "Camila", "Miguel", "Florencia", "Luis", "Rocío", "Gabriel", "Daniela", "Esteban"];
+        string[] apellidos = ["Fernández", "Torres", "Pérez", "García", "Romero", "Vera", "González", "Acosta", "Benítez", "Martínez", "Sosa", "López", "Medina", "Duarte", "Ríos", "Cabrera", "Ramírez", "Silva", "Gómez", "Quiroz"];
         var idsClientes = new List<int>();
-        for (int i = 0; i < 16; i++)
-            idsClientes.Add((await clientes.RegistrarAsync("DNI", (40000000 + i).ToString(), nombres[i % 8], apellidos[i / 8], "379400" + (1000 + i), $"demo{i + 1}@example.invalid", "Calle de prueba " + (100 + i))).IdCliente);
-        var modelos = await db.Modelos.AsNoTracking().OrderBy(x => x.IdModelo).ToListAsync();
+        for (int i = 0; i < PreparadorDemostracion.ClientesActivos; i++)
+            idsClientes.Add((await clientes.RegistrarAsync("DNI", (40000000 + i).ToString(), nombres[i % nombres.Length], apellidos[(i * 7 + i / nombres.Length) % apellidos.Length], "379400" + (1000 + i), $"demo{i + 1}@example.invalid", "Calle de prueba " + (100 + i))).IdCliente);
+        await VehiculosDemostracion.CargarAsync(db);
+        var modelos = await db.Modelos.AsNoTracking().Include(x => x.Marca).Where(x => x.Activo && x.Marca.Activo)
+            .OrderBy(x => x.Marca.Nombre).ThenBy(x => x.Nombre).ToListAsync();
         var idsVehiculos = new List<int>();
-        for (int i = 0; i < 48; i++)
-            idsVehiculos.Add((await vehiculos.RegistrarAsync($"DM{i:000}AA", 2010 + i % 16, new[] { "Blanco", "Gris", "Azul", "Rojo", "Negro" }[i % 5], modelos[i % modelos.Count].IdModelo)).IdVehiculo);
+        for (int i = 0; i < PreparadorDemostracion.Vehiculos; i++)
+        {
+            var perfil = VehiculosDemostracion.Elegir(i, FamiliaPara(i));
+            var modelo = modelos.Single(m => m.Nombre == perfil.Modelo && m.Marca.Nombre == perfil.Marca);
+            idsVehiculos.Add((await vehiculos.RegistrarAsync($"DM{i:000}AA", perfil.Anio,
+                new[] { "Blanco", "Gris", "Azul", "Rojo", "Negro", "Plata", "Bordó" }[i % 7], modelo.IdModelo)).IdVehiculo);
+        }
         await CatalogoDemostracion.CargarAsync(db);
         // Los maestros y autores deben existir antes que las atenciones históricas del lote.
-        var altaHistorica = FechaHoraTaller.Hoy.AddDays(-200);
+        var altaHistorica = FechaHoraTaller.Hoy.AddDays(-400);
         foreach(var u in await db.Usuarios.ToListAsync()) u.FechaAlta=altaHistorica;
         foreach(var c in await db.Clientes.ToListAsync()) c.FechaAlta=altaHistorica;
         foreach(var v in await db.Vehiculos.ToListAsync()) v.FechaAlta=altaHistorica;
@@ -68,10 +79,26 @@ public static class CargadorDemostracion
         var ejecucion = sp.GetRequiredService<EjecucionServicio>();
         var seguimiento = sp.GetRequiredService<SeguimientoTrabajoServicio>();
         var cobros = sp.GetRequiredService<CobroServicio>();
-        string[] sintomas = ["Ruido al frenar y vibración en el pedal", "Revisión por consumo de aceite", "Pérdida de refrigerante al estacionar", "Batería sin capacidad de arranque", "Falla intermitente de conexión al arrancar", "Golpes y rebotes en suspensión delantera"];
-        string[] pedidos = ["Solicita cambio de discos delanteros", "Solicita service completo de filtros y aceite", "Solicita reemplazo de termostato", "Solicita reemplazo de batería", "Solicita reparación de conexiones de batería", "Solicita reemplazo de amortiguadores delanteros"];
-        string[] manoObra = ["Reemplazo de discos delanteros", "Service completo de filtros y lubricación", "Reemplazo de termostato", "Reemplazo de batería", "Reparación de conexiones eléctricas", "Reemplazo de amortiguadores delanteros"];
-        string[] materiales = ["Disco de freno delantero", "Filtro de aceite", "Termostato", "Batería 12V 60Ah", "Terminal de batería", "Amortiguador delantero"];
+        var casos = new[]
+        {
+            new Caso("Ruido al frenar y vibración en el pedal", "Solicita cambio de discos delanteros", "Desgaste e irregularidad de discos delanteros comprobados", "Reemplazo de discos delanteros", "Disco de freno delantero", 2),
+            new Caso("Mantenimiento vencido y lubricante deteriorado", "Solicita service completo de filtros y aceite", "Mantenimiento periódico relevado", "Service completo de filtros y lubricación", "Filtro de aceite", 1),
+            new Caso("Pérdida de refrigerante al estacionar", "Solicita reemplazo de termostato", "Termostato con funcionamiento irregular", "Reemplazo de termostato", "Termostato", 1),
+            new Caso("Batería sin capacidad de arranque", "Solicita reemplazo de batería", "Batería sin capacidad suficiente según comprobación", "Reemplazo de batería", "Batería 12V 60Ah", 1),
+            new Caso("Falla intermitente de conexión al arrancar", "Solicita reparar conexiones de batería", "Conexión eléctrica defectuosa; se puede reparar el contacto sin sustituir piezas si se autoriza solo el servicio", "Reparación de conexiones eléctricas", "Terminal de batería", 2),
+            new Caso("Golpes y rebotes en suspensión delantera", "Solicita reemplazo de amortiguadores delanteros", "Amortiguadores deteriorados en comprobación", "Reemplazo de amortiguadores delanteros", "Amortiguador delantero", 2),
+            new Caso("Desgaste de frenos delanteros", "Solicita reemplazo de pastillas delanteras", "Pastillas delanteras fuera de condición de uso", "Reemplazo de pastillas delanteras", "Juego de pastillas delanteras", 1),
+            new Caso("Embrague patina durante la aceleración", "Solicita reemplazo del kit de embrague", "Desgaste del conjunto de embrague", "Reemplazo de kit de embrague", "Kit de embrague", 1),
+            new Caso("Revisión de distribución por intervalo de uso", "Solicita reemplazo del kit de distribución", "Intervalo de sustitución verificado para la versión relevada", "Reemplazo de kit de distribución", "Kit de distribución", 1),
+            new Caso("Pérdida en panel del radiador", "Solicita reemplazo de radiador", "Fuga comprobada en radiador", "Reemplazo de radiador", "Radiador de refrigeración", 1),
+            new Caso("Neumáticos deteriorados en inspección", "Solicita dos neumáticos delanteros", "Cubiertas con desgaste que justifica reemplazo", "Montaje de neumático", "Neumático 185/65 R15", 2),
+            new Caso("Tironeos con falla de encendido", "Solicita reemplazo de bujías", "Bujías deterioradas en motor de cuatro cilindros relevado", "Reemplazo de bujías", "Bujía convencional", 4),
+            new Caso("Dificultad de alimentación en versión diésel relevada", "Solicita reemplazo de filtro diésel", "Filtro de combustible con restricción verificada", "Reemplazo de filtro diésel", "Filtro de combustible diésel", 1),
+            new Caso("Ruido de correa auxiliar", "Solicita reemplazo de correa auxiliar", "Correa auxiliar deteriorada", "Reemplazo de correa auxiliar", "Correa auxiliar", 1),
+            new Caso("Testigo de carga y batería sin recuperación", "Solicita reemplazo de alternador", "Falla de carga confirmada en alternador", "Reemplazo de alternador", "Alternador", 1),
+            new Caso("Ruido y fuga en silenciador", "Solicita reemplazo de silenciador", "Silenciador deteriorado con fuga comprobada", "Reemplazo de silenciador de escape", "Silenciador de escape", 1)
+        };
+        var nombresClientes = await db.Clientes.AsNoTracking().ToDictionaryAsync(c => c.IdCliente, c => c.Nombre + " " + c.Apellido);
         Concepto Concepto(string nombre) => catalogo.First(c => c.Nombre == nombre);
 
         async Task<byte[]> Version(int id)
@@ -81,18 +108,23 @@ public static class CargadorDemostracion
         }
 
         async Task<PresupuestoGestionDto> Actual(int id) => await presupuestos.ObtenerAsync(id);
-        for (int i = 0; i < 48; i++)
+        for (int i = 0; i < PreparadorDemostracion.Atenciones; i++)
         {
-            int etapa = i % 16;
-            string nombreCliente = $"{nombres[i % 8]} {apellidos[(i % idsClientes.Count) / 8]}";
+            // Primeros 64: todos los puntos operativos; resto: mayor peso histórico
+            // de trabajos terminados/cobrados, sin multiplicar artificialmente pendientes.
+            int etapa = i < 64 ? i % 16 : i % 10 < 6 ? 14 : new[] { 11, 12, 13, 5 }[i % 10 - 6];
+            int familia = FamiliaPara(i);
+            var caso = casos[familia];
+            int idCliente = idsClientes[i % idsClientes.Count];
+            string nombreCliente = nombresClientes[idCliente];
             int tecnico = tecnicos[i % tecnicos.Count];
-            await Entrar(i % 2 == 0 ? recepcion.Id : recepcionDos.Id);
+            await Entrar(recepcionistas[i % recepcionistas.Length]);
             bool definido = i % 3 == 1;
-            var solicitudes = new List<SolicitudIngresoDto> { new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {(definido ? pedidos[i % 6] : sintomas[i % 6])}" } };
+            var solicitudes = new List<SolicitudIngresoDto> { new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {(definido ? caso.Pedido : caso.Sintoma)}" } };
             if (i % 3 == 2) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Control preventivo de niveles y luces solicitado por el cliente" });
             var atencion = await recepcionServicio.RegistrarRecepcionAsync(new() {
-                IdCliente = idsClientes[i % idsClientes.Count], IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
-                Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Recepción DEMO v4: ingreso documentado, sin cargos automáticos.", Solicitudes = solicitudes
+                IdCliente = idCliente, IdVehiculo = idsVehiculos[i], IdUsuarioRecepcion = sesion.UsuarioActual!.Id,
+                Kilometraje = 35000 + i * 1250, ObservacionesRecepcion = "Recepción DEMO v5: versión y aplicación relevadas por el técnico antes de presupuestar; sin cargos automáticos.", Solicitudes = solicitudes
             });
             int id = atencion.IdAtencion;
             if (etapa == 0)
@@ -140,37 +172,51 @@ public static class CargadorDemostracion
             }
             var datos = await evaluacion.ObtenerAsync(id);
             datos.IncluyeDiagnostico = !definido;
-            datos.FallaDetectada = new[] { "Desgaste e irregularidad de discos delanteros comprobados.", "Mantenimiento periódico de aceite y filtros solicitado.", "Termostato con funcionamiento irregular comprobado en la revisión.", "Batería sin capacidad suficiente de arranque según comprobación.", "Terminal de batería deteriorado y conexión defectuosa.", "Amortiguadores delanteros deteriorados en comprobación de suspensión." }[i % 6];
-            datos.TrabajoRecomendado = manoObra[i % 6] + ", con materiales detallados y comprobación final.";
+            datos.FallaDetectada = caso.Conclusion;
+            datos.TrabajoRecomendado = caso.Servicio + ", con materiales y aplicación confirmados para el vehículo relevado.";
             datos.Kilometraje = 35000 + i * 1250;
             datos.Observaciones = "Datos ficticios para el coloquio. Alcance relevado por el técnico.";
-            var servicio = Concepto(manoObra[i % 6]);
-            var repuesto = Concepto(materiales[i % 6]);
+            var servicio = Concepto(caso.Servicio);
+            var repuesto = Concepto(caso.Material);
             datos.Items = [new()
             {
                 IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud,
                 IdConcepto = servicio.IdConcepto,
                 Descripcion = servicio.Nombre,
-                Cantidad = 1,
+                Cantidad = familia == 10 ? caso.CantidadMaterial : 1,
                 PrecioUnitario = servicio.PrecioReferencia!.Value
             }, new()
             {
                 IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud,
                 IdConcepto = repuesto.IdConcepto,
                 Descripcion = repuesto.Nombre,
-                Cantidad = i % 6 is 0 or 5 ? 2 : 1,
+                Cantidad = caso.CantidadMaterial,
                 PrecioUnitario = etapa == 10 ? 0 : repuesto.PrecioReferencia!.Value,
                 OrigenMaterial = etapa == 10 ? OrigenMaterial.Cliente : OrigenMaterial.Taller
             }
 
             ];
-            if (i % 6 == 1)
+            if (familia == 1)
                 foreach (var (nombre, cantidad) in new[] { ("Filtro de aire", 1m), ("Filtro de combustible", 1m), ("Filtro de habitáculo", 1m), ("Aceite de motor semisintético 10W40", 4m) })
                 {
                     var material = Concepto(nombre);
                     datos.Items.Add(new() { IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud, IdConcepto = material.IdConcepto,
                         Descripcion = material.Nombre, Cantidad = cantidad, PrecioUnitario = material.PrecioReferencia!.Value });
                 }
+            if (familia is 2 or 9)
+            {
+                var refrigerante = Concepto("Refrigerante listo para usar");
+                datos.Items.Add(new() { IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud,
+                    IdConcepto = refrigerante.IdConcepto, Descripcion = refrigerante.Nombre, Cantidad = 5,
+                    PrecioUnitario = refrigerante.PrecioReferencia!.Value });
+            }
+            if (familia == 10)
+            {
+                var balanceo = Concepto("Balanceo de rueda");
+                datos.Items.Add(new() { IdSolicitudAtencion = datos.Solicitudes[0].IdSolicitud,
+                    IdConcepto = balanceo.IdConcepto, Descripcion = balanceo.Nombre, Cantidad = 2,
+                    PrecioUnitario = balanceo.PrecioReferencia!.Value });
+            }
             if (datos.Solicitudes.Count > 1) datos.Items.Add(new() {
                 IdSolicitudAtencion = datos.Solicitudes[1].IdSolicitud, IdConcepto = Concepto("Control preventivo de niveles y luces").IdConcepto,
                 Descripcion = "Control preventivo de niveles y luces", Cantidad = 1, PrecioUnitario = Concepto("Control preventivo de niveles y luces").PrecioReferencia!.Value
@@ -327,7 +373,7 @@ public static class CargadorDemostracion
             await vehiculos.DarDeBajaAsync(idVehiculo,v!.Version);
         }
         // Registros inactivos para filtros. Solo maestros sin atenciones asociadas.
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < PreparadorDemostracion.ClientesInactivos; i++)
         {
             var c = await clientes.RegistrarAsync("DNI", (49000000 + i).ToString(), "Cliente", "Inactivo", "379400" + (2000 + i), null, null);
             var actual = await clientes.ObtenerPorIdAsync(c.IdCliente);
@@ -335,11 +381,15 @@ public static class CargadorDemostracion
         }
     }
 
+    private static int FamiliaPara(int indice) => indice == 22 ? 4 : (indice * 7 + indice / 16) % 16;
+
+    private sealed record Caso(string Sintoma, string Pedido, string Conclusion, string Servicio, string Material, decimal CantidadMaterial);
+
     private static async Task FecharAsync(TallerDbContext db, int id, int indice)
     {
         db.ChangeTracker.Clear();
         // Retrodatación exclusivamente de fixtures, conserva los intervalos y el orden interno de cada circuito.
-        int dias = indice * 7 % 180;
+        int dias = indice < 32 ? indice : (indice * 17 + 11) % 360;
         var a = await db.Atenciones.SingleAsync(a => a.IdAtencion == id);
         a.FechaApertura = a.FechaApertura.AddDays(-dias);
         a.FechaCierre = a.FechaCierre?.AddDays(-dias);

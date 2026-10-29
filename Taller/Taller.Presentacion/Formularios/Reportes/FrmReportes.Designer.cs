@@ -78,7 +78,7 @@ partial class FrmReportes
         colEstado = new DataGridViewTextBoxColumn { Name="colEstado", DataPropertyName="Estado", HeaderText="Estado / acción", MinimumWidth=110, FillWeight=110, ReadOnly=true };
         dgvDetalle.Columns.Add(colEstado);
         colCantidad = new DataGridViewTextBoxColumn { Name="colCantidad", DataPropertyName="Cantidad", HeaderText="Cantidad realizada", MinimumWidth=90, FillWeight=90, ReadOnly=true };
-        colCantidad.DefaultCellStyle.Format="N2"; colCantidad.DefaultCellStyle.NullValue="—";
+        colCantidad.DefaultCellStyle.Format="N3"; colCantidad.DefaultCellStyle.NullValue="—";
         dgvDetalle.Columns.Add(colCantidad);
         colImporte = new DataGridViewTextBoxColumn { Name="colImporte", DataPropertyName="Importe", HeaderText="Importe ARS", MinimumWidth=100, FillWeight=100, ReadOnly=true };
         colImporte.DefaultCellStyle.Format="N2"; colImporte.DefaultCellStyle.NullValue="—";
@@ -98,7 +98,11 @@ partial class FrmReportes
         cboTipo.SelectedIndexChanged += CboTipo_SelectedIndexChanged; cboEstado.SelectedIndexChanged += Filtro_Cambio;
         dtpDesde.ValueChanged += Filtro_Cambio; dtpHasta.ValueChanged += Filtro_Cambio; txtBuscar.TextChanged += Filtro_Cambio;
         btnGenerar.Click += BtnGenerar_Click; btnLimpiar.Click += BtnLimpiar_Click; btnExportar.Click += BtnExportar_Click; btnCsv.Click += BtnCsv_Click; btnImprimir.Click += BtnImprimir_Click;
-        pnlGrafico.Paint += PnlGrafico_Paint;
+        pnlGrafico.AutoScroll = true;
+        lienzoGrafico = new Panel { Name = "lienzoGrafico", BackColor = Color.White, Location = Point.Empty };
+        pnlGrafico.Controls.Add(lienzoGrafico);
+        lienzoGrafico.Paint += PnlGrafico_Paint;
+        pnlGrafico.SizeChanged += (_, _) => AjustarGrafico();
         ResumeLayout(false);
     }
     private TableLayoutPanel tlpPrincipal = null!;
@@ -115,6 +119,7 @@ partial class FrmReportes
     private TextBox txtBuscar = null!;
     private TextBox txtResumen = null!;
     private Panel pnlGrafico = null!;
+    private Panel lienzoGrafico = null!;
     private DataGridView dgvDetalle = null!;
     private FlowLayoutPanel flpAcciones = null!;
     private Button btnGenerar = null!;

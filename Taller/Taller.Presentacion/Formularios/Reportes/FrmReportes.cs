@@ -70,7 +70,8 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         _documento = null;
         dgvDetalle.DataSource = null;
         txtResumen.Clear();
-        pnlGrafico.Invalidate();
+        AjustarGrafico();
+        lienzoGrafico.Invalidate();
         btnExportar.Visible = btnCsv.Visible = btnImprimir.Visible = false;
         btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = false;
         lblCantidad.Text = "Configure los filtros y genere el documento.";
@@ -112,6 +113,9 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             Cursor = Cursors.WaitCursor;
             _documento = await _servicio.GenerarAsync(new SolicitudReporteDto { Tipo = opcion.Tipo, Desde = dtpDesde.Value.Date, Hasta = dtpHasta.Value.Date, Busqueda = txtBuscar.Text, Estado = cboEstado.SelectedItem?.ToString() ?? "Todos" });
             dgvDetalle.DataSource = _documento.Registros.Select(x => new { x.Codigo, Atencion = x.IdAtencion, x.Fecha, x.Descripcion, x.Responsable, Estado = ReporteServicio.Legible(x.Estado), x.Cantidad, x.Importe, x.ImporteAceptado }).ToList();
+            colCantidad.Visible = _documento.Registros.Any(x => x.Cantidad.HasValue);
+            colImporte.Visible = _documento.Registros.Any(x => x.Importe.HasValue);
+            colImporteAceptado.Visible = _documento.Registros.Any(x => x.ImporteAceptado.HasValue);
             dgvDetalle.ClearSelection();
             txtResumen.Text = string.Join("   |   ", _documento.Indicadores.Select(x => x.Nombre + ": " + x.Valor)) + Environment.NewLine + _documento.Recomendacion + Environment.NewLine + _documento.Metodologia;
             lblMetodo.Text = _documento.Alcance + " · " + _documento.Filtros;
@@ -151,13 +155,22 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             cboGrafico.SelectedIndex = 0;
             MessageBox.Show(this, "La torta requiere valores no negativos y un total mayor que cero. Se utilizarán barras.", "Tipo de gráfico");
         }
-        pnlGrafico.Invalidate();
+        AjustarGrafico();
+        lienzoGrafico.Invalidate();
+    }
+
+    private void AjustarGrafico()
+    {
+        if (lienzoGrafico is null) return;
+        int minimo = _documento is null ? 100 : Math.Max(260, _documento.Grafico.Count * 38 + 24);
+        lienzoGrafico.Size = new Size(Math.Max(100, pnlGrafico.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 4),
+            Math.Max(minimo, pnlGrafico.ClientSize.Height - 4));
     }
 
     private void PnlGrafico_Paint(object? sender, PaintEventArgs e)
     {
         if (_documento is { } d)
-            GraficoReporte.Dibujar(e.Graphics, Rectangle.Inflate(pnlGrafico.ClientRectangle, -12, -8), d, GraficoElegido);
+            GraficoReporte.Dibujar(e.Graphics, Rectangle.Inflate(lienzoGrafico.ClientRectangle, -12, -8), d, GraficoElegido);
     }
 
     private void BtnLimpiar_Click(object? sender, EventArgs e)

@@ -60,7 +60,7 @@ public sealed class UnidadDeTrabajo : IUnidadDeTrabajo
     public async Task<T> LeerConsistenteAsync<T>(Func<Task<T>> consulta)
     {
         ArgumentNullException.ThrowIfNull(consulta);
-        if (!_contexto.Database.IsRelational())
+        if (!_contexto.Database.IsRelational() || _contexto.Database.CurrentTransaction is not null)
             return await consulta();
         await using var transaccion = await _contexto.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
         var resultado = await consulta();

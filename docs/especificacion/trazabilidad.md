@@ -36,3 +36,11 @@ Los archivos de diagramas derivan del mismo modelo. Las tablas ref. repetidas en
 Consultar [plan integral](../pruebas/aceptacion-version-actual.md), [SQL de contraste](../reportes/verificacion-reportes.sql) y [estado de verificación](../pruebas/evidencia-cierre.md). Ninguna guía debe afirmar que SQL real o Azure se probaron si no hay evidencia de esa ejecución.
 
 La segunda revisión agrega Usuarios.Version y guardias de edición en sus SP (CU02/RNF-05), unifica la entrega estructurada (CU04/RF-27) y revalida maestros del alta en transacción breve (CU04/RNF-04). Evidencia: Usuarios_SPRechazanVersionObsoletaEnDatosCredencialesYEstado, AltaAtencion_RevalidaMaestrosAntesDeGuardarYPermiteReintentarSinResiduos y AtencionPersistenciaPruebas. Véase [segunda revisión](../pruebas/revision-integral-2.md).
+
+## Tercera revisión
+
+- Decisión con persona y medio: PresupuestoServicio y CK_Presupuestos_ContactoDecision; prueba SQL DecisionPersistida_ExigeContactoYLaMigracionNoInventaDatos.
+- Arranque concurrente: InicializadorDatos, bloqueo SQL de transacción; InicializacionConcurrente_CreaUnaSolaCuentaYCatalogoSinDuplicados.
+- Lectura de cuenta: CobroServicio consulta mediante IUnidadDeTrabajo.LeerConsistenteAsync; aislamiento Serializable limitado a la consulta, sin conservarlo mientras se opera la ventana.
+- Reportes: estados validados por ReporteServicio; conciliación de los siete tipos sobre el lote SQL en DemostracionSqlPruebas.
+- Unicidad del diagnóstico: UX_Diagnosticos_Atencion y traducción en UnidadDeTrabajo; prueba SQL de duplicado sin residuos.

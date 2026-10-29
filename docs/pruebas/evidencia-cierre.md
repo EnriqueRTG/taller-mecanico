@@ -1,3 +1,5 @@
+> Evidencia histórica de la etapa descrita en este documento. Para el estado más reciente, consultar [tercera revisión](revision-integral-3.md) y las comprobaciones del commit entregado.
+
 # Evidencia de revisión de cierre
 
 Fecha: 29/10/2026. Base de código: main 253e7d6 y cambios de esta rama de cierre documental. La versión exacta se identifica con el commit que contiene este documento; no extrapolar resultados a una modificación posterior.

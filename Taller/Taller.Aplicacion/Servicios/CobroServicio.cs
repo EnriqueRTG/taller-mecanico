@@ -58,24 +58,27 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
     {
         try
         {
-            await acceso.ExigirAsync(RolesSistema.AdministrativoId);
-            var atenciones = await repositorio.ListarAtencionesParaCobrosAsync();
-            var documentos = (await repositorio.ListarComprobantesAsync()).ToDictionary(d => d.IdAtencion);
-            return atenciones.Select(a =>
+            return await unidad.LeerConsistenteAsync(async () =>
             {
-                documentos.TryGetValue(a.IdAtencion, out var d);
-                return new AtencionCobroDto
+                await acceso.ExigirAsync(RolesSistema.AdministrativoId);
+                var atenciones = await repositorio.ListarAtencionesParaCobrosAsync();
+                var documentos = (await repositorio.ListarComprobantesAsync()).ToDictionary(d => d.IdAtencion);
+                return atenciones.Select(a =>
                 {
-                    IdAtencion = a.IdAtencion,
-                    Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
-                    Dominio = a.Vehiculo.Dominio,
-                    Estado = a.Estado,
-                    Fecha = d == null ? a.FechaApertura : d.Pagos.Select(p => p.FechaAnulacion ?? p.Fecha).Append(d.FechaEmision).Max(),
-                    IdComprobante = d?.IdComprobante,
-                    Total = d?.Total,
-                    Pagado = d?.TotalPagado
-                };
-            }).ToList();
+                    documentos.TryGetValue(a.IdAtencion, out var d);
+                    return new AtencionCobroDto
+                    {
+                        IdAtencion = a.IdAtencion,
+                        Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
+                        Dominio = a.Vehiculo.Dominio,
+                        Estado = a.Estado,
+                        Fecha = d == null ? a.FechaApertura : d.Pagos.Select(p => p.FechaAnulacion ?? p.Fecha).Append(d.FechaEmision).Max(),
+                        IdComprobante = d?.IdComprobante,
+                        Total = d?.Total,
+                        Pagado = d?.TotalPagado
+                    };
+                }).ToList();
+            });
         }
         finally
         {
@@ -87,18 +90,21 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
     {
         try
         {
-            await acceso.ExigirAsync(RolesSistema.AdministrativoId);
-            var a = await AtencionAsync(idAtencion);
-            var d = await repositorio.ObtenerPorAtencionAsync(idAtencion);
-            return new CuentaAtencionDto
+            return await unidad.LeerConsistenteAsync(async () =>
             {
-                IdAtencion = idAtencion,
-                Estado = a.Estado,
-                VersionAtencion = a.Version.ToArray(),
-                Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {a.Estado}" + (a.Estado == EstadoAtencion.Cerrada ? "\r\n" + a.Historial.Where(h => h.Accion == "VehiculoEntregado").OrderByDescending(h => h.Fecha).Select(h => $"Entrega {h.Fecha:dd/MM/yyyy HH:mm}: {h.Observaciones}").FirstOrDefault() : ""),
-                Comprobante = d == null ? null : Mapear(d),
-                ItemsPorLiquidar = d != null || a.Estado == EstadoAtencion.Cerrada ? [] : Items(await FacturablesAsync(idAtencion))
-            };
+                await acceso.ExigirAsync(RolesSistema.AdministrativoId);
+                var a = await AtencionAsync(idAtencion);
+                var d = await repositorio.ObtenerPorAtencionAsync(idAtencion);
+                return new CuentaAtencionDto
+                {
+                    IdAtencion = idAtencion,
+                    Estado = a.Estado,
+                    VersionAtencion = a.Version.ToArray(),
+                    Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {a.Estado}" + (a.Estado == EstadoAtencion.Cerrada ? "\r\n" + a.Historial.Where(h => h.Accion == "VehiculoEntregado").OrderByDescending(h => h.Fecha).Select(h => $"Entrega {h.Fecha:dd/MM/yyyy HH:mm}: {h.Observaciones}").FirstOrDefault() : ""),
+                    Comprobante = d == null ? null : Mapear(d),
+                    ItemsPorLiquidar = d != null || a.Estado == EstadoAtencion.Cerrada ? [] : Items(await FacturablesAsync(idAtencion))
+                };
+            });
         }
         finally
         {

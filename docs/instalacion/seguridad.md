@@ -12,7 +12,7 @@
 
 ## Primera instalación
 
-Sobre una base nueva, aplicar EsquemaInicialCircuitoActual según [entornos](entornos.md). Incluye las tablas de seguridad; no se aplican migraciones retiradas sobre una base antigua. Para Demo, el cargador aplica el esquema antes de crear los usuarios.
+Sobre una base nueva, aplicar todas las migraciones vigentes según [entornos](entornos.md). Incluye las tablas de seguridad; no se aplican migraciones retiradas sobre una base antigua. Para Demo, el cargador aplica el esquema antes de crear los usuarios.
 
 Una base sin usuarios necesita una credencial inicial suministrada por el instalador. En PowerShell, solicítela sin escribirla literalmente en el historial:
 
@@ -47,3 +47,5 @@ Hay pruebas de sesión sin vencimiento temporal y revocación de autorización, 
 ## Política común de contraseñas
 
 Alta y gestión de credenciales utilizan `UsuarioServicio.ValidarPassword`: contraseña no vacía, de 8 a 100 caracteres, conservada exactamente como fue ingresada. No se exige una composición específica. Los dos formularios usan los mismos límites y generador; las contraseñas se almacenan mediante hash. Modificar únicamente el nombre de acceso no obliga a reemplazar la contraseña.
+
+La inicialización mínima se serializa entre puestos mediante sp_getapplock y una transacción SQL. No reemplaza la instalación de migraciones. La configuración del cliente publicado se resuelve desde la carpeta del ejecutable, independientemente del directorio de trabajo del acceso directo.

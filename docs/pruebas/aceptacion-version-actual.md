@@ -26,7 +26,7 @@ Usar el mismo commit y una única base de prueba compartida cuando se prueben do
 | P20 Completa/diferencial | Configurar Demo, completa, cambiar datos, diferencial | Copias verificadas y diferencial vinculada a completa |
 | P21 Programación | Agente activo, horario/prueba, local y réplica si configurada | Resultado real en catálogo; fallo Azure no simula réplica exitosa |
 | P22 Recuperación | Ensayo en copia, plan vencido, dos usuarios, mantenimiento | Validaciones bloquean intentos inválidos; recuperación probada solo en entorno descartable |
-| P23 Limpieza | Aplicar cinco migraciones en base vacía y actualizar copia actual | Modelo sin cambios pendientes y sin IdPresupuestoCambio; datos conservados |
+| P23 Limpieza | Aplicar seis migraciones en base vacía y actualizar copia actual | Modelo sin cambios pendientes y sin IdPresupuestoCambio; datos conservados |
 
 Para P18 usar [consultas SQL](../reportes/verificacion-reportes.sql) y la metodología del reporte. Para P20–P22 seguir [operación de respaldos](../respaldos/operacion.md), [prueba local](../instalacion/respaldos-locales-demo.md) y [Azure](../respaldos/azure.md). No prometer notificación instantánea ni restauración sin interrupción.
 
@@ -40,3 +40,12 @@ La comprobación visual se hace en Windows a 1366×768/1920×1080 y DPI 100/125/
 - Interrumpir técnicamente un alta de atención: no deben quedar solicitudes ni historial pendientes de otro guardado.
 - Inhabilitar cliente/vehículo después de seleccionarlo y antes del alta: rechazar. Rehabilitar y comprobar una nueva apertura válida.
 - Aplicar la quinta migración sobre una copia de la base existente y verificar usuarios, roles, contraseñas, circuito y reportes.
+
+## Comprobaciones de la tercera revisión
+
+- Verificar seis migraciones y repetir la preparación sobre una base ya actualizada sin recrearla.
+- Iniciar dos puestos simultáneamente sobre una instalación nueva autorizada; comprobar una sola cuenta inicial y catálogos sin duplicados.
+- Comprobar que al deshabilitar cliente/vehículo aparece su identidad y No es la opción predeterminada.
+- Ejecutar la publicación desde un acceso directo con otra carpeta de trabajo; debe leer su configuración local.
+- Cambiar el estado de un reporte por un valor ajeno mediante una llamada de servicio: rechazar, no producir una consulta vacía engañosa.
+- Replicar en Azure negocio/control/manifiesto y comprobar sus estados independientes; probar acceso denegado y reintento sin sobrescribir .bak.

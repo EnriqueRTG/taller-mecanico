@@ -217,4 +217,18 @@ public sealed class ReportesPruebas
         Assert.DoesNotContain("NaN", columnas);
     }
 
+    [Theory]
+    [InlineData("Estado inexistente")]
+    [InlineData("Cobro")]
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task EstadoInvalidoNoSeConfundeConReporteVacio(string? estado)
+    {
+        using var c = new Caso();
+        await Assert.ThrowsAsync<ValidacionException>(() => c.Servicio.GenerarAsync(new SolicitudReporteDto
+        {
+            Tipo = TipoReporte.Atenciones, Desde = c.Hoy, Hasta = c.Hoy, Estado = estado!
+        }));
+    }
+
 }

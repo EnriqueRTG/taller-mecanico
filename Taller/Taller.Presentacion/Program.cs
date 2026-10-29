@@ -23,8 +23,9 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Log.Error("Inicio fallido: {Tipo}", ex.GetType().Name);
-            MessageBox.Show("SGTM no pudo iniciar. Revise la configuración de conexión y mantenimiento con el personal técnico.\n\n" + "Consulte el registro local con el responsable técnico.", "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            var referencia = Guid.NewGuid().ToString("N")[..10];
+            Log.Error(ex, "Inicio fallido de SGTM; referencia {Referencia}", referencia);
+            MessageBox.Show("SGTM no pudo iniciar. Revise la configuración de conexión y mantenimiento con el personal técnico.\n\n" + "Consulte el registro local con el responsable técnico. Referencia: " + referencia, "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
         finally
         {
@@ -34,7 +35,7 @@ internal static class Program
 
     private static void Ejecutar(string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
+        var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = args, ContentRootPath = AppContext.BaseDirectory });
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true).AddEnvironmentVariables();
         // Registra los servicios de la capa de Aplicación.
         builder.Services.AddAplicacion();
@@ -55,8 +56,9 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Log.Error("Inicio fallido: {Tipo}", ex.GetType().Name);
-            MessageBox.Show("No se pudo iniciar SGTM. Puede haber una recuperación en curso o un problema de conexión.\n\n" + "Consulte el registro local con el responsable técnico." + "\n\nSi el mantenimiento se interrumpió, contacte al personal técnico; no intente operar con otra copia de la base.", "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            var referencia = Guid.NewGuid().ToString("N")[..10];
+            Log.Error(ex, "Inicio fallido de SGTM; referencia {Referencia}", referencia);
+            MessageBox.Show("No se pudo iniciar SGTM. Puede haber una recuperación en curso o un problema de conexión.\n\n" + "Consulte el registro local con el responsable técnico. Referencia: " + referencia + "\n\nSi el mantenimiento se interrumpió, contacte al personal técnico; no intente operar con otra copia de la base.", "Inicio de SGTM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 

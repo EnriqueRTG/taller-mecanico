@@ -72,3 +72,7 @@ Antes de habilitar el módulo, mantener la ejecución conectada a `SGTM_DB_Demo`
 8. Probar primero **Ensayar restauración** en Demo. La restauración real exige doble aprobación, afecta toda la base y se prueba aparte. Azure aporta el archivo; SQL Server realiza la recuperación. No se restaura directamente sobre una base alojada en Blob Storage.
 
 No habilitar planes automáticos hasta publicar/configurar el agente y comprobar su identidad SQL y Azure. Una copia manual exitosa desde Visual Studio no demuestra que el servicio pueda subirla sin sesión interactiva.
+
+## Verificación de los archivos remotos
+
+El estado Verificada corresponde al archivo de negocio: se comprueban longitud, SHA-256 y una lectura completa protegida con ETag. La copia auxiliar de control registra EstadoControlAzure, Sha256Control y LongitudControl de forma independiente; si no existe localmente, el resultado conserva una advertencia y no declara verificado ese auxiliar. Los archivos .bak remotos no se sobrescriben. El manifiesto informativo puede actualizarse en reintentos y se relee con su ETag para comprobar su contenido. Un fallo conserva la copia local y deja el intento pendiente. Estas comprobaciones no sustituyen un ensayo de restauración ni una prueba con la identidad Azure del despliegue.

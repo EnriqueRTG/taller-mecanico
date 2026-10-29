@@ -128,7 +128,7 @@ Las copias auxiliares de control también deben conservarse fuera del servidor. 
 
 ## Validación
 
-La evidencia de la versión de entrega está en [verificación de cierre](../pruebas/evidencia-cierre.md). No extrapolar resultados de una versión anterior a esta instalación.
+La evidencia de la versión de entrega está en [tercera revisión](../pruebas/revision-integral-3.md). No extrapolar resultados de una versión anterior a esta instalación.
 
 - Pruebas de aplicación: administrador activo, dos identidades distintas, roles admitidos, claves erróneas y revocadas, plan ligado al solicitante/expiración/un solo uso, motivo, reconocimiento, rutas SQL seguras y calendario con zona.
 - Pruebas con SQL Server aislado en GitHub Actions: completa/diferencial, ensayo temporal y CHECKDB, recuperación real, copia protectora, auditoría externa, conexiones activas, generaciones de sesión, archivo reemplazado, esquema distinto y ejecución del agente.

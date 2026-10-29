@@ -13,10 +13,10 @@ SELECT EstadoEjecucion, COUNT(*) AS Cantidad
 FROM dbo.PresupuestoDetalles GROUP BY EstadoEjecucion;
 ```
 
-El esquema actual tiene EsquemaInicialCircuitoActual y SimplificarEjecucionTresEstados. Si existen Parcial u Omitido, la segunda migración rechaza la actualización antes de cambiar datos. No se convierten en Completado ni se reabren atenciones cerradas silenciosamente.
+El esquema actual tiene seis migraciones. Las dos primeras son EsquemaInicialCircuitoActual y SimplificarEjecucionTresEstados; las restantes se detallan más abajo. Si existen Parcial u Omitido, la segunda migración rechaza la actualización antes de cambiar datos. No se convierten en Completado ni se reabren atenciones cerradas silenciosamente.
 
 - **Demo anterior descartable:** conservar una copia si interesa y, confirmado el destino, eliminar únicamente SGTM_DB_Demo desde SSMS y cargar el lote v4 según [replicar Demo](replicar-demo.txt). Se mantiene el nombre acordado, no crear otra base para cada prueba. La eliminación pierde los registros propios; no es necesaria si ya tiene v4.
-- **Base con información que se quiere conservar y sin estados retirados:** aplicar la migración existente. Revisar primero sobre una copia. Desde la raíz, con SGTM_CONN hacia el destino correcto y dotnet-ef instalado en la versión del proyecto:
+- **Base con información que se quiere conservar y sin estados retirados:** aplicar todas las migraciones pendientes existentes. Revisar primero sobre una copia. Desde la raíz, con SGTM_CONN hacia el destino correcto y dotnet-ef instalado en la versión del proyecto:
 
 ```powershell
 dotnet ef database update --project Taller/Taller.Infraestructura --startup-project Taller/Taller.Infraestructura
@@ -24,7 +24,7 @@ dotnet ef database update --project Taller/Taller.Infraestructura --startup-proj
 
 - **Datos reales con estados retirados:** detener la actualización y definir una conversión supervisada de esos casos. No borrar datos comerciales para hacer pasar una migración.
 
-En Demo v4 el cargador aplica ambas migraciones antes del lote. Mantiene 19 clientes, 48 vehículos, 48 atenciones y 158 conceptos. Incluye selección validada sin cambios, reformulaciones, tres estados de ejecución, inspecciones y pagos. Los conteos de reportes pueden variar respecto de v3. No volver a cargar sobre una base poblada.
+En Demo v4 el cargador aplica las seis migraciones antes del lote. Mantiene 19 clientes, 48 vehículos, 48 atenciones y 158 conceptos. Incluye selección validada sin cambios, reformulaciones, tres estados de ejecución, inspecciones y pagos. Los conteos de reportes pueden variar respecto de v3. No volver a cargar sobre una base poblada.
 
 ## Respaldos y todas las estaciones
 
@@ -61,3 +61,20 @@ Esta consulta inicial no reemplaza la validación completa de formato aplicada p
 `20261029210000_AgregarConcurrenciaUsuarios` agrega Usuarios.Version y actualiza los SP de edición, credenciales y estado. Conserva datos y procedimientos de alta. Los tres SP exigen la versión consultada. Una edición obsoleta produce un conflicto y no sobrescribe cambios.
 
 Respaldar previamente, cerrar todos los puestos y aplicar todas las migraciones pendientes desde una única estación de mantenimiento. Actualizar luego todos los clientes. No mezclar ejecutables antiguos con los SP nuevos ni generar otra migración por cuenta propia. No es necesario recrear una base actualizada ni recargar Demo.
+
+## Contacto de la decisión del presupuesto
+
+La sexta migración `20261029220000_ExigirContactoDecisionPresupuesto` agrega CK_Presupuestos_ContactoDecision. Las decisiones aceptadas, rechazadas o pendientes de revisión técnica requieren persona y medio Presencial, Teléfono, Correo o Mensajería. Si hay decisiones incompletas se detiene con error 51144, sin inventar datos ni eliminar propuestas. Revisar con el responsable técnico la evidencia real de esos registros y corregirlos de forma supervisada; después repetir la actualización. No recrear una base válida ni recargar el lote para evitar el control.
+
+Consulta previa de solo lectura:
+
+```sql
+SELECT IdPresupuesto, Estado, PersonaDecision, MedioDecision
+FROM dbo.Presupuestos
+WHERE Estado IN (N'Aceptado', N'Rechazado', N'PendienteRevisionTecnica')
+AND (PersonaDecision IS NULL OR LEN(LTRIM(RTRIM(PersonaDecision)))=0
+     OR MedioDecision IS NULL
+     OR MedioDecision NOT IN (N'Presencial', N'Teléfono', N'Correo', N'Mensajería'));
+```
+
+Cerrar clientes y agente, respaldar, confirmar el destino y ejecutar la actualización completa una sola vez. Verificar seis filas en __EFMigrationsHistory, actualizar todos los ejecutables y crear una completa nueva tras comprobar el circuito. Las copias con un esquema anterior se conservan identificadas para recuperación técnica, no se presentan como compatibles con el nuevo esquema.

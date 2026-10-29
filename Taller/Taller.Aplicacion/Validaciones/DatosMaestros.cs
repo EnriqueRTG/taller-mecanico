@@ -1,5 +1,4 @@
 using System.Net.Mail;
-using System.Text.RegularExpressions;
 using Taller.Aplicacion.Excepciones;
 
 namespace Taller.Aplicacion.Validaciones;
@@ -51,6 +50,19 @@ public static partial class DatosMaestros
         if (tipo == "PASAPORTE" && !d.All(char.IsAsciiLetterOrDigit))
             throw new ValidacionException("El pasaporte admite letras y números.");
         return d;
+    }
+
+    /// <summary>Valida un contacto de 7 a 15 dígitos, conservando su presentación y el prefijo internacional opcional.</summary>
+    public static string Telefono(string? valor)
+    {
+        var telefono = Texto(valor, 30, "Teléfono");
+        int digitos = telefono.Count(char.IsAsciiDigit);
+        if (digitos is < 7 or > 15 ||
+            telefono.Any(c => !char.IsAsciiDigit(c) && !" +()-".Contains(c)) ||
+            telefono.Count(c => c == '+') > 1 ||
+            telefono.Contains('+') && telefono[0] != '+')
+            throw new ValidacionException("Ingrese un teléfono de contacto de 7 a 15 dígitos. Puede incluir espacios, guiones, paréntesis y un + inicial.", "telefono");
+        return telefono;
     }
 
     public static string? Email(string? valor)

@@ -80,6 +80,7 @@ public partial class FrmAltaCliente : Form
         txtNombre.MaxLength = 80;
         txtApellido.MaxLength = 80;
         txtTelefono.MaxLength = 30;
+        txtTelefono.PlaceholderText = "Obligatorio: ej. +54 379 4123456";
         txtEmail.MaxLength = 120;
         txtCalle.MaxLength = 100;
         txtAltura.MaxLength = 10;

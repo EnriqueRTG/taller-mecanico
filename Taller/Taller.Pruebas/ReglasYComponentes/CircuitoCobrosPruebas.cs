@@ -120,8 +120,7 @@ public sealed class CircuitoCobrosPruebas
         {
             Db = new TallerDbContext(new DbContextOptionsBuilder<TallerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
             Db.Database.EnsureCreated();
-            var cliente = new Cliente
-            {
+            var cliente = new Cliente { Telefono = "3794123456",
                 IdCliente = 1,
                 Documento = "12345678",
                 TipoDocumento = "DNI",

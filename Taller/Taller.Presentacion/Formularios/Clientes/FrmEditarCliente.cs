@@ -54,6 +54,7 @@ public partial class FrmEditarCliente : Form
         txtTipoDocumento.MaxLength = 20;
         txtDocumento.MaxLength = 20;
         txtTelefono.MaxLength = 30;
+        txtTelefono.PlaceholderText = "Obligatorio: ej. +54 379 4123456";
         txtEmail.MaxLength = 120;
         txtDireccion.MaxLength = 200;
     }

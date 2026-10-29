@@ -11,7 +11,7 @@ public sealed class ClienteConfiguracion : IEntityTypeConfiguration<Cliente>
     public void Configure(EntityTypeBuilder<Cliente> builder)
     {
         // Nombre de la tabla en la base de datos
-        builder.ToTable("Clientes");
+        builder.ToTable("Clientes", tabla => tabla.HasCheckConstraint("CK_Clientes_TelefonoContacto", "[Telefono] COLLATE Latin1_General_100_BIN2 NOT LIKE N'%[^0-9 +()-]%' AND LEN(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE([Telefono], N' ', N''), N'+', N''), N'(', N''), N')', N''), N'-', N'')) BETWEEN 7 AND 15 AND (CHARINDEX(N'+', [Telefono]) = 0 OR (LEFT(LTRIM([Telefono]), 1) = N'+' AND CHARINDEX(N'+', LTRIM([Telefono]), 2) = 0))"));
         builder.Property(x => x.Version).IsRowVersion();
         // Clave primaria
         builder.HasKey(c => c.IdCliente);
@@ -26,7 +26,7 @@ public sealed class ClienteConfiguracion : IEntityTypeConfiguration<Cliente>
         // Apellido del cliente
         builder.Property(c => c.Apellido).IsRequired().HasMaxLength(80);
         // Teléfono del cliente
-        builder.Property(c => c.Telefono).HasMaxLength(30);
+        builder.Property(c => c.Telefono).IsRequired().HasMaxLength(30);
         // Email del cliente
         builder.Property(c => c.Email).HasMaxLength(120);
         // Dirección del cliente

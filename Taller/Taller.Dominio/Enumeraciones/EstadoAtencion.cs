@@ -61,7 +61,7 @@ public enum EstadoAtencion
     /// Recepción puede gestionar la liquidación, el comprobante,
     /// los pagos y la entrega.
     ///
-    /// Una reparación interrumpida o una atención de solo diagnóstico
+    /// Una atención de solo diagnóstico
     /// utiliza <see cref="PendienteLiquidacion"/>.
     /// </remarks>
     TrabajoFinalizado = 7,
@@ -72,7 +72,7 @@ public enum EstadoAtencion
     /// </summary>
     /// <remarks>
     /// Comprende la atención de solo diagnóstico, el desistimiento
-    /// después de realizar servicios y la reparación interrumpida.
+    /// después de realizar servicios.
     ///
     /// Se liquidan los servicios autorizados efectivamente realizados,
     /// los repuestos instalados y los consumibles utilizados,
@@ -86,7 +86,7 @@ public enum EstadoAtencion
     /// </summary>
     /// <remarks>
     /// Puede corresponder a una reparación completada,
-    /// una atención de solo diagnóstico o una reparación interrumpida.
+    /// o una atención de solo diagnóstico.
     ///
     /// Cuando existe un importe a cobrar, debe haberse emitido
     /// el comprobante correspondiente. Una liquidación en cero

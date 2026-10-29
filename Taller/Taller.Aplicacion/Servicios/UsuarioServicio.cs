@@ -33,7 +33,7 @@ public sealed class UsuarioServicio
     /// </summary>
     public async Task<List<Usuario>> ListarAsync()
     {
-        var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
+        await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         return await _usuarioRepositorio.ListarAsync();
     }
 
@@ -43,7 +43,7 @@ public sealed class UsuarioServicio
     /// </summary>
     public async Task<List<Rol>> ListarRolesDisponiblesAsync()
     {
-        var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
+        await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         List<Rol> rolesRegistrados = await _rolRepositorio.ListarActivosAsync();
         return rolesRegistrados.Where(EsRolDisponible).OrderBy(rol => rol.Id).ToList();
     }
@@ -68,7 +68,7 @@ public sealed class UsuarioServicio
     /// </summary>
     public async Task<Usuario?> ObtenerPorIdAsync(int id)
     {
-        var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
+        await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         ValidarId(id);
         return await _usuarioRepositorio.ObtenerPorIdAsync(id);
     }
@@ -92,29 +92,13 @@ public sealed class UsuarioServicio
             throw new ValidacionException("Debe seleccionar un rol válido.", nameof(rolId));
         }
 
-        Usuario? usuarioEjecutor = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioEjecutorId);
-        if (usuarioEjecutor is null)
-        {
-            throw new InvalidOperationException("El usuario que intenta realizar la operación no existe.");
-        }
-
-        if (!usuarioEjecutor.Activo)
-        {
-            throw new InvalidOperationException("El usuario que intenta realizar la operación está inactivo.");
-        }
-
-        if (usuarioEjecutor.RolId != RolesSistema.AdministradorId)
-        {
-            throw new InvalidOperationException("Solamente un administrador puede modificar usuarios.");
-        }
-
         Usuario? usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
         if (usuario is null)
         {
             throw new InvalidOperationException("El usuario que desea modificar no existe.");
         }
 
-        if (usuario.Id == usuarioEjecutor.Id && rolId != RolesSistema.AdministradorId)
+        if (usuario.Id == administradorSesion.Id && rolId != RolesSistema.AdministradorId)
         {
             throw new InvalidOperationException("El administrador no puede quitarse a sí mismo " + "el rol de Administrador.");
         }
@@ -161,29 +145,13 @@ public sealed class UsuarioServicio
             throw new ValidacionException("Ingrese la nueva contraseña o deje ambos campos vacíos.", nameof(nuevaPassword));
         }
 
-        Usuario? usuarioEjecutor = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioEjecutorId);
-        if (usuarioEjecutor is null)
-        {
-            throw new InvalidOperationException("El usuario que intenta realizar la operación no existe.");
-        }
-
-        if (!usuarioEjecutor.Activo)
-        {
-            throw new InvalidOperationException("El usuario que intenta realizar la operación está inactivo.");
-        }
-
-        if (usuarioEjecutor.RolId != RolesSistema.AdministradorId)
-        {
-            throw new InvalidOperationException("Solamente un administrador puede gestionar credenciales.");
-        }
-
         Usuario? usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
         if (usuario is null)
         {
             throw new InvalidOperationException("El usuario cuyas credenciales desea modificar no existe.");
         }
 
-        if (usuario.Id == usuarioEjecutor.Id)
+        if (usuario.Id == administradorSesion.Id)
         {
             throw new InvalidOperationException("El administrador no puede modificar sus propias " + "credenciales desde la gestión de usuarios.");
         }
@@ -237,24 +205,13 @@ public sealed class UsuarioServicio
             throw new ValidacionException("El ejecutor no coincide con la sesión autenticada.");
         ValidarId(usuarioId);
         ValidarId(usuarioEjecutorId);
-        Usuario? ejecutor = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioEjecutorId);
-        if (ejecutor is null || !ejecutor.Activo)
-        {
-            throw new InvalidOperationException("La cuenta del administrador que realiza " + "la operación no está disponible.");
-        }
-
-        if (ejecutor.RolId != RolesSistema.AdministradorId)
-        {
-            throw new InvalidOperationException("Solamente un administrador puede cambiar " + "el estado de los usuarios.");
-        }
-
         Usuario? usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
         if (usuario is null)
         {
             throw new InvalidOperationException("El usuario seleccionado ya no existe.");
         }
 
-        if (usuario.Id == ejecutor.Id && !habilitar)
+        if (usuario.Id == administradorSesion.Id && !habilitar)
         {
             throw new InvalidOperationException("El administrador no puede deshabilitar " + "su propia cuenta.");
         }
@@ -273,7 +230,7 @@ public sealed class UsuarioServicio
     /// </summary>
     public async Task<Usuario> CrearAsync(string? nombreUsuario, string? password, string? nombre, string? apellido, int rolId)
     {
-        var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
+        await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         string nombreUsuarioNormalizado = NormalizarObligatorio(nombreUsuario, UsuarioRestricciones.NombreUsuarioMaximo, nameof(nombreUsuario), "El nombre de usuario es obligatorio.", $"El nombre de usuario no puede superar " + $"{UsuarioRestricciones.NombreUsuarioMaximo} caracteres.");
         string passwordValidado = ValidarPassword(password);
         string nombreNormalizado = NormalizarObligatorio(nombre, UsuarioRestricciones.NombreMaximo, nameof(nombre), "El nombre es obligatorio.", $"El nombre no puede superar {UsuarioRestricciones.NombreMaximo} caracteres.");

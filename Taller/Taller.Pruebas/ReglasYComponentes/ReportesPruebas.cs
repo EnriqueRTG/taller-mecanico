@@ -30,7 +30,7 @@ public sealed class ReportesPruebas
             var recep = new Usuario { Id = 2, RolId = RolesSistema.AdministrativoId, Nombre = "Recep", Apellido = "Dos" };
             var tec = new Usuario { Id = 3, RolId = RolesSistema.TecnicoId, Nombre = "Tec", Apellido = "Tres" };
             var otro = new Usuario { Id = 4, RolId = RolesSistema.TecnicoId, Nombre = "Tec", Apellido = "Cuatro" };
-            var cliente = new Cliente { IdCliente = 1, Documento = "1", TipoDocumento = "DNI", Nombre = "Ana", Apellido = "Pérez" };
+            var cliente = new Cliente { Telefono = "3794123456", IdCliente = 1, Documento = "1", TipoDocumento = "DNI", Nombre = "Ana", Apellido = "Pérez" };
             var marca = new Marca { IdMarca = 1, Nombre = "Marca" }; var modelo = new Modelo { IdModelo = 1, Marca = marca, Nombre = "Modelo" };
             var vehiculo = new Vehiculo { IdVehiculo = 1, Dominio = "AB123CD", Color = "Gris", Modelo = modelo };
             Db.AddRange(admin, recep, tec, otro);
@@ -42,7 +42,7 @@ public sealed class ReportesPruebas
                 new Comprobante { IdComprobante = 2, IdAtencion = 2, IdUsuarioEmision = 2, FechaEmision = Hoy, Cliente = "Otra", DocumentoCliente = "2", Dominio = "AB123CD", Total = 50, TotalPagado = 50 });
             Db.AddRange(new Pago { IdPago = 1, IdOperacion = Guid.NewGuid(), IdComprobante = 1, IdUsuarioRegistro = 2, Fecha = Hoy.AddDays(-5), Importe = 30, UsuarioRegistroNombre = "Recep", Anulado = true, FechaAnulacion = Hoy, IdUsuarioAnulacion = 2, MotivoAnulacion = "Duplicado", Medios = [new PagoMedio { IdMedioPago = 1, NombreMedio = "Efectivo histórico", Importe = 10, Orden = 0 }, new PagoMedio { IdMedioPago = 2, NombreMedio = "Transferencia", Importe = 20, Orden = 1 }] },
                 new Pago { IdPago = 2, IdOperacion = Guid.NewGuid(), IdComprobante = 1, IdUsuarioRegistro = 2, Fecha = Hoy.AddHours(23), Importe = 40, UsuarioRegistroNombre = "Recep", Medios = [new PagoMedio { IdMedioPago = 1, NombreMedio = "Efectivo histórico", Importe = 40 }] });
-            Db.AddRange(new HistorialAtencion { IdAtencion = 1, IdUsuario = 3, Fecha = Hoy, Accion = "ActividadTomada", EstadoNuevo = EstadoAtencion.EnEvaluacionTecnica },
+            Db.AddRange(new HistorialAtencion { IdAtencion = 1, IdUsuario = 3, Fecha = Hoy, Accion = "EvaluacionTomada", EstadoNuevo = EstadoAtencion.EnEvaluacionTecnica },
                 new HistorialAtencion { IdAtencion = 3, IdUsuario = 4, Fecha = Hoy, Accion = "EjecucionTomada", EstadoNuevo = EstadoAtencion.EnEjecucion });
             var categoria = new Categoria { IdCategoria = 1, Nombre = "Mecánica" }; var concepto = new Concepto { IdConcepto = 1, Categoria = categoria, Nombre = "Revisión", Tipo = TipoConcepto.Servicio };
             Db.AddRange(new Presupuesto { IdPresupuesto = 1, IdAtencion = 1, IdUsuarioCreacion = 3, Estado = EstadoPresupuesto.Aceptado, FechaCreacion = Hoy, Detalles = [new PresupuestoDetalle { Concepto = concepto, Descripcion = "Ítem aceptado", Cantidad = 1, PrecioUnitario = 80, AceptadoPorCliente = true, CantidadEjecutada = 1, EstadoEjecucion = EstadoEjecucionDetalle.Completado, IdTecnicoRegistro = 3, FechaRegistroEjecucion = Hoy }, new PresupuestoDetalle { Concepto = concepto, Descripcion = "Ítem excluido", Cantidad = 1, PrecioUnitario = 20, AceptadoPorCliente = false }] },
@@ -54,6 +54,18 @@ public sealed class ReportesPruebas
         public Task<ReporteDocumentoDto> Generar(TipoReporte tipo, string busqueda = "", string estado = "Todos") => Servicio.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = Hoy, Hasta = Hoy, Busqueda = busqueda, Estado = estado });
         public void Dispose() => Db.Dispose();
     }
+    [Fact]
+    public void FiltroDeActividadSoloOfreceAccionesDelCircuitoActual()
+    {
+        var acciones = Taller.Aplicacion.Consultas.ActividadTecnicaReporte.Acciones;
+        Assert.DoesNotContain("ActividadTomada", acciones);
+        Assert.DoesNotContain("ActividadLiberada", acciones);
+        Assert.DoesNotContain("DiagnosticoRegistrado", acciones);
+        Assert.Contains("EvaluacionFinalizada", acciones);
+        Assert.Contains("TrabajoFinalizado", acciones);
+        Assert.Equal(acciones.Count, acciones.Distinct().Count());
+    }
+
     [Fact]
     public async Task OpcionesDeEstadoExistenSinFilasYNoDependenDelPeriodo()
     {

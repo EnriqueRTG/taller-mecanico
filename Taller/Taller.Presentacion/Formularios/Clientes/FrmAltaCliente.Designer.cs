@@ -397,7 +397,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(309, 22);
             lblTelefono.TabIndex = 0;
-            lblTelefono.Text = "Teléfono";
+            lblTelefono.Text = "Teléfono *";
             // 
             // lblEmail
             // 

@@ -66,6 +66,7 @@ public partial class FrmAltaUsuario : Form
         txtApellido.MaxLength = UsuarioRestricciones.ApellidoMaximo;
         txtNombreUsuario.MaxLength = UsuarioRestricciones.NombreUsuarioMaximo;
         txtPassword.MaxLength = UsuarioRestricciones.PasswordMaximo;
+        txtPassword.PlaceholderText = $"Entre {UsuarioRestricciones.PasswordMinimo} y {UsuarioRestricciones.PasswordMaximo} caracteres";
         txtConfirmarPassword.MaxLength = UsuarioRestricciones.PasswordMaximo;
         txtPassword.UseSystemPasswordChar = true;
         txtConfirmarPassword.UseSystemPasswordChar = true;
@@ -98,10 +99,10 @@ public partial class FrmAltaUsuario : Form
 
             CambiarEstadoFormulario(true);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             cmbRol.DataSource = null;
-            MessageBox.Show("No fue posible cargar los roles disponibles. " + "Verifique la conexión e inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación de usuarios");
         }
     }
 
@@ -202,9 +203,9 @@ public partial class FrmAltaUsuario : Form
         {
             Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo registrar el usuario");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show("Ocurrió un error inesperado al registrar " + "el usuario. Inténtelo nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación de usuarios");
         }
         finally
         {
@@ -225,8 +226,7 @@ public partial class FrmAltaUsuario : Form
     }
 
     /// <summary>
-    /// Alterna la visualización de la contraseña y
-    /// de su confirmación.
+    /// Genera una contraseña y completa su confirmación.
     /// </summary>
     private void BtnGenerarPassword_Click(object? sender, EventArgs e)
     {

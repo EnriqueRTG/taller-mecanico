@@ -260,7 +260,7 @@
         <mxCell id="Cliente" value="Clientes" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
           <mxGeometry x="1140" y="160" width="400" height="292" as="geometry" />
         </mxCell>
-        <mxCell id="Cliente-fields" value="PK IdCliente : int [IDENTITY]&#10;Activo : bit&#10;Apellido : nvarchar(80)&#10;Direccion : nvarchar(200) ?&#10;Documento : nvarchar(20)&#10;Email : nvarchar(120) ?&#10;FechaAlta : datetime2&#10;Nombre : nvarchar(80)&#10;Telefono : nvarchar(30) ?&#10;TipoDocumento : nvarchar(20)&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Cliente">
+        <mxCell id="Cliente-fields" value="PK IdCliente : int [IDENTITY]&#10;Activo : bit&#10;Apellido : nvarchar(80)&#10;Direccion : nvarchar(200) ?&#10;Documento : nvarchar(20)&#10;Email : nvarchar(120) ?&#10;FechaAlta : datetime2&#10;Nombre : nvarchar(80)&#10;Telefono : nvarchar(30)&#10;TipoDocumento : nvarchar(20)&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Cliente">
           <mxGeometry x="0" y="34" width="400" height="258" as="geometry" />
         </mxCell>
         <mxCell id="Marca" value="Marcas" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">

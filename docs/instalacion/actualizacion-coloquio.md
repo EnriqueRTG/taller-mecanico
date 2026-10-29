@@ -41,3 +41,17 @@ La tercera migración `20261029090000_RetirarVinculoCambioSinUso` retira únicam
 Para una base ya actualizada a tres estados: respaldar, cerrar todos los puestos y agente, confirmar destino y aplicar `dotnet ef database update` con los proyectos indicados arriba. No crear otra migración ni recrear la base por esta limpieza. Si hay vínculos antiguos no nulos, la migración se detiene sin borrarlos; solicitar revisión de esos registros. La reversión técnica reconstruye la columna nullable, no recupera valores descartados; por eso se impide descartarlos en Up.
 
 Aplicar el mismo código en todas las estaciones. Las copias anteriores a la tercera migración no se deben restaurar como si tuvieran el esquema actual: el ensayo comprueba compatibilidad. Conservarlas identificadas y crear una completa nueva tras la actualización verificada.
+
+## Teléfono obligatorio del cliente
+
+La migración `20261029190000_ExigirTelefonoContactoCliente` exige contacto telefónico de 7 a 15 dígitos. Antes de actualizar, completar los contactos faltantes o inválidos con datos reales mediante la versión anterior. La migración se detiene con el error 51142 si detecta alguno; no elimina clientes ni inventa teléfonos. Después de corregirlos, volver a ejecutar la actualización. El lote de demostración ya incluye contacto en clientes activos e inactivos.
+
+Consulta previa, de solo lectura, para localizar contactos ausentes o evidentemente incompletos:
+
+```sql
+SELECT IdCliente, Nombre, Apellido, Telefono
+FROM dbo.Clientes
+WHERE Telefono IS NULL OR LEN(LTRIM(RTRIM(Telefono))) < 7;
+```
+
+Esta consulta inicial no reemplaza la validación completa de formato aplicada por la migración. Respaldar la base y cerrar los puestos antes de actualizar el esquema.

@@ -59,6 +59,8 @@ dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj --configuration Release 
 
 Las pruebas SQL requieren una instancia desechable explícitamente autorizada; nunca se dirigen a la base de trabajo. CI construye la solución/filtro en Windows, comprueba formularios con DI validada y ejecuta las pruebas SQL en bases temporales. La comprobación visual del recorrido, escalado e impresión sigue siendo necesaria en la PC/notebook de presentación.
 
-Los editables de requisitos y casos de uso en `docs/ERS` se preservan para actualización académica. No se presentan los diagramas/exportaciones anteriores como descripción del esquema actual. El alcance operativo vigente y los límites se consultan en [la especificación implementada](docs/especificacion/alcance-implementado.md).
+La [documentación v2.0](docs/README.md) incluye ERS, casos de uso, diccionario, DER, diagramas y [trazabilidad](docs/especificacion/trazabilidad.md) alineados con el circuito vigente.
 
 Esta versión incorpora SimplificarEjecucionTresEstados y Demo v4. Antes de abrir una base existente, seguir [actualización](docs/instalacion/actualizacion-coloquio.md). Para dos puestos, [red privada](docs/instalacion/red-privada.md); para copias, [prueba local de recuperación](docs/instalacion/respaldos-locales-demo.md).
+
+La limpieza `RetirarVinculoCambioSinUso` incorpora una tercera migración sin alterar las anteriores. Para una base actual no hace falta recrear Demo: respaldar, cerrar clientes/agente y aplicar la migración existente siguiendo la [guía de actualización](docs/instalacion/actualizacion-coloquio.md). Los respaldos nuevos deben corresponder al esquema actualizado.

@@ -30,6 +30,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04 Documentacion", "04 Docu
 		..\docs\README.md = ..\docs\README.md
 		..\docs\instalacion\replicar-demo.txt = ..\docs\instalacion\replicar-demo.txt
 		..\docs\arquitectura\estructura-solucion.md = ..\docs\arquitectura\estructura-solucion.md
+		..\docs\ERS\ERS-SGTM-v2.0.docx = ..\docs\ERS\ERS-SGTM-v2.0.docx
+		..\docs\ERS\Apendice-A-Casos-de-Uso-v2.0.docx = ..\docs\ERS\Apendice-A-Casos-de-Uso-v2.0.docx
+		..\docs\ERS\Apendice-C-Diccionario-de-Datos-v2.0.docx = ..\docs\ERS\Apendice-C-Diccionario-de-Datos-v2.0.docx
+		..\docs\diagramas\README.md = ..\docs\diagramas\README.md
+		..\docs\especificacion\trazabilidad.md = ..\docs\especificacion\trazabilidad.md
 	EndProjectSection
 EndProject
 Global

@@ -1,6 +1,6 @@
 # Alcance implementado
 
-Este documento describe el comportamiento vigente. Los DOCX académicos de `../ERS` se preservan para su actualización; no se consideran sincronizados automáticamente por modificar el código.
+Este documento describe el comportamiento vigente. La ERS, los apéndices A/C y los diagramas v2.0 describen este mismo alcance; la matriz de trazabilidad enlaza sus requisitos con los servicios y pruebas.
 
 ## Flujo principal
 

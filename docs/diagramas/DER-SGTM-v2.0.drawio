@@ -1,0 +1,1055 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" modified="2026-10-29T06:00:00.000Z" agent="SGTM" version="24.7.17" compressed="false">
+  <diagram id="h8P5ts9nD0zMw8HPZDvN" name="01 Circuito principal">
+    <mxGraphModel dx="1600" dy="1350" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1350" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 01 Circuito principal" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Vista de síntesis del negocio. Las páginas 02 a 07 detallan tablas y atributos. No hay FK Cliente–Vehiculo ni diagnóstico obligatorio para presupuestar. Las 43 relaciones se identifican en la página 08." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="R01" value="R01" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Cliente" target="Atencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="227" />
+              <mxPoint x="520" y="227" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R04" value="R04" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Vehiculo" target="Atencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1070" y="227" />
+              <mxPoint x="1070" y="227" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R05" value="R05" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="Comprobante">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="537" />
+              <mxPoint x="240" y="537" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R07" value="R07" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Comprobante" target="ComprobanteDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="827" />
+              <mxPoint x="520" y="827" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R08" value="R08" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="PresupuestoDetalle" target="ComprobanteDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1340" y="677" />
+              <mxPoint x="800" y="677" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R10" value="R10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="Diagnostico">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="387" />
+              <mxPoint x="240" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R21" value="R21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Comprobante" target="Pago">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="967" />
+              <mxPoint x="240" y="967" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R24" value="R24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="MedioPago" target="PagoMedio">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1070" y="1127" />
+              <mxPoint x="1070" y="1127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R25" value="R25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Pago" target="PagoMedio">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="1127" />
+              <mxPoint x="520" y="1127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R30" value="R30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="367" />
+              <mxPoint x="800" y="367" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R32" value="R32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.6382978723404256;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Presupuesto" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1050" y="540" />
+              <mxPoint x="1050" y="445" />
+              <mxPoint x="800" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R35" value="R35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Diagnostico" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="527" />
+              <mxPoint x="520" y="527" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R36" value="R36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Concepto" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1565" y="827" />
+              <mxPoint x="1565" y="527" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R37" value="R37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Presupuesto" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1070" y="527" />
+              <mxPoint x="1070" y="527" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Cliente" value="Clientes · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="180" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Cliente-fields" value="PK IdCliente : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Cliente">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehiculo" value="Vehiculos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="180" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehiculo-fields" value="PK IdVehiculo : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Vehiculo">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion" value="Atenciones · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="180" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion-fields" value="PK IdAtencion : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Atencion">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico" value="Diagnosticos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="480" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico-fields" value="PK IdDiagnostico : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Diagnostico">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Presupuesto" value="Presupuestos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dcfce7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="480" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Presupuesto-fields" value="PK IdPresupuesto : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Presupuesto">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle" value="PresupuestoDetalles · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dcfce7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="480" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle-fields" value="PK IdPresupuestoDetalle : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PresupuestoDetalle">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Concepto" value="Conceptos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="780" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Concepto-fields" value="PK IdConcepto : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Concepto">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Comprobante" value="Comprobantes · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="780" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Comprobante-fields" value="PK IdComprobante : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Comprobante">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ComprobanteDetalle" value="ComprobanteDetalles · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="780" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="ComprobanteDetalle-fields" value="PK IdComprobanteDetalle : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="ComprobanteDetalle">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Pago" value="Pagos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1080" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Pago-fields" value="PK IdPago : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Pago">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PagoMedio" value="PagoMedios · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1080" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="PagoMedio-fields" value="PK IdPagoMedio : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PagoMedio">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MedioPago" value="MediosPago · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="1080" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="MedioPago-fields" value="PK IdMedioPago : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="MedioPago">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1310" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="maestros-v2" name="02 Maestros y acceso">
+    <mxGraphModel dx="1600" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 02 Maestros y acceso" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="ControlesAcceso y EventosAcceso son tablas técnicas de autenticación. EventosAcceso.IdUsuario no tiene FK declarada. Cliente y Vehiculo se vinculan mediante la Atención de cada visita." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="R09" value="R09" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Categoria" target="Concepto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="899" />
+              <mxPoint x="520" y="932" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R20" value="R20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Marca" target="Modelo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="568" />
+              <mxPoint x="520" y="579" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R42" value="R42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Rol" target="Usuario">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="229" />
+              <mxPoint x="520" y="273" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R43" value="R43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Modelo" target="Vehiculo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1070" y="579" />
+              <mxPoint x="1070" y="623" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rol" value="Roles" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="400" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="Rol-fields" value="PK Id : int [IDENTITY]&#10;Activo : bit&#10;Descripcion : nvarchar(150) ?&#10;Nombre : nvarchar(50)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Rol">
+          <mxGeometry x="0" y="34" width="400" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario" value="Usuarios" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="400" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario-fields" value="PK Id : int [IDENTITY]&#10;Activo : bit&#10;Apellido : nvarchar(100)&#10;FechaAlta : datetime2&#10;Nombre : nvarchar(100)&#10;NombreUsuario : nvarchar(50)&#10;PasswordHash : nvarchar(255)&#10;FK RolId : int" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Usuario">
+          <mxGeometry x="0" y="34" width="400" height="192" as="geometry" />
+        </mxCell>
+        <mxCell id="Cliente" value="Clientes" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="160" width="400" height="292" as="geometry" />
+        </mxCell>
+        <mxCell id="Cliente-fields" value="PK IdCliente : int [IDENTITY]&#10;Activo : bit&#10;Apellido : nvarchar(80)&#10;Direccion : nvarchar(200) ?&#10;Documento : nvarchar(20)&#10;Email : nvarchar(120) ?&#10;FechaAlta : datetime2&#10;Nombre : nvarchar(80)&#10;Telefono : nvarchar(30) ?&#10;TipoDocumento : nvarchar(20)&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Cliente">
+          <mxGeometry x="0" y="34" width="400" height="258" as="geometry" />
+        </mxCell>
+        <mxCell id="Marca" value="Marcas" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="510" width="400" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="Marca-fields" value="PK IdMarca : int [IDENTITY]&#10;Activo : bit&#10;Nombre : nvarchar(50)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Marca">
+          <mxGeometry x="0" y="34" width="400" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="Modelo" value="Modelos" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="510" width="400" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="Modelo-fields" value="PK IdModelo : int [IDENTITY]&#10;Activo : bit&#10;FK IdMarca : int&#10;Nombre : nvarchar(50)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Modelo">
+          <mxGeometry x="0" y="34" width="400" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehiculo" value="Vehiculos" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="510" width="400" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehiculo-fields" value="PK IdVehiculo : int [IDENTITY]&#10;Activo : bit&#10;Anio : int&#10;Color : nvarchar(50)&#10;Dominio : nvarchar(10)&#10;FechaAlta : datetime2&#10;FK IdModelo : int&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Vehiculo">
+          <mxGeometry x="0" y="34" width="400" height="192" as="geometry" />
+        </mxCell>
+        <mxCell id="Categoria" value="Categorias" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="830" width="400" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="Categoria-fields" value="PK IdCategoria : int [IDENTITY]&#10;Activo : bit&#10;Descripcion : nvarchar(500) ?&#10;Nombre : nvarchar(80)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Categoria">
+          <mxGeometry x="0" y="34" width="400" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="Concepto" value="Conceptos" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="830" width="400" height="204" as="geometry" />
+        </mxCell>
+        <mxCell id="Concepto-fields" value="PK IdConcepto : int [IDENTITY]&#10;Activo : bit&#10;Descripcion : nvarchar(500) ?&#10;FK IdCategoria : int&#10;Nombre : nvarchar(150)&#10;PrecioReferencia : decimal(18,2) ?&#10;Tipo : nvarchar(20)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Concepto">
+          <mxGeometry x="0" y="34" width="400" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="ControlAcceso" value="ControlesAcceso" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1170" width="400" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="ControlAcceso-fields" value="PK Clave : varchar(64)&#10;BloqueadoHastaUtc : datetimeoffset ?&#10;Intentos : int&#10;VentanaUtc : datetimeoffset" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="ControlAcceso">
+          <mxGeometry x="0" y="34" width="400" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="EventoAcceso" value="EventosAcceso" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1170" width="400" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="EventoAcceso-fields" value="PK Id : bigint [IDENTITY]&#10;Clave : varchar(64)&#10;Correcto : bit&#10;FechaUtc : datetimeoffset&#10;IdUsuario : int ?" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="EventoAcceso">
+          <mxGeometry x="0" y="34" width="400" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1460" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="recepcion-v2" name="03 Recepción y evaluación">
+    <mxGraphModel dx="1600" dy="1690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1690" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 03 Recepción y evaluación" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Una Atención tiene 0..1 EvaluacionAtencion y 0..1 Diagnostico por claves únicas. La evaluación guarda el avance; Diagnostico conserva el informe definitivo. Solicitudes e historial tienen mínimos operativos validados por servicios." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="R01" value="R01" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Cliente" target="Atencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="317" />
+              <mxPoint x="800" y="317" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R02" value="R02" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.375;exitY=1.0;entryX=0.375;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Atencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R03" value="R03" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.725;exitY=1.0;entryX=0.725;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Atencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R04" value="R04" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Vehiculo" target="Atencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1340" y="317" />
+              <mxPoint x="800" y="317" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R10" value="R10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="Diagnostico">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="829" />
+              <mxPoint x="1340" y="829" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R11" value="R11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.6914893617021277;entryX=0.0;entryY=0.28761061946902655;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Diagnostico">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="225" />
+              <mxPoint x="1090" y="965" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R12" value="R12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="EvaluacionAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="819" />
+              <mxPoint x="800" y="819" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R13" value="R13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5851063829787234;entryX=1.0;entryY=0.2226027397260274;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="EvaluacionAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1075" y="215" />
+              <mxPoint x="1075" y="965" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R17" value="R17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.41899441340782123;entryX=1.0;entryY=0.4435483870967742;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="HistorialAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="550" />
+              <mxPoint x="1090" y="1420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R18" value="R18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Diagnostico" target="HistorialAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1340" y="1260" />
+              <mxPoint x="800" y="1260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R19" value="R19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.6914893617021277;entryX=0.0;entryY=0.3024193548387097;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="HistorialAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="225" />
+              <mxPoint x="520" y="1385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R41" value="R41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="SolicitudAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="839" />
+              <mxPoint x="240" y="839" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Cliente" value="Clientes · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Cliente-fields" value="PK IdCliente : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Cliente">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario" value="Usuarios · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario-fields" value="PK Id : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Usuario">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehiculo" value="Vehiculos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="160" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehiculo-fields" value="PK IdVehiculo : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Vehiculo">
+          <mxGeometry x="0" y="34" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion" value="Atenciones" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="400" width="400" height="358" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion-fields" value="PK IdAtencion : int [IDENTITY]&#10;ActividadTecnica : nvarchar(20) ?&#10;Estado : nvarchar(30)&#10;FechaApertura : datetime2&#10;FechaCierre : datetime2 ?&#10;FK IdCliente : int&#10;FK IdTecnicoEnActividad : int ?&#10;FK IdUsuarioRecepcion : int&#10;FK IdVehiculo : int&#10;KilometrajeRecepcion : int ?&#10;MotivoConsulta : nvarchar(500)&#10;ObservacionesRecepcion : nvarchar(1000) ?&#10;TipoSolicitud : nvarchar(20)&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Atencion">
+          <mxGeometry x="0" y="34" width="400" height="324" as="geometry" />
+        </mxCell>
+        <mxCell id="SolicitudAtencion" value="SolicitudesAtencion" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="900" width="400" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="SolicitudAtencion-fields" value="PK IdSolicitudAtencion : int [IDENTITY]&#10;Descripcion : nvarchar(500)&#10;FK IdAtencion : int&#10;Orden : int&#10;Tipo : nvarchar(20)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="SolicitudAtencion">
+          <mxGeometry x="0" y="34" width="400" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="EvaluacionAtencion" value="EvaluacionesAtencion" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="900" width="400" height="292" as="geometry" />
+        </mxCell>
+        <mxCell id="EvaluacionAtencion-fields" value="PK FK IdAtencion : int&#10;FallaDetectada : nvarchar(1000)&#10;FechaActualizacion : datetime2&#10;Finalizada : bit&#10;FK IdTecnicoUltimaEdicion : int&#10;IncluyeDiagnostico : bit&#10;Kilometraje : int ?&#10;Observaciones : nvarchar(1000) ?&#10;SoloEvaluacion : bit&#10;TrabajoRecomendado : nvarchar(1000)&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="EvaluacionAtencion">
+          <mxGeometry x="0" y="34" width="400" height="258" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico" value="Diagnosticos" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="900" width="400" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico-fields" value="PK IdDiagnostico : int [IDENTITY]&#10;FallaDetectada : nvarchar(1000)&#10;FechaDiagnostico : datetime2(0)&#10;FK IdAtencion : int&#10;FK IdTecnicoAutor : int&#10;Kilometraje : int ?&#10;Observaciones : nvarchar(1000) ?&#10;TrabajoRecomendado : nvarchar(1000)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Diagnostico">
+          <mxGeometry x="0" y="34" width="400" height="192" as="geometry" />
+        </mxCell>
+        <mxCell id="HistorialAtencion" value="HistorialAtenciones" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1310" width="400" height="248" as="geometry" />
+        </mxCell>
+        <mxCell id="HistorialAtencion-fields" value="PK IdHistorialAtencion : int [IDENTITY]&#10;Accion : nvarchar(80)&#10;EstadoAnterior : nvarchar(30) ?&#10;EstadoNuevo : nvarchar(30)&#10;Fecha : datetime2(0)&#10;FK IdAtencion : int&#10;FK IdDiagnostico : int ?&#10;FK IdUsuario : int&#10;Observaciones : nvarchar(2000) ?" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="HistorialAtencion">
+          <mxGeometry x="0" y="34" width="400" height="214" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1650" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="presupuestos-v2" name="04 Propuestas y ejecución">
+    <mxGraphModel dx="1600" dy="1190" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1190" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 04 Propuestas y ejecución" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Toda propuesta pertenece a una Atención; el diagnóstico es opcional. La FK R35 es compuesta (IdDiagnostico, IdAtencion). R32 conserva versiones. Aceptación y ejecución son atributos distintos." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="R30" value="R30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="312" />
+              <mxPoint x="635" y="312" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R31" value="R31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="HallazgoAtencion" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="467" />
+              <mxPoint x="360" y="646" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R32" value="R32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.1171875;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Presupuesto" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="450" />
+              <mxPoint x="920" y="355" />
+              <mxPoint x="635" y="355" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R33" value="R33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5531914893617021;entryX=1.0;entryY=0.263671875;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="975" y="212" />
+              <mxPoint x="975" y="525" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R34" value="R34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.6808510638297872;entryX=1.0;entryY=0.33203125;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="224" />
+              <mxPoint x="1000" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R35" value="R35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Diagnostico" target="Presupuesto">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="332" />
+              <mxPoint x="635" y="332" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R36" value="R36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.6382978723404256;entryX=0.4;entryY=1.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Concepto" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="740" />
+              <mxPoint x="350" y="1000" />
+              <mxPoint x="1268" y="1000" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R37" value="R37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.1953125;entryX=0.0;entryY=0.21367521367521367;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Presupuesto" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R38" value="R38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.6382978723404256;entryX=0.7;entryY=1.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="SolicitudAtencion" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="980" />
+              <mxPoint x="350" y="1040" />
+              <mxPoint x="1409" y="1040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R39" value="R39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.8085106382978723;entryX=0.0;entryY=0.43803418803418803;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1025" y="236" />
+              <mxPoint x="1025" y="595" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R40" value="R40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.425531914893617;entryX=0.0;entryY=0.21367521367521367;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="PresupuestoDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="950" y="200" />
+              <mxPoint x="950" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Atencion" value="Atenciones · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="280" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion-fields" value="PK IdAtencion : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Atencion">
+          <mxGeometry x="0" y="34" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario" value="Usuarios · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="650" y="160" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario-fields" value="PK Id : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Usuario">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico" value="Diagnosticos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="160" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Diagnostico-fields" value="PK IdDiagnostico : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Diagnostico">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Presupuesto" value="Presupuestos" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dcfce7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="400" y="390" width="470" height="512" as="geometry" />
+        </mxCell>
+        <mxCell id="Presupuesto-fields" value="PK IdPresupuesto : int [IDENTITY]&#10;AlcanceValidado : bit&#10;EsAdicional : bit&#10;EsInspeccion : bit&#10;Estado : nvarchar(30)&#10;FechaCreacion : datetime2(0)&#10;FechaDecision : datetime2(0) ?&#10;FechaPresentacion : datetime2(0) ?&#10;FK IdAtencion : int&#10;FK IdDiagnostico : int ?&#10;FK IdHallazgoAtencion : int ?&#10;FK IdPresupuestoAnterior : int ?&#10;FK IdUsuarioCreacion : int&#10;FK IdUsuarioDecision : int ?&#10;MedioDecision : nvarchar(30) ?&#10;MotivoRevision : nvarchar(1000) ?&#10;Observaciones : nvarchar(1000) ?&#10;ObservacionesDecision : nvarchar(1000) ?&#10;PersonaDecision : nvarchar(150) ?&#10;Version : rowversion&#10;Vigente : bit" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Presupuesto">
+          <mxGeometry x="0" y="34" width="470" height="478" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle" value="PresupuestoDetalles" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dcfce7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="390" width="470" height="468" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle-fields" value="PK IdPresupuestoDetalle : int [IDENTITY]&#10;AceptadoPorCliente : bit ?&#10;Cantidad : decimal(18,3)&#10;CantidadEjecutada : decimal(18,3)&#10;CantidadRecibidaCliente : decimal(18,3)&#10;Descripcion : nvarchar(500)&#10;EstadoEjecucion : nvarchar(20)&#10;FechaRecepcionMaterial : datetime2 ?&#10;FechaRegistroEjecucion : datetime2(0) ?&#10;FK IdConcepto : int&#10;FK IdPresupuesto : int&#10;FK IdSolicitudAtencion : int ?&#10;FK IdTecnicoMaterial : int ?&#10;FK IdTecnicoRegistro : int ?&#10;MaterialClienteConforme : bit&#10;ObservacionesEjecucion : nvarchar(1000) ?&#10;ObservacionesMaterial : nvarchar(1000) ?&#10;OrigenMaterial : nvarchar(20)&#10;PrecioUnitario : decimal(18,2)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PresupuestoDetalle">
+          <mxGeometry x="0" y="34" width="470" height="434" as="geometry" />
+        </mxCell>
+        <mxCell id="HallazgoAtencion" value="HallazgosAtencion · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="280" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="HallazgoAtencion-fields" value="PK IdHallazgoAtencion : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="HallazgoAtencion">
+          <mxGeometry x="0" y="34" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Concepto" value="Conceptos · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="680" width="280" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Concepto-fields" value="PK IdConcepto : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Concepto">
+          <mxGeometry x="0" y="34" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="SolicitudAtencion" value="SolicitudesAtencion · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="920" width="280" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="SolicitudAtencion-fields" value="PK IdSolicitudAtencion : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="SolicitudAtencion">
+          <mxGeometry x="0" y="34" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1150" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="seguimiento-v2" name="05 Hallazgos y pausas">
+    <mxGraphModel dx="1600" dy="1130" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1130" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 05 Hallazgos y pausas" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="IdDetalle o IdDetalleAfectado NULL indican alcance de Atención; informados delimitan un ítem. Una pausa pendiente tiene FechaResolucion NULL. No existe EstadoAtencion.Pausada. Los adicionales son propuestas con aceptación propia, no sobrescrituras del principal." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="R14" value="R14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="HallazgoAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="750" y="337" />
+              <mxPoint x="270" y="337" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R15" value="R15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="PresupuestoDetalle" target="HallazgoAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="550" y="487" />
+              <mxPoint x="550" y="553" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R16" value="R16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="HallazgoAtencion">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="945" y="897" />
+              <mxPoint x="945" y="553" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R26" value="R26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="PausaTrabajo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="750" y="337" />
+              <mxPoint x="1310" y="337" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R27" value="R27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="PresupuestoDetalle" target="PausaTrabajo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="990" y="487" />
+              <mxPoint x="990" y="564" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R28" value="R28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="PausaTrabajo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1570" y="897" />
+              <mxPoint x="1570" y="564" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R29" value="R29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="PausaTrabajo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1565" y="897" />
+              <mxPoint x="1565" y="564" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Atencion" value="Atenciones · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion-fields" value="PK IdAtencion : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Atencion">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="HallazgoAtencion" value="HallazgosAtencion" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="440" width="460" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="HallazgoAtencion-fields" value="PK IdHallazgoAtencion : int [IDENTITY]&#10;Descripcion : nvarchar(1000)&#10;Fecha : datetime2&#10;FK IdAtencion : int&#10;FK IdDetalleAfectado : int ?&#10;FK IdTecnico : int&#10;ImpideContinuar : bit&#10;Recomendacion : nvarchar(1000)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="HallazgoAtencion">
+          <mxGeometry x="0" y="34" width="460" height="192" as="geometry" />
+        </mxCell>
+        <mxCell id="PausaTrabajo" value="PausasTrabajo" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="440" width="460" height="248" as="geometry" />
+        </mxCell>
+        <mxCell id="PausaTrabajo-fields" value="PK IdPausaTrabajo : int [IDENTITY]&#10;Fecha : datetime2&#10;FechaResolucion : datetime2 ?&#10;FK IdAtencion : int&#10;FK IdDetalle : int ?&#10;FK IdTecnicoResolucion : int ?&#10;FK IdUsuario : int&#10;Motivo : nvarchar(1000)&#10;Resolucion : nvarchar(1000) ?" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PausaTrabajo">
+          <mxGeometry x="0" y="34" width="460" height="214" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle" value="PresupuestoDetalles · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dcfce7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="440" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle-fields" value="PK IdPresupuestoDetalle : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PresupuestoDetalle">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario" value="Usuarios · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="850" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario-fields" value="PK Id : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Usuario">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1090" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="cobros-v2" name="06 Liquidación y cobros">
+    <mxGraphModel dx="1600" dy="1410" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1410" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 06 Liquidación y cobros" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Atención 1–0..1 Comprobante por UNIQUE IdAtencion. Cada origen presupuestado se liquida a lo sumo una vez. Un pago puede tener varios medios. LIQ, REC y Saldo son valores calculados de consulta, no columnas. Entrega se registra en Atención e historial." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="R05" value="R05" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Atencion" target="Comprobante">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="190" y="337" />
+              <mxPoint x="260" y="337" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R06" value="R06" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.425531914893617;entryX=1.0;entryY=0.28662420382165604;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Comprobante">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="200" />
+              <mxPoint x="530" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R07" value="R07" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Comprobante" target="ComprobanteDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="597" />
+              <mxPoint x="540" y="542" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R08" value="R08" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="PresupuestoDetalle" target="ComprobanteDetalle">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="487" />
+              <mxPoint x="1090" y="542" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R21" value="R21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Comprobante" target="Pago">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="872" />
+              <mxPoint x="260" y="872" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R22" value="R22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.5851063829787234;entryX=1.0;entryY=0.3821656050955414;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Pago">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="550" y="215" />
+              <mxPoint x="550" y="1110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R23" value="R23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.7446808510638298;entryX=1.0;entryY=0.47770700636942676;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Usuario" target="Pago">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="230" />
+              <mxPoint x="570" y="1140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R24" value="R24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="MedioPago" target="PagoMedio">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="1059" />
+              <mxPoint x="1090" y="1092" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="R25" value="R25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=35;html=0;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;strokeColor=#64748b;fontColor=#334155;fontSize=13;labelBackgroundColor=#ffffff;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="Pago" target="PagoMedio">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="1147" />
+              <mxPoint x="540" y="1092" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Atencion" value="Atenciones · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dbeafe;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Atencion-fields" value="PK IdAtencion : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Atencion">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario" value="Usuarios · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="300" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="Usuario-fields" value="PK Id : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Usuario">
+          <mxGeometry x="0" y="34" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Comprobante" value="Comprobantes" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="440" width="440" height="314" as="geometry" />
+        </mxCell>
+        <mxCell id="Comprobante-fields" value="PK IdComprobante : int [IDENTITY]&#10;Cliente : nvarchar(200)&#10;DocumentoCliente : nvarchar(60)&#10;Dominio : nvarchar(20)&#10;FechaEmision : datetime2&#10;FK IdAtencion : int&#10;FK IdUsuarioEmision : int&#10;Moneda : nvarchar(3)&#10;Observaciones : nvarchar(1000) ?&#10;Total : decimal(18,2)&#10;TotalPagado : decimal(18,2)&#10;Version : rowversion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Comprobante">
+          <mxGeometry x="0" y="34" width="440" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="ComprobanteDetalle" value="ComprobanteDetalles" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="440" width="440" height="204" as="geometry" />
+        </mxCell>
+        <mxCell id="ComprobanteDetalle-fields" value="PK IdComprobanteDetalle : int [IDENTITY]&#10;Cantidad : decimal(18,3)&#10;Descripcion : nvarchar(500)&#10;FK IdComprobante : int&#10;FK IdPresupuestoDetalle : int&#10;PrecioUnitario : decimal(18,2)&#10;Subtotal : decimal(18,2)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="ComprobanteDetalle">
+          <mxGeometry x="0" y="34" width="440" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle" value="PresupuestoDetalles · ref." style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#dcfce7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="440" width="360" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="PresupuestoDetalle-fields" value="PK IdPresupuestoDetalle : int&#10;Referencia a la misma tabla" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PresupuestoDetalle">
+          <mxGeometry x="0" y="34" width="360" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Pago" value="Pagos" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="990" width="440" height="314" as="geometry" />
+        </mxCell>
+        <mxCell id="Pago-fields" value="PK IdPago : int [IDENTITY]&#10;Anulado : bit&#10;Fecha : datetime2&#10;FechaAnulacion : datetime2 ?&#10;FK IdComprobante : int&#10;IdOperacion : uniqueidentifier&#10;FK IdUsuarioAnulacion : int ?&#10;FK IdUsuarioRegistro : int&#10;Importe : decimal(18,2)&#10;MotivoAnulacion : nvarchar(1000) ?&#10;SaldoPosterior : decimal(18,2)&#10;UsuarioRegistroNombre : nvarchar(200)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="Pago">
+          <mxGeometry x="0" y="34" width="440" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="PagoMedio" value="PagoMedios" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="990" width="440" height="204" as="geometry" />
+        </mxCell>
+        <mxCell id="PagoMedio-fields" value="PK IdPagoMedio : int [IDENTITY]&#10;FK IdMedioPago : int&#10;FK IdPago : int&#10;Importe : decimal(18,2)&#10;NombreMedio : nvarchar(60)&#10;Orden : int&#10;Referencia : nvarchar(200) ?" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="PagoMedio">
+          <mxGeometry x="0" y="34" width="440" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="MedioPago" value="MediosPago" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#fef3c7;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="990" width="360" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="MedioPago-fields" value="PK IdMedioPago : int [IDENTITY]&#10;Activo : bit&#10;Nombre : nvarchar(60)&#10;RequiereReferencia : bit" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="MedioPago">
+          <mxGeometry x="0" y="34" width="360" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1370" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="control-v2" name="07 Control de respaldos">
+    <mxGraphModel dx="1600" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 07 Control de respaldos" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="BASE SEPARADA · SGTM_DB_Demo_Control o la configurada. Tablas creadas por RegistroRespaldosSql, fuera de EF. No hay FK SQL entre estas tablas ni hacia Usuarios. Documento almacena JSON; BaseId del JSON relaciona diferencial y completa de forma lógica. La auditoría de control no se revierte al restaurar negocio." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="EstadoSGTM" value="EstadoSGTM" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="650" height="204" as="geometry" />
+        </mxCell>
+        <mxCell id="EstadoSGTM-fields" value="PK Id : int&#10;BaseDatos : nvarchar(128)&#10;VersionEsquema : int&#10;Generacion : bigint&#10;Mantenimiento : bit&#10;Operacion : uniqueidentifier ?&#10;Detalle : nvarchar(2000)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="EstadoSGTM">
+          <mxGeometry x="0" y="34" width="650" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="ProgramaSGTM" value="ProgramaSGTM" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="850" y="250" width="650" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="ProgramaSGTM-fields" value="PK Id : int&#10;Documento : nvarchar(max)&#10;Version : bigint&#10;SenalUtc : datetimeoffset ?&#10;Resultado : nvarchar(2000)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="ProgramaSGTM">
+          <mxGeometry x="0" y="34" width="650" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="CopiasSGTM" value="CopiasSGTM" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="700" width="650" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="CopiasSGTM-fields" value="PK Id : uniqueidentifier&#10;BackupSet : uniqueidentifier&#10;FechaUtc : datetimeoffset&#10;Documento : nvarchar(max)" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="CopiasSGTM">
+          <mxGeometry x="0" y="34" width="650" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="EventosSGTM" value="EventosSGTM" style="swimlane;html=0;startSize=34;horizontal=1;rounded=0;collapsible=0;fontSize=16;fontStyle=1;align=left;spacingLeft=10;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="850" y="700" width="650" height="226" as="geometry" />
+        </mxCell>
+        <mxCell id="EventosSGTM-fields" value="PK Id : bigint [IDENTITY]&#10;FechaUtc : datetimeoffset&#10;Accion : nvarchar(100)&#10;Resultado : nvarchar(100)&#10;Autor : nvarchar(250)&#10;Segundo : nvarchar(250)&#10;Detalle : nvarchar(2000)&#10;Operacion : uniqueidentifier ?" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;fontFamily=Consolas;fontSize=12;spacing=8;" vertex="1" parent="EventosSGTM">
+          <mxGeometry x="0" y="34" width="650" height="192" as="geometry" />
+        </mxCell>
+        <mxCell id="ef-history" value="__EFMigrationsHistory · metadato de EF en la base operativa&#10;PK MigrationId NVARCHAR(150) NOT NULL&#10;ProductVersion NVARCHAR(32) NOT NULL&#10;Sin FK de negocio. No pertenece a la base de control." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fillColor=#f8fafc;strokeColor=#cbd5e1;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="850" y="950" width="650" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1080" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="4eAmK_F6W_2AO-mXNLi3" name="08 Relaciones e integridad">
+    <mxGraphModel dx="1600" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SGTM DER 2.0 · 08 Relaciones e integridad" style="text;html=0;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Registro completo de las 43 FK físicas. Cada hijo tiene 1 o 0..1 padre según nulabilidad; el padre admite 0..N hijos salvo FK única (0..1). Las líneas de páginas anteriores representan estas mismas FK, no flujos de pantallas." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="72" width="1510" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="rules" value="Referencia: main 253e7d6 + RetirarVinculoCambioSinUso · 29/10/2026. Modelo EF: 24 tablas y 204 columnas; control: 4 tablas y 24 columnas.&#10;&#10;PK/FK usan nombres físicos. ? significa NULL permitido. Las tablas ref. son repeticiones visuales del mismo objeto.&#10;&#10;NO ACTION en las 43 FK; las cardinalidades 0..1 de Diagnostico, EvaluacionAtencion y Comprobante usan PK o índice único.&#10;&#10;Un presupuesto puede estar en borrador sin detalles; al presentarlo el servicio exige alcance o motivo válido.&#10;&#10;No hay cargo mínimo automático, OrdenTrabajo, stock, factura fiscal ni cierre con interrupción en esta entrega.&#10;&#10;Autorización, reserva, estado, pertenencia, sumas y cronología requieren validaciones de Aplicación además de SQL." style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=15;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="150" width="1500" height="285" as="geometry" />
+        </mxCell>
+        <mxCell id="R01-register" value="R01  Cliente 1 — 0..N Atencion&#10;IdCliente → IdCliente" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="470" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R02-register" value="R02  Usuario 0..1 — 0..N Atencion&#10;IdTecnicoEnActividad → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="525" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R03-register" value="R03  Usuario 1 — 0..N Atencion&#10;IdUsuarioRecepcion → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="580" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R04-register" value="R04  Vehiculo 1 — 0..N Atencion&#10;IdVehiculo → IdVehiculo" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="635" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R05-register" value="R05  Atencion 1 — 0..1 Comprobante&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="690" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R06-register" value="R06  Usuario 1 — 0..N Comprobante&#10;IdUsuarioEmision → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="745" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R07-register" value="R07  Comprobante 1 — 0..N ComprobanteDetalle&#10;IdComprobante → IdComprobante" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="800" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R08-register" value="R08  PresupuestoDetalle 1 — 0..1 ComprobanteDetalle&#10;IdPresupuestoDetalle → IdPresupuestoDetalle" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="855" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R09-register" value="R09  Categoria 1 — 0..N Concepto&#10;IdCategoria → IdCategoria" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="910" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R10-register" value="R10  Atencion 1 — 0..1 Diagnostico&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="965" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R11-register" value="R11  Usuario 1 — 0..N Diagnostico&#10;IdTecnicoAutor → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1020" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R12-register" value="R12  Atencion 1 — 0..1 EvaluacionAtencion&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1075" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R13-register" value="R13  Usuario 1 — 0..N EvaluacionAtencion&#10;IdTecnicoUltimaEdicion → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1130" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R14-register" value="R14  Atencion 1 — 0..N HallazgoAtencion&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1185" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R15-register" value="R15  PresupuestoDetalle 0..1 — 0..N HallazgoAtencion&#10;IdDetalleAfectado → IdPresupuestoDetalle" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1240" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R16-register" value="R16  Usuario 1 — 0..N HallazgoAtencion&#10;IdTecnico → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1295" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R17-register" value="R17  Atencion 1 — 0..N HistorialAtencion&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1350" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R18-register" value="R18  Diagnostico 0..1 — 0..N HistorialAtencion&#10;IdDiagnostico → IdDiagnostico" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1405" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R19-register" value="R19  Usuario 1 — 0..N HistorialAtencion&#10;IdUsuario → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1460" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R20-register" value="R20  Marca 1 — 0..N Modelo&#10;IdMarca → IdMarca" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1515" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R21-register" value="R21  Comprobante 1 — 0..N Pago&#10;IdComprobante → IdComprobante" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1570" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R22-register" value="R22  Usuario 0..1 — 0..N Pago&#10;IdUsuarioAnulacion → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1625" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R23-register" value="R23  Usuario 1 — 0..N Pago&#10;IdUsuarioRegistro → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="470" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R24-register" value="R24  MedioPago 1 — 0..N PagoMedio&#10;IdMedioPago → IdMedioPago" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="525" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R25-register" value="R25  Pago 1 — 0..N PagoMedio&#10;IdPago → IdPago" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="580" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R26-register" value="R26  Atencion 1 — 0..N PausaTrabajo&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="635" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R27-register" value="R27  PresupuestoDetalle 0..1 — 0..N PausaTrabajo&#10;IdDetalle → IdPresupuestoDetalle" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="690" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R28-register" value="R28  Usuario 0..1 — 0..N PausaTrabajo&#10;IdTecnicoResolucion → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="745" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R29-register" value="R29  Usuario 1 — 0..N PausaTrabajo&#10;IdUsuario → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="800" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R30-register" value="R30  Atencion 1 — 0..N Presupuesto&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="855" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R31-register" value="R31  HallazgoAtencion 0..1 — 0..N Presupuesto&#10;IdHallazgoAtencion → IdHallazgoAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="910" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R32-register" value="R32  Presupuesto 0..1 — 0..N Presupuesto&#10;IdPresupuestoAnterior → IdPresupuesto" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="965" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R33-register" value="R33  Usuario 1 — 0..N Presupuesto&#10;IdUsuarioCreacion → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1020" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R34-register" value="R34  Usuario 0..1 — 0..N Presupuesto&#10;IdUsuarioDecision → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1075" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R35-register" value="R35  Diagnostico 0..1 — 0..N Presupuesto&#10;IdDiagnostico, IdAtencion → IdDiagnostico, IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1130" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R36-register" value="R36  Concepto 1 — 0..N PresupuestoDetalle&#10;IdConcepto → IdConcepto" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1185" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R37-register" value="R37  Presupuesto 1 — 0..N PresupuestoDetalle&#10;IdPresupuesto → IdPresupuesto" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1240" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R38-register" value="R38  SolicitudAtencion 0..1 — 0..N PresupuestoDetalle&#10;IdSolicitudAtencion → IdSolicitudAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1295" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R39-register" value="R39  Usuario 0..1 — 0..N PresupuestoDetalle&#10;IdTecnicoMaterial → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1350" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R40-register" value="R40  Usuario 0..1 — 0..N PresupuestoDetalle&#10;IdTecnicoRegistro → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1405" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R41-register" value="R41  Atencion 1 — 0..N SolicitudAtencion&#10;IdAtencion → IdAtencion" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1460" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R42-register" value="R42  Rol 1 — 0..N Usuario&#10;RolId → Id" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1515" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="R43-register" value="R43  Modelo 1 — 0..N Vehiculo&#10;IdModelo → IdModelo" style="text;html=0;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="830" y="1570" width="760" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SGTM · DER 2.0 · Todas las vistas describen el mismo esquema · Ver Apéndice C para validaciones de servicio y contratos JSON" style="text;html=0;align=left;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1760" width="1500" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

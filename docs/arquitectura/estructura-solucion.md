@@ -39,4 +39,4 @@ La sesión no vence por tiempo ni inactividad. Termina por Cerrar sesión o sali
 
 La instalación del puesto incluye Presentación y sus dependencias. Demostración se utiliza para preparar datos académicos, no al iniciar una instalación real. El agente de respaldos se despliega por separado en un equipo disponible para ejecutar las tareas programadas.
 
-Los archivos de pruebas están agrupados en Arquitectura, ReglasYComponentes e IntegracionSql dentro del mismo proyecto. Los namespaces y filtros de CI se conservan; mover los archivos no cambia las pruebas ejecutadas. Los editables de requisitos en docs/ERS se mantienen sin modificar para su revisión académica.
+Los archivos de pruebas están agrupados en Arquitectura, ReglasYComponentes e IntegracionSql dentro del mismo proyecto. Los namespaces y filtros de CI se conservan; mover los archivos no cambia las pruebas ejecutadas. Los editables v2.0 de docs/ERS y los diagramas de docs/diagramas están vinculados en la matriz de trazabilidad.

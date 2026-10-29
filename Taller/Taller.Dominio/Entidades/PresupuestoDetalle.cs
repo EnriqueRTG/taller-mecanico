@@ -47,18 +47,11 @@ public sealed class PresupuestoDetalle
     public int? IdTecnicoRegistro { get; set; }
     public DateTime? FechaRegistroEjecucion { get; set; }
     /// <summary>
-    /// Explica una ejecución parcial, una omisión
+    /// Explica un avance parcial
     /// u otra circunstancia relevante del trabajo.
     /// </summary>
     public string? ObservacionesEjecucion { get; set; }
-    /// <summary>
-    /// Propuesta posterior que plantea modificar o suprimir
-    /// la parte pendiente de este ítem.
-    /// El cambio requiere la aceptación de esa propuesta.
-    /// </summary>
-    public int? IdPresupuestoCambio { get; set; }
     public Presupuesto Presupuesto { get; set; } = null!;
     public Concepto Concepto { get; set; } = null!;
     public Usuario? TecnicoRegistro { get; set; }
-    public Presupuesto? PresupuestoCambio { get; set; }
 }

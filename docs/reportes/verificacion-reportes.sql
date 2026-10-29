@@ -52,11 +52,11 @@ SELECT a.IdAtencion,a.FechaApertura,a.Estado,a.IdTecnicoEnActividad,
 FROM dbo.Atenciones a WHERE a.Estado IN(N'EnEvaluacionTecnica',N'EnEjecucion')
 AND (@Tecnico IS NULL OR a.IdTecnicoEnActividad IS NULL OR a.IdTecnicoEnActividad=@Tecnico);
 
--- 6. Actividad técnica: acciones admitidas por ReporteServicio, eventos, no horas.
+-- 6. Actividad técnica: acciones admitidas por ActividadTecnicaReporte, eventos, no horas.
 SELECT IdHistorialAtencion,IdAtencion,Fecha,IdUsuario,Accion,Observaciones
 FROM dbo.HistorialAtenciones
 WHERE Fecha>=@Desde AND Fecha<@Hasta AND (@Tecnico IS NULL OR IdUsuario=@Tecnico)
-AND Accion IN(N'ActividadTomada',N'ActividadLiberada',N'DiagnosticoRegistrado',N'EvaluacionTomada',N'EvaluacionLiberada',
+AND Accion IN(N'EvaluacionTomada',N'EvaluacionLiberada',
 N'EvaluacionAvanceGuardado',N'EvaluacionFinalizada',N'EjecucionTomada',N'EjecucionLiberada',N'EjecucionAvanceGuardado',
 N'TrabajoFinalizado',N'HallazgoRegistrado',N'PausaResuelta',N'MaterialClienteRevisado',N'PresupuestoAdicionalPreparado',
 N'SeleccionParcialRevisada',N'SeleccionClienteValidada');

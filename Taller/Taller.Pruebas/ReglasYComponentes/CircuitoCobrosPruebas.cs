@@ -211,14 +211,16 @@ public sealed class CircuitoCobrosPruebas
                 IdConcepto = 1,
                 Descripcion = "Mano de obra acordada",
                 Cantidad = 2,
-                PrecioUnitario = 100
-, IdSolicitudAtencion = 1             }, new ItemPropuestaDto
+                PrecioUnitario = 100,
+                IdSolicitudAtencion = 1
+            }, new ItemPropuestaDto
             {
                 IdConcepto = 2,
                 Descripcion = "Repuesto acordado",
                 Cantidad = 1,
-                PrecioUnitario = 50
-, IdSolicitudAtencion = 1             }
+                PrecioUnitario = 50,
+                IdSolicitudAtencion = 1
+            }
 
             ];
             foreach (var i in d.InspeccionesAutorizadas)
@@ -1059,8 +1061,9 @@ public sealed class CircuitoCobrosPruebas
             IdConcepto = 1,
             Descripcion = "Solución propuesta",
             Cantidad = 1,
-            PrecioUnitario = 100
-, IdSolicitudAtencion = 1         }
+            PrecioUnitario = 100,
+                IdSolicitudAtencion = 1
+            }
 
         ];
         await c.Evaluacion.GuardarAsync(d, true);

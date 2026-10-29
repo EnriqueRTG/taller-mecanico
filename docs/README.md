@@ -43,6 +43,9 @@ La versión 2.0 está sincronizada con el circuito actual y su migración de lim
 
 Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DOCX y diagramas del repositorio son la instantánea de entrega; deben actualizarse conjuntamente si cambian reglas o esquema. Se retiraron las notas de diseño previas que proponían entidades o estados ya descartados.
 
+- [Primera revisión de consistencia](pruebas/revision-integral-1.md)
+- [Segunda revisión y aceptación pendiente](pruebas/revision-integral-2.md)
+
 ## Pruebas y revisión
 
 `Taller.Pruebas/Arquitectura` protege el sentido de referencias; `ReglasYComponentes` comprueba servicios, validaciones, fechas y documentos (varios casos usan EF InMemory); `IntegracionSql` comprueba restricciones, transacciones, rowversion, recuperación y el lote en SQL real. Son verificaciones complementarias, no copias redundantes. `Taller.Pruebas.Interfaz` comprueba controles y construcción Windows/STA; no reemplaza la revisión visual manual.

@@ -352,8 +352,9 @@ public sealed class IntegracionSqlPruebas
             IdConcepto = ids.Concepto,
             Descripcion = "Trabajo acordado",
             Cantidad = 2,
-            PrecioUnitario = 100
-, IdSolicitudAtencion = 1         }
+            PrecioUnitario = 100,
+                IdSolicitudAtencion = 1
+            }
 
         ];
         foreach (var item in d.Items) item.IdSolicitudAtencion = d.Solicitudes.FirstOrDefault()?.IdSolicitud;
@@ -459,7 +460,8 @@ public sealed class IntegracionSqlPruebas
             IdUsuarioRecepcion = ids.Recepcion,
             Estado = EstadoAtencion.PendienteDecision,
             MotivoConsulta = "Servicio definido solicitado",
-            TipoSolicitud = TipoSolicitudAtencion.ServicioDefinido
+            TipoSolicitud = TipoSolicitudAtencion.ServicioDefinido,
+            Solicitudes = [new() { Orden = 1, Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Trabajo principal solicitado" }]
         };
         db.Add(a);
         await db.SaveChangesAsync();
@@ -476,14 +478,16 @@ public sealed class IntegracionSqlPruebas
                 IdConcepto = ids.Concepto,
                 Descripcion = "Trabajo principal",
                 Cantidad = 1,
-                PrecioUnitario = 100
-, IdSolicitudAtencion = 1             }, new()
+                PrecioUnitario = 100,
+                IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion
+            }, new()
             {
                 IdConcepto = repuesto.IdConcepto,
                 Descripcion = "Repuesto propuesto",
                 Cantidad = 1,
-                PrecioUnitario = 20
-, IdSolicitudAtencion = 1             }
+                PrecioUnitario = 20,
+                IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion
+            }
 
             ]
         };
@@ -516,7 +520,7 @@ public sealed class IntegracionSqlPruebas
         await seg.RegistrarHallazgoAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdDetalle = tarea, Descripcion = "Hallazgo durante el desarme", Recomendacion = "Requiere material adicional", ImpideContinuar = true });
         await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => seg.PausarAsync(a.IdAtencion, seguimiento.Version, null, "Token anterior al hallazgo"));
         seguimiento = await seg.ObtenerAsync(a.IdAtencion);
-        int adicional = await seg.CrearAdicionalAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdHallazgo = seguimiento.Hallazgos.Single().Id, Motivo = "El cliente aportará la pieza, el taller realiza el trabajo", Items = [new() { IdConcepto = repuesto.IdConcepto, Descripcion = "Pieza aportada", Cantidad = 1, OrigenMaterial = OrigenMaterial.Cliente }, new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo adicional", Cantidad = 1, PrecioUnitario = 50 , IdSolicitudAtencion = 1 }] });
+        int adicional = await seg.CrearAdicionalAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdHallazgo = seguimiento.Hallazgos.Single().Id, Motivo = "El cliente aportará la pieza, el taller realiza el trabajo", Items = [new() { IdConcepto = repuesto.IdConcepto, Descripcion = "Pieza aportada", Cantidad = 1, OrigenMaterial = OrigenMaterial.Cliente }, new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo adicional", Cantidad = 1, PrecioUnitario = 50 , IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion }] });
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
         var ad = await ps.ObtenerAsync(adicional);
         await ev.PresentarAsync(adicional, ad.Version);

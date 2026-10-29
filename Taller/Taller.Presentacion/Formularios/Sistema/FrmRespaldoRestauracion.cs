@@ -13,6 +13,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
     private PlanRestauracionDto? _plan;
     private bool _configurando;
     private bool _reiniciar;
+    private bool _puedeExplorarCarpetaLocal;
     public bool OperacionEnCurso { get; private set; }
 
     public FrmRespaldoRestauracion(RespaldoServicio servicio, SesionUsuario sesion)
@@ -41,6 +42,34 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         }
 
         await ActualizarAsync();
+    }
+
+    private void ElegirCarpetaManual_Click(object? sender, EventArgs e) => ElegirCarpeta(txtCarpetaManual);
+    private void ElegirCarpetaAuto_Click(object? sender, EventArgs e) => ElegirCarpeta(txtCarpetaAuto);
+    private void ElegirCarpeta(TextBox destino)
+    {
+        if (OperacionEnCurso || !_puedeExplorarCarpetaLocal) return;
+        try
+        {
+            using var dialogo = new FolderBrowserDialog
+            {
+                Description = "Seleccione la carpeta donde SQL Server guardará los respaldos",
+                UseDescriptionForTitle = true,
+                ShowNewFolderButton = true,
+                SelectedPath = Directory.Exists(destino.Text.Trim()) ? destino.Text.Trim() : string.Empty
+            };
+            if (dialogo.ShowDialog(this) != DialogResult.OK) return;
+            if (dialogo.SelectedPath.Length > destino.MaxLength)
+            {
+                MessageBox.Show(this, $"La ruta admite hasta {destino.MaxLength} caracteres. Elija una carpeta con una ruta más corta.", "Carpeta de respaldo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            destino.Text = dialogo.SelectedPath;
+        }
+        catch (Exception ex)
+        {
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Seleccionar carpeta de respaldo");
+        }
     }
 
     private IProgress<string> Progreso() => new Progress<string>(texto =>
@@ -93,6 +122,11 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
     private async Task CargarDatosAsync()
     {
         var estado = await _servicio.ConsultarAsync();
+        _puedeExplorarCarpetaLocal = estado.PuedeExplorarCarpetaLocal;
+        btnCarpetaManual.Visible = btnCarpetaAuto.Visible = _puedeExplorarCarpetaLocal;
+        lblManual.Text = _puedeExplorarCarpetaLocal
+            ? "Elija una carpeta de este equipo o escriba su ruta. SQL Server debe tener permiso de escritura, también en unidades externas. Completa copia toda la base; diferencial necesita su completa base. Elegir una carpeta no crea el respaldo ni concede permisos."
+            : $"SQL Server está en otro equipo o sistema ({estado.EquipoServidor}). Escriba la ruta del servidor: el explorador de esta PC no representa su disco. Para elegir una carpeta visualmente, abra SGTM en el servidor Windows. SQL Server debe tener permiso de escritura.";
         _programa = await _servicio.ObtenerProgramaAsync();
         _configurando = true;
         dgvCopias.DataSource = estado.Copias.ToList();

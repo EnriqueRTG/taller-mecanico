@@ -143,3 +143,9 @@ Validación del 22/10/2026: solución Release sin errores ni advertencias; 77 pr
 - [DBCC CHECKDB](https://learn.microsoft.com/en-us/sql/t-sql/database-console-commands/dbcc-checkdb-transact-sql).
 - [RESTORE y efecto de REPLACE](https://learn.microsoft.com/en-us/sql/t-sql/statements/restore-statements-transact-sql).
 - [BackgroundService como servicio de Windows](https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service).
+
+### Selección visual de carpeta
+
+Cuando SGTM se abre en el mismo equipo Windows que SQL Server, aparece **Elegir carpeta…** junto a la ruta de las copias manuales y de la programación. Abre el explorador de Windows, permite seleccionar una carpeta interna, externa o accesible en red y completa el campo. Cancelar conserva la ruta anterior; no se inicia ninguna copia ni se guarda el plan hasta confirmar la operación correspondiente. La ruta sigue siendo editable.
+
+El sistema consulta el nombre y plataforma del servidor SQL real para evitar confundir el disco del cliente con el del servidor. En equipos remotos, Linux o entornos donde no se puede confirmar que comparten el sistema de archivos, se mantiene la entrada de la ruta del servidor sin explorador local. Para usar el selector, abrir SGTM en el servidor Windows. Elegir o crear una carpeta no concede permisos a la cuenta del servicio SQL; verificar acceso antes de usarla.

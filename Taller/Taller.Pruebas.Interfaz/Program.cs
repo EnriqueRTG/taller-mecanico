@@ -44,6 +44,7 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        VerificarSelectoresRespaldos(proveedor);
         VerificarFiltrosReportes(proveedor);
         VerificarAccionesContextuales();
         VerificarFiltrosListados(proveedor);
@@ -60,6 +61,23 @@ internal static class Program
         VerificarNavegacionDocumento();
         return 0;
     }
+    private static void VerificarSelectoresRespaldos(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var f = scope.ServiceProvider.GetRequiredService<FrmRespaldoRestauracion>();
+        f.PerformLayout();
+        foreach (var nombre in new[] { "btnCarpetaManual", "btnCarpetaAuto" })
+        {
+            var boton = f.Controls.Find(nombre, true).Single() as Button;
+            if (boton is null || boton.Visible) throw new InvalidOperationException("El explorador requiere verificar primero el equipo del servidor.");
+        }
+        var ruta = f.Controls.Find("txtCarpetaManual", true).Single() as TextBox;
+        ruta!.Text = @"C:\SGTM\Respaldos";
+        typeof(FrmRespaldoRestauracion).GetMethod("ElegirCarpeta", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [ruta]);
+        if (ruta.Text != @"C:\SGTM\Respaldos") throw new InvalidOperationException("Un selector no disponible no debe modificar la ruta escrita.");
+        Console.WriteLine("Respaldos: selectores manual/programado y ruta conservada sin servidor local verificado.");
+    }
+
     private static void VerificarFiltrosReportes(IServiceProvider proveedor)
     {
         using var scope = proveedor.CreateScope();

@@ -33,6 +33,16 @@ public sealed class RespaldosSqlPruebas
     }
 
     [SqlRespaldoFact]
+    public async Task ConsultaIdentificaServidorReal_SinHabilitarExploradorDeClienteLinux()
+    {
+        await using var c = await Caso.CrearAsync();
+        var estado = await c.Motor.ConsultarAsync();
+        Assert.False(string.IsNullOrWhiteSpace(estado.EquipoServidor));
+        if (!OperatingSystem.IsWindows()) Assert.False(estado.PuedeExplorarCarpetaLocal);
+        Assert.Empty(estado.Copias);
+    }
+
+    [SqlRespaldoFact]
     public async Task Preparacion_RechazaBaseInexistenteSinCrearControl()
     {
         await using var c = await Caso.CrearAsync();

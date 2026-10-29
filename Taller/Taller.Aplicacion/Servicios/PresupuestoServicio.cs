@@ -59,7 +59,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             if (persona.Length > 150 || medio.Length > 30 || (persona.Length == 0 || !new[] { "Presencial", "Teléfono", "Correo", "Mensajería" }.Contains(medio)))
                 throw new ValidacionException("Identifique quién comunica la decisión y seleccione el medio de comunicación.");
             p.PersonaDecision = persona;
-            p.MedioDecision = medio.Length == 0 ? null : medio;
+            p.MedioDecision = medio;
             var motivo = AutorizacionOperativa.Texto(datos.Observaciones, datos.ItemsAceptados.Count != p.Detalles.Count);
             foreach (var d in p.Detalles)
                 d.AceptadoPorCliente = datos.ItemsAceptados.Contains(d.IdPresupuestoDetalle);

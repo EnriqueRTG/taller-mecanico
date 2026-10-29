@@ -31,9 +31,17 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 
 ## Material académico editable
 
-Los tres DOCX de `ERS` (ERS v1.0, Apéndice A de casos de uso y Apéndice C de diccionario) se conservan sin modificar. Requieren revisión formal para alinearse por completo con la implementación actual. `ERS/Notas-de-revision.txt` es material de trabajo para esa revisión, no una lista de funciones prometidas o pendientes del programa.
+La versión 2.0 está sincronizada con el circuito actual y su migración de limpieza:
 
-Se retiraron el PDF v0.9 y los diagramas PNG anteriores: repetían entregas previas y describían columnas/relaciones o alcances ya reemplazados. El modelo relacional enlaza la migración/configuraciones actuales; no sustituye todavía la edición académica final del DER y los casos de uso.
+- [ERS](ERS/ERS-SGTM-v2.0.docx)
+- [Apéndice A de casos de uso](ERS/Apendice-A-Casos-de-Uso-v2.0.docx)
+- [Apéndice C de diccionario](ERS/Apendice-C-Diccionario-de-Datos-v2.0.docx)
+- [Diagramas editables y vistas](diagramas/README.md)
+- [Trazabilidad de requisitos, servicios y pruebas](especificacion/trazabilidad.md)
+- [Plan integral de aceptación](pruebas/aceptacion-version-actual.md)
+- [Evidencia y límites de verificación](pruebas/evidencia-cierre.md)
+
+Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DOCX y diagramas del repositorio son la instantánea de entrega; deben actualizarse conjuntamente si cambian reglas o esquema. Se retiraron las notas de diseño previas que proponían entidades o estados ya descartados.
 
 ## Pruebas y revisión
 

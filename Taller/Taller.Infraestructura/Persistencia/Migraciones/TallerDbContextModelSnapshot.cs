@@ -1061,9 +1061,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<int>("IdPresupuesto")
                         .HasColumnType("int");
 
-                    b.Property<int?>("IdPresupuestoCambio")
-                        .HasColumnType("int");
-
                     b.Property<int?>("IdSolicitudAtencion")
                         .HasColumnType("int");
 
@@ -1101,8 +1098,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
 
                     b.HasIndex("IdPresupuesto");
 
-                    b.HasIndex("IdPresupuestoCambio");
-
                     b.HasIndex("IdSolicitudAtencion");
 
                     b.HasIndex("IdTecnicoMaterial");
@@ -1124,8 +1119,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                             t.HasCheckConstraint("CK_PresupuestoDetalles_EstadoEjecucion", "[EstadoEjecucion] IN (\n    N'NoIniciado',\n    N'EnCurso',\n    N'Completado'\n)");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_PrecioUnitario", "[PrecioUnitario] >= 0");
-
-                            t.HasCheckConstraint("CK_PresupuestoDetalles_PresupuestoCambio", "[IdPresupuestoCambio] IS NULL\nOR [IdPresupuestoCambio] <> [IdPresupuesto]");
 
                             t.HasCheckConstraint("CK_PresupuestoDetalles_RegistroTecnico", "(\n    [IdTecnicoRegistro] IS NULL\n    AND [FechaRegistroEjecucion] IS NULL\n)\nOR\n(\n    [IdTecnicoRegistro] IS NOT NULL\n    AND [FechaRegistroEjecucion] IS NOT NULL\n)");
                         });
@@ -1638,11 +1631,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Taller.Dominio.Entidades.Presupuesto", "PresupuestoCambio")
-                        .WithMany()
-                        .HasForeignKey("IdPresupuestoCambio")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Taller.Dominio.Entidades.SolicitudAtencion", null)
                         .WithMany()
                         .HasForeignKey("IdSolicitudAtencion")
@@ -1661,8 +1649,6 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Navigation("Concepto");
 
                     b.Navigation("Presupuesto");
-
-                    b.Navigation("PresupuestoCambio");
 
                     b.Navigation("TecnicoMaterial");
 

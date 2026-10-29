@@ -171,15 +171,49 @@ public sealed class IntegracionSqlPruebas
     }
 
     [SqlRespaldoFact]
+    public async Task Limpieza_RechazaVinculosNoNulosSinDescartarlos()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var db = b.Contexto();
+        var migrador = db.GetService<IMigrator>();
+        await migrador.MigrateAsync("20261028164124_SimplificarEjecucionTresEstados");
+        var atencion = new Atencion
+        {
+            IdUsuarioRecepcion = ids.Recepcion, MotivoConsulta = "Preservar vínculo antiguo",
+            Cliente = new Cliente { TipoDocumento = "DNI", Documento = "33999112", Nombre = "Prueba", Apellido = "Limpieza" },
+            Vehiculo = new Vehiculo { IdModelo = ids.Modelo, Dominio = "ZZ988XY", Color = "Gris" }
+        };
+        var primero = new Presupuesto { Atencion = atencion, IdUsuarioCreacion = ids.Tecnico,
+            Detalles = [new PresupuestoDetalle { IdConcepto = ids.Concepto, Descripcion = "Ítem histórico", Cantidad = 1, PrecioUnitario = 100 }] };
+        var segundo = new Presupuesto { Atencion = atencion, IdUsuarioCreacion = ids.Tecnico };
+        db.AddRange(primero, segundo);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.PresupuestoDetalles SET IdPresupuestoCambio={segundo.IdPresupuesto} WHERE IdPresupuesto={primero.IdPresupuesto}");
+        var error = await Assert.ThrowsAsync<SqlException>(() => migrador.MigrateAsync());
+        Assert.Equal(51141, error.Number);
+        Assert.Equal(2, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        var vinculo = await db.Database.SqlQueryRaw<int>("SELECT IdPresupuestoCambio AS [Value] FROM dbo.PresupuestoDetalles").SingleAsync();
+        Assert.Equal(segundo.IdPresupuesto, vinculo);
+        await db.Database.ExecuteSqlRawAsync("UPDATE dbo.PresupuestoDetalles SET IdPresupuestoCambio=NULL");
+        await migrador.MigrateAsync();
+        Assert.Equal(3, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Single(await db.PresupuestoDetalles.AsNoTracking().ToListAsync());
+    }
+
+    [SqlRespaldoFact]
     public async Task BaseNuevaSoloAdmiteEstadosVigentesYNoContieneClasificadoresObsoletos()
     {
         await using var b = await BasePrueba.CrearAsync();
         await using var db = b.Contexto();
-        Assert.Equal(2, db.Database.GetMigrations().Count());
+        Assert.Equal(3, db.Database.GetMigrations().Count());
         await using var sql = new SqlConnection(b.Conexion);
         await sql.OpenAsync();
         var comando = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE (object_id = OBJECT_ID(N'dbo.Presupuestos') OR object_id = OBJECT_ID(N'dbo.Diagnosticos')) AND name = N'Tipo' OR object_id = OBJECT_ID(N'dbo.Conceptos') AND name = N'DisponibleParaIngreso'", sql);
         Assert.Equal(0, (int)(await comando.ExecuteScalarAsync())!);
+        var columnaRetirada = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE object_id=OBJECT_ID(N'dbo.PresupuestoDetalles') AND name=N'IdPresupuestoCambio'", sql);
+        Assert.Equal(0, (int)(await columnaRetirada.ExecuteScalarAsync())!);
         var restricciones = (await db.Database.SqlQueryRaw<string>("SELECT definition AS [Value] FROM sys.check_constraints WHERE name IN (N'CK_Atenciones_Estado', N'CK_HistorialAtenciones_EstadoNuevo', N'CK_HistorialAtenciones_EstadoAnterior')").ToListAsync());
         Assert.NotEmpty(restricciones);
         Assert.All(restricciones, texto => { Assert.DoesNotContain("Abierta", texto); Assert.DoesNotContain("PendienteDiagnostico", texto); Assert.DoesNotContain("Pausada", texto); });

@@ -10,7 +10,7 @@ Se implementan **completas y diferenciales**. Una diferencial contiene los cambi
 
 Las copias nativas se hacen con CHECKSUM y se someten a RESTORE VERIFYONLY. Esto valida lectura/conjunto/checksums, pero no reemplaza una recuperación real: antes de autorizar una restauración, SGTM recupera la cadena en una **base temporal**, ejecuta **DBCC CHECKDB sin reparar datos** y comprueba el esquema de migraciones.
 
-Las copias están en el **servidor SQL**, no en la PC que abre el formulario. No se usa un explorador de carpetas del cliente que pueda dar una falsa impresión de dónde se guarda el archivo. La carpeta debe existir y permitir escritura a la cuenta del servicio SQL Server. Se usan nombres únicos, un conjunto por archivo y no se sobrescriben/eliminan copias anteriores desde la aplicación. El administrador debe disponer además de almacenamiento externo al equipo y una política de conservación supervisada: guardar todas las copias en el mismo disco no protege contra la pérdida de ese disco.
+Las copias están en el **servidor SQL**, no en la PC que abre el formulario. El explorador se habilita solo cuando se confirma el mismo equipo Windows; en otro puesto se indica la ruta del servidor. La carpeta debe existir y permitir escritura a la cuenta del servicio SQL Server. Se usan nombres únicos, un conjunto por archivo y no se sobrescriben/eliminan copias anteriores desde la aplicación. El administrador debe disponer además de almacenamiento externo al equipo y una política de conservación supervisada: guardar todas las copias en el mismo disco no protege contra la pérdida de ese disco.
 
 ## Base de control separada
 
@@ -128,7 +128,7 @@ Las copias auxiliares de control también deben conservarse fuera del servidor. 
 
 ## Validación
 
-Validación del 22/10/2026: solución Release sin errores ni advertencias; 77 pruebas generales aprobadas y 12 pruebas nativas aprobadas sobre SQL Server 2025 Developer desechable. Se comprobó también que no hay cambios de modelo pendientes. La ejecución Windows/SQL Server 2022 de CI y la inspección visual del despliegue deben comprobarse antes de fusionar.
+La evidencia de la versión de entrega está en [verificación de cierre](../pruebas/evidencia-cierre.md). No extrapolar resultados de una versión anterior a esta instalación.
 
 - Pruebas de aplicación: administrador activo, dos identidades distintas, roles admitidos, claves erróneas y revocadas, plan ligado al solicitante/expiración/un solo uso, motivo, reconocimiento, rutas SQL seguras y calendario con zona.
 - Pruebas con SQL Server aislado en GitHub Actions: completa/diferencial, ensayo temporal y CHECKDB, recuperación real, copia protectora, auditoría externa, conexiones activas, generaciones de sesión, archivo reemplazado, esquema distinto y ejecución del agente.

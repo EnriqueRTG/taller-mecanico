@@ -55,11 +55,6 @@ public sealed class PresupuestoDetalleConfiguracion : IEntityTypeConfiguration<P
                     AND [FechaRegistroEjecucion] IS NOT NULL
                 )
                 """);
-            // Una propuesta no puede ser su propio presupuesto de cambio.
-            tabla.HasCheckConstraint("CK_PresupuestoDetalles_PresupuestoCambio", """
-                [IdPresupuestoCambio] IS NULL
-                OR [IdPresupuestoCambio] <> [IdPresupuesto]
-                """);
         });
         builder.Property(d => d.OrigenMaterial).HasConversion<string>().HasMaxLength(20).HasDefaultValue(Taller.Dominio.Enumeraciones.OrigenMaterial.Taller);
         builder.Property(d => d.CantidadRecibidaCliente).HasPrecision(18, 3);
@@ -79,12 +74,9 @@ public sealed class PresupuestoDetalleConfiguracion : IEntityTypeConfiguration<P
         builder.Property(d => d.IdTecnicoRegistro).IsRequired(false);
         builder.Property(d => d.FechaRegistroEjecucion).HasColumnType("datetime2(0)").IsRequired(false);
         builder.Property(d => d.ObservacionesEjecucion).HasMaxLength(1000).IsRequired(false);
-        builder.Property(d => d.IdPresupuestoCambio).IsRequired(false);
         // Presupuesto al que pertenece el ítem.
         builder.HasOne(d => d.Presupuesto).WithMany(p => p.Detalles).HasForeignKey(d => d.IdPresupuesto).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(d => d.Concepto).WithMany().HasForeignKey(d => d.IdConcepto).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(d => d.TecnicoRegistro).WithMany().HasForeignKey(d => d.IdTecnicoRegistro).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
-        // Propuesta posterior que plantea cambiar el ítem original.
-        builder.HasOne(d => d.PresupuestoCambio).WithMany().HasForeignKey(d => d.IdPresupuestoCambio).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
     }
 }

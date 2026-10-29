@@ -29,22 +29,14 @@ public sealed class ArchivoRespaldoAzure(IConfiguration configuracion) : IArchiv
         return Convert.ToHexString(await SHA256.HashDataAsync(f, ct));
     }
 
-    public async Task<CopiaRespaldoDto> SubirAsync(CopiaRespaldoDto copia, CancellationToken ct = default)
+    /// <summary>Verifica el contenido remoto, no solo los metadatos declarados al subir.</summary>
+    private static async Task<BlobProperties> SubirVerificadoAsync(BlobClient blob, Func<Stream> abrir,
+        string hash, long longitud, Guid id, CancellationToken ct)
     {
-        var uri = Contenedor();
-        var contenedor = Cliente(uri);
-        if ((await contenedor.GetPropertiesAsync(cancellationToken: ct)).Value.PublicAccess != PublicAccessType.None)
-            throw new InvalidOperationException("El contenedor debe ser privado.");
-        if (!File.Exists(copia.RutaServidor))
-            throw new InvalidOperationException("El proceso de respaldos no puede leer el archivo local del servidor SQL. Instálelo junto al servidor o configure una carpeta compartida con permisos.");
-        var hash = await HuellaAsync(copia.RutaServidor, ct);
-        var longitud = new FileInfo(copia.RutaServidor).Length;
-        var nombre = $"sgtm/{copia.Familia:N}/{copia.Id:N}/negocio.bak";
-        var blob = contenedor.GetBlobClient(nombre);
         try
         {
-            await using var f = new FileStream(copia.RutaServidor, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 1024, true);
-            await blob.UploadAsync(f, new BlobUploadOptions { Conditions = new BlobRequestConditions { IfNoneMatch = ETag.All }, Metadata = new Dictionary<string, string> { ["sha256"] = hash, ["copia"] = copia.Id.ToString("N") }, TransferValidation = new UploadTransferValidationOptions { ChecksumAlgorithm = StorageChecksumAlgorithm.Auto } }, ct);
+            await using var f = abrir();
+            await blob.UploadAsync(f, new BlobUploadOptions { Conditions = new BlobRequestConditions { IfNoneMatch = ETag.All }, Metadata = new Dictionary<string, string> { ["sha256"] = hash, ["copia"] = id.ToString("N") }, TransferValidation = new UploadTransferValidationOptions { ChecksumAlgorithm = StorageChecksumAlgorithm.Auto } }, ct);
         }
         catch (RequestFailedException ex)when (ex.Status is 409 or 412)
         { /* Reintento: verificar el objeto existente, nunca sobrescribir. */
@@ -58,11 +50,43 @@ public sealed class ArchivoRespaldoAzure(IConfiguration configuracion) : IArchiv
         await using (var contenido = descarga.Value.Content)
             if (Convert.ToHexString(await SHA256.HashDataAsync(contenido, ct)) != hash)
                 throw new InvalidOperationException("La comprobación SHA-256 del contenido remoto falló.");
+        return propiedades;
+    }
+
+    public async Task<CopiaRespaldoDto> SubirAsync(CopiaRespaldoDto copia, CancellationToken ct = default)
+    {
+        var uri = Contenedor();
+        var contenedor = Cliente(uri);
+        if ((await contenedor.GetPropertiesAsync(cancellationToken: ct)).Value.PublicAccess != PublicAccessType.None)
+            throw new InvalidOperationException("El contenedor debe ser privado.");
+        if (!File.Exists(copia.RutaServidor))
+            throw new InvalidOperationException("El proceso de respaldos no puede leer el archivo local del servidor SQL. Instálelo junto al servidor o configure una carpeta compartida con permisos.");
+        var hash = await HuellaAsync(copia.RutaServidor, ct);
+        var longitud = new FileInfo(copia.RutaServidor).Length;
+        var nombre = $"sgtm/{copia.Familia:N}/{copia.Id:N}/negocio.bak";
+        var propiedades = await SubirVerificadoAsync(contenedor.GetBlobClient(nombre),
+            () => new FileStream(copia.RutaServidor, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 1024, true),
+            hash, longitud, copia.Id, ct);
+        var estadoControl = "No disponible";
+        string hashControl = "";
+        long longitudControl = 0;
+        if (File.Exists(copia.RutaControl))
+        {
+            hashControl = await HuellaAsync(copia.RutaControl, ct);
+            longitudControl = new FileInfo(copia.RutaControl).Length;
+            await SubirVerificadoAsync(contenedor.GetBlobClient($"sgtm/{copia.Familia:N}/{copia.Id:N}/control.bak"),
+                () => new FileStream(copia.RutaControl, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 1024, true),
+                hashControl, longitudControl, copia.Id, ct);
+            estadoControl = "Verificada";
+        }
         var resultado = copia with
         {
             AzureSolicitado = true,
             EstadoAzure = "Verificada",
-            AdvertenciaAzure = "",
+            AdvertenciaAzure = estadoControl == "Verificada" ? "" : "Negocio verificado en Azure; falta el archivo auxiliar de control. Contacte al técnico.",
+            EstadoControlAzure = estadoControl,
+            Sha256Control = hashControl,
+            LongitudControl = longitudControl,
             ContenedorAzure = uri.AbsoluteUri.TrimEnd('/'),
             BlobAzure = nombre,
             Sha256 = hash,
@@ -70,10 +94,22 @@ public sealed class ArchivoRespaldoAzure(IConfiguration configuracion) : IArchiv
             ETagAzure = propiedades.ETag.ToString(),
             VerificadaAzureUtc = DateTimeOffset.UtcNow
         };
-        // Manifiesto portable sin credenciales; el catálogo de control sigue siendo la autoridad para restaurar.
-        await contenedor.GetBlobClient($"sgtm/{copia.Familia:N}/{copia.Id:N}/manifiesto.json").UploadAsync(BinaryData.FromString(JsonSerializer.Serialize(resultado)), overwrite: true, cancellationToken: ct);
-        if (File.Exists(copia.RutaControl))
-            await contenedor.GetBlobClient($"sgtm/{copia.Familia:N}/{copia.Id:N}/control.bak").UploadAsync(copia.RutaControl, overwrite: true, cancellationToken: ct);
+        // El manifiesto es informativo, no autoriza restauraciones. Puede actualizarse
+        // en un reintento; los archivos .bak son inmutables y nunca se sobrescriben.
+        var manifiesto = contenedor.GetBlobClient($"sgtm/{copia.Familia:N}/{copia.Id:N}/manifiesto.json");
+        var bytes = System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resultado));
+        var subida = await manifiesto.UploadAsync(BinaryData.FromBytes(bytes), overwrite: true, cancellationToken: ct);
+        var descarga = await manifiesto.DownloadStreamingAsync(new BlobDownloadOptions
+        {
+            Conditions = new BlobRequestConditions { IfMatch = subida.Value.ETag }
+        }, ct);
+        var hashManifiesto = SHA256.HashData(bytes);
+        await using (var contenido = descarga.Value.Content)
+        {
+            var hashRemoto = await SHA256.HashDataAsync(contenido, ct);
+            if (!hashManifiesto.SequenceEqual(hashRemoto))
+                throw new InvalidOperationException("La comprobación del manifiesto remoto falló.");
+        }
         return resultado;
     }
 

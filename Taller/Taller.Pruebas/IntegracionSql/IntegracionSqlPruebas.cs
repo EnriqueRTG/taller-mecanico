@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Taller.Dominio.Tiempo;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -198,7 +199,7 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(segundo.IdPresupuesto, vinculo);
         await db.Database.ExecuteSqlRawAsync("UPDATE dbo.PresupuestoDetalles SET IdPresupuestoCambio=NULL");
         await migrador.MigrateAsync();
-        Assert.Equal(5, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Equal(6, (await db.Database.GetAppliedMigrationsAsync()).Count());
         Assert.Single(await db.PresupuestoDetalles.AsNoTracking().ToListAsync());
     }
 
@@ -266,7 +267,7 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(1, await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS [Value] FROM dbo.Clientes WHERE Telefono IS NULL").SingleAsync());
         await db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'+54 (379) 412-3456'");
         await migrador.MigrateAsync();
-        Assert.Equal(5, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Equal(6, (await db.Database.GetAppliedMigrationsAsync()).Count());
         var invalido = await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'abc'"));
         Assert.Equal(547, invalido.Number);
         Assert.Equal("+54 (379) 412-3456", await db.Clientes.AsNoTracking().Select(c => c.Telefono).SingleAsync());
@@ -277,7 +278,7 @@ public sealed class IntegracionSqlPruebas
     {
         await using var b = await BasePrueba.CrearAsync();
         await using var db = b.Contexto();
-        Assert.Equal(5, db.Database.GetMigrations().Count());
+        Assert.Equal(6, db.Database.GetMigrations().Count());
         await using var sql = new SqlConnection(b.Conexion);
         await sql.OpenAsync();
         var comando = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE (object_id = OBJECT_ID(N'dbo.Presupuestos') OR object_id = OBJECT_ID(N'dbo.Diagnosticos')) AND name = N'Tipo' OR object_id = OBJECT_ID(N'dbo.Conceptos') AND name = N'DisponibleParaIngreso'", sql);
@@ -555,4 +556,91 @@ public sealed class IntegracionSqlPruebas
         Assert.Single(await db.Set<HallazgoAtencion>().ToListAsync());
         Assert.NotNull((await db.Set<PausaTrabajo>().SingleAsync()).FechaResolucion);
     }
+    [SqlRespaldoFact]
+    public async Task InicializacionConcurrente_CreaUnaSolaCuentaYCatalogoSinDuplicados()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        await using var uno = b.Contexto();
+        await using var dos = b.Contexto();
+        var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder().AddInMemoryCollection(
+            new Dictionary<string, string?> { ["Instalacion:ClaveAdministrador"] = "A1!" + Guid.NewGuid().ToString("N") }).Build();
+        var hash = new Taller.Infraestructura.Seguridad.PasswordHasher();
+        await Task.WhenAll(
+            new Taller.Infraestructura.Persistencia.Inicializacion.InicializadorDatos(uno, hash, config).InicializarAsync(),
+            new Taller.Infraestructura.Persistencia.Inicializacion.InicializadorDatos(dos, hash, config).InicializarAsync());
+        Assert.Single(await uno.Usuarios.AsNoTracking().ToListAsync());
+        Assert.Equal(10, await uno.Marcas.CountAsync());
+        Assert.Equal(20, await uno.Modelos.CountAsync());
+        Assert.Empty(uno.ChangeTracker.Entries());
+        Assert.Empty(dos.ChangeTracker.Entries());
+    }
+
+    [SqlRespaldoFact]
+    public async Task DecisionPersistida_ExigeContactoYLaMigracionNoInventaDatos()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var db = b.Contexto();
+        var p = new Presupuesto { IdUsuarioCreacion = ids.Tecnico,
+            Atencion = new Atencion { IdUsuarioRecepcion = ids.Recepcion, MotivoConsulta = "Contacto de decisión",
+                Cliente = new Cliente { Telefono = "3794123456", Documento = "34111222", TipoDocumento = "DNI", Nombre = "Ana", Apellido = "Prueba" },
+                Vehiculo = new Vehiculo { IdModelo = ids.Modelo, Dominio = "AE111AA", Color = "Gris" } } };
+        db.Add(p); await db.SaveChangesAsync(); db.ChangeTracker.Clear();
+        var rechazo = await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Presupuestos SET Estado=N'Rechazado', FechaPresentacion=FechaCreacion, FechaDecision=FechaCreacion, IdUsuarioDecision={ids.Recepcion}, PersonaDecision=NULL, MedioDecision=N'Presencial' WHERE IdPresupuesto={p.IdPresupuesto}"));
+        Assert.Equal(547, rechazo.Number);
+        var migrador = db.GetService<IMigrator>();
+        await migrador.MigrateAsync("20261029210000_AgregarConcurrenciaUsuarios");
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Presupuestos SET Estado=N'Rechazado', FechaPresentacion=FechaCreacion, FechaDecision=FechaCreacion, IdUsuarioDecision={ids.Recepcion}, PersonaDecision=NULL, MedioDecision=N'Presencial' WHERE IdPresupuesto={p.IdPresupuesto}");
+        var error = await Assert.ThrowsAsync<SqlException>(() => migrador.MigrateAsync());
+        Assert.Equal(51144, error.Number);
+        Assert.Equal(5, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Null((await db.Presupuestos.AsNoTracking().SingleAsync()).PersonaDecision);
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Presupuestos SET PersonaDecision=N'Ana Prueba' WHERE IdPresupuesto={p.IdPresupuesto}");
+        await migrador.MigrateAsync();
+        Assert.Equal(6, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        var medioInvalido = await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Presupuestos SET MedioDecision=N'Desconocido' WHERE IdPresupuesto={p.IdPresupuesto}"));
+        Assert.Equal(547, medioInvalido.Number);
+    }
+
+    [SqlRespaldoFact]
+    public async Task DiagnosticoDuplicado_TraduceElIndiceActualYRevierteElGuardado()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var db = b.Contexto();
+        var a = new Atencion { IdUsuarioRecepcion = ids.Recepcion, MotivoConsulta = "Informe duplicado",
+            Cliente = new Cliente { Telefono = "3794123456", Documento = "34111223", TipoDocumento = "DNI", Nombre = "Ana", Apellido = "Prueba" },
+            Vehiculo = new Vehiculo { IdModelo = ids.Modelo, Dominio = "AE112AA", Color = "Gris" } };
+        db.Add(a); await db.SaveChangesAsync(); db.ChangeTracker.Clear();
+        db.AddRange(Enumerable.Range(0, 2).Select(_ => new Diagnostico { IdAtencion = a.IdAtencion,
+            IdTecnicoAutor = ids.Tecnico, FallaDetectada = "Falla", TrabajoRecomendado = "Trabajo" }));
+        var error = await Assert.ThrowsAsync<ValidacionException>(() => new UnidadDeTrabajo(db).GuardarCambiosAsync());
+        Assert.Contains("informe técnico definitivo", error.Message);
+        Assert.Empty(db.ChangeTracker.Entries());
+        Assert.Empty(await db.Diagnosticos.ToListAsync());
+    }
+
+    [SqlRespaldoFact]
+    public async Task LecturaConsistente_NoMezclaUnCambioConcurrenteYLiberaBloqueosAlFinal()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        await using var uno = b.Contexto();
+        await using var dos = b.Contexto();
+        var c = new Cliente { Documento = "34111224", TipoDocumento = "DNI", Nombre = "Antes", Apellido = "Prueba", Telefono = "3794123456" };
+        uno.Add(c); await uno.SaveChangesAsync(); uno.ChangeTracker.Clear();
+        var unidad = new UnidadDeTrabajo(uno);
+        var valor = await unidad.LeerConsistenteAsync(async () =>
+        {
+            var primero = await uno.Clientes.AsNoTracking().SingleAsync(x => x.IdCliente == c.IdCliente);
+            var error = await Assert.ThrowsAsync<SqlException>(() => dos.Database.ExecuteSqlInterpolatedAsync($"SET LOCK_TIMEOUT 250; UPDATE dbo.Clientes SET Nombre=N'Después' WHERE IdCliente={c.IdCliente}"));
+            Assert.Equal(1222, error.Number);
+            var segundo = await uno.Clientes.AsNoTracking().SingleAsync(x => x.IdCliente == c.IdCliente);
+            Assert.Equal(primero.Nombre, segundo.Nombre);
+            return segundo.Nombre;
+        });
+        Assert.Equal("Antes", valor);
+        await dos.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Clientes SET Nombre=N'Después' WHERE IdCliente={c.IdCliente}");
+        Assert.Equal("Después", (await uno.Clientes.AsNoTracking().SingleAsync()).Nombre);
+    }
+
 }

@@ -22,6 +22,7 @@ public sealed class PresupuestoConfiguracion : IEntityTypeConfiguration<Presupue
                     N'Rechazado', N'PendienteRevisionTecnica'
                 )
                 """);
+            tabla.HasCheckConstraint("CK_Presupuestos_ContactoDecision", "[Estado] NOT IN (N'Aceptado', N'Rechazado', N'PendienteRevisionTecnica') OR ([PersonaDecision] IS NOT NULL AND LEN(LTRIM(RTRIM([PersonaDecision]))) BETWEEN 1 AND 150 AND [MedioDecision] IS NOT NULL AND [MedioDecision] IN (N'Presencial', N'Teléfono', N'Correo', N'Mensajería'))");
             // Una decisión requiere usuario y fecha.
             // Mientras está pendiente, ninguno debe estar cargado.
             tabla.HasCheckConstraint("CK_Presupuestos_Decision", """

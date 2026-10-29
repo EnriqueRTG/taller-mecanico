@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Persistencia;
 using Taller.Aplicacion.Excepciones;
@@ -44,10 +44,10 @@ public sealed class UnidadDeTrabajo : IUnidadDeTrabajo
             throw new ValidacionException("La atención ya fue liquidada por otra operación. Actualice el listado.");
         }
         catch (DbUpdateException ex)
-            when (EsDiagnosticoInicialDuplicado(ex))
+            when (EsDiagnosticoDuplicado(ex))
         {
             throw new ValidacionException(
-                "La atención ya tiene registrado un diagnóstico inicial.");
+                "La atención ya tiene registrado su informe técnico definitivo. Actualice la información.");
         }
         finally
         {
@@ -57,19 +57,30 @@ public sealed class UnidadDeTrabajo : IUnidadDeTrabajo
         }
     }
 
+    public async Task<T> LeerConsistenteAsync<T>(Func<Task<T>> consulta)
+    {
+        ArgumentNullException.ThrowIfNull(consulta);
+        if (!_contexto.Database.IsRelational())
+            return await consulta();
+        await using var transaccion = await _contexto.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        var resultado = await consulta();
+        await transaccion.CommitAsync();
+        return resultado;
+    }
+
     public void DescartarCambios()
     {
         _contexto.ChangeTracker.Clear();
     }
 
-    private static bool EsDiagnosticoInicialDuplicado(
+    private static bool EsDiagnosticoDuplicado(
         DbUpdateException excepcion)
     {
         return excepcion.InnerException is SqlException sqlEx
             && sqlEx.Errors.Cast<SqlError>().Any(error =>
                 (error.Number == 2601 || error.Number == 2627)
                 && error.Message.Contains(
-                    "UX_Diagnosticos_InicialPorAtencion",
+                    "UX_Diagnosticos_Atencion",
                     StringComparison.OrdinalIgnoreCase));
     }
 }

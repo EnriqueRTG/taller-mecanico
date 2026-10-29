@@ -169,7 +169,7 @@ public partial class FrmVehiculos : Form, IFormularioConOperacion
         var seleccionado = ObtenerSeleccionado();
         if (seleccionado is null || OperacionEnCurso)
             return;
-        if (MessageBox.Show(this, "¿Confirma cambiar el estado del registro seleccionado?", "Cambiar estado", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        if (MessageBox.Show(this, $"¿Confirma {(seleccionado.Activo ? "deshabilitar" : "reactivar")} el vehículo {seleccionado.Dominio}?", "Cambiar estado", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
             return;
         try
         {

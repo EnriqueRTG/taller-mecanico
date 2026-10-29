@@ -251,7 +251,8 @@ partial class FrmRespaldoRestauracion
             FillWeight = 180
         };
         dgvCopias.Columns.Add(colAdvertencia);
-        dgvCopias.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAzure", DataPropertyName = "EstadoAzure", HeaderText = "Azure", MinimumWidth = 120 });
+        dgvCopias.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAzure", DataPropertyName = "EstadoAzure", HeaderText = "Azure · negocio", MinimumWidth = 120 });
+        dgvCopias.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAzureControl", DataPropertyName = "EstadoControlAzure", HeaderText = "Azure · control", MinimumWidth = 120 });
         tlpPrograma.Dock = DockStyle.Fill;
         tlpPrograma.Padding = new Padding(10);
         tlpPrograma.ColumnCount = 1;

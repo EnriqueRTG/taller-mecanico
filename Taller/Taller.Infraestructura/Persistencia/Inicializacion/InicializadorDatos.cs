@@ -10,16 +10,15 @@ namespace Taller.Infraestructura.Persistencia.Inicializacion;
 /// </summary>
 public sealed class InicializadorDatos
 {
-    // Variable para el contexto de la base de datos
     private readonly TallerDbContext _contexto;
-    // Variable para el servicio de hash de contraseñas
     private readonly IPasswordHasher _passwordHasher;
     private readonly IConfiguration _configuracion;
     /// <summary>
     /// Inicializa una nueva instancia de la clase <see cref = "InicializadorDatos"/> con el contexto de la base de datos y el servicio de hash de contraseñas proporcionados.
     /// </summary>
-    /// <param name = "contexto"></param>
-    /// <param name = "passwordHasher"></param>
+    /// <param name = "contexto">Unidad de persistencia de esta inicialización.</param>
+    /// <param name = "passwordHasher">Genera el hash del administrador inicial.</param>
+    /// <param name = "configuracion">Configuración local de instalación.</param>
     public InicializadorDatos(TallerDbContext contexto, IPasswordHasher passwordHasher, IConfiguration configuracion)
     {
         _configuracion = configuracion;
@@ -30,17 +29,42 @@ public sealed class InicializadorDatos
     /// <summary>
     /// Inicializa los datos mínimos requeridos por el sistema, incluyendo la creación del usuario administrador y la inicialización del catálogo de vehículos.
     /// </summary>
-    /// <returns></returns>
     public async Task InicializarAsync()
     {
-        await InicializarAdministradorAsync();
-        await InicializarCatalogoVehiculosAsync();
+        if (!_contexto.Database.IsRelational())
+        {
+            await InicializarAdministradorAsync();
+            await InicializarCatalogoVehiculosAsync();
+            _contexto.ChangeTracker.Clear();
+            return;
+        }
+
+        await using var transaccion = await _contexto.Database.BeginTransactionAsync();
+        try
+        {
+            // Dos puestos pueden arrancar juntos: la segunda consulta debe ver lo
+            // confirmado por el primero antes de decidir si faltan datos mínimos.
+            await _contexto.Database.ExecuteSqlRawAsync("""
+                DECLARE @resultado int;
+                EXEC @resultado = sys.sp_getapplock
+                    @Resource=N'SGTM:Inicializacion', @LockMode=N'Exclusive',
+                    @LockOwner=N'Transaction', @LockTimeout=30000;
+                IF @resultado < 0
+                    THROW 51143, 'No se pudo coordinar la inicialización. Reintente iniciar SGTM.', 1;
+                """);
+            await InicializarAdministradorAsync();
+            await InicializarCatalogoVehiculosAsync();
+            await transaccion.CommitAsync();
+        }
+        finally
+        {
+            _contexto.ChangeTracker.Clear();
+        }
     }
 
     /// <summary>
     /// Inicializa el usuario administrador si no existe en la base de datos. Crea el administrador con una credencial suministrada durante la instalación.
     /// </summary>
-    /// <returns></returns>
     private async Task InicializarAdministradorAsync()
     {
         if (await _contexto.Usuarios.AnyAsync(u => u.RolId == RolesSistema.AdministradorId && u.Activo))
@@ -68,7 +92,6 @@ public sealed class InicializadorDatos
     /// Inicializa las marcas y modelos básicos utilizados
     /// como catálogo para el registro de vehículos.
     /// </summary>
-    /// <returns></returns>
     private async Task InicializarCatalogoVehiculosAsync()
     {
         var chevrolet = await ObtenerOCrearMarcaAsync("Chevrolet");

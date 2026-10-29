@@ -56,6 +56,7 @@ public sealed class DemostracionSqlPruebas
             Assert.True(await db.Presupuestos.AnyAsync(p => p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado && p.Detalles.Any(d => d.CantidadEjecutada > 0)));
             foreach (var estado in Enum.GetValues<EstadoEjecucionDetalle>())
                 Assert.True(await db.PresupuestoDetalles.AnyAsync(d => d.EstadoEjecucion == estado), "Falta estado de ejecución: " + estado);
+            await ConciliarReportesAsync(sp, db);
             var receptor = await db.Usuarios.Include(u => u.Rol).AsNoTracking().FirstAsync(u => u.RolId == 2 && u.Activo);
             sp.GetRequiredService<SesionUsuario>().Iniciar(receptor);
             Assert.Contains(await sp.GetRequiredService<CobroServicio>().ListarAsync(), c => c.PuedeRegistrarEntrega);
@@ -105,4 +106,35 @@ public sealed class DemostracionSqlPruebas
             await cmd.ExecuteNonQueryAsync();
         }
     }
+    private static async Task ConciliarReportesAsync(IServiceProvider sp, TallerDbContext db)
+    {
+        var admin = await db.Usuarios.AsNoTracking().SingleAsync(u => u.NombreUsuario == "admin");
+        sp.GetRequiredService<SesionUsuario>().Iniciar(admin);
+        var servicio = sp.GetRequiredService<ReporteServicio>();
+        var desde = FechaHoraTaller.Hoy.AddYears(-1);
+        var hasta = FechaHoraTaller.Hoy.AddDays(1);
+        var acciones = Taller.Aplicacion.Consultas.ActividadTecnicaReporte.Acciones;
+        var conteos = new Dictionary<Taller.Aplicacion.DTOs.Reportes.TipoReporte, int>
+        {
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.Atenciones] = await db.Atenciones.CountAsync(a => a.FechaApertura >= desde && a.FechaApertura < hasta),
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.Presupuestos] = await db.Presupuestos.CountAsync(p => p.Vigente && p.FechaCreacion >= desde && p.FechaCreacion < hasta),
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.CargaTecnica] = await db.Atenciones.CountAsync(a => a.Estado == EstadoAtencion.EnEvaluacionTecnica || a.Estado == EstadoAtencion.EnEjecucion),
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.SaldosPendientes] = await db.Comprobantes.CountAsync(c => c.Total > c.TotalPagado),
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.ActividadTecnica] = await db.HistorialAtenciones.CountAsync(h => h.Fecha >= desde && h.Fecha < hasta && acciones.Contains(h.Accion)),
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.ConceptosRealizados] = await db.PresupuestoDetalles.CountAsync(d => d.CantidadEjecutada > 0 && d.FechaRegistroEjecucion >= desde && d.FechaRegistroEjecucion < hasta),
+            [Taller.Aplicacion.DTOs.Reportes.TipoReporte.MovimientosCobro] = await db.PagoMedios.CountAsync(m => m.Pago.Fecha >= desde && m.Pago.Fecha < hasta) + await db.PagoMedios.CountAsync(m => m.Pago.Anulado && m.Pago.FechaAnulacion >= desde && m.Pago.FechaAnulacion < hasta)
+        };
+        foreach (var tipo in Enum.GetValues<Taller.Aplicacion.DTOs.Reportes.TipoReporte>())
+        {
+            var reporte = await servicio.GenerarAsync(new() { Tipo = tipo, Desde = desde, Hasta = hasta.AddDays(-1), Estado = "Todos" });
+            Assert.Equal(conteos[tipo], reporte.Registros.Count);
+            bool monetario = tipo is Taller.Aplicacion.DTOs.Reportes.TipoReporte.MovimientosCobro or Taller.Aplicacion.DTOs.Reportes.TipoReporte.SaldosPendientes;
+            Assert.Equal(monetario ? reporte.Registros.Sum(x => x.Importe ?? 0) : reporte.Registros.Count, reporte.Grafico.Sum(x => x.Valor));
+            if (tipo == Taller.Aplicacion.DTOs.Reportes.TipoReporte.SaldosPendientes)
+                Assert.Equal(await db.Database.SqlQueryRaw<decimal>("SELECT COALESCE(SUM(Total-TotalPagado),0) AS [Value] FROM dbo.Comprobantes WHERE Total>TotalPagado").SingleAsync(), reporte.Registros.Sum(x => x.Importe ?? 0));
+            if (tipo == Taller.Aplicacion.DTOs.Reportes.TipoReporte.Presupuestos)
+                Assert.Equal(await db.Database.SqlQueryRaw<decimal>("SELECT COALESCE(SUM(ROUND(d.Cantidad*d.PrecioUnitario,2)),0) AS [Value] FROM dbo.PresupuestoDetalles d JOIN dbo.Presupuestos p ON p.IdPresupuesto=d.IdPresupuesto WHERE p.Vigente=1 AND p.Estado=N'Aceptado' AND d.AceptadoPorCliente=1").SingleAsync(), reporte.Registros.Sum(x => x.ImporteAceptado ?? 0));
+        }
+    }
+
 }

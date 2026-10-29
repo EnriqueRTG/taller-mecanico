@@ -58,7 +58,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             var medio = datos.MedioDecision?.Trim() ?? "";
             if (persona.Length > 150 || medio.Length > 30 || (persona.Length == 0 || !new[] { "Presencial", "Teléfono", "Correo", "Mensajería" }.Contains(medio)))
                 throw new ValidacionException("Identifique quién comunica la decisión y seleccione el medio de comunicación.");
-            p.PersonaDecision = persona.Length == 0 ? null : persona;
+            p.PersonaDecision = persona;
             p.MedioDecision = medio.Length == 0 ? null : medio;
             var motivo = AutorizacionOperativa.Texto(datos.Observaciones, datos.ItemsAceptados.Count != p.Detalles.Count);
             foreach (var d in p.Detalles)
@@ -74,7 +74,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             if (!p.EsAdicional)
                 a.Estado = parcial ? EstadoAtencion.PendienteDecision : p.Estado == EstadoPresupuesto.Aceptado ? EstadoAtencion.EnEjecucion : EstadoAtencion.PendienteLiquidacion;
             evaluacion.PrepararVersion(a, a.Version);
-            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "DecisionPresupuestoRegistrada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Presupuesto {p.IdPresupuesto}: {datos.ItemsAceptados.Count}/{p.Detalles.Count} ítems aceptados. Persona: {p.PersonaDecision ?? "No informada (registro anterior)"}. Medio: {p.MedioDecision ?? "No informado"}. {motivo}" });
+            evaluacion.AgregarHistorial(new HistorialAtencion { IdAtencion = a.IdAtencion, IdUsuario = usuario.Id, Fecha = FechaHoraTaller.Ahora, Accion = "DecisionPresupuestoRegistrada", EstadoAnterior = anterior, EstadoNuevo = a.Estado, Observaciones = $"Presupuesto {p.IdPresupuesto}: {datos.ItemsAceptados.Count}/{p.Detalles.Count} ítems aceptados. Persona: {p.PersonaDecision}. Medio: {p.MedioDecision}. {motivo}" });
             await unidad.GuardarCambiosAsync();
         }
         finally

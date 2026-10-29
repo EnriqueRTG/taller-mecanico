@@ -81,6 +81,9 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         var usuario = await ExigirUsuarioAsync();
         if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo))
             throw new ValidacionException("Su rol no permite consultar este reporte.");
+        var estadosDisponibles = EstadosPara(solicitud.Tipo);
+        if (solicitud.Estado != "Todos" && !estadosDisponibles.Contains(solicitud.Estado))
+            throw new ValidacionException("Seleccione un estado válido para el tipo de reporte.");
         var hoy = FechaHoraTaller.Hoy;
         if (solicitud.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica) && (solicitud.Desde.Date > solicitud.Hasta.Date || solicitud.Hasta.Date > hoy || solicitud.Hasta.Year >= 9999))
             throw new ValidacionException("Seleccione un período válido, sin fechas futuras.");
@@ -99,7 +102,6 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             TipoReporte.ActividadTecnica => await reportes.ListarActividadAsync(desde, hasta, tecnico),
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
             _ => throw new ValidacionException("Tipo de reporte inválido.")};
-        var estadosDisponibles = EstadosPara(solicitud.Tipo);
         string texto = (solicitud.Busqueda ?? "").Trim();
         registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
         if (solicitud.Tipo == TipoReporte.SaldosPendientes)

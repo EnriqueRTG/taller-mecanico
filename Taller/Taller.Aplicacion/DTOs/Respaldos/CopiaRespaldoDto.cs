@@ -5,6 +5,10 @@ public sealed record CopiaRespaldoDto
     public DateTimeOffset? UltimoIntentoAzureUtc { get; init; }
     public bool AzureSolicitado { get; init; }
     public string AdvertenciaAzure { get; init; } = "";
+    /// <summary>Verificación independiente de la copia auxiliar; no equivale a la de negocio.</summary>
+    public string EstadoControlAzure { get; init; } = "No verificada";
+    public string Sha256Control { get; init; } = "";
+    public long LongitudControl { get; init; }
     public string EstadoAzure { get; init; } = "No solicitado";
     public string ContenedorAzure { get; init; } = "";
     public string BlobAzure { get; init; } = "";

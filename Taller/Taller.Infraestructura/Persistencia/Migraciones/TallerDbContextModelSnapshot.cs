@@ -1010,6 +1010,8 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         {
                             t.HasCheckConstraint("CK_Presupuestos_Adicional", "([EsInspeccion] = 0 OR [EsAdicional] = 1) AND ([IdHallazgoAtencion] IS NULL OR [EsAdicional] = 1)");
 
+                            t.HasCheckConstraint("CK_Presupuestos_ContactoDecision", "[Estado] NOT IN (N'Aceptado', N'Rechazado', N'PendienteRevisionTecnica') OR ([PersonaDecision] IS NOT NULL AND LEN(LTRIM(RTRIM([PersonaDecision]))) BETWEEN 1 AND 150 AND [MedioDecision] IS NOT NULL AND [MedioDecision] IN (N'Presencial', N'Teléfono', N'Correo', N'Mensajería'))");
+
                             t.HasCheckConstraint("CK_Presupuestos_Decision", "(\n    [Estado] IN (\n        N'Borrador',\n    N'PendientePresentacion',\n        N'PendienteDecision'\n    )\n    AND [IdUsuarioDecision] IS NULL\n    AND [FechaDecision] IS NULL\n)\nOR\n(\n    [Estado] IN (N'Aceptado', N'Rechazado', N'PendienteRevisionTecnica')\n    AND [IdUsuarioDecision] IS NOT NULL\n    AND [FechaDecision] IS NOT NULL\n)");
 
                             t.HasCheckConstraint("CK_Presupuestos_Estado", "[Estado] IN (\n    N'Borrador',\n    N'PendientePresentacion',\n    N'PendienteDecision',\n    N'Aceptado',\n    N'Rechazado', N'PendienteRevisionTecnica'\n)");

@@ -1,4 +1,4 @@
-﻿namespace Taller.Aplicacion.Abstracciones.Persistencia;
+namespace Taller.Aplicacion.Abstracciones.Persistencia;
 
 /// <summary>
 /// Confirma los cambios preparados para una operación de aplicación.
@@ -16,4 +16,8 @@ public interface IUnidadDeTrabajo
     /// que todavía no fueron guardados.
     /// </summary>
     void DescartarCambios();
+
+    /// <summary>Ejecuta una consulta compuesta breve con aislamiento de lectura,
+    /// sin mantener una transacción mientras el usuario opera el formulario.</summary>
+    Task<T> LeerConsistenteAsync<T>(Func<Task<T>> consulta);
 }

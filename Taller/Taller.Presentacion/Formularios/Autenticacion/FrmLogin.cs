@@ -118,8 +118,9 @@ public partial class FrmLogin : Form
                     nombreUsuario,
                     password);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Serilog.Log.Error(ex, "Fallo técnico al autenticar el acceso");
             ocurrioErrorTecnico = true;
         }
         finally

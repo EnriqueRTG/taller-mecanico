@@ -55,3 +55,9 @@ WHERE Telefono IS NULL OR LEN(LTRIM(RTRIM(Telefono))) < 7;
 ```
 
 Esta consulta inicial no reemplaza la validación completa de formato aplicada por la migración. Respaldar la base y cerrar los puestos antes de actualizar el esquema.
+
+## Concurrencia de usuarios
+
+`20261029210000_AgregarConcurrenciaUsuarios` agrega Usuarios.Version y actualiza los SP de edición, credenciales y estado. Conserva datos y procedimientos de alta. Los tres SP exigen la versión consultada. Una edición obsoleta produce un conflicto y no sobrescribe cambios.
+
+Respaldar previamente, cerrar todos los puestos y aplicar todas las migraciones pendientes desde una única estación de mantenimiento. Actualizar luego todos los clientes. No mezclar ejecutables antiguos con los SP nuevos ni generar otra migración por cuenta propia. No es necesario recrear una base actualizada ni recargar Demo.

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
@@ -24,6 +24,7 @@ public sealed class UsuarioConfiguracion
         EntityTypeBuilder<Usuario> builder)
     {
         builder.ToTable("Usuarios");
+        builder.Property(usuario => usuario.Version).IsRowVersion();
 
         builder.HasKey(usuario => usuario.Id);
 

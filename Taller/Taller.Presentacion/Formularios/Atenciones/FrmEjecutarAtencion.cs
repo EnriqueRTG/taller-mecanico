@@ -8,6 +8,7 @@ namespace Taller.Presentacion.Formularios.Atenciones;
 /// <summary>Registra el trabajo real de los ítems aceptados; conserva avances y reserva técnica.</summary>
 public partial class FrmEjecutarAtencion : Form
 {
+    private bool _falloContinuidadRegistrado;
     private readonly IServiceProvider _proveedor;
     private readonly int _id;
     private readonly EjecucionServicio _servicio;
@@ -192,9 +193,15 @@ public partial class FrmEjecutarAtencion : Form
                     "Detención de trabajos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             if (firma.Length == 0) _ultimaAlerta = "";
+            _falloContinuidadRegistrado = false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            if (!_falloContinuidadRegistrado)
+            {
+                Serilog.Log.Error(ex, "No se pudo verificar la continuidad de la atención {Atencion}", _id);
+                _falloContinuidadRegistrado = true;
+            }
             if (!IsDisposed && !Disposing)
             {
                 _controlNoDisponible = true;

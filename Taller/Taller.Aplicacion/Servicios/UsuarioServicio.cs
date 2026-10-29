@@ -76,7 +76,7 @@ public sealed class UsuarioServicio
     /// <summary>
     /// Actualiza los datos personales y el rol de un usuario existente.
     /// </summary>
-    public async Task ActualizarDatosAsync(int usuarioId, string? nombre, string? apellido, int rolId, int usuarioEjecutorId)
+    public async Task ActualizarDatosAsync(int usuarioId, string? nombre, string? apellido, int rolId, int usuarioEjecutorId, byte[] version)
     {
         var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         if (administradorSesion.Id != usuarioEjecutorId)
@@ -95,29 +95,31 @@ public sealed class UsuarioServicio
         Usuario? usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
         if (usuario is null)
         {
-            throw new InvalidOperationException("El usuario que desea modificar no existe.");
+            throw new ValidacionException("El usuario que desea modificar no existe.");
         }
+
+        AutorizacionOperativa.Version(version, usuario.Version);
 
         if (usuario.Id == administradorSesion.Id && rolId != RolesSistema.AdministradorId)
         {
-            throw new InvalidOperationException("El administrador no puede quitarse a sí mismo " + "el rol de Administrador.");
+            throw new ValidacionException("El administrador no puede quitarse a sí mismo " + "el rol de Administrador.");
         }
 
         Rol? rol = await _rolRepositorio.ObtenerPorIdAsync(rolId);
         if (rol is null)
         {
-            throw new InvalidOperationException("El rol seleccionado no existe.");
+            throw new ValidacionException("El rol seleccionado no existe.");
         }
 
         if (!rol.Activo)
         {
-            throw new InvalidOperationException("El rol seleccionado se encuentra inactivo.");
+            throw new ValidacionException("El rol seleccionado se encuentra inactivo.");
         }
 
-        string nombreRolEsperado = RolesSistema.ObtenerNombreEsperado(rolId) ?? throw new InvalidOperationException("La configuración del rol no es válida.");
+        string nombreRolEsperado = RolesSistema.ObtenerNombreEsperado(rolId) ?? throw new ValidacionException("La configuración del rol no es válida.");
         if (string.IsNullOrWhiteSpace(rol.Nombre) || !string.Equals(rol.Nombre, nombreRolEsperado, StringComparison.Ordinal))
         {
-            throw new InvalidOperationException("La configuración del rol seleccionado no es válida.");
+            throw new ValidacionException("La configuración del rol seleccionado no es válida.");
         }
 
         bool modificaDatos = !string.Equals(usuario.Nombre, nombre, StringComparison.Ordinal) || !string.Equals(usuario.Apellido, apellido, StringComparison.Ordinal) || usuario.RolId != rolId;
@@ -126,13 +128,13 @@ public sealed class UsuarioServicio
             throw new ValidacionException("No se realizaron cambios en los datos del usuario.");
         }
 
-        await _usuarioRepositorio.ActualizarDatosAsync(usuarioId, nombre, apellido, rolId);
+        await _usuarioRepositorio.ActualizarDatosAsync(usuarioId, nombre, apellido, rolId, version);
     }
 
     /// <summary>
     /// Actualiza las credenciales de acceso de un usuario.
     /// </summary>
-    public async Task ActualizarCredencialesAsync(int usuarioId, string? nombreUsuario, string? nuevaPassword, string? confirmarPassword, int usuarioEjecutorId)
+    public async Task ActualizarCredencialesAsync(int usuarioId, string? nombreUsuario, string? nuevaPassword, string? confirmarPassword, int usuarioEjecutorId, byte[] version)
     {
         var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         if (administradorSesion.Id != usuarioEjecutorId)
@@ -148,12 +150,14 @@ public sealed class UsuarioServicio
         Usuario? usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
         if (usuario is null)
         {
-            throw new InvalidOperationException("El usuario cuyas credenciales desea modificar no existe.");
+            throw new ValidacionException("El usuario cuyas credenciales desea modificar no existe.");
         }
+
+        AutorizacionOperativa.Version(version, usuario.Version);
 
         if (usuario.Id == administradorSesion.Id)
         {
-            throw new InvalidOperationException("El administrador no puede modificar sus propias " + "credenciales desde la gestión de usuarios.");
+            throw new ValidacionException("El administrador no puede modificar sus propias " + "credenciales desde la gestión de usuarios.");
         }
 
         bool cambiaNombreUsuario = !string.Equals(usuario.NombreUsuario, nombreUsuarioNormalizado, StringComparison.Ordinal);
@@ -192,13 +196,13 @@ public sealed class UsuarioServicio
             }
         }
 
-        await _usuarioRepositorio.ActualizarCredencialesAsync(usuarioId, nombreUsuarioNormalizado, passwordHash);
+        await _usuarioRepositorio.ActualizarCredencialesAsync(usuarioId, nombreUsuarioNormalizado, passwordHash, version);
     }
 
     /// <summary>
     /// Cambia el estado de acceso de un usuario registrado.
     /// </summary>
-    public async Task CambiarEstadoAsync(int usuarioId, bool habilitar, int usuarioEjecutorId)
+    public async Task CambiarEstadoAsync(int usuarioId, bool habilitar, int usuarioEjecutorId, byte[] version)
     {
         var administradorSesion = await _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
         if (administradorSesion.Id != usuarioEjecutorId)
@@ -208,20 +212,22 @@ public sealed class UsuarioServicio
         Usuario? usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioId);
         if (usuario is null)
         {
-            throw new InvalidOperationException("El usuario seleccionado ya no existe.");
+            throw new ValidacionException("El usuario seleccionado ya no existe.");
         }
+
+        AutorizacionOperativa.Version(version, usuario.Version);
 
         if (usuario.Id == administradorSesion.Id && !habilitar)
         {
-            throw new InvalidOperationException("El administrador no puede deshabilitar " + "su propia cuenta.");
+            throw new ValidacionException("El administrador no puede deshabilitar " + "su propia cuenta.");
         }
 
         if (usuario.Activo == habilitar)
         {
-            throw new InvalidOperationException(habilitar ? "El usuario ya se encuentra habilitado." : "El usuario ya se encuentra deshabilitado.");
+            throw new ValidacionException(habilitar ? "El usuario ya se encuentra habilitado." : "El usuario ya se encuentra deshabilitado.");
         }
 
-        await _usuarioRepositorio.CambiarEstadoAsync(usuarioId, habilitar);
+        await _usuarioRepositorio.CambiarEstadoAsync(usuarioId, habilitar, version);
     }
 
     /// <summary>
@@ -245,17 +251,17 @@ public sealed class UsuarioServicio
         Rol? rol = await _rolRepositorio.ObtenerPorIdAsync(rolId);
         if (rol is null)
         {
-            throw new InvalidOperationException("El rol seleccionado no existe.");
+            throw new ValidacionException("El rol seleccionado no existe.");
         }
 
         if (!rol.Activo)
         {
-            throw new InvalidOperationException("El rol seleccionado se encuentra inactivo.");
+            throw new ValidacionException("El rol seleccionado se encuentra inactivo.");
         }
 
         if (!EsRolDisponible(rol))
         {
-            throw new InvalidOperationException("La configuración del rol seleccionado no es válida.");
+            throw new ValidacionException("La configuración del rol seleccionado no es válida.");
         }
 
         bool nombreUsuarioExistente = await _usuarioRepositorio.ExisteNombreUsuarioAsync(nombreUsuarioNormalizado);

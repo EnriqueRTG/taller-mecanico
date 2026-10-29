@@ -198,8 +198,58 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(segundo.IdPresupuesto, vinculo);
         await db.Database.ExecuteSqlRawAsync("UPDATE dbo.PresupuestoDetalles SET IdPresupuestoCambio=NULL");
         await migrador.MigrateAsync();
-        Assert.Equal(4, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Equal(5, (await db.Database.GetAppliedMigrationsAsync()).Count());
         Assert.Single(await db.PresupuestoDetalles.AsNoTracking().ToListAsync());
+    }
+
+    [SqlRespaldoFact]
+    public async Task Usuarios_SPRechazanVersionObsoletaEnDatosCredencialesYEstado()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var uno = b.Contexto();
+        await using var dos = b.Contexto();
+        var r1 = new UsuarioRepositorio(uno);
+        var r2 = new UsuarioRepositorio(dos);
+        var original = (await r1.ObtenerPorIdAsync(ids.Tecnico))!;
+        Assert.Equal(8, original.Version.Length);
+        await r1.ActualizarDatosAsync(original.Id, "Cambio", "Prueba", 3, original.Version);
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => r2.ActualizarDatosAsync(original.Id, "Obsoleto", "Prueba", 3, original.Version));
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => r2.ActualizarCredencialesAsync(original.Id, original.NombreUsuario, "hash rechazado", original.Version));
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => r2.CambiarEstadoAsync(original.Id, false, original.Version));
+        var actual = (await r2.ObtenerPorIdAsync(original.Id))!;
+        Assert.Equal("Cambio", actual.Nombre);
+        Assert.True(actual.Activo);
+        Assert.Equal(original.PasswordHash, actual.PasswordHash);
+        await r2.ActualizarCredencialesAsync(actual.Id, "tecnico.actualizado", null, actual.Version);
+        actual = (await r1.ObtenerPorIdAsync(actual.Id))!;
+        Assert.Equal("tecnico.actualizado", actual.NombreUsuario);
+        await r1.CambiarEstadoAsync(actual.Id, false, actual.Version);
+        Assert.False((await r2.ObtenerPorIdAsync(actual.Id))!.Activo);
+    }
+
+    [SqlRespaldoFact]
+    public async Task AltaAtencion_RevalidaMaestrosAntesDeGuardarYPermiteReintentarSinResiduos()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        var ids = await b.DatosAsync();
+        await using var db = b.Contexto();
+        var acceso = Acceso(db, ids.Recepcion, out _);
+        var cliente = await new ClienteServicio(new ClienteRepositorio(db), acceso).RegistrarAsync("DNI", "45678903", "Ana", "Prueba", "3794123456", null, null);
+        var vehiculo = await new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso).RegistrarAsync("AB987CD", 2020, "Gris", ids.Modelo);
+        await using var otro = b.Contexto();
+        await otro.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Clientes SET Activo=0 WHERE IdCliente={cliente.IdCliente}");
+        Atencion Nueva() => new() { IdCliente = cliente.IdCliente, IdVehiculo = vehiculo.IdVehiculo, IdUsuarioRecepcion = ids.Recepcion,
+            MotivoConsulta = "Solicitud de servicio", Solicitudes = [new() { Orden = 1, Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Servicio solicitado" }],
+            Historial = [new() { IdUsuario = ids.Recepcion, Accion = "RecepcionRegistrada", EstadoNuevo = EstadoAtencion.EnEvaluacionTecnica }] };
+        var repo = new AtencionRepositorio(db);
+        await Assert.ThrowsAsync<ValidacionException>(() => repo.AgregarAsync(Nueva()));
+        Assert.Empty(db.ChangeTracker.Entries());
+        await otro.Database.ExecuteSqlInterpolatedAsync($"UPDATE dbo.Clientes SET Activo=1 WHERE IdCliente={cliente.IdCliente}");
+        await repo.AgregarAsync(Nueva());
+        Assert.Single(await db.Atenciones.ToListAsync());
+        Assert.Single(await db.Set<SolicitudAtencion>().ToListAsync());
+        Assert.Single(await db.HistorialAtenciones.ToListAsync());
     }
 
     [SqlRespaldoFact]
@@ -216,7 +266,7 @@ public sealed class IntegracionSqlPruebas
         Assert.Equal(1, await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS [Value] FROM dbo.Clientes WHERE Telefono IS NULL").SingleAsync());
         await db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'+54 (379) 412-3456'");
         await migrador.MigrateAsync();
-        Assert.Equal(4, (await db.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Equal(5, (await db.Database.GetAppliedMigrationsAsync()).Count());
         var invalido = await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'abc'"));
         Assert.Equal(547, invalido.Number);
         Assert.Equal("+54 (379) 412-3456", await db.Clientes.AsNoTracking().Select(c => c.Telefono).SingleAsync());
@@ -227,7 +277,7 @@ public sealed class IntegracionSqlPruebas
     {
         await using var b = await BasePrueba.CrearAsync();
         await using var db = b.Contexto();
-        Assert.Equal(4, db.Database.GetMigrations().Count());
+        Assert.Equal(5, db.Database.GetMigrations().Count());
         await using var sql = new SqlConnection(b.Conexion);
         await sql.OpenAsync();
         var comando = new SqlCommand("SELECT COUNT(*) FROM sys.columns WHERE (object_id = OBJECT_ID(N'dbo.Presupuestos') OR object_id = OBJECT_ID(N'dbo.Diagnosticos')) AND name = N'Tipo' OR object_id = OBJECT_ID(N'dbo.Conceptos') AND name = N'DisponibleParaIngreso'", sql);
@@ -283,7 +333,7 @@ public sealed class IntegracionSqlPruebas
         var vehiculos = new VehiculoServicio(new VehiculoRepositorio(db), new ModeloRepositorio(db), acceso);
         var cliente = await clientes.RegistrarAsync("DNI", "23456789", "Lucía", "Gómez", "3794123456", null, null);
         var vehiculo = await vehiculos.RegistrarAsync("AC456DE", 2021, "Blanco", ids.Modelo);
-        var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), usuarios, sesion);
+        var recepcion = new AtencionServicio(new AtencionRepositorio(db), new ClienteRepositorio(db), new VehiculoRepositorio(db), new Taller.Aplicacion.Seguridad.AutorizacionOperativa(usuarios, sesion));
         var a = await recepcion.RegistrarRecepcionAsync(new RegistrarRecepcionDto {
             IdCliente = cliente.IdCliente, IdVehiculo = vehiculo.IdVehiculo, IdUsuarioRecepcion = ids.Recepcion,
             Kilometraje = 80000, Solicitudes = [new() { Tipo = TipoSolicitudIngreso.ProblemaInformado, Descripcion = "Ruido persistente al frenar" }]
@@ -302,8 +352,9 @@ public sealed class IntegracionSqlPruebas
             IdConcepto = ids.Concepto,
             Descripcion = "Trabajo acordado",
             Cantidad = 2,
-            PrecioUnitario = 100
-        }
+            PrecioUnitario = 100,
+                IdSolicitudAtencion = 1
+            }
 
         ];
         foreach (var item in d.Items) item.IdSolicitudAtencion = d.Solicitudes.FirstOrDefault()?.IdSolicitud;
@@ -369,10 +420,10 @@ public sealed class IntegracionSqlPruebas
         cuenta = await cobro.ObtenerAsync(a.IdAtencion);
         Assert.Single(cuenta.Comprobante!.Pagos);
         Assert.Equal(100, cuenta.Comprobante.Saldo);
-        await Assert.ThrowsAsync<ValidacionException>(() => cobro.EntregarAsync(a.IdAtencion, cuenta.VersionAtencion, "Entrega prematura"));
+        await Assert.ThrowsAsync<ValidacionException>(() => cobro.EntregarAsync(new Taller.Aplicacion.DTOs.Cobros.RegistrarEntregaDto { IdAtencion = a.IdAtencion, Version = cuenta.VersionAtencion, PersonaRetira = "Cliente de prueba", ConformidadRecepcion = true, Observaciones = "Entrega prematura" }));
         await cobro.RegistrarPagoAsync(new RegistrarPagoDto { IdComprobante = cuenta.Comprobante.IdComprobante, Version = cuenta.Comprobante.Version, Medios = [new PagoMedioDto { IdMedioPago = efectivo.IdMedioPago, Importe = 100 }] });
         cuenta = await cobro.ObtenerAsync(a.IdAtencion);
-        await cobro.EntregarAsync(a.IdAtencion, cuenta.VersionAtencion, "Retira el cliente con trabajos verificados");
+        await cobro.EntregarAsync(new Taller.Aplicacion.DTOs.Cobros.RegistrarEntregaDto { IdAtencion = a.IdAtencion, Version = cuenta.VersionAtencion, PersonaRetira = "Cliente de prueba", ConformidadRecepcion = true, Observaciones = "Retira el cliente con trabajos verificados" });
         Assert.Equal(EstadoAtencion.Cerrada, (await recepcion.ObtenerPorIdAsync(a.IdAtencion))!.Estado);
         Assert.Single(await db.Diagnosticos.ToListAsync());
         Assert.Equal(2, await db.Set<Pago>().CountAsync());
@@ -409,7 +460,8 @@ public sealed class IntegracionSqlPruebas
             IdUsuarioRecepcion = ids.Recepcion,
             Estado = EstadoAtencion.PendienteDecision,
             MotivoConsulta = "Servicio definido solicitado",
-            TipoSolicitud = TipoSolicitudAtencion.ServicioDefinido
+            TipoSolicitud = TipoSolicitudAtencion.ServicioDefinido,
+            Solicitudes = [new() { Orden = 1, Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Trabajo principal solicitado" }]
         };
         db.Add(a);
         await db.SaveChangesAsync();
@@ -426,13 +478,15 @@ public sealed class IntegracionSqlPruebas
                 IdConcepto = ids.Concepto,
                 Descripcion = "Trabajo principal",
                 Cantidad = 1,
-                PrecioUnitario = 100
+                PrecioUnitario = 100,
+                IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion
             }, new()
             {
                 IdConcepto = repuesto.IdConcepto,
                 Descripcion = "Repuesto propuesto",
                 Cantidad = 1,
-                PrecioUnitario = 20
+                PrecioUnitario = 20,
+                IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion
             }
 
             ]
@@ -446,7 +500,7 @@ public sealed class IntegracionSqlPruebas
         var ejec = new EjecucionServicio(er, cr, unidad, acceso);
         var cobro = new CobroServicio(cr, er, unidad, acceso);
         var original = await ps.ObtenerAsync(p.IdPresupuesto);
-        await ps.DecidirAsync(new() { IdPresupuesto = p.IdPresupuesto, Version = original.Version, ItemsAceptados = [original.Items.First(i => i.IdConcepto == ids.Concepto).IdDetalle], Observaciones = "Cliente solicita solo la tarea independiente" });
+        await ps.DecidirAsync(new() { IdPresupuesto = p.IdPresupuesto, Version = original.Version, ItemsAceptados = [original.Items.First(i => i.IdConcepto == ids.Concepto).IdDetalle], Observaciones = "Cliente solicita solo la tarea independiente" , PersonaDecision = "Cliente de prueba" , MedioDecision = "Presencial" });
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         await Assert.ThrowsAsync<ValidacionException>(() => ejec.ObtenerAsync(a.IdAtencion));
         original = await ps.ObtenerAsync(p.IdPresupuesto);
@@ -466,12 +520,12 @@ public sealed class IntegracionSqlPruebas
         await seg.RegistrarHallazgoAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdDetalle = tarea, Descripcion = "Hallazgo durante el desarme", Recomendacion = "Requiere material adicional", ImpideContinuar = true });
         await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => seg.PausarAsync(a.IdAtencion, seguimiento.Version, null, "Token anterior al hallazgo"));
         seguimiento = await seg.ObtenerAsync(a.IdAtencion);
-        int adicional = await seg.CrearAdicionalAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdHallazgo = seguimiento.Hallazgos.Single().Id, Motivo = "El cliente aportará la pieza, el taller realiza el trabajo", Items = [new() { IdConcepto = repuesto.IdConcepto, Descripcion = "Pieza aportada", Cantidad = 1, OrigenMaterial = OrigenMaterial.Cliente }, new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo adicional", Cantidad = 1, PrecioUnitario = 50 }] });
+        int adicional = await seg.CrearAdicionalAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdHallazgo = seguimiento.Hallazgos.Single().Id, Motivo = "El cliente aportará la pieza, el taller realiza el trabajo", Items = [new() { IdConcepto = repuesto.IdConcepto, Descripcion = "Pieza aportada", Cantidad = 1, OrigenMaterial = OrigenMaterial.Cliente }, new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo adicional", Cantidad = 1, PrecioUnitario = 50 , IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion }] });
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
         var ad = await ps.ObtenerAsync(adicional);
         await ev.PresentarAsync(adicional, ad.Version);
         ad = await ps.ObtenerAsync(adicional);
-        await ps.DecidirAsync(new() { IdPresupuesto = adicional, Version = ad.Version, ItemsAceptados = ad.Items.Select(i => i.IdDetalle).ToList() });
+        await ps.DecidirAsync(new() { IdPresupuesto = adicional, Version = ad.Version, ItemsAceptados = ad.Items.Select(i => i.IdDetalle).ToList() , PersonaDecision = "Cliente de prueba" , MedioDecision = "Presencial" });
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         seguimiento = await seg.ObtenerAsync(a.IdAtencion);
         var material = seguimiento.Items.Single(i => i.Origen == OrigenMaterial.Cliente);

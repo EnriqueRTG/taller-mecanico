@@ -11,7 +11,7 @@ public interface IClienteRepositorio
     Task<Cliente?> ObtenerPorIdAsync(int id);
     Task<Cliente?> ObtenerPorDocumentoAsync(string tipoDocumento, string documento);
     Task<List<Cliente>> ListarActivosAsync();
-    Task<List<Cliente>> ListarInactivosAsync();
+
     Task AgregarAsync(Cliente cliente);
     Task ActualizarAsync(Cliente cliente);
     Task<bool> ExisteDocumentoAsync(string tipoDocumento, string documento, int? excluirIdCliente = null);

@@ -35,7 +35,7 @@ La sesión no vence por tiempo ni inactividad. Termina por Cerrar sesión o sali
 2. Preparar la base nueva con la guía de entornos y cargar Demo v4 antes de abrir la aplicación. No aplicar el esquema inicial sobre la base anterior.
 3. Configurar en cada equipo la conexión al destino elegido y seleccionar Taller.Presentacion como inicio.
 4. Ejecutar el recorrido principal con cuentas de recepción y técnico. Si ambas máquinas colaboran sobre el mismo circuito, deben usar la misma instancia/base accesible; localhost de cada equipo representa bases diferentes.
-5. Las configuraciones de Azure y del agente se realizan después. Este cambio no modifica el esquema ni el lote; no requiere otra migración sobre una base ya creada con EsquemaInicialCircuitoActual.
+5. Las configuraciones de Azure y del agente se realizan después. La versión actual requiere aplicar todas las migraciones, incluida AgregarConcurrenciaUsuarios, con los puestos cerrados. Después actualizar todos los ejecutables antes de reanudar operaciones.
 
 La instalación del puesto incluye Presentación y sus dependencias. Demostración se utiliza para preparar datos académicos, no al iniciar una instalación real. El agente de respaldos se despliega por separado en un equipo disponible para ejecutar las tareas programadas.
 

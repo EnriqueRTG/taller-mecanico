@@ -24,11 +24,6 @@ public sealed class VehiculoServicio(IVehiculoRepositorio vehiculos, IModeloRepo
         return await vehiculos.ListarActivosAsync();
     }
 
-    public async Task<List<Vehiculo>> ListarInactivosAsync()
-    {
-        await RecepcionAsync();
-        return await vehiculos.ListarInactivosAsync();
-    }
 
     public async Task<Vehiculo?> ObtenerPorIdAsync(int id)
     {

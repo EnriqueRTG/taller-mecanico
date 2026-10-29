@@ -1,6 +1,6 @@
 # Modelo relacional vigente
 
-Referencia: ERS, Apéndices A/C y DER v2.0. El snapshot EF y las tres migraciones son la evidencia física. El esquema final tiene 24 tablas, 204 columnas y 43 FK; el control técnico agrega cuatro tablas y 24 columnas fuera de EF. No se cuentan como entidades de negocio los metadatos __EFMigrationsHistory.
+Referencia: ERS, Apéndices A/C y DER v2.0. El snapshot EF y las cinco migraciones son la evidencia física. El esquema final tiene 24 tablas, 205 columnas y 43 FK; el control técnico agrega cuatro tablas y 24 columnas fuera de EF. No se cuentan como entidades de negocio los metadatos __EFMigrationsHistory.
 
 | Tabla | PK | FK declaradas |
 |---|---|---|

@@ -95,17 +95,7 @@ public sealed class ClienteRepositorio : IClienteRepositorio
         return await _contexto.Clientes.AsNoTracking().Where(c => c.Activo).OrderBy(c => c.Apellido).ThenBy(c => c.Nombre).ToListAsync();
     }
 
-    /// <summary>
-    /// Obtiene los clientes dados de baja lógica.
-    /// </summary>
-    public async Task<List<Cliente>> ListarInactivosAsync()
-    {
-        return await _contexto.Clientes.AsNoTracking().Where(c => !c.Activo).OrderBy(c => c.Apellido).ThenBy(c => c.Nombre).ToListAsync();
-    }
 
-    /// <summary>
-    /// Obtiene un cliente mediante su tipo y número de documento.
-    /// </summary>
     public async Task<Cliente?> ObtenerPorDocumentoAsync(string tipoDocumento, string documento)
     {
         return await _contexto.Clientes.AsNoTracking().FirstOrDefaultAsync(c => c.TipoDocumento == tipoDocumento && c.Documento == documento);

@@ -17,19 +17,17 @@ public sealed class AtencionServicio
     private readonly IAtencionRepositorio _atencionRepositorio;
     private readonly IClienteRepositorio _clienteRepositorio;
     private readonly IVehiculoRepositorio _vehiculoRepositorio;
-    private readonly IUsuarioRepositorio _usuarioRepositorio;
-    private readonly SesionUsuario _sesionUsuario;
+    private readonly AutorizacionOperativa _acceso;
     /// <summary>
     /// Inicializa el servicio con los repositorios necesarios
     /// para gestionar una atención.
     /// </summary>
-    public AtencionServicio(IAtencionRepositorio atencionRepositorio, IClienteRepositorio clienteRepositorio, IVehiculoRepositorio vehiculoRepositorio, IUsuarioRepositorio usuarioRepositorio, SesionUsuario sesionUsuario)
+    public AtencionServicio(IAtencionRepositorio atencionRepositorio, IClienteRepositorio clienteRepositorio, IVehiculoRepositorio vehiculoRepositorio, AutorizacionOperativa acceso)
     {
         _atencionRepositorio = atencionRepositorio;
         _clienteRepositorio = clienteRepositorio;
         _vehiculoRepositorio = vehiculoRepositorio;
-        _usuarioRepositorio = usuarioRepositorio;
-        _sesionUsuario = sesionUsuario;
+        _acceso = acceso;
     }
 
     /// <summary>
@@ -38,7 +36,7 @@ public sealed class AtencionServicio
     /// </summary>
     public async Task<List<Atencion>> ListarActivasAsync()
     {
-        await new AutorizacionOperativa(_usuarioRepositorio, _sesionUsuario).ExigirAsync();
+        await _acceso.ExigirAsync();
         return await _atencionRepositorio.ListarActivasAsync();
     }
 
@@ -47,7 +45,7 @@ public sealed class AtencionServicio
     /// </summary>
     public async Task<List<Atencion>> ListarTodasAsync()
     {
-        await new AutorizacionOperativa(_usuarioRepositorio, _sesionUsuario).ExigirAsync();
+        await _acceso.ExigirAsync();
         return await _atencionRepositorio.ListarTodasAsync();
     }
 
@@ -58,7 +56,7 @@ public sealed class AtencionServicio
     /// <returns>La atención encontrada o null si no existe.</returns>
     public async Task<Atencion?> ObtenerPorIdAsync(int idAtencion)
     {
-        await new AutorizacionOperativa(_usuarioRepositorio, _sesionUsuario).ExigirAsync();
+        await _acceso.ExigirAsync();
         ValidarId(idAtencion, nameof(idAtencion));
         return await _atencionRepositorio.ObtenerPorIdAsync(idAtencion);
     }
@@ -68,7 +66,7 @@ public sealed class AtencionServicio
     /// </summary>
     public async Task<List<Atencion>> ListarPorClienteAsync(int idCliente)
     {
-        await new AutorizacionOperativa(_usuarioRepositorio, _sesionUsuario).ExigirAsync();
+        await _acceso.ExigirAsync();
         ValidarId(idCliente, nameof(idCliente));
         return await _atencionRepositorio.ListarPorClienteAsync(idCliente);
     }
@@ -78,7 +76,7 @@ public sealed class AtencionServicio
     /// </summary>
     public async Task<List<Atencion>> ListarPorVehiculoAsync(int idVehiculo)
     {
-        await new AutorizacionOperativa(_usuarioRepositorio, _sesionUsuario).ExigirAsync();
+        await _acceso.ExigirAsync();
         ValidarId(idVehiculo, nameof(idVehiculo));
         return await _atencionRepositorio.ListarPorVehiculoAsync(idVehiculo);
     }
@@ -134,7 +132,6 @@ public sealed class AtencionServicio
         motivoConsulta = NormalizarMotivoConsulta(motivoConsulta);
         await ValidarClienteAsync(idCliente);
         await ValidarVehiculoAsync(idVehiculo);
-        await ValidarUsuarioRecepcionAsync(idUsuarioRecepcion);
         if (await _atencionRepositorio.ExisteAtencionActivaParaVehiculoAsync(idVehiculo))
         {
             throw new ValidacionException("El vehículo ya posee una atención activa.");
@@ -194,24 +191,6 @@ public sealed class AtencionServicio
     }
 
     /// <summary>
-    /// Verifica que el usuario de recepción exista y
-    /// se encuentre activo.
-    /// </summary>
-    private async Task ValidarUsuarioRecepcionAsync(int idUsuarioRecepcion)
-    {
-        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(idUsuarioRecepcion);
-        if (usuario is null)
-        {
-            throw new ValidacionException("El usuario de recepción no existe.");
-        }
-
-        if (!UsuarioAutorizado.EstaHabilitado(usuario) || usuario.RolId != RolesSistema.AdministrativoId)
-        {
-            throw new ValidacionException("El usuario de recepción se encuentra inactivo.");
-        }
-    }
-
-    /// <summary>
     /// Valida que un identificador sea mayor a cero.
     /// </summary>
     private static void ValidarId(int id, string nombreParametro)
@@ -248,23 +227,6 @@ public sealed class AtencionServicio
     /// </summary>
     private async Task<Usuario> ObtenerAdministrativoActualAsync()
     {
-        var usuarioSesion = _sesionUsuario.UsuarioActual;
-        if (usuarioSesion is null)
-        {
-            throw new ValidacionException("Debe iniciar sesión para realizar esta operación.");
-        }
-
-        var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(usuarioSesion.Id);
-        if (!UsuarioAutorizado.EstaHabilitado(usuario))
-        {
-            throw new ValidacionException("El usuario de la sesión no existe o está inactivo.");
-        }
-
-        if (usuario.RolId != RolesSistema.AdministrativoId)
-        {
-            throw new ValidacionException("Solo Recepción puede enviar el vehículo a diagnóstico.");
-        }
-
-        return usuario;
+        return await _acceso.ExigirRolesAsync(RolesSistema.AdministrativoId);
     }
 }

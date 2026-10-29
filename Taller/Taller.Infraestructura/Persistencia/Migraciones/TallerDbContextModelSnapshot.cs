@@ -1255,6 +1255,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     b.Property<int>("RolId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NombreUsuario")

@@ -56,7 +56,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 throw new ValidacionException("No puede decidir sobre una propuesta vacía.");
             var persona = datos.PersonaDecision?.Trim() ?? "";
             var medio = datos.MedioDecision?.Trim() ?? "";
-            if (persona.Length > 150 || medio.Length > 30 || p.Atencion.Solicitudes.Count > 0 && (persona.Length == 0 || !new[] { "Presencial", "Teléfono", "Correo", "Mensajería" }.Contains(medio)))
+            if (persona.Length > 150 || medio.Length > 30 || (persona.Length == 0 || !new[] { "Presencial", "Teléfono", "Correo", "Mensajería" }.Contains(medio)))
                 throw new ValidacionException("Identifique quién comunica la decisión y seleccione el medio de comunicación.");
             p.PersonaDecision = persona.Length == 0 ? null : persona;
             p.MedioDecision = medio.Length == 0 ? null : medio;

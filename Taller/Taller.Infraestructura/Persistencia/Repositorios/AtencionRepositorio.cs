@@ -46,6 +46,16 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
     {
         //Es una comprobación del contrato del método, no una validación de negocio.
         ArgumentNullException.ThrowIfNull(atencion);
+        // RepeatableRead conserva las precondiciones de habilitación hasta confirmar el alta.
+        await using var transaccion = _contexto.Database.IsRelational()
+            ? await _contexto.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead)
+            : null;
+        if (transaccion is not null)
+        {
+            bool habilitados = await _contexto.Clientes.AsNoTracking().AnyAsync(c => c.IdCliente == atencion.IdCliente && c.Activo)
+                && await _contexto.Vehiculos.AsNoTracking().AnyAsync(v => v.IdVehiculo == atencion.IdVehiculo && v.Activo);
+            if (!habilitados) throw new ValidacionException("El cliente o el vehículo fueron inhabilitados. Actualice antes de abrir la atención.");
+        }
         var entrada = _contexto.Entry(atencion);
         entrada.State = EntityState.Added;
         foreach (var evento in atencion.Historial)
@@ -59,7 +69,11 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
             solicitud.Atencion = atencion;
             _contexto.Set<SolicitudAtencion>().Add(solicitud);
         }
-        try { await GuardarAsync(entrada); }
+        try
+        {
+            await GuardarAsync(entrada);
+            if (transaccion is not null) await transaccion.CommitAsync();
+        }
         finally
         {
             foreach (var solicitud in atencion.Solicitudes) _contexto.Entry(solicitud).State = EntityState.Detached;

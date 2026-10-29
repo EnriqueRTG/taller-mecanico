@@ -1,4 +1,4 @@
-﻿using Taller.Dominio.Entidades;
+using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Abstracciones.Persistencia;
 
@@ -26,14 +26,14 @@ public interface IUsuarioRepositorio
         int id,
         string nombre,
         string apellido,
-        int rolId);
+        int rolId, byte[] version);
 
     Task ActualizarCredencialesAsync(
         int id,
         string nombreUsuario,
-        string? passwordHash);
+        string? passwordHash, byte[] version);
 
     Task CambiarEstadoAsync(
         int id,
-        bool activo);
+        bool activo, byte[] version);
 }

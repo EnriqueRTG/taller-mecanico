@@ -20,6 +20,7 @@ public partial class FrmEditarUsuario : Form
     private readonly SesionUsuario _sesionUsuario;
 
     private int _usuarioId;
+    private byte[] _version = [];
 
     /// <summary>
     /// Inicializa una nueva instancia del formulario.
@@ -77,14 +78,9 @@ public partial class FrmEditarUsuario : Form
             await CargarRolesAsync();
             await CargarUsuarioAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            MessageBox.Show(
-                "No fue posible cargar los datos del usuario. " +
-                "Inténtelo nuevamente.",
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "No se pudo completar la operación");
 
             DialogResult = DialogResult.Cancel;
             Close();
@@ -166,6 +162,7 @@ public partial class FrmEditarUsuario : Form
             usuario.Activo
                 ? Color.FromArgb(22, 101, 52)
                 : Color.FromArgb(185, 28, 28);
+        _version = usuario.Version.ToArray();
 
         txtNombre.Text =
             usuario.Nombre;
@@ -218,7 +215,8 @@ public partial class FrmEditarUsuario : Form
                 txtNombre.Text,
                 txtApellido.Text,
                 rolId,
-                usuarioEjecutor.Id);
+                usuarioEjecutor.Id,
+                _version);
         }
         catch (Exception ex)
         {
@@ -259,36 +257,7 @@ public partial class FrmEditarUsuario : Form
     private void MostrarErrorActualizacion(
         Exception error)
     {
-        switch (error)
-        {
-            case ValidacionException validacion:
-                MessageBox.Show(
-                    validacion.Message,
-                    "Datos inválidos",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                break;
-
-            case InvalidOperationException operacion:
-                MessageBox.Show(
-                    operacion.Message,
-                    "No se pudo actualizar el usuario",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
-                break;
-
-            default:
-                MessageBox.Show(
-                    "Ocurrió un error inesperado al actualizar " +
-                    "el usuario. Inténtelo nuevamente.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-
-                break;
-        }
+        Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, error, "Actualizar usuario");
     }
 
     /// <summary>

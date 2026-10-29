@@ -47,10 +47,10 @@ public sealed class AtencionRepositorio : IAtencionRepositorio
         //Es una comprobación del contrato del método, no una validación de negocio.
         ArgumentNullException.ThrowIfNull(atencion);
         // RepeatableRead conserva las precondiciones de habilitación hasta confirmar el alta.
-        await using var transaccion = _contexto.Database.IsRelational()
+        await using var transaccion = _contexto.Database.IsRelational() && _contexto.Database.CurrentTransaction is null
             ? await _contexto.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead)
             : null;
-        if (transaccion is not null)
+        if (_contexto.Database.IsRelational())
         {
             bool habilitados = await _contexto.Clientes.AsNoTracking().AnyAsync(c => c.IdCliente == atencion.IdCliente && c.Activo)
                 && await _contexto.Vehiculos.AsNoTracking().AnyAsync(v => v.IdVehiculo == atencion.IdVehiculo && v.Activo);

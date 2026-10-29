@@ -14,6 +14,8 @@ Base de revisión: main 85c44c7. Esta iteración corrige hallazgos confirmados s
 - Reportes: las acciones técnicas compartidas pasan a Consultas/ActividadTecnicaReporte; Infraestructura deja de depender del servicio concreto. Se retiran tres opciones históricas que ningún servicio del circuito actual emite: ActividadTomada, ActividadLiberada y DiagnosticoRegistrado. El informe definitivo actual queda representado por EvaluacionFinalizada.
 - Legibilidad: consultas de reportes distribuidas en líneas, documentación XML corregida y comentarios de atención alineados con la exclusión del cierre con interrupción.
 
+Se eliminó `FrmUsuarios.dgvUsuarios_CellFormatting`: no tenía suscripción al evento ni referencias en el diseñador o en otros componentes. Su retirada no modifica el formato efectivo de la grilla.
+
 ## Comprobaciones de estructura
 
 Referencias de proyecto verificadas: Dominio sin referencias internas; Aplicación depende de Dominio; Infraestructura depende de Aplicación y Dominio; Presentación depende de Aplicación e Infraestructura para la composición. Las herramientas y las pruebas no son dependencias de las capas operativas.

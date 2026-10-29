@@ -1,5 +1,4 @@
 using System.Net.Mail;
-using System.Text.RegularExpressions;
 using Taller.Aplicacion.Excepciones;
 
 namespace Taller.Aplicacion.Validaciones;

@@ -199,30 +199,6 @@ public partial class FrmUsuarios : Form
     }
 
     /// <summary>
-    /// Aplica colores diferenciados según el estado
-    /// mostrado en cada fila.
-    /// </summary>
-    private void dgvUsuarios_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
-    {
-        if (e.RowIndex < 0 || e.ColumnIndex < 0 || dgvUsuarios.Columns[e.ColumnIndex].Name != "colEstado")
-        {
-            return;
-        }
-
-        string? estado = e.Value?.ToString();
-        if (estado == "Activo")
-        {
-            e.CellStyle.ForeColor = Color.FromArgb(22, 101, 52);
-            e.CellStyle.SelectionForeColor = Color.FromArgb(22, 101, 52);
-        }
-        else if (estado == "Inactivo")
-        {
-            e.CellStyle.ForeColor = Color.FromArgb(185, 28, 28);
-            e.CellStyle.SelectionForeColor = Color.FromArgb(185, 28, 28);
-        }
-    }
-
-    /// <summary>
     /// Representa una fila adaptada específicamente
     /// para la grilla de usuarios.
     /// </summary>

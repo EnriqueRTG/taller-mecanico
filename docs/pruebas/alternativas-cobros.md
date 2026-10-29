@@ -1,6 +1,6 @@
 # Probar decisiones, ejecución, cobros y entrega
 
-Usar [actualización y Demo v4](../instalacion/actualizacion-coloquio.md). Las cuentas de SGTM son distintas de la identidad SQL de cada estación.
+Usar [actualización y Demo v5](../instalacion/actualizacion-coloquio.md). Las cuentas de SGTM son distintas de la identidad SQL de cada estación.
 
 | Caso | Comprobación |
 |---|---|

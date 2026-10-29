@@ -61,6 +61,6 @@ Las pruebas SQL requieren una instancia desechable explícitamente autorizada; n
 
 La [documentación v2.0](docs/README.md) incluye ERS, casos de uso, diccionario, DER, diagramas y [trazabilidad](docs/especificacion/trazabilidad.md) alineados con el circuito vigente.
 
-Esta versión incorpora SimplificarEjecucionTresEstados y Demo v4. Antes de abrir una base existente, seguir [actualización](docs/instalacion/actualizacion-coloquio.md). Para dos puestos, [red privada](docs/instalacion/red-privada.md); para copias, [prueba local de recuperación](docs/instalacion/respaldos-locales-demo.md).
+Esta versión utiliza las seis migraciones del circuito actual y el lote ampliado Demo v5. Antes de abrir una base existente, seguir [actualización](docs/instalacion/actualizacion-coloquio.md). Para dos puestos, [red privada](docs/instalacion/red-privada.md); para copias, [prueba local de recuperación](docs/instalacion/respaldos-locales-demo.md).
 
 La limpieza `RetirarVinculoCambioSinUso` incorpora una tercera migración sin alterar las anteriores. Para una base actual no hace falta recrear Demo: respaldar, cerrar clientes/agente y aplicar la migración existente siguiendo la [guía de actualización](docs/instalacion/actualizacion-coloquio.md). Los respaldos nuevos deben corresponder al esquema actualizado.

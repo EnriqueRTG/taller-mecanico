@@ -1,5 +1,5 @@
 SGTM - REPLICAR LA DEMOSTRACION EN OTRA PC WINDOWS
-Version de referencia: main, seis migraciones vigentes, lote Demo v4.
+Version de referencia: main, seis migraciones vigentes, lote Demo v5.
 
 OBJETIVO
 Usar el mismo codigo, esquema y lote en PC y notebooks independientes.
@@ -37,9 +37,9 @@ Si SGTM_DB_Demo no existe, el cargador la creara con permisos SQL suficientes.
 Si contiene el esquema/lote anterior y se decidio descartarlo: cerrar SGTM y
 eliminar SOLO SGTM_DB_Demo desde SSMS. Confirmar el nombre; esa eliminacion
 pierde sus registros. No eliminar SGTM_DB ni otras bases por confusion.
-Si ya cargo Demo v4 correctamente, NO repetir la carga: aplicar las migraciones
+Si ya cargo Demo v5 correctamente, NO repetir la carga: aplicar las migraciones
 pendientes segun docs/instalacion/actualizacion-coloquio.md y luego ir al paso 5.
-Si tiene Demo v3, leer docs/instalacion/actualizacion-coloquio.md antes de actualizar.
+Si tiene Demo v4 o anterior, leer docs/instalacion/actualizacion-coloquio.md antes de actualizar.
 
 4. CREAR ESQUEMA Y CARGAR LOTE (misma ventana PowerShell, raiz del repositorio)
 Copiar los comandos siguientes, uno por uno:
@@ -53,8 +53,10 @@ dotnet run --project Taller/Taller.Demostracion -- --cargar-demo
 Elegir y conservar la clave: sera la de las cuentas del lote. No compartirla
 por capturas ni subirla a Git. Puede acordarse la misma clave solo para Demo.
 El cargador crea la base, aplica todas las migraciones existentes y carga mediante servicios reales. Esperar:
-  Lote DEMO v4 completo: 19 clientes, 48 vehiculos y 48 atenciones...
-Catalogo: 157 conceptos activos y uno inactivo. No administra stock.
+  Lote DEMO v5 completo: 88 clientes, 256 vehiculos y 240 atenciones...
+Catalogo: 353 conceptos activos y uno inactivo, 17 categorias en total.
+Vehiculos: 30 marcas y 208 modelos activos, mas una referencia historica
+inactiva de marca/modelo. No administra stock ni compatibilidad automatica.
 Si hay error, conservar el mensaje y resolverlo antes de repetir.
 Si dice que ya existen registros, no insistir ni borrar tablas aisladas.
 Al terminar correctamente:
@@ -93,7 +95,8 @@ Presionar F5. Usar la clave elegida al cargar:
   admin               Administrador
   demo.recepcion      Administrativo
   demo.tecnico        Tecnico
-Otros operativos: demo.recepciondos, demo.tecnicodos, demo.tecnicotres.
+Otros operativos: demo.recepciondos, demo.recepciontres, demo.tecnicodos,
+demo.tecnicotres, demo.tecnicocuatro y demo.tecnicocinco.
 demo.inactivo esta deshabilitado a proposito.
 Confirmar clientes, vehiculos, catalogo y atenciones. Se pueden crear usuarios
 nuevos desde admin; para el recorrido usar una atencion nueva/disponible.
@@ -104,7 +107,7 @@ Recepcion: alta de atencion -> tecnico: tomar y preparar informe/propuesta ->
 recepcion: informar y aceptar -> tecnico: tomar ejecucion, guardar y finalizar
 con conformidad -> recepcion: liquidar, cobrar, entregar con saldo cero.
 Pagar no entrega automaticamente; el retiro puede registrarse mas tarde.
-Para reportes del lote ampliar el periodo a seis meses cuando corresponda.
+Para reportes del lote ampliar el periodo a doce meses cuando corresponda.
 
 En SSMS, actualizar Bases de datos y comprobar:
 USE SGTM_DB_Demo;
@@ -114,7 +117,7 @@ SELECT COUNT(*) AS Vehiculos FROM dbo.Vehiculos;
 SELECT COUNT(*) AS Atenciones FROM dbo.Atenciones;
 SELECT COUNT(*) AS Conceptos FROM dbo.Conceptos;
 Deben figurar SEIS migraciones, hasta ExigirContactoDecisionPresupuesto,
-y conteos 19, 48, 48 y 158 antes de operar.
+y conteos 88, 256, 240 y 354 antes de operar.
 
 7. REPLICAR Y CONTINUAR
 Repetir los pasos en cada equipo con el mismo main. Para trabajo conjunto

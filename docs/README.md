@@ -27,6 +27,7 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 | Credenciales y configuración segura | [Seguridad](instalacion/seguridad.md) |
 | Preparar y operar el agente | [Respaldos y restauración](respaldos/operacion.md) |
 | Configurar almacenamiento Azure | [Azure](respaldos/azure.md) |
+| Preparar Azure en las notebooks de la demostración | [Preparación guiada](respaldos/azure-demo.md) |
 | Trabajo colaborativo con Git | [Git](desarrollo/git.md) |
 
 ## Material académico editable
@@ -50,3 +51,5 @@ Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DO
 ## Pruebas y revisión
 
 `Taller.Pruebas/Arquitectura` protege el sentido de referencias; `ReglasYComponentes` comprueba servicios, validaciones, fechas y documentos (varios casos usan EF InMemory); `IntegracionSql` comprueba restricciones, transacciones, rowversion, recuperación y el lote en SQL real. Son verificaciones complementarias, no copias redundantes. `Taller.Pruebas.Interfaz` comprueba controles y construcción Windows/STA; no reemplaza la revisión visual manual.
+
+- [Verificación de Demo v5](pruebas/demo-ampliada-v5.md).

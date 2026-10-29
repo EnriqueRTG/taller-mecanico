@@ -44,7 +44,7 @@ El documento contiene datos de clientes y del taller; quien exporta es responsab
 
 ## Instalación y pruebas
 
-Usar main y el esquema EsquemaInicialCircuitoActual siguiendo [instalación](../instalacion/entornos.md). La Demo v4 usa los tres estados. Prepararla siguiendo la guía de actualización. No aplicar migraciones de ramas retiradas.
+Usar main y el esquema EsquemaInicialCircuitoActual siguiendo [instalación](../instalacion/entornos.md). La Demo v5 usa los tres estados. Prepararla siguiendo la guía de actualización. No aplicar migraciones de ramas retiradas.
 
 ```powershell
 dotnet build Taller/Taller.sln --configuration Release
@@ -81,3 +81,11 @@ Comprobación: entrar como administrador y administrativo, elegir Atenciones sin
 La impresión/PDF de presupuestos y liquidaciones utiliza columnas de concepto, cantidad, precio unitario y subtotal; importes alineados a la derecha y totales separados. El recibo identifica el cobro concreto, sus medios y referencias, y el saldo histórico al registrarlo. No confundir ese saldo con el saldo actual de la liquidación. Conservan identidad de empresa, logo, atención, cliente y vehículo; son documentos internos sin validez fiscal.
 
 Comprobación visual en Windows: imprimir un presupuesto con más de una página y descripciones extensas, una liquidación con varios conceptos, un recibo con dos medios y un recibo anulado. Revisar repetición del encabezado, continuidad de filas sin perder texto, importes a la derecha y diferencias entre total propuesto, liquidado y cobrado. No se agregan impuestos, descuentos ni subtotales ficticios.
+
+## Presentación con lotes extensos
+
+El gráfico de pantalla tiene un lienzo desplazable: aumentar las series no comprime todas las etiquetas en el espacio de una notebook. La grilla omite magnitudes completamente ausentes y conserva cantidades a tres decimales y dinero a dos. Búsqueda/estado/período afectan el mismo conjunto de indicadores, gráfico y detalle.
+
+HTML e impresión comparten el detalle tabular: referencia/fecha, descripción, responsable, estado y las magnitudes presentes. La impresión usa A4 horizontal, resumen y gráfico al inicio, cabeceras de tabla repetidas, ajuste de texto, importes a la derecha y metodología al final. Una fila extensa se continúa sin descartar texto. El CSV mantiene su esquema estable y valores numéricos para análisis. Ninguna exportación corta el detalle a los primeros registros.
+
+Los precios del lote son ficticios y los reportes no calculan stock, utilidad ni rentabilidad que no estén respaldados por datos del sistema. Ampliar el período a doce meses para recorrer el lote completo.

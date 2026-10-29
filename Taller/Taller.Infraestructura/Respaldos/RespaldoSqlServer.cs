@@ -47,7 +47,15 @@ public sealed partial class RespaldoSqlServer(OpcionesRespaldos opciones, TimePr
     {
         await using var c = await ControlAsync(cancelacion);
         var e = await _registro.ComprobarAsync(c, cancelacion);
-        return new(opciones.BaseDatos, e.Mantenimiento, e.Generacion, e.Detalle, await _registro.CopiasAsync(c, cancelacion), await _registro.EventosAsync(c, cancelacion));
+        // Se consulta el servidor real: localhost puede ser un alias, contenedor o túnel.
+        string equipo = await SqlRespaldos.EscalarAsync<string>(c, "SELECT CONVERT(nvarchar(128),SERVERPROPERTY('MachineName'))", cancelacion);
+        string plataforma = await SqlRespaldos.EscalarAsync<string>(c, "SELECT CASE WHEN CHARINDEX(N'Linux',@@VERSION)>0 THEN N'Linux' WHEN CHARINDEX(N'Windows',@@VERSION)>0 THEN N'Windows' ELSE N'Otro' END", cancelacion);
+        return new(opciones.BaseDatos, e.Mantenimiento, e.Generacion, e.Detalle, await _registro.CopiasAsync(c, cancelacion), await _registro.EventosAsync(c, cancelacion))
+        {
+            EquipoServidor = equipo,
+            PuedeExplorarCarpetaLocal = OperatingSystem.IsWindows() && plataforma == "Windows"
+                && string.Equals(equipo, Environment.MachineName, StringComparison.OrdinalIgnoreCase)
+        };
     }
 
     public async Task<ProgramaRespaldoDto> ObtenerProgramaAsync(CancellationToken cancelacion = default)

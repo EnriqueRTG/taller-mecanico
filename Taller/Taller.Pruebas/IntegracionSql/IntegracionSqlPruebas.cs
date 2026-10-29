@@ -213,7 +213,7 @@ public sealed class IntegracionSqlPruebas
         var error = await Assert.ThrowsAsync<SqlException>(() => migrador.MigrateAsync());
         Assert.Equal(51142, error.Number);
         Assert.Equal(3, (await db.Database.GetAppliedMigrationsAsync()).Count());
-        Assert.Null(await db.Clientes.AsNoTracking().Select(c => c.Telefono).SingleAsync());
+        Assert.Equal(1, await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS [Value] FROM dbo.Clientes WHERE Telefono IS NULL").SingleAsync());
         await db.Database.ExecuteSqlRawAsync("UPDATE dbo.Clientes SET Telefono=N'+54 (379) 412-3456'");
         await migrador.MigrateAsync();
         Assert.Equal(4, (await db.Database.GetAppliedMigrationsAsync()).Count());
@@ -252,8 +252,8 @@ public sealed class IntegracionSqlPruebas
         var inicial = await s2.ObtenerPorIdAsync(c.IdCliente);
         var version = c.Version.ToArray();
         Assert.Equal(8, version.Length);
-        await s1.ModificarAsync(c.IdCliente, "DNI", "12345678", "Cambio uno", "Pérez", null, null, null, version);
-        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => s2.ModificarAsync(c.IdCliente, "DNI", "12345678", "Cambio dos", "Pérez", null, null, null, inicial!.Version));
+        await s1.ModificarAsync(c.IdCliente, "DNI", "12345678", "Cambio uno", "Pérez", "3794123456", null, null, version);
+        await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => s2.ModificarAsync(c.IdCliente, "DNI", "12345678", "Cambio dos", "Pérez", "3794123456", null, null, inicial!.Version));
         Assert.Equal("Cambio uno", (await s2.ObtenerPorIdAsync(c.IdCliente))!.Nombre);
         var v1 = new VehiculoServicio(new VehiculoRepositorio(uno), new ModeloRepositorio(uno), Acceso(uno, ids.Recepcion, out _));
         var v2 = new VehiculoServicio(new VehiculoRepositorio(dos), new ModeloRepositorio(dos), Acceso(dos, ids.Recepcion, out _));

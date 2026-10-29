@@ -9,7 +9,7 @@ Los nombres SGTM_Pruebas_* son bases temporales de CI, no instalaciones que deba
 
 ## Preparar una base nueva (cambio de esquema)
 
-El esquema vigente parte de EsquemaInicialCircuitoActual y agrega SimplificarEjecucionTresEstados y RetirarVinculoCambioSinUso. Ver [actualización](actualizacion-coloquio.md) antes de cambiar una base existente. **No ejecutar Update-Database sobre una base creada por versiones anteriores ni restaurar un respaldo de esa versión para usarlo con este código.** Se retiraron columnas, clasificaciones y rutas antiguas por decisión de alcance del proyecto.
+El esquema vigente contiene seis migraciones: EsquemaInicialCircuitoActual, SimplificarEjecucionTresEstados, RetirarVinculoCambioSinUso, ExigirTelefonoContactoCliente, AgregarConcurrenciaUsuarios y ExigirContactoDecisionPresupuesto. Ver [actualización](actualizacion-coloquio.md) antes de cambiar una base existente. **Una base de una línea de migraciones retirada requiere conversión técnica; no aplicar estas migraciones a ciegas. Una base de la línea actual se actualiza sin recrearla según la guía.** Se retiraron columnas, clasificaciones y rutas antiguas por decisión de alcance del proyecto.
 
 1. Guardar y actualizar el código. Cerrar aplicación y agente de respaldos del entorno que va a reemplazarse.
 2. En SSMS confirmar la instancia y base Demo. Para los equipos de demostración se usa SGTM_DB_Demo. Si aún contiene el esquema anterior y se decidió descartar ese lote, eliminar únicamente esa base desde SSMS, confirmando el destino. El cargador la recrea; no hace falta inventar otro nombre.
@@ -34,7 +34,7 @@ Visual Studio debe usar SGTM_CONN de su propio perfil/proceso o ConnectionString
 
 1. Publicar la aplicación para Windows con el runtime correspondiente al proyecto o autocontenida; preparar SQL Server y su identidad de acceso.
 2. Configurar SGTM_CONN o ConnectionStrings:Default para SGTM_DB. No distribuir las credenciales del desarrollador. Configurar nombre/contacto/logo del taller.
-3. Aplicar la migración inicial de Infraestructura sobre el destino nuevo confirmado, mediante el procedimiento de instalación. La base de destino debe estar vacía y recibir EsquemaInicialCircuitoActual.
+3. Aplicar todas las migraciones de Infraestructura sobre el destino nuevo confirmado mediante `dotnet ef database update --project Taller/Taller.Infraestructura --startup-project Taller/Taller.Infraestructura`. La base vacía debe recibir las seis migraciones, incluida ExigirContactoDecisionPresupuesto.
 4. Suministrar SGTM_ADMIN_INICIAL_PASSWORD de forma local y temporal para crear el administrador al primer inicio; retirarla después. Crear usuarios operativos con sus roles y credenciales.
 5. Confirmar conexión, catálogos, permisos y un recorrido de aceptación en el entorno de prueba antes de operar datos reales.
 6. Configurar el agente de respaldos y su base de control con permisos separados. Probar recuperación en una copia antes de habilitarla como procedimiento operativo.
@@ -55,6 +55,6 @@ SELECT Estado, COUNT(*) AS Cantidad FROM dbo.Atenciones GROUP BY Estado;
 SELECT COUNT(*) AS Conceptos FROM dbo.Conceptos;
 ```
 
-Deben existir las migraciones EsquemaInicialCircuitoActual, SimplificarEjecucionTresEstados y RetirarVinculoCambioSinUso y siete estados admitidos por las restricciones. No debe generar migraciones nuevas en su PC: aplicar las existentes. Al abrir Visual Studio configurar la misma base del cargador, reconstruir y ejecutar. La producción vacía lleva solo inicialización mínima y cuentas reales, no el lote académico.
+Deben existir las seis migraciones indicadas al principio, hasta ExigirContactoDecisionPresupuesto, y siete estados de atención admitidos por las restricciones. No debe generar migraciones nuevas en su PC: aplicar las existentes. Al abrir Visual Studio configurar la misma base del cargador, reconstruir y ejecutar. La producción vacía lleva solo inicialización mínima y cuentas reales, no el lote académico.
 
 Los respaldos anteriores no corresponden al esquema actual. El registro y la base técnica de respaldos se configurarán para este entorno nuevo al preparar Azure. La conexión a SQL Server y la identidad/contenedor de Azure son configuraciones distintas.

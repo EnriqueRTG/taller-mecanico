@@ -34,6 +34,6 @@ Cierre con interrupción, ABM de catálogo desde formularios, inventario, compra
 
 ## Esquema y evidencia
 
-EsquemaInicialCircuitoActual crea el modelo y SimplificarEjecucionTresEstados lo acota a tres estados de ejecución. No existe una cadena de conversión de bases anteriores. Atención es el expediente principal; no se agrega una orden de trabajo paralela. Se preservan claves/rowversion y documentos asociados; las pausas se representan por alcance, no por el antiguo estado general Pausada.
+Las seis migraciones vigentes crean y ajustan el modelo, los tres estados de ejecución, el teléfono obligatorio, la concurrencia de usuarios y el contacto de las decisiones. Ver la guía de actualización para aplicarlas completas. No existe una cadena de conversión de bases anteriores. Atención es el expediente principal; no se agrega una orden de trabajo paralela. Se preservan claves/rowversion y documentos asociados; las pausas se representan por alcance, no por el antiguo estado general Pausada.
 
 Las pruebas de reglas/componentes, SQL aislado y Windows/STA están en los proyectos de pruebas. La revisión visual del circuito y de impresión se realiza en la instalación de presentación. Ver [estados](../arquitectura/estados-circuito-actual.md), [alternativas](../operacion/alternativas.md) y [reportes](../reportes/reportes-por-rol.md).

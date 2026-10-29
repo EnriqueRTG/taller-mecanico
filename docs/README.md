@@ -31,7 +31,7 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 
 ## Material académico editable
 
-La versión 2.0 está sincronizada con el circuito actual y su migración de limpieza:
+La versión 2.0 está sincronizada con el circuito actual y las seis migraciones vigentes:
 
 - [ERS](ERS/ERS-SGTM-v2.0.docx)
 - [Apéndice A de casos de uso](ERS/Apendice-A-Casos-de-Uso-v2.0.docx)
@@ -45,6 +45,7 @@ Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DO
 
 - [Primera revisión de consistencia](pruebas/revision-integral-1.md)
 - [Segunda revisión y aceptación pendiente](pruebas/revision-integral-2.md)
+- [Tercera revisión y evidencia de entrega](pruebas/revision-integral-3.md)
 
 ## Pruebas y revisión
 

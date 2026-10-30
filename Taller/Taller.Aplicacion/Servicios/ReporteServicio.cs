@@ -51,7 +51,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         TipoReporte.SaldosPendientes => new[] { "Sin cobros", "Cobrado parcialmente" },
         TipoReporte.CargaTecnica => new[] { "Disponible para tomar", "Reservada", "Con pausas pendientes" },
         TipoReporte.ConceptosRealizados => Enum.GetNames<EstadoEjecucionDetalle>().Where(e => e != nameof(EstadoEjecucionDetalle.NoIniciado)),
-        TipoReporte.ActividadTecnica => ActividadTecnicaReporte.Acciones,
+        TipoReporte.ActividadTecnica => ActividadTecnicaReporte.AccionesFiltrables,
         _ => throw new ValidacionException("Tipo de reporte inválido.")
         };
         return valores.Select(Legible).Distinct().Order().ToArray();
@@ -153,8 +153,8 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         }
         else if (solicitud.Tipo == TipoReporte.ActividadTecnica)
         {
-            metodologia = "Eventos del historial realizados por usuarios técnicos durante el período. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos.";
-            recomendacion = "Identificar pausas y liberaciones frecuentes para revisar causas y coordinar continuidad de las atenciones.";
+            metodologia = "Eventos del historial realizados por usuarios técnicos durante el período. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos. El filtro ofrece hitos principales y tres alternativas habituales; «Todos» conserva además avances, liberaciones, pausas y materiales.";
+            recomendacion = "Revisar el inicio y finalización de evaluaciones y trabajos; consultar hallazgos y revisiones del alcance cuando corresponda.";
         }
         else
         {

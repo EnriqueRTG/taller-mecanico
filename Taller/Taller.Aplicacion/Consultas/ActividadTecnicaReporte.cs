@@ -19,4 +19,15 @@ public static class ActividadTecnicaReporte
         "SeleccionParcialRevisada",
         "SeleccionClienteValidada"
     });
+    /// <summary>Hitos ofrecidos como filtros individuales. No limita los eventos consultados con «Todos».</summary>
+    public static IReadOnlyList<string> AccionesFiltrables { get; } = Array.AsReadOnly(new[]
+    {
+        "EvaluacionTomada",
+        "EvaluacionFinalizada",
+        "EjecucionTomada",
+        "TrabajoFinalizado",
+        "HallazgoRegistrado",
+        "SeleccionClienteValidada",
+        "SeleccionParcialRevisada"
+    });
 }

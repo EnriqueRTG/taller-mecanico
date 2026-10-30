@@ -89,3 +89,9 @@ El gráfico de pantalla tiene un lienzo desplazable: aumentar las series no comp
 HTML e impresión comparten el detalle tabular: referencia/fecha, descripción, responsable, estado y las magnitudes presentes. La impresión usa A4 horizontal, resumen y gráfico al inicio, cabeceras de tabla repetidas, ajuste de texto, importes a la derecha y metodología al final. Una fila extensa se continúa sin descartar texto. El CSV mantiene su esquema estable y valores numéricos para análisis. Ninguna exportación corta el detalle a los primeros registros.
 
 Los precios del lote son ficticios y los reportes no calculan stock, utilidad ni rentabilidad que no estén respaldados por datos del sistema. Ampliar el período a doce meses para recorrer el lote completo.
+
+## Filtro simplificado de actividad técnica
+
+El desplegable Acción ofrece cuatro hitos del recorrido principal: Evaluación tomada, Evaluación finalizada, Ejecución tomada y Trabajo finalizado. Conserva tres alternativas habituales: Hallazgo registrado, Selección del cliente validada y Selección reformulada por el técnico.
+
+La reducción afecta solamente las opciones de selección individual del reporte, para todos los roles autorizados a consultarlo. «Todos» mantiene el conjunto completo de eventos técnicos: también borradores/avances, liberaciones, resolución de pausas, materiales y preparación de adicionales. Estos eventos siguen presentes en el detalle, los indicadores, el gráfico y las exportaciones cuando pertenecen al alcance consultado. No se eliminan estados, operaciones, historial ni datos, ni se modifica el circuito de negocio. Los demás tipos de reporte conservan sus filtros.

@@ -67,6 +67,23 @@ public sealed class ReportesPruebas
     }
 
     [Fact]
+    public async Task CargaTecnica_SimplificaFiltroSinOcultarAtencionesConPausas()
+    {
+        using var c = new Caso();
+        c.Db.Add(new PausaTrabajo { IdAtencion = 1, IdUsuario = 3, Fecha = c.Hoy, Motivo = "Requiere revisión antes de continuar" });
+        await c.Db.SaveChangesAsync(); c.Db.ChangeTracker.Clear();
+        var completo = await c.Generar(TipoReporte.CargaTecnica);
+        Assert.Equal(new[] { "Disponible para tomar", "Reservada" }, completo.EstadosDisponibles);
+        Assert.Contains(completo.Registros, r => r.IdAtencion == 1 && r.Estado == "Con pausas pendientes");
+        var disponibles = await c.Generar(TipoReporte.CargaTecnica, estado: "Disponible para tomar");
+        Assert.Single(disponibles.Registros);
+        Assert.Equal(4, disponibles.Registros[0].IdAtencion);
+        var reservadas = await c.Generar(TipoReporte.CargaTecnica, estado: "Reservada");
+        Assert.Single(reservadas.Registros);
+        Assert.Equal(3, reservadas.Registros[0].IdAtencion);
+    }
+
+    [Fact]
     public async Task OpcionesDeEstadoExistenSinFilasYNoDependenDelPeriodo()
     {
         using var c = new Caso();

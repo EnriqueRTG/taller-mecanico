@@ -95,3 +95,9 @@ Los precios del lote son ficticios y los reportes no calculan stock, utilidad ni
 El desplegable Acción ofrece cuatro hitos del recorrido principal: Evaluación tomada, Evaluación finalizada, Ejecución tomada y Trabajo finalizado. Conserva tres alternativas habituales: Hallazgo registrado, Selección del cliente validada y Selección reformulada por el técnico.
 
 La reducción afecta solamente las opciones de selección individual del reporte, para todos los roles autorizados a consultarlo. «Todos» mantiene el conjunto completo de eventos técnicos: también borradores/avances, liberaciones, resolución de pausas, materiales y preparación de adicionales. Estos eventos siguen presentes en el detalle, los indicadores, el gráfico y las exportaciones cuando pertenecen al alcance consultado. No se eliminan estados, operaciones, historial ni datos, ni se modifica el circuito de negocio. Los demás tipos de reporte conservan sus filtros.
+
+## Filtro simplificado de carga técnica
+
+El desplegable Estado ofrece «Todos», «Disponible para tomar» y «Reservada». Se omite la selección individual «Con pausas pendientes» para centrar la consulta en la asignación habitual. «Todos» conserva las atenciones con pausas y las identifica en el detalle; no modifica sus restricciones de operación ni las clasifica como disponibles.
+
+«Con pausas pendientes» es una categoría calculada cuando existe al menos una PausaTrabajo sin FechaResolucion en la atención. Tiene prioridad sobre su reserva: no es un valor de EstadoAtencion ni EstadoEjecucionDetalle y no implica necesariamente que todas sus tareas estén detenidas. Puede provenir de un hallazgo que impide continuar o una detención registrada, general o por tarea según permisos. Los filtros Disponible/Reservada conservan su semántica actual y no incorporan las filas categorizadas con pausas. Los datos, el gráfico y las exportaciones de «Todos» mantienen el alcance completo.

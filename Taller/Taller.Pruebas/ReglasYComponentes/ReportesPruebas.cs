@@ -94,6 +94,12 @@ public sealed class ReportesPruebas
         await c.Db.SaveChangesAsync(); c.Db.ChangeTracker.Clear();
         var d = await c.Generar(TipoReporte.ActividadTecnica);
         Assert.Equal(12, d.Registros.Count);
+        Assert.Equal(7, d.EstadosDisponibles.Count);
+        Assert.DoesNotContain("Avance de evaluación guardado", d.EstadosDisponibles);
+        Assert.Contains(d.Registros, r => r.Estado == "EvaluacionAvanceGuardado");
+        var filtrado = await c.Generar(TipoReporte.ActividadTecnica, estado: "Selección del cliente validada");
+        Assert.Single(filtrado.Registros);
+        Assert.Equal("SeleccionClienteValidada", filtrado.Registros[0].Estado);
         Assert.Equal(8, d.Grafico.Count);
         Assert.StartsWith("Resto (", d.Grafico.Last().Etiqueta);
         foreach (var accion in acciones) Assert.True(d.Grafico.Any(g => g.Etiqueta == ReporteServicio.Legible(accion)) || d.Metodologia.Contains(ReporteServicio.Legible(accion)));

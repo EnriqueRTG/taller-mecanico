@@ -339,10 +339,18 @@ internal static class Program
             var grilla = Campo<DataGridView>("dgvItems");
             foreach (var control in new Control[] { Campo<TextBox>("txtDescripcion"), Campo<NumericUpDown>("nudCantidad"), Campo<NumericUpDown>("nudPrecio"), Campo<Button>("btnQuitar") })
             {
-                var limites = control.RectangleToScreen(control.ClientRectangle);
-                var padre = control.Parent!.RectangleToScreen(control.Parent.ClientRectangle);
-                if (!padre.Contains(limites) || limites.IntersectsWith(grilla.RectangleToScreen(grilla.ClientRectangle)))
-                    throw new InvalidOperationException($"Editor de revisión parcial recortado o solapado: {control.GetType().Name}, tamaño {tamano}, control {limites}, padre {padre}, grilla {grilla.RectangleToScreen(grilla.ClientRectangle)}");
+                // En controles ocultos, las coordenadas nativas pueden conservar posiciones previas.
+                // La prueba de layout usa los Bounds administrados en un único sistema de coordenadas.
+                Rectangle EnFormulario(Control c)
+                {
+                    Point origen = c.Location;
+                    for (Control? padre = c.Parent; padre != null && padre != formulario; padre = padre.Parent)
+                        origen.Offset(padre.Location);
+                    return new Rectangle(origen, c.Size);
+                }
+                var limites = EnFormulario(control);
+                if (!control.Parent!.ClientRectangle.Contains(control.Bounds) || limites.IntersectsWith(EnFormulario(grilla)))
+                    throw new InvalidOperationException($"Editor de revisión parcial recortado o solapado: {control.GetType().Name}, tamaño {tamano}, control {control.Bounds}, padre {control.Parent.ClientRectangle}, grilla {EnFormulario(grilla)}");
             }
             if (grilla.Height < 150) throw new InvalidOperationException("La revisión debe conservar una lista legible.");
         }

@@ -49,7 +49,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         TipoReporte.Presupuestos => Enum.GetNames<EstadoPresupuesto>().Append("Aceptado parcialmente"),
         TipoReporte.MovimientosCobro => new[] { "Cobro", "Anulación" },
         TipoReporte.SaldosPendientes => new[] { "Sin cobros", "Cobrado parcialmente" },
-        TipoReporte.CargaTecnica => new[] { "Disponible para tomar", "Reservada", "Con pausas pendientes" },
+        TipoReporte.CargaTecnica => new[] { "Disponible para tomar", "Reservada" },
         TipoReporte.ConceptosRealizados => Enum.GetNames<EstadoEjecucionDetalle>().Where(e => e != nameof(EstadoEjecucionDetalle.NoIniciado)),
         TipoReporte.ActividadTecnica => ActividadTecnicaReporte.AccionesFiltrables,
         _ => throw new ValidacionException("Tipo de reporte inválido.")

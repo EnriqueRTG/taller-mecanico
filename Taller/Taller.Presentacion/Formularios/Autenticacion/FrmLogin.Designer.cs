@@ -200,7 +200,7 @@
             lblDescripcion.Name = "lblDescripcion";
             lblDescripcion.Size = new Size(224, 58);
             lblDescripcion.TabIndex = 2;
-            lblDescripcion.Text = "Sistema de gestión del circuito operativo\r\ndesde la recepción hasta la entrega.";
+            lblDescripcion.Text = "Sistema de Gestión de\r\nTaller Mecánico";
             // 
             // lblNombreSistema
             // 

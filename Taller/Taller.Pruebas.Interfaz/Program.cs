@@ -53,6 +53,7 @@ internal static class Program
         VerificarSolicitudesIngreso(proveedor);
         VerificarContextoHistorial(proveedor);
         VerificarEditorPresupuesto(proveedor);
+        VerificarRevisionParcial(proveedor);
         VerificarEjecucionYConsulta(proveedor);
         VerificarCobroRestanteYEntrega(proveedor);
         VerificarContextoSeguimiento(proveedor);
@@ -319,6 +320,31 @@ internal static class Program
         var notas = (TextBox)seguimiento.GetType().GetField("txtDescripcion", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(seguimiento)!;
         if (!notas.ReadOnly) throw new InvalidOperationException("La consulta no debe iniciar con campos técnicos editables.");
         Console.WriteLine("Ejecución: estado/cantidad sincronizados; progreso de recepción de solo lectura; acciones dentro de la ventana.");
+    }
+
+    private static void VerificarRevisionParcial(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var formulario = new Taller.Presentacion.Formularios.Presupuestos.FrmPrepararPropuesta(1,
+            scope.ServiceProvider.GetRequiredService<SeguimientoTrabajoServicio>(),
+            scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(),
+            scope.ServiceProvider.GetRequiredService<PresupuestoServicio>(), presupuesto: 1);
+        T Campo<T>(string nombre) where T : Control => (T)formulario.GetType()
+            .GetField(nombre, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(formulario)!;
+        foreach (var tamano in new[] { new Size(1140, 700), new Size(1000, 640) })
+        {
+            formulario.ClientSize = tamano; Disponer(formulario);
+            var grilla = Campo<DataGridView>("dgvItems");
+            foreach (var control in new Control[] { Campo<TextBox>("txtDescripcion"), Campo<NumericUpDown>("nudCantidad"), Campo<NumericUpDown>("nudPrecio"), Campo<Button>("btnQuitar") })
+            {
+                var limites = control.RectangleToScreen(control.ClientRectangle);
+                var padre = control.Parent!.RectangleToScreen(control.Parent.ClientRectangle);
+                if (!padre.Contains(limites) || limites.IntersectsWith(grilla.RectangleToScreen(grilla.ClientRectangle)))
+                    throw new InvalidOperationException("Editor de revisión parcial recortado o solapado: " + control.GetType().Name);
+            }
+            if (grilla.Height < 150) throw new InvalidOperationException("La revisión debe conservar una lista legible.");
+        }
+        Console.WriteLine("Revisión parcial: descripción, cantidad, precio y quitar visibles sin solapar la lista.");
     }
 
     private static void VerificarEditorPresupuesto(IServiceProvider proveedor)

@@ -31,7 +31,7 @@ partial class FrmPrepararPropuesta
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 85));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 116));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 140));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
@@ -53,6 +53,8 @@ partial class FrmPrepararPropuesta
             ColumnCount = 4,
             RowCount = 2
         };
+        entrada.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+        entrada.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
         entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
         entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
         entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
@@ -124,6 +126,7 @@ partial class FrmPrepararPropuesta
             MultiSelect = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            MinimumSize = new Size(0, 150),
             BackgroundColor = Color.White
         };
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Concepto / alcance", FillWeight = 220, MinimumWidth = 210 });
@@ -176,11 +179,13 @@ partial class FrmPrepararPropuesta
         tlpPrincipal.Controls.Add(chkCondiciones, 0, 6);
         tlpPrincipal.Controls.Add(acciones, 0, 7);
         tlpPrincipal.AutoScroll = true;
+        tlpPrincipal.AutoScrollMinSize = new Size(0, 680);
         dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
         dgvItems.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         Controls.Add(tlpPrincipal);
         AutoScaleMode = AutoScaleMode.Font;
+        AutoScaleDimensions = new SizeF(7F, 15F);
         Font = new Font("Segoe UI", 10);
         Text = "Preparar propuesta técnica";
         ClientSize = new Size(1140, 700);
@@ -190,7 +195,7 @@ partial class FrmPrepararPropuesta
         FormClosing += AlCerrar;
         static Control Campo(string texto, Control editor)
         {
-            var grupo = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Margin = Padding.Empty };
+            var grupo = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Margin = new Padding(3, 3, 6, 6) };
             grupo.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
             grupo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             grupo.Controls.Add(new Label { Text = texto, Dock = DockStyle.Fill, AutoEllipsis = true }, 0, 0);

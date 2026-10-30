@@ -53,6 +53,8 @@ internal static class Program
         VerificarSolicitudesIngreso(proveedor);
         VerificarContextoHistorial(proveedor);
         VerificarEditorPresupuesto(proveedor);
+        try { VerificarRevisionParcial(proveedor); }
+        catch (Exception ex) { Console.WriteLine("::error::" + ex.Message); throw; }
         VerificarEjecucionYConsulta(proveedor);
         VerificarCobroRestanteYEntrega(proveedor);
         VerificarContextoSeguimiento(proveedor);
@@ -319,6 +321,40 @@ internal static class Program
         var notas = (TextBox)seguimiento.GetType().GetField("txtDescripcion", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(seguimiento)!;
         if (!notas.ReadOnly) throw new InvalidOperationException("La consulta no debe iniciar con campos técnicos editables.");
         Console.WriteLine("Ejecución: estado/cantidad sincronizados; progreso de recepción de solo lectura; acciones dentro de la ventana.");
+    }
+
+    private static void VerificarRevisionParcial(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var formulario = new Taller.Presentacion.Formularios.Presupuestos.FrmPrepararPropuesta(1,
+            scope.ServiceProvider.GetRequiredService<SeguimientoTrabajoServicio>(),
+            scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(),
+            scope.ServiceProvider.GetRequiredService<PresupuestoServicio>(), presupuesto: 1);
+        T Campo<T>(string nombre) where T : Control => (T)formulario.GetType()
+            .GetField(nombre, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(formulario)!;
+        foreach (var tamano in new[] { new Size(1140, 700), new Size(1000, 640) })
+        {
+            _ = formulario.Handle;
+            formulario.ClientSize = tamano; Disponer(formulario);
+            var grilla = Campo<DataGridView>("dgvItems");
+            foreach (var control in new Control[] { Campo<TextBox>("txtDescripcion"), Campo<NumericUpDown>("nudCantidad"), Campo<NumericUpDown>("nudPrecio"), Campo<Button>("btnQuitar") })
+            {
+                // En controles ocultos, las coordenadas nativas pueden conservar posiciones previas.
+                // La prueba de layout usa los Bounds administrados en un único sistema de coordenadas.
+                Rectangle EnFormulario(Control c)
+                {
+                    Point origen = c.Location;
+                    for (Control? padre = c.Parent; padre != null && padre != formulario; padre = padre.Parent)
+                        origen.Offset(padre.Location);
+                    return new Rectangle(origen, c.Size);
+                }
+                var limites = EnFormulario(control);
+                if (!control.Parent!.ClientRectangle.Contains(control.Bounds) || limites.IntersectsWith(EnFormulario(grilla)))
+                    throw new InvalidOperationException($"Editor de revisión parcial recortado o solapado: {control.GetType().Name}, tamaño {tamano}, control {control.Bounds}, padre {control.Parent.ClientRectangle}, grilla {EnFormulario(grilla)}");
+            }
+            if (grilla.Height < 150) throw new InvalidOperationException("La revisión debe conservar una lista legible.");
+        }
+        Console.WriteLine("Revisión parcial: descripción, cantidad, precio y quitar visibles sin solapar la lista.");
     }
 
     private static void VerificarEditorPresupuesto(IServiceProvider proveedor)

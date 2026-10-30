@@ -53,7 +53,8 @@ internal static class Program
         VerificarSolicitudesIngreso(proveedor);
         VerificarContextoHistorial(proveedor);
         VerificarEditorPresupuesto(proveedor);
-        VerificarRevisionParcial(proveedor);
+        try { VerificarRevisionParcial(proveedor); }
+        catch (Exception ex) { Console.WriteLine("::error::" + ex.Message); throw; }
         VerificarEjecucionYConsulta(proveedor);
         VerificarCobroRestanteYEntrega(proveedor);
         VerificarContextoSeguimiento(proveedor);
@@ -333,6 +334,7 @@ internal static class Program
             .GetField(nombre, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(formulario)!;
         foreach (var tamano in new[] { new Size(1140, 700), new Size(1000, 640) })
         {
+            _ = formulario.Handle;
             formulario.ClientSize = tamano; Disponer(formulario);
             var grilla = Campo<DataGridView>("dgvItems");
             foreach (var control in new Control[] { Campo<TextBox>("txtDescripcion"), Campo<NumericUpDown>("nudCantidad"), Campo<NumericUpDown>("nudPrecio"), Campo<Button>("btnQuitar") })
@@ -340,7 +342,7 @@ internal static class Program
                 var limites = control.RectangleToScreen(control.ClientRectangle);
                 var padre = control.Parent!.RectangleToScreen(control.Parent.ClientRectangle);
                 if (!padre.Contains(limites) || limites.IntersectsWith(grilla.RectangleToScreen(grilla.ClientRectangle)))
-                    throw new InvalidOperationException("Editor de revisión parcial recortado o solapado: " + control.GetType().Name);
+                    throw new InvalidOperationException($"Editor de revisión parcial recortado o solapado: {control.GetType().Name}, tamaño {tamano}, control {limites}, padre {padre}, grilla {grilla.RectangleToScreen(grilla.ClientRectangle)}");
             }
             if (grilla.Height < 150) throw new InvalidOperationException("La revisión debe conservar una lista legible.");
         }

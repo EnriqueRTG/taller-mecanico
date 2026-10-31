@@ -48,6 +48,7 @@ internal static class Program
         VerificarFiltrosReportes(proveedor);
         VerificarAccionesContextuales();
         VerificarFiltrosListados(proveedor);
+        VerificarBusquedaClientes(proveedor);
         VerificarUniformidadListados(proveedor);
         VerificarRecorridoTecnico(proveedor);
         VerificarSolicitudesIngreso(proveedor);
@@ -206,6 +207,28 @@ internal static class Program
         tipo.GetMethod("Seleccion", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [null, EventArgs.Empty]);
         if (((Button)f.Controls.Find("btnAnular", true).Single()).Enabled) throw new InvalidOperationException("No debe anular dos veces el recibo.");
         Console.WriteLine("Cuenta: recibo disponible desde ambas pestañas y anulación condicionada al pago vigente.");
+    }
+
+    private static void VerificarBusquedaClientes(IServiceProvider proveedor)
+    {
+        using var scope = proveedor.CreateScope();
+        using var f = scope.ServiceProvider.GetRequiredService<Taller.Presentacion.Formularios.Clientes.FrmClientes>();
+        var tipo = f.GetType();
+        var filas = (System.Collections.IList)tipo.GetField("_clientes", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        var tipoFila = tipo.GetNestedType("ClienteFila", BindingFlags.NonPublic)!;
+        filas.Add(Activator.CreateInstance(tipoFila, [1, "DNI", "45900123", "Prueba, Martín", "3794000123", "martin@example.com", "Calle Norte 1", true, DateTime.Today, Array.Empty<byte>()])!);
+        filas.Add(Activator.CreateInstance(tipoFila, [2, "DNI", "40000001", "Pérez, Ana", "3794000999", "ana@example.com", "Calle de prueba 179", true, DateTime.Today, Array.Empty<byte>()])!);
+        var buscar = (TextBox)f.Controls.Find("txtBuscar", true).Single();
+        var grilla = (DataGridView)f.Controls.Find("dgvUsuarios", true).Single();
+        foreach (string texto in new[] { "Prueba", "45900123", "3794000123", "martin@example.com" })
+        {
+            buscar.Text = texto;
+            tipo.GetMethod("AplicarFiltros", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, null);
+            var resultado = (System.Collections.IList)grilla.DataSource!;
+            if (resultado.Count != 1 || (int)tipoFila.GetProperty("Id")!.GetValue(resultado[0])! != 1)
+                throw new InvalidOperationException("La búsqueda de clientes debe usar identidad/contacto, sin coincidencias por domicilio.");
+        }
+        Console.WriteLine("Clientes: búsqueda por identidad y contacto excluye coincidencias solo por domicilio.");
     }
 
     private static void VerificarFiltrosListados(IServiceProvider proveedor)

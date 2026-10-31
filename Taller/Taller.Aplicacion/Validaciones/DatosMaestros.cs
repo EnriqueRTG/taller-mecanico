@@ -55,6 +55,8 @@ public static partial class DatosMaestros
     /// <summary>Valida un contacto de 7 a 15 dígitos, conservando su presentación y el prefijo internacional opcional.</summary>
     public static string Telefono(string? valor)
     {
+        if (string.IsNullOrWhiteSpace(valor))
+            throw new ValidacionException("Ingrese un teléfono de contacto; este dato es obligatorio.", "telefono");
         var telefono = Texto(valor, 30, "Teléfono");
         int digitos = telefono.Count(char.IsAsciiDigit);
         if (digitos is < 7 or > 15 ||

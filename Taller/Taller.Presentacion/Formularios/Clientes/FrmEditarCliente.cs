@@ -100,6 +100,7 @@ public partial class FrmEditarCliente : Form
             _guardando = true;
             btnGuardar.Enabled = btnCancelar.Enabled = false;
             await _servicio.ModificarAsync(_id, txtTipoDocumento.Text, txtDocumento.Text, txtNombreCliente.Text, txtApellidoCliente.Text, txtTelefono.Text, txtEmail.Text, txtDireccion.Text, _version);
+            MessageBox.Show(this, $"Datos de {txtNombreCliente.Text.Trim()} {txtApellidoCliente.Text.Trim()} actualizados correctamente.", "Edición de cliente", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }

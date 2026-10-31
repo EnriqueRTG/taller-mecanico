@@ -64,7 +64,7 @@ public partial class FrmClientes : Form, IFormularioConOperacion
         direccion.DataPropertyName = nameof(ClienteFila.Direccion);
         colEstado.DataPropertyName = nameof(ClienteFila.Estado);
         colFechaAlta.DataPropertyName = nameof(ClienteFila.FechaAlta);
-        txtBuscar.PlaceholderText = "Nombre, documento o correo";
+        txtBuscar.PlaceholderText = "Nombre, apellido, documento, teléfono o correo";
         cboEstado.Items.Clear();
         cboEstado.Items.AddRange(["Todos", "Habilitados", "Deshabilitados"]);
         cboEstado.SelectedIndex = 0;
@@ -83,7 +83,7 @@ public partial class FrmClientes : Form, IFormularioConOperacion
         IEnumerable<ClienteFila> consulta = _clientes;
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
-            consulta = consulta.Where(cliente => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.NombreCompleto, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Documento, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Email, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Telefono, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Direccion, busqueda));
+            consulta = consulta.Where(cliente => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.NombreCompleto, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Documento, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Email, busqueda) || Taller.Aplicacion.Consultas.BusquedaTexto.Coincide(cliente.Telefono, busqueda));
         }
 
         consulta = cboEstado.SelectedIndex switch

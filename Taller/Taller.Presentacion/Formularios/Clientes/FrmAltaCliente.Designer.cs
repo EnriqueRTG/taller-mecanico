@@ -508,7 +508,7 @@ namespace Taller.Presentacion.Formularios.Clientes
             lblAyudaContacto.Name = "lblAyudaContacto";
             lblAyudaContacto.Size = new Size(643, 64);
             lblAyudaContacto.TabIndex = 3;
-            lblAyudaContacto.Text = "Los datos de contacto y domicilio son opcionales. Si informa el domicilio, complete la calle y la altura.";
+            lblAyudaContacto.Text = "El teléfono es obligatorio. El correo y el domicilio son opcionales. Si informa el domicilio, complete la calle y la altura.";
             lblAyudaContacto.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pnlAcciones

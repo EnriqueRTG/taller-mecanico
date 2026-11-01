@@ -100,7 +100,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                     IdAtencion = idAtencion,
                     Estado = a.Estado,
                     VersionAtencion = a.Version.ToArray(),
-                    Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {a.Estado}" + (a.Estado == EstadoAtencion.Cerrada ? "\r\n" + a.Historial.Where(h => h.Accion == "VehiculoEntregado").OrderByDescending(h => h.Fecha).Select(h => $"Entrega {h.Fecha:dd/MM/yyyy HH:mm}: {h.Observaciones}").FirstOrDefault() : ""),
+                    Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {Taller.Aplicacion.DTOs.Atenciones.TextoAtencion.Estado(a.Estado)}" + (a.Estado == EstadoAtencion.Cerrada ? "\r\n" + a.Historial.Where(h => h.Accion == "VehiculoEntregado").OrderByDescending(h => h.Fecha).Select(h => $"Entrega {h.Fecha:dd/MM/yyyy HH:mm}: {h.Observaciones}").FirstOrDefault() : ""),
                     Comprobante = d == null ? null : Mapear(d),
                     ItemsPorLiquidar = d != null || a.Estado == EstadoAtencion.Cerrada ? [] : Items(await FacturablesAsync(idAtencion))
                 };

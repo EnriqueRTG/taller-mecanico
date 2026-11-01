@@ -15,7 +15,8 @@ partial class FrmDetalleAtencion
         lblResumen = new Label { Name = "lblResumen", Dock = DockStyle.Fill, Padding = new Padding(8), BackColor = Color.FromArgb(219, 234, 254), ForeColor = Color.FromArgb(30, 58, 138) };
         txtMotivo = new TextBox { Name = "txtMotivo", Dock = DockStyle.Fill, ReadOnly = true, Multiline = true, ScrollBars = ScrollBars.Vertical };
         txtExpediente = new TextBox { Name = "txtExpediente", Dock = DockStyle.Fill, ReadOnly = true, Multiline = true, ScrollBars = ScrollBars.Vertical };
-        var tabs = new TabControl { Dock = DockStyle.Fill };
+        tabs = new TabControl { Dock = DockStyle.Fill };
+        tabs.SelectedIndexChanged += SeleccionarPestana;
         var ingreso = new TabPage("Ingreso y solicitudes"); ingreso.Controls.Add(txtMotivo);
         var expediente = new TabPage("Expediente de la atención"); expediente.Controls.Add(txtExpediente);
         tabs.TabPages.AddRange([ingreso, expediente]);
@@ -33,6 +34,7 @@ partial class FrmDetalleAtencion
         Text = "Detalle de atención y solicitudes"; BackColor = Color.FromArgb(248, 250, 252);
         Load += Cargar; FormClosing += AlCerrar; CancelButton = btnCerrar;
     }
+    private TabControl tabs = null!;
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblResumen = null!;
     private TextBox txtMotivo = null!;

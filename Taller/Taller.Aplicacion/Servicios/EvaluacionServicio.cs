@@ -349,12 +349,12 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             throw new ValidacionException("Los textos no pueden superar 1000 caracteres.");
     }
 
-    public async Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync()
+    public async Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync(int? idAtencion = null)
     {
         try
         {
             await AutorizarAsync();
-            return await repositorio.ListarPresupuestosAsync();
+            return await repositorio.ListarPresupuestosAsync(idAtencion);
         }
         finally
         {

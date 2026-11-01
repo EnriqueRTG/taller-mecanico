@@ -55,6 +55,25 @@ public sealed class EvaluacionServicioPruebas
     }
 
     [Fact]
+    public async Task ConsultaPresupuestos_FiltraPorAtencionSinAlterarListadoGeneral()
+    {
+        using var e = new Escenario(TipoSolicitudAtencion.ServicioDefinido);
+        var d = await e.TomarAsync(); d.Items.Add(Escenario.Item());
+        await e.Servicio.GuardarAsync(d, finalizar: true);
+        // Otra atención con su propio documento no debe aparecer en el expediente consultado.
+        var original = await e.Db.Atenciones.AsNoTracking().SingleAsync();
+        e.Db.Add(new Atencion { IdAtencion = 2, IdCliente = original.IdCliente,
+            IdVehiculo = original.IdVehiculo, IdUsuarioRecepcion = original.IdUsuarioRecepcion,
+            MotivoConsulta = "Otra visita", Estado = EstadoAtencion.Cerrada });
+        e.Db.Add(new Presupuesto { IdAtencion = 2, Version = new byte[8] });
+        await e.Db.SaveChangesAsync(); e.Db.ChangeTracker.Clear();
+        Assert.Equal(2, (await e.Servicio.ListarPresupuestosAsync()).Count);
+        Assert.Equal(1, Assert.Single(await e.Servicio.ListarPresupuestosAsync(1)).IdAtencion);
+        Assert.Equal(2, Assert.Single(await e.Servicio.ListarPresupuestosAsync(2)).IdAtencion);
+        Assert.Empty(await e.Servicio.ListarPresupuestosAsync(999));
+    }
+
+    [Fact]
     public async Task Recepcion_RechazaPedidosInvalidosSinCrearAtenciones()
     {
         using var e = new Escenario();

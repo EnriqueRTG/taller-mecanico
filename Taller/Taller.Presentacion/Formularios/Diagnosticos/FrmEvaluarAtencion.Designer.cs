@@ -198,7 +198,15 @@ partial class FrmEvaluarAtencion
         seleccion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         seleccion.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         seleccion.Controls.Add(Campo("Solicitud del cliente", cboSolicitud), 0, 0);
-        seleccion.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 1, 0);
+        var busqueda = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+        busqueda.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        busqueda.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
+        busqueda.Controls.Add(txtBuscar, 0, 0);
+        var btnBuscarConcepto = new Button { Name = "btnBuscarConcepto", Text = "Buscar concepto…", Dock = DockStyle.Fill };
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnBuscarConcepto);
+        btnBuscarConcepto.Click += BuscarConcepto;
+        busqueda.Controls.Add(btnBuscarConcepto, 1, 0);
+        seleccion.Controls.Add(Campo("Buscar en el catálogo", busqueda), 1, 0);
         tlpPropuesta.Controls.Add(seleccion, 0, 0);
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 0));
         tlpPropuesta.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));

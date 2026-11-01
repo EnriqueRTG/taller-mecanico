@@ -124,6 +124,18 @@ public partial class FrmEvaluarAtencion : Form
         cboConcepto.DataSource = _catalogo.Where(c => ($"{c.Nombre} {c.Categoria} {c.Descripcion}").Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
+    private void BuscarConcepto(object? s, EventArgs e)
+    {
+        if (_cargando || _ocupado) return;
+        using var selector = new FrmBuscarConcepto(_catalogo, txtBuscar.Text);
+        if (selector.ShowDialog(this) != DialogResult.OK || selector.ConceptoSeleccionado is not { } concepto) return;
+        // La selección solo prepara el editor; Agregar ítem conserva todas las validaciones actuales.
+        txtBuscar.Clear();
+        cboConcepto.SelectedItem = concepto;
+        nudCantidad.Focus();
+        nudCantidad.Select(0, nudCantidad.Text.Length);
+    }
+
     private void ConceptoCambiado(object? s, EventArgs e)
     {
         if (cboConcepto.SelectedItem is not ConceptoPropuestaDto c)

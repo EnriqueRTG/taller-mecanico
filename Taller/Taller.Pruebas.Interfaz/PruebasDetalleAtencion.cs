@@ -40,7 +40,7 @@ internal static class PruebasDetalleAtencion
         using var scope = proveedor.CreateScope();
         using var f = new FrmDetalleAtencion(242, scope.ServiceProvider.GetRequiredService<AtencionServicio>(),
             proveedor.GetRequiredService<SesionUsuario>(), scope.ServiceProvider.GetRequiredService<EvaluacionServicio>(), scope.ServiceProvider);
-        f.CreateControl();
+        _ = f.Handle;
         var carga = (Task)typeof(FrmDetalleAtencion).GetMethod("RecargarAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, null)!;
         if (carga.IsCompleted || !f.Controls.Find("btnCerrar", true).Single().Enabled)
             throw new InvalidOperationException("Una consulta lenta debe permitir cerrar el detalle.");
@@ -52,6 +52,7 @@ internal static class PruebasDetalleAtencion
         if (!resumen.Contains("En preparación técnica") || !resumen.Contains("Servicio definido"))
             throw new InvalidOperationException("El detalle debe mostrar etiquetas legibles.");
         var tabs = (TabControl)typeof(FrmDetalleAtencion).GetField("tabs", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(f)!;
+        _ = tabs.Handle;
         tabs.SelectedIndex = 1;
         if (consultas != 1) throw new InvalidOperationException("El expediente debe consultar solo la atención seleccionada.");
         // Cambiar de pestaña mientras carga no debe iniciar consultas simultáneas.

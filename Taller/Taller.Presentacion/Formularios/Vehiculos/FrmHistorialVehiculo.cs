@@ -59,7 +59,7 @@ public partial class FrmHistorialVehiculo : Form
             lblClienteValor.Text = ultima is null ? "Sin atenciones" : ultima.Cliente.Apellido + ", " + ultima.Cliente.Nombre;
             dgvHistorial.Rows.Clear();
             foreach (var a in datos.OrderByDescending(a => a.FechaApertura))
-                dgvHistorial.Rows.Add(a.IdAtencion.ToString("D6"), a.FechaApertura.ToString("dd/MM/yyyy"), a.MotivoConsulta, string.Join(" · ", a.Diagnosticos.Select(d => d.FallaDetectada)), string.Join(" · ", a.Diagnosticos.Select(d => d.TrabajoRecomendado)), ReporteServicio.Legible(a.Estado.ToString()));
+                dgvHistorial.Rows.Add(a.IdAtencion.ToString("D6"), a.FechaApertura.ToString("dd/MM/yyyy"), a.MotivoConsulta, string.Join(" · ", a.Diagnosticos.Select(d => d.FallaDetectada)), string.Join(" · ", a.Diagnosticos.Select(d => d.TrabajoRecomendado)), Taller.Aplicacion.DTOs.Atenciones.TextoAtencion.Estado(a.Estado));
             lblCantidad.Text = $"{datos.Count} atenciones registradas";
             dgvHistorial.ClearSelection();
         }

@@ -44,6 +44,7 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        PruebasDetalleAtencion.Verificar(config);
         VerificarSelectoresRespaldos(proveedor);
         VerificarFiltrosReportes(proveedor);
         VerificarAccionesContextuales();

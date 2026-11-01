@@ -8,7 +8,7 @@ internal static class TextoIntervencion
 {
     public static string Generar(SeguimientoTrabajoDto d)
     {
-        var t = new StringBuilder($"SGTM · INFORME DE INTERVENCIÓN\n{d.Resumen}\nEstado al consultar: {d.Estado} · Emitido {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm}\nEste informe no sustituye la autorización del cliente ni acredita un pago.\n\n");
+        var t = new StringBuilder($"SGTM · INFORME DE INTERVENCIÓN\n{d.Resumen}\nEstado al consultar: {Taller.Aplicacion.DTOs.Atenciones.TextoAtencion.Estado(d.Estado)} · Emitido {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm}\nEste informe no sustituye la autorización del cliente ni acredita un pago.\n\n");
         t.AppendLine("EVALUACIÓN TÉCNICA\n" + (string.IsNullOrWhiteSpace(d.InformeInicial) ? "Sin diagnóstico registrado: consultar la solicitud definida y las propuestas." : d.InformeInicial));
         t.AppendLine("\nTRABAJOS AUTORIZADOS Y REGISTRO TÉCNICO\n" + d.TrabajosRegistrados);
         t.AppendLine("\nHALLAZGOS Y RECOMENDACIONES");

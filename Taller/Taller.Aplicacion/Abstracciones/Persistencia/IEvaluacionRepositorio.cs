@@ -11,7 +11,7 @@ public interface IEvaluacionRepositorio
     Task<List<Concepto>> ListarCatalogoAsync();
     Task<List<EvaluacionBandejaDto>> ListarAsync();
     Task<List<Taller.Aplicacion.DTOs.Ejecuciones.TrabajoEnCursoDto>> ListarEjecucionesAsync();
-    Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync();
+    Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync(int? idAtencion = null);
     void PrepararVersion(Atencion atencion, byte[] version);
     void EliminarBorrador(Presupuesto presupuesto);
     void AgregarAvance(EvaluacionAtencion avance);

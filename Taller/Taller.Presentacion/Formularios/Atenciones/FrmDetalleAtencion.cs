@@ -1,4 +1,5 @@
-using System.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 using Taller.Aplicacion.DTOs.Atenciones;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
@@ -10,17 +11,17 @@ public partial class FrmDetalleAtencion : Form
 {
     private readonly IServiceProvider _proveedor;
     private readonly int _id;
-    private readonly AtencionServicio _atenciones;
     private readonly EvaluacionServicio _evaluaciones;
     private readonly SesionUsuario _sesion;
     private Atencion? _atencion;
     private bool _ocupado;
+    private bool _cerrando;
+    private bool _expedienteCargado;
     public FrmDetalleAtencion(int idAtencion, AtencionServicio atencionServicio, SesionUsuario sesionUsuario, EvaluacionServicio evaluaciones, IServiceProvider proveedor)
     {
         InitializeComponent();
         _proveedor = proveedor;
         _id = idAtencion;
-        _atenciones = atencionServicio;
         _sesion = sesionUsuario;
         _evaluaciones = evaluaciones;
     }
@@ -42,19 +43,55 @@ public partial class FrmDetalleAtencion : Form
     private async Task RecargarAsync()
     {
         _ocupado = true;
-        tlpPrincipal.Enabled = false;
+        btnProgreso.Enabled = false;
+        lblResumen.Text = "Cargando ingreso de la atención… Puede cerrar esta consulta.";
         try
         {
-            _atencion = await _atenciones.ObtenerPorIdAsync(_id) ?? throw new InvalidOperationException("La atención no existe.");
-            lblResumen.Text = $"Atención {_id:D6} · {_atencion.Estado} · Solicitud: {_atencion.TipoSolicitud}\n{_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · {_atencion.Vehiculo.Dominio} · Apertura {_atencion.FechaApertura:dd/MM/yyyy HH:mm}";
+            using var alcance = _proveedor.CreateScope();
+            _atencion = await MedirAsync("Ingreso", () => alcance.ServiceProvider.GetRequiredService<AtencionServicio>().ObtenerPorIdAsync(_id)) ?? throw new InvalidOperationException("La atención no existe.");
+            if (_cerrando || IsDisposed) return;
+            lblResumen.Text = $"Atención {_id:D6} · {TextoAtencion.Estado(_atencion.Estado)} · Solicitud: {TextoAtencion.Solicitud(_atencion.TipoSolicitud)}\n{_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · {_atencion.Vehiculo.Dominio} · Apertura {_atencion.FechaApertura:dd/MM/yyyy HH:mm}";
             txtMotivo.Text = (_atencion.Solicitudes.Count == 0 ? _atencion.MotivoConsulta : string.Join(Environment.NewLine, _atencion.Solicitudes.OrderBy(s => s.Orden).Select(s => $"{s.Orden}. {(s.Tipo == Taller.Dominio.Enumeraciones.TipoSolicitudIngreso.TrabajoSolicitado ? "Solicita" : "Informa")}: {s.Descripcion}")))
                 + $"\r\nKilometraje de ingreso: {_atencion.KilometrajeRecepcion?.ToString("N0") ?? "No informado"}\r\nObservaciones: {_atencion.ObservacionesRecepcion}";
             btnProgreso.Enabled = true;
+
+        }
+        catch (Exception ex)
+        {
+            if (!_cerrando && !IsDisposed) Error(ex);
+        }
+        finally
+        {
+            _ocupado = false;
+            if (!_cerrando && !IsDisposed && _atencion != null && tabs.SelectedIndex == 1)
+                await CargarExpedienteAsync();
+        }
+    }
+
+    private async void SeleccionarPestana(object? sender, EventArgs e)
+    {
+        if (tabs.SelectedIndex == 1) await CargarExpedienteAsync();
+    }
+
+    private async Task CargarExpedienteAsync()
+    {
+        if (_ocupado || _atencion == null || _expedienteCargado || _cerrando) return;
+        _ocupado = true;
+        btnProgreso.Enabled = false;
+        txtExpediente.Text = "Cargando expediente… Puede consultar el ingreso o cerrar esta ventana.";
+        try
+        {
+            // La consulta conserva su propio contexto hasta terminar, incluso si se cierra
+            // la ventana. Nunca deja una operación pendiente en el contexto del padre.
+            using var alcance = _proveedor.CreateScope();
+            var proveedor = alcance.ServiceProvider;
             bool recepcion = _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId;
-            var documentos = (await _evaluaciones.ListarPresupuestosAsync()).Where(p => p.IdAtencion == _id).OrderBy(p => p.IdPresupuesto).ToList();
-            var seguimiento = await Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<SeguimientoTrabajoServicio>(_proveedor).ObtenerAsync(_id);
+            var documentos = (await MedirAsync("Presupuestos de la atención", () => proveedor.GetRequiredService<EvaluacionServicio>().ListarPresupuestosAsync(_id))).OrderBy(p => p.IdPresupuesto).ToList();
+            if (_cerrando || IsDisposed) return;
+            var seguimiento = await MedirAsync("Seguimiento", () => proveedor.GetRequiredService<SeguimientoTrabajoServicio>().ObtenerAsync(_id));
+            if (_cerrando || IsDisposed) return;
             var detalle = new System.Text.StringBuilder();
-            detalle.AppendLine($"ATENCIÓN {_id:D6} · {_atencion.Estado}\r\nCliente: {_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · Vehículo: {_atencion.Vehiculo.Dominio}");
+            detalle.AppendLine($"ATENCIÓN {_id:D6} · {TextoAtencion.Estado(_atencion.Estado)}\r\nCliente: {_atencion.Cliente.Apellido}, {_atencion.Cliente.Nombre} · Vehículo: {_atencion.Vehiculo.Dominio}");
             detalle.AppendLine("\r\nINFORMES TÉCNICOS");
             detalle.AppendLine(string.IsNullOrWhiteSpace(seguimiento.InformeInicial) ? "Sin diagnóstico registrado." : seguimiento.InformeInicial.Replace("\n", Environment.NewLine));
             detalle.AppendLine("\r\nPRESUPUESTOS Y VERSIONES");
@@ -65,7 +102,8 @@ public partial class FrmDetalleAtencion : Form
             foreach (var h in seguimiento.Hallazgos) detalle.AppendLine($"{h.Fecha:dd/MM/yyyy HH:mm} · {h.Descripcion} · {h.Recomendacion}");
             if (recepcion && _atencion.Estado is Taller.Dominio.Enumeraciones.EstadoAtencion.TrabajoFinalizado or Taller.Dominio.Enumeraciones.EstadoAtencion.PendienteLiquidacion or Taller.Dominio.Enumeraciones.EstadoAtencion.Cerrada)
             {
-                var cuenta = await Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<CobroServicio>(_proveedor).ObtenerAsync(_id);
+                var cuenta = await MedirAsync("Cuenta", () => proveedor.GetRequiredService<CobroServicio>().ObtenerAsync(_id));
+                if (_cerrando || IsDisposed) return;
                 detalle.AppendLine("\r\nLIQUIDACIÓN Y COBROS");
                 if (cuenta.Comprobante is { } c)
                 {
@@ -76,29 +114,38 @@ public partial class FrmDetalleAtencion : Form
             }
             detalle.AppendLine("\r\nHISTORIAL Y ENTREGA");
             foreach (var h in _atencion.Historial.OrderBy(h => h.Fecha).ThenBy(h => h.IdHistorialAtencion)) detalle.AppendLine($"{h.Fecha:dd/MM/yyyy HH:mm} · {h.Accion} · {h.Observaciones}");
+            if (_cerrando || IsDisposed) return;
+            _expedienteCargado = true;
             txtExpediente.Text = detalle.ToString();
         }
         catch (Exception ex)
         {
-            Error(ex);
+            if (!_cerrando && !IsDisposed)
+            {
+                txtExpediente.Text = "No se pudo cargar el expediente. Vuelva a seleccionar esta pestaña para reintentar.";
+                Error(ex);
+            }
         }
         finally
         {
             _ocupado = false;
-            tlpPrincipal.Enabled = true;
+            if (!_cerrando && !IsDisposed) btnProgreso.Enabled = true;
+        }
+    }
+
+    private async Task<T> MedirAsync<T>(string consulta, Func<Task<T>> cargar)
+    {
+        var reloj = Stopwatch.StartNew();
+        try { return await cargar(); }
+        finally
+        {
+            Serilog.Log.Information("Consulta de detalle {Consulta}; atención {IdAtencion}; duración {DuracionMs} ms",
+                consulta, _id, reloj.ElapsedMilliseconds);
         }
     }
 
     private void Cerrar(object? s, EventArgs e) => Close();
-    private void AlCerrar(object? s, FormClosingEventArgs e)
-    {
-        if (_ocupado)
-        {
-            e.Cancel = true;
-            return;
-        }
-
-    }
+    private void AlCerrar(object? s, FormClosingEventArgs e) => _cerrando = true;
 
     private void Error(Exception ex) => Taller.Presentacion.Errores.ErroresInterfaz.Mostrar(this, ex, "Detalle de atención");
 }

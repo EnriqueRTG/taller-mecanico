@@ -22,7 +22,7 @@ public partial class FrmHistorialCliente : Form
             _cargando = true;
             btnCerrar.Enabled = false;
             var datos = await _servicio.ListarPorClienteAsync(_id);
-            dgvDatos.DataSource = datos.Select(a => new { Numero = a.IdAtencion, Fecha = a.FechaApertura, Dominio = a.Vehiculo.Dominio, Motivo = a.MotivoConsulta, Estado = ReporteServicio.Legible(a.Estado.ToString()), Informe = string.Join(" · ", a.Diagnosticos.Select(d => d.FallaDetectada)) }).ToList();
+            dgvDatos.DataSource = datos.Select(a => new { Numero = a.IdAtencion, Fecha = a.FechaApertura, Dominio = a.Vehiculo.Dominio, Motivo = a.MotivoConsulta, Estado = Taller.Aplicacion.DTOs.Atenciones.TextoAtencion.Estado(a.Estado), Informe = string.Join(" · ", a.Diagnosticos.Select(d => d.FallaDetectada)) }).ToList();
             dgvDatos.ClearSelection();
             lblResumen.Text = $"{datos.Count} atenciones · {datos.Select(a => a.IdVehiculo).Distinct().Count()} vehículos atendidos para este cliente";
         }

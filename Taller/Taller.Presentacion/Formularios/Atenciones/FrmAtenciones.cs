@@ -270,20 +270,8 @@ namespace Taller.Presentacion.Formularios.Atenciones
             };
         }
 
-        private static string ObtenerNombreEstado(EstadoAtencion estado)
-        {
-            return estado switch
-            {
-                EstadoAtencion.EnEvaluacionTecnica => "En preparación técnica",
-                EstadoAtencion.PendienteDecision => "Pendiente de decisión",
-                EstadoAtencion.EnEjecucion => "En ejecución",
-                EstadoAtencion.TrabajoFinalizado => "Trabajo finalizado",
-                EstadoAtencion.PendienteLiquidacion => "Pendiente de liquidación",
-                EstadoAtencion.Cerrada => "Cerrada",
-                EstadoAtencion.Cancelada => "Cancelada",
-                _ => "Estado desconocido"
-            };
-        }
+        private static string ObtenerNombreEstado(EstadoAtencion estado) =>
+            Taller.Aplicacion.DTOs.Atenciones.TextoAtencion.Estado(estado);
 
         private static string ObtenerEtapaTemporal(Atencion atencion)
         {

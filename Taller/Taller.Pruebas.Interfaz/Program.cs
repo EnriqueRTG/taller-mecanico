@@ -409,6 +409,16 @@ internal static class Program
             formulario.ClientSize = new Size(ancho, 620);
             Disponer(formulario);
             if (grilla.Height < 160) throw new InvalidOperationException($"Lista de presupuesto demasiado pequeña: {ancho}, {grilla.Height}.");
+            var buscarConcepto = (Button)formulario.Controls.Find("btnBuscarConcepto", true).Single();
+            if (buscarConcepto.Text != "Buscar concepto…" || buscarConcepto.Height < 30 || buscarConcepto.Width < 140)
+                throw new InvalidOperationException($"Botón de catálogo ilegible: {ancho}, {buscarConcepto.Size}.");
+            Control hijo = buscarConcepto;
+            while (hijo.Parent is { } padre && padre != formulario)
+            {
+                if (!padre.ClientRectangle.Contains(hijo.Bounds))
+                    throw new InvalidOperationException($"Botón de catálogo recortado por {padre.GetType().Name}: {ancho}.");
+                hijo = padre;
+            }
         }
         Console.WriteLine("Presupuesto: espacio para lista, desplazamiento y columnas editables delimitadas.");
     }

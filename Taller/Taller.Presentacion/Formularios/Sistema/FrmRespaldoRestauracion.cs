@@ -21,6 +21,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         InitializeComponent();
         _servicio = servicio;
         _sesion = sesion;
+        PrepararPaquetes();
     }
 
     private sealed record DiaOpcion(DayOfWeek Dia, string Nombre);
@@ -124,6 +125,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         var estado = await _servicio.ConsultarAsync();
         _puedeExplorarCarpetaLocal = estado.PuedeExplorarCarpetaLocal;
         btnCarpetaManual.Visible = btnCarpetaAuto.Visible = _puedeExplorarCarpetaLocal;
+        tabPaquetes.Enabled = _puedeExplorarCarpetaLocal;
         lblManual.Text = _puedeExplorarCarpetaLocal
             ? "Elija una carpeta de este equipo o escriba su ruta. SQL Server debe tener permiso de escritura, también en unidades externas. Completa copia toda la base; diferencial necesita su completa base. Elegir una carpeta no crea el respaldo ni concede permisos."
             : $"SQL Server está en otro equipo o sistema ({estado.EquipoServidor}). Escriba la ruta del servidor: el explorador de esta PC no representa su disco. Para elegir una carpeta visualmente, abra SGTM en el servidor Windows. SQL Server debe tener permiso de escritura.";

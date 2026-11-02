@@ -22,6 +22,15 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         _servicio = servicio;
         _sesion = sesion;
         PrepararPaquetes();
+        var vencimiento = new System.Windows.Forms.Timer(components!) { Interval = 1000 };
+        vencimiento.Tick += (_, _) => {
+            if (!OperacionEnCurso && _plan is { } plan && plan.VenceUtc <= DateTimeOffset.UtcNow) {
+                _plan = null;
+                txtPlan.Text = "El ensayo venció. La copia sigue seleccionada; vuelva a ensayarla antes de autorizar la restauración.";
+                ActualizarAcciones();
+            }
+        };
+        vencimiento.Start();
     }
 
     private sealed record DiaOpcion(DayOfWeek Dia, string Nombre);

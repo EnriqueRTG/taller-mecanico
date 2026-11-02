@@ -36,6 +36,18 @@ Se admiten paquetes de la misma familia de base y versión. La reconstrucción t
 
 En **Programación automática**, indique la carpeta local (por ejemplo `C:\SGTM\Respaldos`), la carpeta de Drive (por ejemplo `G:\My Drive\SGTM-Respaldos`), la hora y el tipo de planificación. Guarde el plan. Dejar Drive vacío programa únicamente copias locales.
 
+### Preparación asistida de Demo
+
+Con la Demo y su control ya preparados, desde PowerShell en la raíz del repositorio, con la misma cuenta Windows que usa Drive:
+
+```powershell
+.\scripts\Preparar-AgenteDriveDemo.ps1
+```
+
+Publica y registra el agente para `localhost\SQLEXPRESS`, `SGTM_DB_Demo` y su control existente. Puede indicar `-ServidorSql` si usa otra instancia. No carga datos ni restaura la base. Se detiene si ya existe configuración local para conservarla. Luego guarde y active el horario en SGTM.
+
+### Otras instalaciones
+
 Publique el agente en una carpeta estable, fuera del repositorio y de Drive:
 
 ```powershell

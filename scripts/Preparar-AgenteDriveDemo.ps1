@@ -4,6 +4,14 @@ param(
     [string]$DirectorioPublicacion = 'C:\SGTM\AgenteRespaldos'
 )
 $ErrorActionPreference = 'Stop'
+# The executable gives environment overrides priority over JSON; never silently target another database.
+foreach ($variable in @('SGTM_CONN', 'SGTM_MANTENIMIENTO_CONN', 'ConnectionStrings__Default', 'ConnectionStrings__Mantenimiento', 'Respaldos__BaseControl', 'Respaldos__Habilitado')) {
+    foreach ($ambito in @('Process', 'User', 'Machine')) {
+        if (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($variable, $ambito))) {
+            throw "Existe una configuración de entorno $variable ($ambito). Revise la guía para instalar el agente con su configuración existente; no se publicó ni modificó la Demo."
+        }
+    }
+}
 $proyecto = Join-Path $PSScriptRoot '..\Taller\Taller.Respaldos\Taller.Respaldos.csproj'
 $configuracion = Join-Path $DirectorioPublicacion 'appsettings.Local.json'
 if (Test-Path -LiteralPath $configuracion) { throw 'Ya existe una configuración del agente. Se conserva sin cambios; revise la guía Google Drive para instalar la tarea con esa configuración.' }

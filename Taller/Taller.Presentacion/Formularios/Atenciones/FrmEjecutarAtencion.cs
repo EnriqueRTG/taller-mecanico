@@ -132,6 +132,7 @@ public partial class FrmEjecutarAtencion : Form
         try
         {
             var columna = dgvItems.Columns[e.ColumnIndex].Name;
+            chkConformidad.Checked = false;
             if (columna == "colEstado" && item.Estado == EstadoEjecucionDetalle.Completado)
                 item.CantidadEjecutada = item.CantidadAutorizada;
             else if (columna == "colCantidadEjecutada")
@@ -271,8 +272,17 @@ public partial class FrmEjecutarAtencion : Form
         }
         _datos.ConformidadTecnica = chkConformidad.Checked;
         _datos.Observaciones = txtObservaciones.Text;
+        bool conformidad = chkConformidad.Checked;
         bool guardado = false;
         await OperarAsync(async () => { await _servicio.GuardarAsync(_datos, finalizar); guardado = true; });
+        if (guardado && !finalizar)
+        {
+            // Guardar no cambia los trabajos comprobados en esta sesión.
+            // Actualizar, reabrir o editar sí exige una nueva comprobación.
+            chkConformidad.Checked = conformidad && chkConformidad.Enabled;
+            ActualizarConformidad(null, EventArgs.Empty);
+            MessageBox.Show(this, "Avance guardado correctamente.", "Avance registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
         if (guardado && finalizar)
         {
             _sucio = false;

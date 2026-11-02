@@ -35,6 +35,7 @@ public partial class FrmSeguimientoTrabajo : Form
         _servicio = servicio;
         _evaluacion = evaluacion;
         _presupuestos = presupuestos;
+        cboTarea.SelectedIndexChanged += ActualizarContexto;
     }
 
     private async void Cargar(object? s, EventArgs e)
@@ -121,13 +122,19 @@ public partial class FrmSeguimientoTrabajo : Form
         btnRecibir.Enabled = _datos.PuedeRegistrar && dgvMateriales.CurrentRow?.DataBoundItem is MaterialTrabajoDto;
         btnHallazgo.Visible = btnHallazgo.Enabled = _datos.PuedeRegistrar && pestana == "tabHallazgos";
         Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnAdicional, btnResolver, btnRecibir, btnExportarAvance, btnImprimirInforme);
-        btnPausar.Visible = btnPausar.Enabled = _datos.PuedePausar && pestana == "tabPausas";
+        btnPausar.Visible = _datos.PuedePausar && pestana == "tabPausas";
+        btnPausar.Enabled = btnPausar.Visible && !TienePausaEnAlcance;
+        if (pestana == "tabPausas" && TienePausaEnAlcance)
+            lblContexto.Text = "El alcance seleccionado ya tiene una pausa activa. Seleccione la pausa para consultar su causa o resolverla.";
 
     }
 
     private int? Tarea => cboTarea.SelectedItem is MaterialTrabajoDto { IdDetalle: > 0 } i ? i.IdDetalle : null;
 
-    private async Task OperarAsync(Func<Task> accion)
+    private bool TienePausaEnAlcance => _datos?.Pausas.Any(p => p.FechaResolucion == null
+        && p.IdDetalle == (_datos.PuedeRegistrar ? Tarea : null)) == true;
+
+    private async Task OperarAsync(Func<Task> accion, string? confirmacion = null)
     {
         if (_ocupado)
             return;
@@ -137,6 +144,7 @@ public partial class FrmSeguimientoTrabajo : Form
         {
             await accion();
             await RecargarAsync();
+            if (confirmacion != null) MessageBox.Show(this, confirmacion, "Operación registrada", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
@@ -165,11 +173,11 @@ public partial class FrmSeguimientoTrabajo : Form
 
     private async void Pausar(object? s, EventArgs e)
     {
-        if (_datos == null || _ocupado)
+        if (_datos == null || _ocupado || TienePausaEnAlcance)
             return;
         using var f = new FrmSolicitarMotivo("Pausar trabajo", _datos.PuedeRegistrar ? "Indique la causa. Se bloquea el alcance elegido sin borrar lo ejecutado ni cancelar lo autorizado." : "Registre quién pidió detener y el motivo. Se detendrá toda la intervención. Avise también directamente al técnico: el sistema controla el registro, no detiene físicamente el trabajo.");
         if (f.ShowDialog(this) == DialogResult.OK)
-            await OperarAsync(() => _servicio.PausarAsync(_id, _datos.Version, _datos.PuedeRegistrar ? Tarea : null, f.Motivo));
+            await OperarAsync(() => _servicio.PausarAsync(_id, _datos.Version, _datos.PuedeRegistrar ? Tarea : null, f.Motivo), "Pausa registrada. El alcance indicado queda detenido.");
     }
 
     private async void Resolver(object? s, EventArgs e)
@@ -178,7 +186,7 @@ public partial class FrmSeguimientoTrabajo : Form
             return;
         using var f = new FrmSolicitarMotivo("Resolver pausa bajo responsabilidad técnica", "Explique si ya puede retomar, continuar solo otras tareas o coordinar las tareas pendientes. Resolver la pausa no ejecuta ni autoriza trabajos adicionales.");
         if (f.ShowDialog(this) == DialogResult.OK)
-            await OperarAsync(() => _servicio.ResolverPausaAsync(_id, _datos.Version, p.Id, f.Motivo));
+            await OperarAsync(() => _servicio.ResolverPausaAsync(_id, _datos.Version, p.Id, f.Motivo), "Resolución de la pausa registrada. Se mantienen las demás pausas y el alcance autorizado.");
     }
 
     private void MaterialSeleccionado(object? s, EventArgs e)

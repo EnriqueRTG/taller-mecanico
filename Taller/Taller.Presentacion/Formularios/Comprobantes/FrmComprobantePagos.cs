@@ -18,6 +18,9 @@ public partial class FrmComprobantePagos : Form
         InitializeComponent();
         Taller.Presentacion.Estilos.ValoresGrilla.Aplicar(dgvPagos);
         Taller.Presentacion.Estilos.CabeceraOperacion.Aplicar(lblResumen);
+        void AjustarResumen() => lblResumen.MaximumSize = new Size(Math.Max(100, tlpPrincipal.ClientSize.Width - tlpPrincipal.Padding.Horizontal - 6), 0);
+        tlpPrincipal.SizeChanged += (_, _) => AjustarResumen();
+        AjustarResumen();
         Button[] orden = [btnEmitir, btnPago, btnEntregar, btnImprimir, btnRecibo, btnActualizar, btnAnular, btnCerrar];
         for (int i = 0; i < orden.Length; i++) flpAcciones.Controls.SetChildIndex(orden[i], i);
         btnAnular.Margin = new Padding(20, 3, 3, 3);

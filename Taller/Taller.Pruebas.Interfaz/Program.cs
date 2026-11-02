@@ -80,7 +80,26 @@ internal static class Program
         ruta!.Text = @"C:\SGTM\Respaldos";
         typeof(FrmRespaldoRestauracion).GetMethod("ElegirCarpeta", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(f, [ruta]);
         if (ruta.Text != @"C:\SGTM\Respaldos") throw new InvalidOperationException("Un selector no disponible no debe modificar la ruta escrita.");
-        Console.WriteLine("Respaldos: selectores manual/programado y ruta conservada sin servidor local verificado.");
+        if (string.IsNullOrWhiteSpace(ruta.PlaceholderText)) throw new InvalidOperationException("La carpeta necesita un ejemplo de ruta.");
+        f.TopLevel = false; f.FormBorderStyle = FormBorderStyle.None; f.Dock = DockStyle.Fill;
+        using var contenedor = new Form();
+        contenedor.Controls.Add(f);
+        contenedor.Show();
+        f.Show();
+        Application.DoEvents();
+        var elegir = f.Controls.Find("btnCarpetaManual", true).Single(); elegir.Visible = true;
+        var tipo = f.Controls.Find("cboTipo", true).Single();
+        var crear = f.Controls.Find("btnCrear", true).Single();
+        var actualizar = f.Controls.Find("btnActualizar", true).Single();
+        foreach (var tamano in new[] { new Size(854, 600), new Size(1020, 650), new Size(1660, 920) })
+        {
+            contenedor.ClientSize = tamano; Disponer(contenedor); Disponer(contenedor);
+            if (f.Height > contenedor.ClientSize.Height) throw new InvalidOperationException("El mínimo del módulo excede el espacio de navegación.");
+            foreach (var control in new Control[] { ruta, elegir, tipo, crear, actualizar }) VerificarDentroDelFormulario(f, control);
+            var centros = new Control[] { ruta, elegir, tipo, crear }.Select(c => c.Top + c.Height / 2).ToArray();
+            if (centros.Max() - centros.Min() > 2) throw new InvalidOperationException("Los controles manuales deben compartir el centro vertical.");
+        }
+        Console.WriteLine("Respaldos: ruta con ejemplo, controles alineados y actualización visible en módulo integrado desde 854x600.");
     }
 
     private static void VerificarFiltrosReportes(IServiceProvider proveedor)

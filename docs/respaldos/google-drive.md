@@ -67,3 +67,15 @@ El equipo debe estar encendido, con Windows y Drive iniciados. SGTM y Visual Stu
 Comprobar: señal reciente en SGTM, próxima ejecución, resultado y archivo local; luego paquete en Drive y sincronización terminada. “Paquete verificado” certifica los archivos escritos, no la subida a Internet. La auditoría conserva exportaciones y restauraciones con sus aprobadores.
 
 El instalador debe ejecutarse en el mismo Windows que SQL Server. La cuenta necesita permisos SQL de mantenimiento y lectura de los archivos locales; SQL Server necesita escritura en la carpeta local. La unidad virtual de Drive se usa para paquetes, no como destino del comando BACKUP de SQL.
+
+## Recorrido práctico en la Demo preparada
+
+1. Copias manuales: carpeta `C:\SGTM\Respaldos`, tipo **Completa**, **Crear y verificar copia**. Confirmar la nueva fila y el resultado correcto.
+2. Google Drive: seleccionar esa misma copia en su tabla, **Exportar copia a Drive…**, destino `G:\My Drive\SGTM-Respaldos`. Esperar la sincronización y comprobar la carpeta completa en Drive web.
+3. Instalar una sola vez el agente con la preparación asistida anterior. Volver a SGTM y actualizar: debe aparecer señal reciente.
+4. Programación automática: indicar ambas carpetas, seleccionar zona Argentina, una hora unos minutos posterior a la actual y, para esta comprobación inicial, desmarcar diferenciales para crear una completa diaria. Marcar **Activar respaldo diario** y guardar. Comprobar la próxima ejecución.
+5. Cerrar SGTM, manteniendo Windows y Drive iniciados. Después del horario, abrir SGTM y comprobar la nueva copia, el resultado del agente y el paquete sincronizado. Si no aparece, revisar el estado antes de volver a guardar el horario.
+6. Después de la prueba, establecer el horario diario definitivo y elegir completa diaria o completa semanal con diferenciales. Guardar y comprobar la próxima ejecución.
+7. Para comprobar recuperación: descargar el paquete completo desde Drive web, extraerlo e importarlo desde Google Drive a una carpeta local con permisos SQL. Importar no reemplaza datos. En Restaurar, comprobar la fecha de la fila y ejecutar **Ensayar restauración**. La sustitución real es una operación separada con doble aprobación y reemplaza los cambios posteriores al punto elegido.
+
+El historial permite consultar la secuencia de operaciones y sus aprobadores; doble clic en la fila abre el detalle. No es necesario volver a restaurar la base activa para comprobar únicamente el horario automático o los ajustes visuales.

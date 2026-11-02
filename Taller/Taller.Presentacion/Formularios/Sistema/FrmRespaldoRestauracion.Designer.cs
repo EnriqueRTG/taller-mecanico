@@ -45,7 +45,10 @@ partial class FrmRespaldoRestauracion
     {
         var p = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2 };
         p.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); p.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        texto.Dock = DockStyle.Fill; p.Controls.Add(texto, 0, 0); p.Controls.Add(boton, 1, 0); return p;
+        p.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+        texto.Dock = DockStyle.None; texto.Anchor = AnchorStyles.Left | AnchorStyles.Right; texto.Margin = new Padding(3, 0, 8, 0);
+        boton.Anchor = AnchorStyles.Left; boton.Margin = new Padding(3, 0, 3, 0);
+        p.Controls.Add(texto, 0, 0); p.Controls.Add(boton, 1, 0); return p;
     }
     private static DataGridView GrillaCopias(string nombre)
     {
@@ -63,10 +66,10 @@ partial class FrmRespaldoRestauracion
     private void InitializeComponent()
     {
         components = new System.ComponentModel.Container(); SuspendLayout();
-        AutoScaleMode = AutoScaleMode.Font; Font = new Font("Segoe UI", 10F); ClientSize = new Size(1180, 760); MinimumSize = new Size(850, 620);
+        AutoScaleMode = AutoScaleMode.Font; Font = new Font("Segoe UI", 10F); ClientSize = new Size(1180, 760); MinimumSize = new Size(760, 480);
         BackColor = EstilosInterfaz.FondoAplicacion; Text = "Respaldos y recuperación";
         tlpPrincipal = Columna(); tlpPrincipal.AutoScroll = false;
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); Controls.Add(tlpPrincipal);
         lblTitulo = Ayuda("Respaldos y recuperación de información"); lblTitulo.Font = new Font("Segoe UI", 17, FontStyle.Bold);
         lblEstado = Ayuda("Consultando configuración…");
@@ -74,24 +77,36 @@ partial class FrmRespaldoRestauracion
         tabCopias = new TabPage("Copias manuales"); tabPrograma = new TabPage("Programación automática"); tabRestaurar = new TabPage("Restaurar"); tabHistorial = new TabPage("Historial y aprobaciones");
         tabs.TabPages.AddRange([tabCopias, tabPrograma, tabRestaurar, tabHistorial]);
         foreach (TabPage t in tabs.TabPages) { t.Font = Font; t.BackColor = Color.White; }
-        btnActualizar = Boton("Actualizar estado e historial", BtnActualizar_Click); btnActualizar.Anchor = AnchorStyles.Left;
+        btnActualizar = Boton("Actualizar estado e historial", BtnActualizar_Click); btnActualizar.Anchor = AnchorStyles.Left; btnActualizar.Name = "btnActualizar";
         tlpPrincipal.Controls.Add(lblTitulo, 0, 0); tlpPrincipal.Controls.Add(lblEstado, 0, 1); tlpPrincipal.Controls.Add(tabs, 0, 2); tlpPrincipal.Controls.Add(btnActualizar, 0, 3);
         var manual = Columna(); tabCopias.Controls.Add(manual);
         manual.RowStyles.Add(new RowStyle(SizeType.AutoSize)); manual.RowStyles.Add(new RowStyle(SizeType.AutoSize)); manual.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); manual.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         lblManual = Ayuda(""); manual.Controls.Add(lblManual, 0, 0);
-        var opciones = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = true };
-        txtCarpetaManual = new TextBox { Name = "txtCarpetaManual", MaxLength = 145, Width = 380 };
+        var opciones = new TableLayoutPanel { Name = "opcionesManual", Dock = DockStyle.Top, AutoSize = true, ColumnCount = 4, RowCount = 2, Margin = new Padding(3, 4, 3, 12) };
+        opciones.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        opciones.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
+        opciones.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 155));
+        opciones.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 205));
+        opciones.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        opciones.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
+        Label Etiqueta(string texto) => new() { Text = texto, AutoSize = true, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Margin = new Padding(3, 3, 3, 7) };
+        var etiquetaCarpeta = Etiqueta("Carpeta local de respaldo");
+        opciones.Controls.Add(etiquetaCarpeta, 0, 0); opciones.SetColumnSpan(etiquetaCarpeta, 2);
+        opciones.Controls.Add(Etiqueta("Tipo de copia"), 2, 0);
+        opciones.Controls.Add(Etiqueta("Crear respaldo local"), 3, 0);
+        txtCarpetaManual = new TextBox { Name = "txtCarpetaManual", MaxLength = 145, PlaceholderText = @"Ej.: C:\SGTM\Respaldos", Anchor = AnchorStyles.Left | AnchorStyles.Right, Margin = new Padding(3, 0, 8, 0) };
         btnCarpetaManual = Boton("Elegir carpeta…", ElegirCarpetaManual_Click); btnCarpetaManual.Name = "btnCarpetaManual"; btnCarpetaManual.Visible = false;
-        var carpeta = Campo("Carpeta local de respaldo", Selector(txtCarpetaManual, btnCarpetaManual)); carpeta.Width = 500; opciones.Controls.Add(carpeta);
-        cboTipo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 145 }; var tipo = Campo("Tipo de copia", cboTipo); tipo.Width = 160; opciones.Controls.Add(tipo);
-        btnCrear = Boton("Crear y verificar copia", BtnCrear_Click, true); opciones.Controls.Add(Campo("Crear respaldo local", btnCrear));
+        btnCarpetaManual.Anchor = AnchorStyles.Left | AnchorStyles.Right; btnCarpetaManual.Margin = new Padding(3, 0, 12, 0);
+        cboTipo = new ComboBox { Name = "cboTipo", DropDownStyle = ComboBoxStyle.DropDownList, Anchor = AnchorStyles.Left | AnchorStyles.Right, Margin = new Padding(3, 0, 12, 0) };
+        btnCrear = Boton("Crear y verificar copia", BtnCrear_Click, true); btnCrear.Name = "btnCrear"; btnCrear.Anchor = AnchorStyles.Left | AnchorStyles.Right; btnCrear.Margin = new Padding(3, 0, 3, 0);
+        opciones.Controls.Add(txtCarpetaManual, 0, 1); opciones.Controls.Add(btnCarpetaManual, 1, 1); opciones.Controls.Add(cboTipo, 2, 1); opciones.Controls.Add(btnCrear, 3, 1);
         manual.Controls.Add(opciones, 0, 1); dgvCopias = GrillaCopias("dgvCopias"); manual.Controls.Add(dgvCopias, 0, 2);
         var programa = Columna(); tabPrograma.Controls.Add(programa); programa.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         lblAyudaPrograma = Ayuda("El agente se ejecuta al iniciar sesión en Windows y sigue funcionando con SGTM cerrado. El equipo debe estar encendido, la sesión iniciada y Drive disponible. Si falta la completa base, se crea una. Los fallos se reintentan cada 15 minutos."); programa.Controls.Add(lblAyudaPrograma);
         chkProgramado = new CheckBox { Text = "Activar respaldo diario", AutoSize = true }; programa.Controls.Add(chkProgramado);
-        txtCarpetaAuto = new TextBox { MaxLength = 145 }; btnCarpetaAuto = Boton("Elegir carpeta…", ElegirCarpetaAuto_Click); btnCarpetaAuto.Name = "btnCarpetaAuto"; btnCarpetaAuto.Visible = false;
+        txtCarpetaAuto = new TextBox { MaxLength = 145, PlaceholderText = @"Ej.: C:\SGTM\Respaldos" }; btnCarpetaAuto = Boton("Elegir carpeta…", ElegirCarpetaAuto_Click); btnCarpetaAuto.Name = "btnCarpetaAuto"; btnCarpetaAuto.Visible = false;
         programa.Controls.Add(Campo("Carpeta local (SQL Server debe poder escribir aquí)", Selector(txtCarpetaAuto, btnCarpetaAuto)));
-        txtCarpetaDrive = new TextBox { MaxLength = 500 }; var elegirDrive = Boton("Elegir carpeta…", (_, _) => ElegirCarpeta(txtCarpetaDrive));
+        txtCarpetaDrive = new TextBox { MaxLength = 500, PlaceholderText = @"Ej.: G:\My Drive\SGTM-Respaldos" }; var elegirDrive = Boton("Elegir carpeta…", (_, _) => ElegirCarpeta(txtCarpetaDrive));
         programa.Controls.Add(Campo("Carpeta de Google Drive para los paquetes automáticos (opcional)", Selector(txtCarpetaDrive, elegirDrive)));
         chkDiferenciales = new CheckBox { Text = "Completa semanal y diferenciales los demás días; desmarcado: completa diaria", AutoSize = true }; programa.Controls.Add(chkDiferenciales);
         var horario = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, WrapContents = true };

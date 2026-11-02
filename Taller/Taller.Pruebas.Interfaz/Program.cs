@@ -84,8 +84,9 @@ internal static class Program
         f.TopLevel = false; f.FormBorderStyle = FormBorderStyle.None; f.Dock = DockStyle.Fill;
         using var contenedor = new Form();
         contenedor.Controls.Add(f);
-        _ = contenedor.Handle; _ = f.Handle;
+        contenedor.Show();
         f.Show();
+        Application.DoEvents();
         var elegir = f.Controls.Find("btnCarpetaManual", true).Single(); elegir.Visible = true;
         var tipo = f.Controls.Find("cboTipo", true).Single();
         var crear = f.Controls.Find("btnCrear", true).Single();

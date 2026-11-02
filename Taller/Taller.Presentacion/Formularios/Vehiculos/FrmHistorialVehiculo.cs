@@ -92,5 +92,7 @@ public partial class FrmHistorialVehiculo : Form
         BackColor = EstilosInterfaz.FondoAplicacion;
         EstilosInterfaz.AplicarBotonSecundario(btnCerrar);
         EstilosInterfaz.AplicarGrilla(dgvHistorial);
+        dgvHistorial.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        dgvHistorial.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
     }
 }

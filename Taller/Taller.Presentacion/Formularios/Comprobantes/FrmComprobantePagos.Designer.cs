@@ -57,7 +57,7 @@ partial class FrmComprobantePagos
         tlpPrincipal.ColumnCount = 1;
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowCount = 5;
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 62));
@@ -65,13 +65,15 @@ partial class FrmComprobantePagos
         Controls.Add(tlpPrincipal);Text="Liquidación, pagos y entrega";
         tlpPrincipal.Controls.Add(lblResumen, 0, 0);
         lblResumen.Dock = DockStyle.Fill;
+        lblResumen.AutoSize = true;
+        lblResumen.MinimumSize = new Size(0, 70);
         tlpPrincipal.Controls.Add(lblSaldo, 0, 1);
         lblSaldo.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(tabs, 0, 2);
         tabs.Dock = DockStyle.Fill;
         var notas = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
         notas.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
-        notas.Controls.Add(new Label { Text = "Observaciones de liquidación / conformidad del cliente para la entrega", Dock = DockStyle.Fill }, 0, 0);
+        notas.Controls.Add(new Label { Text = "Observaciones de la liquidación", Dock = DockStyle.Fill }, 0, 0);
         notas.Controls.Add(txtObservaciones, 0, 1);
         tlpPrincipal.Controls.Add(notas, 0, 3);
         txtObservaciones.Dock = DockStyle.Fill;

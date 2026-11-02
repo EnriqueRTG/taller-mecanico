@@ -164,7 +164,7 @@ partial class FrmSeguimientoTrabajo
         dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTarea", DataPropertyName = "Alcance", HeaderText = "Alcance detenido", MinimumWidth = 95 });
         dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colMotivo", DataPropertyName = "Motivo", HeaderText = "Motivo", MinimumWidth = 220, FillWeight = 200 });
         dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colResolucion", DataPropertyName = "Resolucion", HeaderText = "Resolución técnica", MinimumWidth = 220, FillWeight = 200 });
-        dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFechaResolucion", DataPropertyName = "FechaResolucion", HeaderText = "Resuelta el", MinimumWidth = 125 });
+        dgvPausas.Columns.Add(new DataGridViewTextBoxColumn { Name = "colFechaResolucion", DataPropertyName = "FechaResolucion", HeaderText = "Resuelta el", MinimumWidth = 125, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" } });
         var pt = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,

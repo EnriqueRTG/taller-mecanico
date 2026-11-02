@@ -55,7 +55,7 @@ partial class FrmReportes
         lblTipo.AutoSize=lblDesde.AutoSize=lblHasta.AutoSize=lblEstado.AutoSize=true;
         lblTipo.Margin=lblDesde.Margin=lblHasta.Margin=lblEstado.Margin=new Padding(3,8,3,0);
         cboTipo.Width=310; cboEstado.Width=190; cboTipo.DropDownStyle=cboEstado.DropDownStyle=ComboBoxStyle.DropDownList;
-        dtpDesde.Format=dtpHasta.Format=DateTimePickerFormat.Short; dtpDesde.Width=dtpHasta.Width=110;
+        dtpDesde.Format=dtpHasta.Format=DateTimePickerFormat.Custom; dtpDesde.CustomFormat=dtpHasta.CustomFormat="dd/MM/yyyy"; dtpDesde.Width=dtpHasta.Width=110;
         txtBuscar.Width=245; txtBuscar.MaxLength=150; txtBuscar.PlaceholderText="Código, atención, dominio o responsable";
         pnlFiltros.Controls.AddRange([lblTipo,cboTipo,lblDesde,dtpDesde,lblHasta,dtpHasta,lblEstado,cboEstado,txtBuscar,lblGrafico,cboGrafico]);
         tlpPrincipal.Controls.Add(lblMetodo,0,2); lblMetodo.Dock=DockStyle.Fill; lblMetodo.ForeColor=Color.FromArgb(71,85,105);

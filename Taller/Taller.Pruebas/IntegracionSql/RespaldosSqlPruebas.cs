@@ -65,11 +65,13 @@ public sealed class RespaldosSqlPruebas
         var reloj = new RelojPrueba();
         var motor = new RespaldoSqlServer(c.Opciones, reloj);
         var programa = await motor.ObtenerProgramaAsync();
-        await motor.GuardarProgramaAsync(programa with {
+        var plan = programa with {
             Activo = true, Diferenciales = false, CarpetaServidor = c.Carpeta,
             CarpetaDrive = Path.Combine(Path.GetTempPath(), "DriveAusente-" + Guid.NewGuid().ToString("N")),
             IdAdministrador = 1, Autor = "Admin prueba", ProximaUtc = reloj.Ahora.AddMinutes(-1)
-        });
+        };
+        // Simulate a persisted Windows plan on an unavailable Drive host. The Linux CI must not bypass the production Windows/local-server guard.
+        await c.SqlAsync($"UPDATE {SqlRespaldos.Identificador(c.Nombre + "_Control")}.dbo.ProgramaSGTM SET Documento=@json,Version=Version+1 WHERE Id=1", new SqlParameter("@json", JsonSerializer.Serialize(plan)));
         await motor.EjecutarProgramacionAsync();
         var copia = Assert.Single((await motor.ConsultarAsync()).Copias);
         Assert.StartsWith("Pendiente", copia.EstadoDrive);

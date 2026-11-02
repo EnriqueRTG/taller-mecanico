@@ -45,7 +45,7 @@ La sesión permanece hasta cerrar sesión o salir. Las operaciones revalidan usu
 - Pagos parciales y varios medios por cobro; referencias de operaciones electrónicas, recibos y anulaciones justificadas. Entrega explícita con saldo cero.
 - Documentos económicos internos en ARS, **sin validez fiscal**. Sin anticipos, financiación, crédito posterior a la entrega ni devolución bancaria automática.
 - Siete reportes con filtros, gráficos, HTML autocontenido, CSV e impresión/PDF. No calculan rentabilidad ni horas de productividad, porque no se registran esos costos/horas.
-- Respaldos completos/diferenciales, manuales/programados y réplica opcional Azure. Requieren configurar permisos, control y agente; permanecen deshabilitados hasta instalar ese entorno. Recuperación con mantenimiento y doble aprobación; sin promesa de operación sin interrupción ni copias de log.
+- Respaldos completos/diferenciales, manuales/programados y paquetes para Google Drive. Requieren configurar permisos, control y agente; permanecen deshabilitados hasta instalar ese entorno. Recuperación con mantenimiento y doble aprobación; sin promesa de operación sin interrupción ni copias de log.
 
 ## Verificaciones
 

@@ -70,8 +70,8 @@ partial class FrmAprobarRestauracion
         tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-        tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-        tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+        tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
         Controls.Add(tlp);
         tlp.Controls.Add(txtResumen, 0, 0);
         tlp.SetColumnSpan(txtResumen, 2);
@@ -121,9 +121,13 @@ partial class FrmAprobarRestauracion
         btnConfirmar.Text = "Aprobar y ejecutar restauración";
         btnConfirmar.ForeColor = Color.Firebrick;
         btnConfirmar.AutoSize = true;
+        btnConfirmar.MinimumSize = new Size(240, 36);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPeligro(btnConfirmar);
         btnConfirmar.DialogResult = DialogResult.None;
         btnCancelar.Text = "Cancelar";
         btnCancelar.AutoSize = true;
+        btnCancelar.MinimumSize = new Size(100, 36);
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnCancelar);
         btnCancelar.DialogResult = DialogResult.Cancel;
         CancelButton = btnCancelar;
         flp.Controls.AddRange([btnConfirmar, btnCancelar]);

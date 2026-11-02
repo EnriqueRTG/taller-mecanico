@@ -20,18 +20,6 @@ public sealed class SqlRespaldoFactAttribute : FactAttribute
 
 public sealed class RespaldosSqlPruebas
 {
-    private sealed class NubePrueba : Taller.Aplicacion.Abstracciones.Persistencia.IArchivoRespaldoNube
-    {
-        public bool Fallar { get; set; }
-
-        public void ValidarConfiguracion()
-        {
-        }
-
-        public Task<CopiaRespaldoDto> SubirAsync(CopiaRespaldoDto copia, CancellationToken ct = default) => Fallar ? throw new IOException("Fallo controlado de transferencia") : Task.FromResult(copia with { EstadoAzure = "Verificada", VerificadaAzureUtc = DateTimeOffset.UtcNow, BlobAzure = "objeto-de-prueba" });
-        public Task RecuperarArchivoAsync(CopiaRespaldoDto copia, CancellationToken ct = default) => Task.CompletedTask;
-    }
-
     [SqlRespaldoFact]
     public async Task ConsultaIdentificaServidorReal_SinHabilitarExploradorDeClienteLinux()
     {
@@ -65,23 +53,35 @@ public sealed class RespaldosSqlPruebas
         }
     }
 
+    private sealed class RelojPrueba : TimeProvider
+    {
+        public DateTimeOffset Ahora { get; set; } = DateTimeOffset.UtcNow;
+        public override DateTimeOffset GetUtcNow() => Ahora;
+    }
     [SqlRespaldoFact]
-    public async Task Azure_FalloDeReplica_ConservaCopiaVerificadaYPermiteReintentar()
+    public async Task DriveNoDisponible_ConservaCopiaYReintentaSinDuplicarRespaldoSql()
     {
         await using var c = await Caso.CrearAsync();
-        var nube = new NubePrueba
-        {
-            Fallar = true
+        var reloj = new RelojPrueba();
+        var motor = new RespaldoSqlServer(c.Opciones, reloj);
+        var programa = await motor.ObtenerProgramaAsync();
+        var plan = programa with {
+            Activo = true, Diferenciales = false, CarpetaServidor = c.Carpeta,
+            CarpetaDrive = Path.Combine(Path.GetTempPath(), "DriveAusente-" + Guid.NewGuid().ToString("N")),
+            IdAdministrador = 1, Autor = "Admin prueba", ProximaUtc = reloj.Ahora.AddMinutes(-1)
         };
-        var motor = new RespaldoSqlServer(c.Opciones, TimeProvider.System, nube);
-        var copia = await motor.CrearConDestinoAsync(TipoRespaldo.Completa, c.Carpeta, "Administrador CI", true);
-        Assert.Equal("Pendiente de reintento", copia.EstadoAzure);
-        Assert.Single((await motor.ConsultarAsync()).Copias, x => x.Id == copia.Id);
-        // El ensayo lee y verifica el respaldo SQL real, independientemente de la réplica fallida.
-        await motor.ProbarRestauracionAsync(copia.Id, 1);
-        nube.Fallar = false;
-        await motor.ReintentarAzureAsync(copia.Id, "Administrador CI");
-        Assert.Equal("Verificada", (await motor.ConsultarAsync()).Copias.Single(x => x.Id == copia.Id).EstadoAzure);
+        // Simulate a persisted Windows plan on an unavailable Drive host. The Linux CI must not bypass the production Windows/local-server guard.
+        await c.SqlAsync($"UPDATE {SqlRespaldos.Identificador(c.Nombre + "_Control")}.dbo.ProgramaSGTM SET Documento=@json,Version=Version+1 WHERE Id=1", new SqlParameter("@json", JsonSerializer.Serialize(plan)));
+        await motor.EjecutarProgramacionAsync();
+        var copia = Assert.Single((await motor.ConsultarAsync()).Copias);
+        Assert.StartsWith("Pendiente", copia.EstadoDrive);
+        Assert.NotEmpty(copia.RutaServidor);
+        await motor.ProbarRestauracionAsync(copia.Id, 1); // The failed export did not invalidate SQL backup.
+        reloj.Ahora = reloj.Ahora.AddMinutes(16);
+        await motor.EjecutarProgramacionAsync();
+        var reintentada = Assert.Single((await motor.ConsultarAsync()).Copias);
+        Assert.Equal(copia.Id, reintentada.Id);
+        Assert.True(reintentada.UltimoIntentoDriveUtc > copia.UltimoIntentoDriveUtc);
     }
 
     private sealed class Caso : IAsyncDisposable

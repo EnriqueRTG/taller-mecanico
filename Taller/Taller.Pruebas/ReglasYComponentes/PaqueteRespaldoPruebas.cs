@@ -39,4 +39,29 @@ public sealed class PaqueteRespaldoPruebas : IDisposable
         var paquete = await PaqueteRespaldo.ExportarAsync(_carpeta, copia.Id, [copia]);
         await Assert.ThrowsAsync<InvalidOperationException>(() => PaqueteRespaldo.LeerAsync(paquete));
     }
+    [Fact]
+    public async Task PaqueteDiferencialIncluyeBaseYSePuedeVerificar()
+    {
+        var original = Path.Combine(_carpeta, "base.bak");
+        var cambio = Path.Combine(_carpeta, "diferencial.bak");
+        await File.WriteAllTextAsync(original, "base completa");
+        await File.WriteAllTextAsync(cambio, "cambios posteriores");
+        var completa = new CopiaRespaldoDto { Id = Guid.NewGuid(), Tipo = TipoRespaldo.Completa, RutaServidor = original };
+        var diferencial = new CopiaRespaldoDto { Id = Guid.NewGuid(), BaseId = completa.Id, Tipo = TipoRespaldo.Diferencial, RutaServidor = cambio };
+        var paquete = await PaqueteRespaldo.ExportarAsync(_carpeta, diferencial.Id, [completa, diferencial]);
+        var leido = await PaqueteRespaldo.LeerAsync(paquete);
+        Assert.Equal(diferencial.Id, leido.Seleccionada);
+        Assert.Equal(2, leido.Archivos.Count);
+        Assert.Contains(leido.Archivos, a => a.Copia.Id == completa.Id);
+        Assert.All(leido.Archivos, a => Assert.Empty(a.Copia.RutaPaqueteDrive));
+    }
+    [Fact]
+    public async Task DestinoAusenteNoEliminaRespaldoOriginal()
+    {
+        var original = Path.Combine(_carpeta, "local.bak");
+        await File.WriteAllTextAsync(original, "copia local conservada");
+        var copia = new CopiaRespaldoDto { Id = Guid.NewGuid(), Tipo = TipoRespaldo.Completa, RutaServidor = original };
+        await Assert.ThrowsAsync<InvalidOperationException>(() => PaqueteRespaldo.ExportarAsync(Path.Combine(_carpeta, "ausente"), copia.Id, [copia]));
+        Assert.Equal("copia local conservada", await File.ReadAllTextAsync(original));
+    }
 }

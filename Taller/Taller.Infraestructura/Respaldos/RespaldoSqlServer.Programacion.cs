@@ -26,9 +26,10 @@ public sealed partial class RespaldoSqlServer
             int autorizado = await SqlRespaldos.EscalarAsync<int>(master, $"SELECT COUNT(*) FROM {Db}.dbo.Usuarios u JOIN {Db}.dbo.Roles r ON r.Id=u.RolId WHERE u.Id=@id AND u.Activo=1 AND u.RolId=1 AND r.Activo=1 AND r.Nombre=N'Administrador'", cancelacion, ("@id", p.IdAdministrador));
             if (autorizado != 1)
                 throw new InvalidOperationException("El administrador que autorizó la programación ya no está habilitado. Otro administrador debe revisar y guardar el plan.");
-            // Reintentar réplicas pendientes sin volver a crear la copia SQL. Máximo dos por ciclo y 15 minutos entre intentos.
-            foreach (var pendiente in (await _registro.CopiasAsync(control, cancelacion)).Where(c => c.AzureSolicitado && c.EstadoAzure != "Verificada" && (!c.UltimoIntentoAzureUtc.HasValue || c.UltimoIntentoAzureUtc <= ahora.AddMinutes(-15))).Take(2))
-                await ReplicarAsync(control, pendiente, cancelacion);
+            // Retry pending packages independently of the next SQL backup date.
+            if (p.CarpetaDrive.Length > 0)
+                foreach (var pendiente in (await _registro.CopiasAsync(control, cancelacion)).Where(c => c.EstadoDrive.StartsWith("Pendiente") && (!c.UltimoIntentoDriveUtc.HasValue || c.UltimoIntentoDriveUtc <= ahora.AddMinutes(-15))).Take(2))
+                    await ExportarDriveAsync(control, pendiente, p.CarpetaDrive, cancelacion);
             if (p.ProximaUtc is null || p.ProximaUtc > ahora)
                 return;
             var familia = await FamiliaAsync(master, cancelacion);
@@ -36,11 +37,11 @@ public sealed partial class RespaldoSqlServer
             var completa = (await _registro.CopiasAsync(control, cancelacion)).FirstOrDefault(x => x.Tipo == TipoRespaldo.Completa && !x.SoloCopia && x.Familia == familia && x.EsquemaHash == esquema);
             var tipo = PoliticaRespaldos.TipoProgramado(p, ahora, completa is not null && completa.RegistradaUtc > ahora.AddDays(-7) && await EsBaseActualAsync(master, completa, cancelacion));
             var copia = await CrearNativaAsync(master, control, tipo, p.CarpetaServidor, "Agente · autorizado por " + p.Autor, false, null, cancelacion);
-            if (p.CopiarAzure)
-                copia = await ReplicarAsync(control, copia, cancelacion);
+            if (p.CarpetaDrive.Length > 0)
+                copia = await ExportarDriveAsync(control, copia, p.CarpetaDrive, cancelacion);
             var proxima = PoliticaRespaldos.Proxima(p, reloj.GetUtcNow());
             await _registro.GuardarProgramaAsync(control, p with { ProximaUtc = proxima }, cancelacion);
-            await SqlRespaldos.EjecutarAsync(control, "UPDATE dbo.ProgramaSGTM SET Resultado=@resultado WHERE Id=1", cancelacion, ("@resultado", $"{tipo} verificada: {copia.FechaServidor:dd/MM/yyyy HH:mm:ss} (servidor SQL). {copia.Advertencia} {copia.AdvertenciaAzure}"));
+            await SqlRespaldos.EjecutarAsync(control, "UPDATE dbo.ProgramaSGTM SET Resultado=@resultado WHERE Id=1", cancelacion, ("@resultado", $"{tipo} verificada: {copia.FechaServidor:dd/MM/yyyy HH:mm:ss} (servidor SQL). {copia.Advertencia} {copia.EstadoDrive}"));
         }
         catch (Exception e)when (e is not OperationCanceledException)
         {

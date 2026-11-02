@@ -24,11 +24,11 @@ Usar el mismo commit y una única base de prueba compartida cuando se prueben do
 | P18 Reportes | Cada rol/tipo, opciones antes de generar, vacío, limpiar, SQL y exportaciones | Detalle/indicadores/gráfico coherentes, permisos y filtros completos |
 | P19 Documentos | Presupuesto, informe, liquidación y recibo de varias páginas | Logo/contacto, datos reales, cantidades/importes históricos, impresión legible |
 | P20 Completa/diferencial | Configurar Demo, completa, cambiar datos, diferencial | Copias verificadas y diferencial vinculada a completa |
-| P21 Programación | Agente activo, horario/prueba, local y réplica si configurada | Resultado real en catálogo; fallo Azure no simula réplica exitosa |
+| P21 Programación | Agente activo, horario/prueba, local y réplica si configurada | Resultado real en catálogo; Drive no disponible conserva copia local y reintenta exportación |
 | P22 Recuperación | Ensayo en copia, plan vencido, dos usuarios, mantenimiento | Validaciones bloquean intentos inválidos; recuperación probada solo en entorno descartable |
 | P23 Limpieza | Aplicar seis migraciones en base vacía y actualizar copia actual | Modelo sin cambios pendientes y sin IdPresupuestoCambio; datos conservados |
 
-Para P18 usar [consultas SQL](../reportes/verificacion-reportes.sql) y la metodología del reporte. Para P20–P22 seguir [operación de respaldos](../respaldos/operacion.md), [prueba local](../instalacion/respaldos-locales-demo.md) y [Azure](../respaldos/azure.md). No prometer notificación instantánea ni restauración sin interrupción.
+Para P18 usar [consultas SQL](../reportes/verificacion-reportes.sql) y la metodología del reporte. Para P20–P22 seguir [operación de respaldos](../respaldos/operacion.md), [prueba local](../instalacion/respaldos-locales-demo.md) y [Google Drive](../respaldos/google-drive.md). No prometer notificación instantánea ni restauración sin interrupción.
 
 La comprobación visual se hace en Windows a 1366×768/1920×1080 y DPI 100/125/150 %. Probar con teclado, rueda y varias páginas. Un resultado automático aprobado no reemplaza estas comprobaciones.
 
@@ -48,4 +48,4 @@ La comprobación visual se hace en Windows a 1366×768/1920×1080 y DPI 100/125/
 - Comprobar que al deshabilitar cliente/vehículo aparece su identidad y No es la opción predeterminada.
 - Ejecutar la publicación desde un acceso directo con otra carpeta de trabajo; debe leer su configuración local.
 - Cambiar el estado de un reporte por un valor ajeno mediante una llamada de servicio: rechazar, no producir una consulta vacía engañosa.
-- Replicar en Azure negocio/control/manifiesto y comprobar sus estados independientes; probar acceso denegado y reintento sin sobrescribir .bak.
+- Exportar paquetes a Drive; comprobar sincronización externa e importación. Probar destino no disponible y reintento sin recrear el respaldo SQL.

@@ -1,473 +1,119 @@
 #nullable enable
+using Taller.Presentacion.Estilos;
 namespace Taller.Presentacion.Formularios.Sistema;
 partial class FrmRespaldoRestauracion
 {
     private System.ComponentModel.IContainer? components;
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-            components?.Dispose();
-        base.Dispose(disposing);
-    }
+    protected override void Dispose(bool disposing) { if (disposing) components?.Dispose(); base.Dispose(disposing); }
+    private TableLayoutPanel tlpPrincipal = null!;
+    private Label lblTitulo = null!, lblEstado = null!, lblManual = null!, lblAyudaPrograma = null!, lblRiesgos = null!, lblSeleccion = null!;
+    private TabControl tabs = null!;
+    private TabPage tabCopias = null!, tabPrograma = null!, tabRestaurar = null!, tabHistorial = null!;
+    private TextBox txtCarpetaManual = null!, txtCarpetaAuto = null!, txtCarpetaDrive = null!, txtEstadoPrograma = null!, txtPlan = null!;
+    private ComboBox cboTipo = null!, cboDia = null!, cboZona = null!;
+    private CheckBox chkProgramado = null!, chkDiferenciales = null!;
+    private DateTimePicker dtpHora = null!;
+    private Button btnCrear = null!, btnCarpetaManual = null!, btnCarpetaAuto = null!, btnGuardarPrograma = null!, btnEnsayar = null!, btnRestaurar = null!, btnActualizar = null!;
+    private DataGridView dgvCopias = null!, dgvRestaurar = null!, dgvHistorial = null!;
 
+    private static Label Ayuda(string texto)
+    {
+        var label = new Label { Text = texto, AutoSize = true, Dock = DockStyle.Top, Margin = new Padding(3, 5, 3, 10), ForeColor = EstilosInterfaz.TextoNormal };
+        label.ParentChanged += (_, _) => {
+            if (label.Parent is not { } parent) return;
+            void Ajustar() { if (!label.IsDisposed) label.MaximumSize = new Size(Math.Max(100, parent.ClientSize.Width - parent.Padding.Horizontal - 12), 0); }
+            parent.SizeChanged += (_, _) => Ajustar(); Ajustar();
+        };
+        return label;
+    }
+    private static TableLayoutPanel Columna() => new() { Dock = DockStyle.Fill, ColumnCount = 1, Padding = new Padding(14), AutoScroll = true };
+    private static Button Boton(string texto, EventHandler click, bool primario = false, bool peligro = false)
+    {
+        var b = new Button { Text = texto, AutoSize = true, MinimumSize = new Size(110, 36), Margin = new Padding(3, 6, 8, 6) };
+        if (peligro) EstilosInterfaz.AplicarBotonPeligro(b);
+        else if (primario) EstilosInterfaz.AplicarBotonPrimario(b);
+        else EstilosInterfaz.AplicarBotonSecundario(b);
+        b.Click += click; return b;
+    }
+    private static Control Campo(string titulo, Control control)
+    {
+        var p = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 1, Margin = new Padding(3, 4, 14, 6) };
+        p.Controls.Add(new Label { Text = titulo, AutoSize = true, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Margin = new Padding(3, 3, 3, 7) });
+        control.Dock = DockStyle.Top; p.Controls.Add(control); return p;
+    }
+    private static Control Selector(TextBox texto, Button boton)
+    {
+        var p = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2 };
+        p.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); p.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        texto.Dock = DockStyle.Fill; p.Controls.Add(texto, 0, 0); p.Controls.Add(boton, 1, 0); return p;
+    }
+    private static DataGridView GrillaCopias(string nombre)
+    {
+        var g = new DataGridView { Name = nombre, Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+        EstilosInterfaz.AplicarGrilla(g);
+        foreach (var (prop, titulo, ancho) in new[] { ("FechaServidor", "Fecha de la copia (SQL)", 150), ("Tipo", "Tipo", 90), ("SoloCopia", "Protectora", 85), ("Autor", "Solicitada por", 150), ("RutaServidor", "Archivo local", 250), ("EstadoDrive", "Google Drive", 210), ("Advertencia", "Observaciones", 190) })
+        {
+            var c = new DataGridViewTextBoxColumn { DataPropertyName = prop, HeaderText = titulo, MinimumWidth = ancho, FillWeight = ancho };
+            if (prop == "FechaServidor") c.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm:ss";
+            g.Columns.Add(c);
+        }
+        g.CellFormatting += (_, e) => { if (e.ColumnIndex >= 0 && g.Columns[e.ColumnIndex].DataPropertyName == "SoloCopia" && e.Value is bool valor) { e.Value = valor ? "Sí" : "No"; e.FormattingApplied = true; } };
+        return g;
+    }
     private void InitializeComponent()
     {
-        components = new System.ComponentModel.Container();
-        tlpPrincipal = new TableLayoutPanel();
-        tlpPrincipal.Name = "tlpPrincipal";
-        lblTitulo = new Label();
-        lblTitulo.Name = "lblTitulo";
-        lblEstado = new Label();
-        lblEstado.Name = "lblEstado";
-        tabs = new TabControl();
-        tabs.Name = "tabs";
-        tabCopias = new TabPage();
-        tabCopias.Name = "tabCopias";
-        tabPrograma = new TabPage();
-        tabPrograma.Name = "tabPrograma";
-        tabRestaurar = new TabPage();
-        tabRestaurar.Name = "tabRestaurar";
-        tabHistorial = new TabPage();
-        tabHistorial.Name = "tabHistorial";
-        tlpCopias = new TableLayoutPanel();
-        tlpCopias.Name = "tlpCopias";
-        flpManual = new FlowLayoutPanel();
-        flpManual.Name = "flpManual";
-        txtCarpetaManual = new TextBox();
-        txtCarpetaManual.Name = "txtCarpetaManual";
-        cboTipo = new ComboBox();
-        cboTipo.Name = "cboTipo";
-        btnCrear = new Button();
-        btnCrear.Name = "btnCrear";
-        lblManual = new Label();
-        lblManual.Name = "lblManual";
-        dgvCopias = new DataGridView();
-        dgvCopias.Name = "dgvCopias";
-        tlpPrograma = new TableLayoutPanel();
-        tlpPrograma.Name = "tlpPrograma";
-        lblAyudaPrograma = new Label();
-        lblAyudaPrograma.Name = "lblAyudaPrograma";
-        txtCarpetaAuto = new TextBox();
-        txtCarpetaAuto.Name = "txtCarpetaAuto";
-        chkProgramado = new CheckBox();
-        chkProgramado.Name = "chkProgramado";
-        chkDiferenciales = new CheckBox();
-        chkDiferenciales.Name = "chkDiferenciales";
-        flpHorario = new FlowLayoutPanel();
-        flpHorario.Name = "flpHorario";
-        lblHora = new Label();
-        lblHora.Name = "lblHora";
-        dtpHora = new DateTimePicker();
-        dtpHora.Name = "dtpHora";
-        lblDia = new Label();
-        lblDia.Name = "lblDia";
-        cboDia = new ComboBox();
-        cboDia.Name = "cboDia";
-        lblZona = new Label();
-        lblZona.Name = "lblZona";
-        cboZona = new ComboBox();
-        cboZona.Name = "cboZona";
-        btnGuardarPrograma = new Button();
-        btnGuardarPrograma.Name = "btnGuardarPrograma";
-        txtEstadoPrograma = new TextBox
-        {
-            Multiline = true,
-            ReadOnly = true,
-            ScrollBars = ScrollBars.Vertical
-        };
-        txtEstadoPrograma.Name = "txtEstadoPrograma";
-        tlpRestaurar = new TableLayoutPanel();
-        tlpRestaurar.Name = "tlpRestaurar";
-        lblRiesgos = new Label();
-        lblRiesgos.Name = "lblRiesgos";
-        txtPlan = new TextBox();
-        txtPlan.Name = "txtPlan";
-        flpRestaurar = new FlowLayoutPanel();
-        flpRestaurar.Name = "flpRestaurar";
-        btnEnsayar = new Button();
-        btnEnsayar.Name = "btnEnsayar";
-        btnRestaurar = new Button();
-        btnRestaurar.Name = "btnRestaurar";
-        dgvHistorial = new DataGridView();
-        dgvHistorial.Name = "dgvHistorial";
-        btnActualizar = new Button();
-        btnActualizar.Name = "btnActualizar";
-        chkAzureManual = new CheckBox
-        {
-            Name = "chkAzureManual",
-            Text = "Replicar también en Azure privado",
-            AutoSize = true
-        };
-        chkAzureAuto = new CheckBox
-        {
-            Name = "chkAzureAuto",
-            Text = "Replicar también en Azure privado",
-            AutoSize = true
-        };
-        btnReintentarAzure = new Button
-        {
-            Name = "btnReintentarAzure",
-            Text = "Reintentar Azure de la copia seleccionada",
-            AutoSize = true
-        };
-        btnReintentarAzure.Click += BtnReintentarAzure_Click;
-        SuspendLayout();
-        AutoScaleDimensions = new SizeF(7F, 15F);
-        AutoScaleMode = AutoScaleMode.Font;
-        Font = new Font("Segoe UI", 9F);
-        ClientSize = new Size(1060, 630);
-        MinimumSize = new Size(800, 520);
-        BackColor = Color.FromArgb(244, 247, 251);
-        Text = "Respaldos y recuperación";
-        tlpPrincipal.Dock = DockStyle.Fill;
-        tlpPrincipal.Padding = new Padding(12);
-        tlpPrincipal.ColumnCount = 1;
-        tlpPrincipal.RowCount = 4;
-        tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-        Controls.Add(tlpPrincipal);
-        tlpPrincipal.Controls.Add(lblTitulo, 0, 0);
-        tlpPrincipal.Controls.Add(lblEstado, 0, 1);
-        tlpPrincipal.Controls.Add(tabs, 0, 2);
-        tlpPrincipal.Controls.Add(btnActualizar, 0, 3);
-        lblTitulo.Dock = DockStyle.Fill;
-        lblTitulo.Font = new Font("Segoe UI", 17, FontStyle.Bold);
-        lblTitulo.Text = "Respaldos y recuperación de información";
-        lblEstado.Dock = DockStyle.Fill;
-        lblEstado.Text = "Consultando configuración…";
-        lblEstado.ForeColor = Color.FromArgb(71, 85, 105);
-        tabs.Dock = DockStyle.Fill;
-        tabs.Controls.AddRange([tabCopias, tabPrograma, tabRestaurar, tabHistorial]);
-        tabCopias.Text = "1 · Copias manuales";
-        tabPrograma.Text = "2 · Programación automática";
-        tabRestaurar.Text = "3 · Restaurar";
-        tabHistorial.Text = "Historial y aprobaciones";
-        tlpCopias.Dock = DockStyle.Fill;
-        tlpCopias.Padding = new Padding(8);
-        tlpCopias.ColumnCount = 1;
-        tlpCopias.RowCount = 3;
-        tlpCopias.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpCopias.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
-        tlpCopias.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
-        tlpCopias.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        tabCopias.Controls.Add(tlpCopias);
-        lblManual.Dock = DockStyle.Fill;
-        lblManual.Text = "Carpeta absoluta del SERVIDOR SQL (no de esta PC). SQL Server debe poder escribir en ella. Completa copia toda la base de datos; diferencial copia los cambios desde su completa base. Fechas de las copias: hora informada por SQL Server. No se eliminan copias automáticamente.";
-        tlpCopias.Controls.Add(lblManual, 0, 0);
-        tlpCopias.Controls.Add(flpManual, 0, 1);
-        tlpCopias.Controls.Add(dgvCopias, 0, 2);
-        flpManual.Dock = DockStyle.Fill;
-        flpManual.AutoScroll = true;
-        flpManual.WrapContents = true;
-        btnCarpetaManual = new Button { Name = "btnCarpetaManual", Text = "Elegir carpeta…", AutoSize = true, Visible = false };
-        btnCarpetaAuto = new Button { Name = "btnCarpetaAuto", Text = "Elegir carpeta…", AutoSize = true, Dock = DockStyle.Fill, Visible = false };
-        btnCarpetaManual.Click += ElegirCarpetaManual_Click;
-        btnCarpetaAuto.Click += ElegirCarpetaAuto_Click;
-        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnCarpetaManual);
-        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnCarpetaAuto);
-        txtCarpetaManual.Width = 400;
-        txtCarpetaManual.MaxLength = 145;
-        txtCarpetaManual.PlaceholderText = "Ej.: D:\\RespaldosSGTM o /var/opt/mssql/backup";
-        cboTipo.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboTipo.Width = 135;
-        btnCrear.Text = "Crear y verificar copia";
-        btnCrear.AutoSize = true;
-        flpManual.Controls.AddRange([txtCarpetaManual, btnCarpetaManual, cboTipo, chkAzureManual, btnCrear, btnReintentarAzure]);
-        dgvCopias.Dock = DockStyle.Fill;
-        dgvCopias.ReadOnly = true;
-        dgvCopias.AutoGenerateColumns = false;
-        dgvCopias.AllowUserToAddRows = false;
-        dgvCopias.AllowUserToDeleteRows = false;
-        dgvCopias.AllowUserToResizeColumns = true;
-        dgvCopias.RowHeadersVisible = false;
-        dgvCopias.MultiSelect = false;
-        dgvCopias.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgvCopias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        dgvCopias.BackgroundColor = Color.White;
-        colFechaServidor = new DataGridViewTextBoxColumn
-        {
-            Name = "colFechaServidor",
-            DataPropertyName = "FechaServidor",
-            HeaderText = "Fecha (servidor SQL)",
-            MinimumWidth = 90,
-            FillWeight = 150
-        };
-        dgvCopias.Columns.Add(colFechaServidor);
-        colFechaServidor.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm:ss";
-        colTipo = new DataGridViewTextBoxColumn
-        {
-            Name = "colTipo",
-            DataPropertyName = "Tipo",
-            HeaderText = "Tipo",
-            MinimumWidth = 90,
-            FillWeight = 100
-        };
-        dgvCopias.Columns.Add(colTipo);
-        colSoloCopia = new DataGridViewTextBoxColumn
-        {
-            Name = "colSoloCopia",
-            DataPropertyName = "SoloCopia",
-            HeaderText = "Protectora / sólo copia",
-            MinimumWidth = 90,
-            FillWeight = 100
-        };
-        dgvCopias.Columns.Add(colSoloCopia);
-        colRutaServidor = new DataGridViewTextBoxColumn
-        {
-            Name = "colRutaServidor",
-            DataPropertyName = "RutaServidor",
-            HeaderText = "Archivo en servidor",
-            MinimumWidth = 90,
-            FillWeight = 350
-        };
-        dgvCopias.Columns.Add(colRutaServidor);
-        colAutor = new DataGridViewTextBoxColumn
-        {
-            Name = "colAutor",
-            DataPropertyName = "Autor",
-            HeaderText = "Solicitada por",
-            MinimumWidth = 90,
-            FillWeight = 130
-        };
-        dgvCopias.Columns.Add(colAutor);
-        colRutaControl = new DataGridViewTextBoxColumn
-        {
-            Name = "colRutaControl",
-            DataPropertyName = "RutaControl",
-            HeaderText = "Copia auxiliar de control",
-            MinimumWidth = 120,
-            FillWeight = 220
-        };
-        dgvCopias.Columns.Add(colRutaControl);
-        colAdvertencia = new DataGridViewTextBoxColumn
-        {
-            Name = "colAdvertencia",
-            DataPropertyName = "Advertencia",
-            HeaderText = "Advertencia",
-            MinimumWidth = 100,
-            FillWeight = 180
-        };
-        dgvCopias.Columns.Add(colAdvertencia);
-        dgvCopias.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAzure", DataPropertyName = "EstadoAzure", HeaderText = "Azure · negocio", MinimumWidth = 120 });
-        dgvCopias.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAzureControl", DataPropertyName = "EstadoControlAzure", HeaderText = "Azure · control", MinimumWidth = 120 });
-        tlpPrograma.Dock = DockStyle.Fill;
-        tlpPrograma.Padding = new Padding(10);
-        tlpPrograma.ColumnCount = 1;
-        tlpPrograma.RowCount = 8;
-        tlpPrograma.AutoScroll = true;
-        tlpPrograma.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 66));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
-        tlpPrograma.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        tabPrograma.Controls.Add(tlpPrograma);
-        lblAyudaPrograma.Text = "El agente SGTMRespaldos debe estar instalado en un equipo encendido con acceso al servidor. El plan corre una vez por día al horario indicado; no depende de una sesión abierta. Si falta una completa base, el agente crea una. Los fallos reintentan a los 15 minutos y quedan registrados.";
-        lblAyudaPrograma.Dock = DockStyle.Fill;
-        chkProgramado.Text = "Activar plan diario";
-        chkProgramado.AutoSize = true;
-        chkDiferenciales.Text = "Completa semanal y diferenciales los demás días (desmarcado: completa todos los días)";
-        chkDiferenciales.AutoSize = true;
-        txtCarpetaAuto.Dock = DockStyle.Fill;
-        txtCarpetaAuto.MaxLength = 145;
-        txtCarpetaAuto.PlaceholderText = "Carpeta de destino en el servidor SQL";
-        flpHorario.Dock = DockStyle.Fill;
-        flpHorario.WrapContents = true;
-        flpHorario.AutoScroll = true;
-        lblHora.Text = "Hora";
-        lblDia.Text = "Completa semanal";
-        lblZona.Text = "Zona";
-        lblHora.AutoSize = lblDia.AutoSize = lblZona.AutoSize = true;
-        dtpHora.Format = DateTimePickerFormat.Custom;
-        dtpHora.CustomFormat = "HH:mm";
-        dtpHora.ShowUpDown = true;
-        dtpHora.Width = 85;
-        cboDia.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboDia.Width = 130;
-        cboZona.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboZona.Width = 230;
-        flpHorario.Controls.AddRange([lblHora, dtpHora, lblDia, cboDia, lblZona, cboZona]);
-        btnGuardarPrograma.Text = "Guardar programación";
-        btnGuardarPrograma.AutoSize = true;
-        btnGuardarPrograma.Anchor = AnchorStyles.Left;
-        txtEstadoPrograma.Dock = DockStyle.Fill;
-        tlpPrograma.Controls.Add(lblAyudaPrograma, 0, 0);
-        tlpPrograma.Controls.Add(chkProgramado, 0, 1);
-        tlpPrograma.Controls.Add(chkDiferenciales, 0, 2);
-        var selectorAuto = new TableLayoutPanel { Name = "selectorCarpetaAuto", Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
-        selectorAuto.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        selectorAuto.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        selectorAuto.Controls.Add(txtCarpetaAuto, 0, 0);
-        selectorAuto.Controls.Add(btnCarpetaAuto, 1, 0);
-        tlpPrograma.Controls.Add(selectorAuto, 0, 3);
-        tlpPrograma.Controls.Add(flpHorario, 0, 4);
-        tlpPrograma.Controls.Add(btnGuardarPrograma, 0, 5);
-        tlpPrograma.Controls.Add(chkAzureAuto, 0, 6);
-        tlpPrograma.Controls.Add(txtEstadoPrograma, 0, 7);
-        tlpRestaurar.Dock = DockStyle.Fill;
-        tlpRestaurar.Padding = new Padding(10);
-        tlpRestaurar.ColumnCount = 1;
-        tlpRestaurar.RowCount = 3;
-        tlpRestaurar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpRestaurar.RowStyles.Add(new RowStyle(SizeType.Absolute, 125));
-        tlpRestaurar.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        tlpRestaurar.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-        tabRestaurar.Controls.Add(tlpRestaurar);
-        lblRiesgos.Dock = DockStyle.Fill;
-        lblRiesgos.ForeColor = Color.Firebrick;
-        lblRiesgos.Text = "RESTAURAR REEMPLAZA DATOS: se pierden del estado activo los cambios posteriores al punto de copia, incluidos cobros, usuarios y contraseñas. Coordine una ventana de mantenimiento y solicite acompañamiento del personal técnico.\r\nPrimero seleccione una copia en la pestaña Copias manuales y ensaye su recuperación en una base temporal. Después se requieren el administrador de esta sesión y otro administrador o administrativo, con credenciales distintas. Las demás conexiones deben terminar; no se fuerza su desconexión.";
-        txtPlan.Dock = DockStyle.Fill;
-        txtPlan.Multiline = true;
-        txtPlan.ReadOnly = true;
-        txtPlan.ScrollBars = ScrollBars.Vertical;
-        txtPlan.BackColor = Color.White;
-        flpRestaurar.Dock = DockStyle.Fill;
-        flpRestaurar.WrapContents = false;
-        flpRestaurar.AutoScroll = true;
-        btnEnsayar.Text = "Ensayar restauración de la copia seleccionada";
-        btnRestaurar.Text = "Autorizar y restaurar…";
-        btnEnsayar.AutoSize = btnRestaurar.AutoSize = true;
-        btnRestaurar.ForeColor = Color.Firebrick;
-        btnEnsayar.Enabled = btnRestaurar.Enabled = false;
-        flpRestaurar.Controls.AddRange([btnEnsayar, btnRestaurar]);
-        tlpRestaurar.Controls.Add(lblRiesgos, 0, 0);
-        tlpRestaurar.Controls.Add(txtPlan, 0, 1);
-        tlpRestaurar.Controls.Add(flpRestaurar, 0, 2);
-        tabHistorial.Controls.Add(dgvHistorial);
-        dgvHistorial.Dock = DockStyle.Fill;
-        dgvHistorial.ReadOnly = true;
-        dgvHistorial.AutoGenerateColumns = false;
-        dgvHistorial.AllowUserToAddRows = false;
-        dgvHistorial.AllowUserToDeleteRows = false;
-        dgvHistorial.AllowUserToResizeColumns = true;
-        dgvHistorial.RowHeadersVisible = false;
-        dgvHistorial.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        dgvHistorial.BackgroundColor = Color.White;
-        colEventoFechaUtc = new DataGridViewTextBoxColumn
-        {
-            Name = "colEventoFechaUtc",
-            DataPropertyName = "FechaLocal",
-            HeaderText = "Fecha y hora — Argentina",
-            MinimumWidth = 90,
-            FillWeight = 130
-        };
-        dgvHistorial.Columns.Add(colEventoFechaUtc);
-        colEventoFechaUtc.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm:ss";
-        colEventoAccion = new DataGridViewTextBoxColumn
-        {
-            Name = "colEventoAccion",
-            DataPropertyName = "Accion",
-            HeaderText = "Operación",
-            MinimumWidth = 90,
-            FillWeight = 130
-        };
-        dgvHistorial.Columns.Add(colEventoAccion);
-        colEventoResultado = new DataGridViewTextBoxColumn
-        {
-            Name = "colEventoResultado",
-            DataPropertyName = "Resultado",
-            HeaderText = "Resultado",
-            MinimumWidth = 90,
-            FillWeight = 100
-        };
-        dgvHistorial.Columns.Add(colEventoResultado);
-        colEventoAutor = new DataGridViewTextBoxColumn
-        {
-            Name = "colEventoAutor",
-            DataPropertyName = "Autor",
-            HeaderText = "Solicitante",
-            MinimumWidth = 90,
-            FillWeight = 110
-        };
-        dgvHistorial.Columns.Add(colEventoAutor);
-        colEventoSegundoAprobador = new DataGridViewTextBoxColumn
-        {
-            Name = "colEventoSegundoAprobador",
-            DataPropertyName = "SegundoAprobador",
-            HeaderText = "Segundo aprobador",
-            MinimumWidth = 90,
-            FillWeight = 110
-        };
-        dgvHistorial.Columns.Add(colEventoSegundoAprobador);
-        colEventoDetalle = new DataGridViewTextBoxColumn
-        {
-            Name = "colEventoDetalle",
-            DataPropertyName = "Detalle",
-            HeaderText = "Detalle / archivos",
-            MinimumWidth = 90,
-            FillWeight = 350
-        };
-        dgvHistorial.Columns.Add(colEventoDetalle);
-        btnActualizar.Text = "Actualizar estado e historial";
-        btnActualizar.AutoSize = true;
-        btnActualizar.Anchor = AnchorStyles.Left;
-        Load += Formulario_Load;
-        FormClosing += Formulario_FormClosing;
-        btnActualizar.Click += BtnActualizar_Click;
-        btnCrear.Click += BtnCrear_Click;
-        btnGuardarPrograma.Click += BtnGuardarPrograma_Click;
-        btnEnsayar.Click += BtnEnsayar_Click;
-        btnRestaurar.Click += BtnRestaurar_Click;
-        dgvCopias.SelectionChanged += DgvCopias_SelectionChanged;
-        ResumeLayout(false);
+        components = new System.ComponentModel.Container(); SuspendLayout();
+        AutoScaleMode = AutoScaleMode.Font; Font = new Font("Segoe UI", 10F); ClientSize = new Size(1180, 760); MinimumSize = new Size(850, 620);
+        BackColor = EstilosInterfaz.FondoAplicacion; Text = "Respaldos y recuperación";
+        tlpPrincipal = Columna(); tlpPrincipal.AutoScroll = false;
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
+        tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); Controls.Add(tlpPrincipal);
+        lblTitulo = Ayuda("Respaldos y recuperación de información"); lblTitulo.Font = new Font("Segoe UI", 17, FontStyle.Bold);
+        lblEstado = Ayuda("Consultando configuración…");
+        tabs = new TabControl { Name = "tabs", Dock = DockStyle.Fill, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+        tabCopias = new TabPage("Copias manuales"); tabPrograma = new TabPage("Programación automática"); tabRestaurar = new TabPage("Restaurar"); tabHistorial = new TabPage("Historial y aprobaciones");
+        tabs.TabPages.AddRange([tabCopias, tabPrograma, tabRestaurar, tabHistorial]);
+        foreach (TabPage t in tabs.TabPages) { t.Font = Font; t.BackColor = Color.White; }
+        btnActualizar = Boton("Actualizar estado e historial", BtnActualizar_Click); btnActualizar.Anchor = AnchorStyles.Left;
+        tlpPrincipal.Controls.Add(lblTitulo, 0, 0); tlpPrincipal.Controls.Add(lblEstado, 0, 1); tlpPrincipal.Controls.Add(tabs, 0, 2); tlpPrincipal.Controls.Add(btnActualizar, 0, 3);
+        var manual = Columna(); tabCopias.Controls.Add(manual);
+        manual.RowStyles.Add(new RowStyle(SizeType.AutoSize)); manual.RowStyles.Add(new RowStyle(SizeType.AutoSize)); manual.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); manual.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        lblManual = Ayuda(""); manual.Controls.Add(lblManual, 0, 0);
+        var opciones = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = true };
+        txtCarpetaManual = new TextBox { Name = "txtCarpetaManual", MaxLength = 145, Width = 380 };
+        btnCarpetaManual = Boton("Elegir carpeta…", ElegirCarpetaManual_Click); btnCarpetaManual.Name = "btnCarpetaManual"; btnCarpetaManual.Visible = false;
+        var carpeta = Campo("Carpeta local de respaldo", Selector(txtCarpetaManual, btnCarpetaManual)); carpeta.Width = 500; opciones.Controls.Add(carpeta);
+        cboTipo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 145 }; var tipo = Campo("Tipo de copia", cboTipo); tipo.Width = 160; opciones.Controls.Add(tipo);
+        btnCrear = Boton("Crear y verificar copia", BtnCrear_Click, true); opciones.Controls.Add(Campo("Crear respaldo local", btnCrear));
+        manual.Controls.Add(opciones, 0, 1); dgvCopias = GrillaCopias("dgvCopias"); manual.Controls.Add(dgvCopias, 0, 2);
+        var programa = Columna(); tabPrograma.Controls.Add(programa); programa.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        lblAyudaPrograma = Ayuda("El agente se ejecuta al iniciar sesión en Windows y sigue funcionando con SGTM cerrado. El equipo debe estar encendido, la sesión iniciada y Drive disponible. Si falta la completa base, se crea una. Los fallos se reintentan cada 15 minutos."); programa.Controls.Add(lblAyudaPrograma);
+        chkProgramado = new CheckBox { Text = "Activar respaldo diario", AutoSize = true }; programa.Controls.Add(chkProgramado);
+        txtCarpetaAuto = new TextBox { MaxLength = 145 }; btnCarpetaAuto = Boton("Elegir carpeta…", ElegirCarpetaAuto_Click); btnCarpetaAuto.Name = "btnCarpetaAuto"; btnCarpetaAuto.Visible = false;
+        programa.Controls.Add(Campo("Carpeta local (SQL Server debe poder escribir aquí)", Selector(txtCarpetaAuto, btnCarpetaAuto)));
+        txtCarpetaDrive = new TextBox { MaxLength = 500 }; var elegirDrive = Boton("Elegir carpeta…", (_, _) => ElegirCarpeta(txtCarpetaDrive));
+        programa.Controls.Add(Campo("Carpeta de Google Drive para los paquetes automáticos (opcional)", Selector(txtCarpetaDrive, elegirDrive)));
+        chkDiferenciales = new CheckBox { Text = "Completa semanal y diferenciales los demás días; desmarcado: completa diaria", AutoSize = true }; programa.Controls.Add(chkDiferenciales);
+        var horario = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, WrapContents = true };
+        dtpHora = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "HH:mm", ShowUpDown = true, Width = 100 };
+        cboDia = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 150 }; cboZona = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 240 };
+        horario.Controls.Add(Campo("Hora diaria (24 horas)", dtpHora)); horario.Controls.Add(Campo("Día de la copia completa", cboDia)); horario.Controls.Add(Campo("Zona horaria del plan", cboZona)); programa.Controls.Add(horario);
+        btnGuardarPrograma = Boton("Guardar programación", BtnGuardarPrograma_Click, true); programa.Controls.Add(btnGuardarPrograma);
+        txtEstadoPrograma = new TextBox { Multiline = true, ReadOnly = true, Height = 120, Dock = DockStyle.Top, ScrollBars = ScrollBars.Vertical }; programa.Controls.Add(Campo("Estado del agente y próxima ejecución", txtEstadoPrograma));
+        var restaurar = Columna(); tabRestaurar.Controls.Add(restaurar); restaurar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        restaurar.RowStyles.Add(new RowStyle(SizeType.AutoSize)); restaurar.RowStyles.Add(new RowStyle(SizeType.Percent, 65)); restaurar.RowStyles.Add(new RowStyle(SizeType.AutoSize)); restaurar.RowStyles.Add(new RowStyle(SizeType.Percent, 35)); restaurar.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
+        lblRiesgos = Ayuda("RESTAURAR REEMPLAZA DATOS posteriores a la copia, incluidos cobros, usuarios y contraseñas. Seleccione aquí la copia, ensaye y luego autorice con dos cuentas distintas. Cierre las demás conexiones; se creará una copia protectora."); lblRiesgos.ForeColor = EstilosInterfaz.Peligro;
+        dgvRestaurar = GrillaCopias("dgvRestaurar"); dgvRestaurar.SelectionChanged += DgvCopias_SelectionChanged;
+        lblSeleccion = Ayuda("Ninguna copia seleccionada."); lblSeleccion.Font = new Font(Font, FontStyle.Bold);
+        txtPlan = new TextBox { Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, BackColor = Color.White };
+        var acciones = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, WrapContents = false };
+        btnEnsayar = Boton("Ensayar restauración", BtnEnsayar_Click, true); btnRestaurar = Boton("Autorizar y restaurar…", BtnRestaurar_Click, peligro: true); btnEnsayar.Enabled = btnRestaurar.Enabled = false; acciones.Controls.AddRange([btnEnsayar, btnRestaurar]);
+        restaurar.Controls.Add(lblRiesgos, 0, 0); restaurar.Controls.Add(dgvRestaurar, 0, 1); restaurar.Controls.Add(lblSeleccion, 0, 2); restaurar.Controls.Add(txtPlan, 0, 3); restaurar.Controls.Add(acciones, 0, 4);
+        var historial = Columna(); historial.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); historial.RowStyles.Add(new RowStyle(SizeType.AutoSize)); historial.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); tabHistorial.Controls.Add(historial);
+        historial.Controls.Add(Ayuda("Registro de las copias, exportaciones, ensayos y restauraciones: permite consultar qué ocurrió, cuándo y quién autorizó. Se conserva separado de los datos restaurados. Seleccione una fila para consultar su detalle completo."), 0, 0);
+        dgvHistorial = new DataGridView { Name = "dgvHistorial", Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill }; EstilosInterfaz.AplicarGrilla(dgvHistorial);
+        foreach (var (prop, titulo) in new[] { ("FechaLocal", "Fecha y hora — Argentina"), ("Accion", "Operación"), ("Resultado", "Resultado"), ("Autor", "Solicitante"), ("SegundoAprobador", "Segundo aprobador"), ("Detalle", "Detalle / archivos") }) { var c = new DataGridViewTextBoxColumn { DataPropertyName = prop, HeaderText = titulo, MinimumWidth = 110 }; if (prop == "FechaLocal") c.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm:ss"; if (prop == "Detalle") c.FillWeight = 300; dgvHistorial.Columns.Add(c); }
+        dgvHistorial.CellDoubleClick += (_, e) => { if (e.RowIndex >= 0) MessageBox.Show(this, dgvHistorial.Rows[e.RowIndex].Cells[5].Value?.ToString(), "Detalle de la operación"); }; historial.Controls.Add(dgvHistorial, 0, 1);
+        Load += Formulario_Load; FormClosing += Formulario_FormClosing; ResumeLayout(false);
     }
-
-    private CheckBox chkAzureManual = null!, chkAzureAuto = null!;
-    private Button btnReintentarAzure = null!;
-    private TableLayoutPanel tlpPrincipal = null!;
-    private Label lblTitulo = null!;
-    private Label lblEstado = null!;
-    private TabControl tabs = null!;
-    private TabPage tabCopias = null!;
-    private TabPage tabPrograma = null!;
-    private TabPage tabRestaurar = null!;
-    private TabPage tabHistorial = null!;
-    private TableLayoutPanel tlpCopias = null!;
-    private FlowLayoutPanel flpManual = null!;
-    private TextBox txtCarpetaManual = null!;
-    private Button btnCarpetaManual = null!, btnCarpetaAuto = null!;
-    private ComboBox cboTipo = null!;
-    private Button btnCrear = null!;
-    private Label lblManual = null!;
-    private DataGridView dgvCopias = null!;
-    private TableLayoutPanel tlpPrograma = null!;
-    private Label lblAyudaPrograma = null!;
-    private TextBox txtCarpetaAuto = null!;
-    private CheckBox chkProgramado = null!;
-    private CheckBox chkDiferenciales = null!;
-    private FlowLayoutPanel flpHorario = null!;
-    private Label lblHora = null!;
-    private DateTimePicker dtpHora = null!;
-    private Label lblDia = null!;
-    private ComboBox cboDia = null!;
-    private Label lblZona = null!;
-    private ComboBox cboZona = null!;
-    private Button btnGuardarPrograma = null!;
-    private TextBox txtEstadoPrograma = null!;
-    private TableLayoutPanel tlpRestaurar = null!;
-    private Label lblRiesgos = null!;
-    private TextBox txtPlan = null!;
-    private FlowLayoutPanel flpRestaurar = null!;
-    private Button btnEnsayar = null!;
-    private Button btnRestaurar = null!;
-    private DataGridView dgvHistorial = null!;
-    private Button btnActualizar = null!;
-    private DataGridViewTextBoxColumn colRutaControl = null!, colAdvertencia = null!;
-    private DataGridViewTextBoxColumn colFechaServidor = null!;
-    private DataGridViewTextBoxColumn colTipo = null!;
-    private DataGridViewTextBoxColumn colSoloCopia = null!;
-    private DataGridViewTextBoxColumn colRutaServidor = null!;
-    private DataGridViewTextBoxColumn colAutor = null!;
-    private DataGridViewTextBoxColumn colEventoFechaUtc = null!;
-    private DataGridViewTextBoxColumn colEventoAccion = null!;
-    private DataGridViewTextBoxColumn colEventoResultado = null!;
-    private DataGridViewTextBoxColumn colEventoAutor = null!;
-    private DataGridViewTextBoxColumn colEventoSegundoAprobador = null!;
-    private DataGridViewTextBoxColumn colEventoDetalle = null!;
 }

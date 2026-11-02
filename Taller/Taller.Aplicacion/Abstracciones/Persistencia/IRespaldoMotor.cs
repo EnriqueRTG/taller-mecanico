@@ -8,8 +8,6 @@ public interface IRespaldoMotor
     Task<string> ExportarPaqueteAsync(Guid copia, string destino, string autor, CancellationToken ct = default) => throw new InvalidOperationException("El motor no permite exportar paquetes.");
     Task<Guid> ImportarPaqueteAsync(string origen, string carpetaServidor, string autor, CancellationToken ct = default) => throw new InvalidOperationException("El motor no permite importar paquetes.");
 
-    Task<CopiaRespaldoDto> CrearConDestinoAsync(TipoRespaldo tipo, string carpeta, string autor, bool azure, IProgress<string>? progreso = null, CancellationToken ct = default) => azure ? throw new InvalidOperationException("El motor no admite Azure.") : CrearAsync(tipo, carpeta, autor, progreso, ct);
-    Task ReintentarAzureAsync(Guid id, string autor, CancellationToken ct = default) => throw new InvalidOperationException("El motor no admite Azure.");
     Task<EstadoRespaldosDto> ConsultarAsync(CancellationToken cancelacion = default);
     Task<ProgramaRespaldoDto> ObtenerProgramaAsync(CancellationToken cancelacion = default);
     Task GuardarProgramaAsync(ProgramaRespaldoDto programa, CancellationToken cancelacion = default);

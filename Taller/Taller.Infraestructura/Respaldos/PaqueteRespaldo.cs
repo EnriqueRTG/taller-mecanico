@@ -31,7 +31,7 @@ public static class PaqueteRespaldo
                 var hash = await Hash(ruta, ct);
                 if (hash != await Hash(copia.RutaServidor, ct)) throw new InvalidOperationException("La copia transportable no coincide con el respaldo original.");
                 // No transportar rutas ni referencias a credenciales de la instalación original.
-                archivos.Add(new(copia with { RutaServidor = "", RutaControl = "", ContenedorAzure = "", BlobAzure = "", ETagAzure = "", AzureSolicitado = false, EstadoAzure = "No solicitado", AdvertenciaAzure = "", EstadoControlAzure = "No verificada" }, nombre, new FileInfo(ruta).Length, hash));
+                archivos.Add(new(copia with { RutaServidor = "", RutaControl = "", RutaPaqueteDrive = "", EstadoDrive = "", UltimoIntentoDriveUtc = null }, nombre, new FileInfo(ruta).Length, hash));
             }
             await File.WriteAllTextAsync(Path.Combine(temporal, "sgtm-respaldo.json"), JsonSerializer.Serialize(new Manifiesto(1, seleccionada, archivos)), ct);
             Directory.Move(temporal, final);

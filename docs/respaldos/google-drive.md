@@ -28,7 +28,7 @@ Espere a que Drive indique sincronización completada. La confirmación de SGTM 
 
 ## Alcance actual
 
-La exportación/importación es manual y requiere ejecutar SGTM junto a SQL Server en Windows. La programación del agente conserva sus destinos existentes; no exporta automáticamente a la unidad Drive del usuario, que puede no estar montada para un servicio Windows.
+La importación es manual y requiere ejecutar SGTM junto a SQL Server en Windows. La exportación puede hacerse manualmente o desde el agente de sesión configurado a continuación.
 
 Se admiten paquetes de la misma familia de base y versión. La reconstrucción tras perder toda la instalación (base y control) sigue siendo un procedimiento técnico separado; esta pantalla no adopta arbitrariamente la familia de un archivo externo. El paquete no incluye la base auxiliar de control. No se debe presentar esta función como recuperación automática de un equipo perdido.
 

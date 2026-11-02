@@ -16,7 +16,16 @@ partial class FrmRespaldoRestauracion
     private Button btnCrear = null!, btnCarpetaManual = null!, btnCarpetaAuto = null!, btnGuardarPrograma = null!, btnEnsayar = null!, btnRestaurar = null!, btnActualizar = null!;
     private DataGridView dgvCopias = null!, dgvRestaurar = null!, dgvHistorial = null!;
 
-    private static Label Ayuda(string texto) => new() { Text = texto, AutoSize = true, Dock = DockStyle.Top, Margin = new Padding(3, 5, 3, 10), ForeColor = EstilosInterfaz.TextoNormal, MaximumSize = new Size(1400, 0) };
+    private static Label Ayuda(string texto)
+    {
+        var label = new Label { Text = texto, AutoSize = true, Dock = DockStyle.Top, Margin = new Padding(3, 5, 3, 10), ForeColor = EstilosInterfaz.TextoNormal };
+        label.ParentChanged += (_, _) => {
+            if (label.Parent is not { } parent) return;
+            void Ajustar() { if (!label.IsDisposed) label.MaximumSize = new Size(Math.Max(100, parent.ClientSize.Width - parent.Padding.Horizontal - 12), 0); }
+            parent.SizeChanged += (_, _) => Ajustar(); Ajustar();
+        };
+        return label;
+    }
     private static TableLayoutPanel Columna() => new() { Dock = DockStyle.Fill, ColumnCount = 1, Padding = new Padding(14), AutoScroll = true };
     private static Button Boton(string texto, EventHandler click, bool primario = false, bool peligro = false)
     {

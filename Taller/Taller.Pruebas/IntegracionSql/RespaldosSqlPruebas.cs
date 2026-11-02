@@ -53,6 +53,35 @@ public sealed class RespaldosSqlPruebas
         }
     }
 
+    private sealed class RelojPrueba : TimeProvider
+    {
+        public DateTimeOffset Ahora { get; set; } = DateTimeOffset.UtcNow;
+        public override DateTimeOffset GetUtcNow() => Ahora;
+    }
+    [SqlRespaldoFact]
+    public async Task DriveNoDisponible_ConservaCopiaYReintentaSinDuplicarRespaldoSql()
+    {
+        await using var c = await Caso.CrearAsync();
+        var reloj = new RelojPrueba();
+        var motor = new RespaldoSqlServer(c.Opciones, reloj);
+        var programa = await motor.ObtenerProgramaAsync();
+        await motor.GuardarProgramaAsync(programa with {
+            Activo = true, Diferenciales = false, CarpetaServidor = c.Carpeta,
+            CarpetaDrive = Path.Combine(Path.GetTempPath(), "DriveAusente-" + Guid.NewGuid().ToString("N")),
+            IdAdministrador = 1, Autor = "Admin prueba", ProximaUtc = reloj.Ahora.AddMinutes(-1)
+        });
+        await motor.EjecutarProgramacionAsync();
+        var copia = Assert.Single((await motor.ConsultarAsync()).Copias);
+        Assert.StartsWith("Pendiente", copia.EstadoDrive);
+        Assert.NotEmpty(copia.RutaServidor);
+        await motor.ProbarRestauracionAsync(copia.Id, 1); // The failed export did not invalidate SQL backup.
+        reloj.Ahora = reloj.Ahora.AddMinutes(16);
+        await motor.EjecutarProgramacionAsync();
+        var reintentada = Assert.Single((await motor.ConsultarAsync()).Copias);
+        Assert.Equal(copia.Id, reintentada.Id);
+        Assert.True(reintentada.UltimoIntentoDriveUtc > copia.UltimoIntentoDriveUtc);
+    }
+
     private sealed class Caso : IAsyncDisposable
     {
         public string Nombre { get; } = "SGTM_Pruebas_" + Guid.NewGuid().ToString("N");

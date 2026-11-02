@@ -10,6 +10,16 @@ namespace Taller.Aplicacion.Servicios;
 public sealed class RespaldoServicio(IRespaldoMotor motor, IUsuarioRepositorio usuarios, AutenticacionServicio autenticacion, SesionUsuario sesion, PlanesRestauracion planes, TimeProvider reloj)
 {
     public bool Habilitado => motor.Habilitado;
+    public async Task<string> ExportarPaqueteAsync(Guid copia, string destino)
+    {
+        var u = await AdministradorAsync();
+        return await motor.ExportarPaqueteAsync(copia, destino, $"{u.Id} · {u.Apellido}, {u.Nombre}");
+    }
+    public async Task<Guid> ImportarPaqueteAsync(string origen, string carpetaServidor)
+    {
+        var u = await AdministradorAsync();
+        return await motor.ImportarPaqueteAsync(origen, PoliticaRespaldos.Carpeta(carpetaServidor), $"{u.Id} · {u.Apellido}, {u.Nombre}");
+    }
 
     private async Task<Usuario> AdministradorAsync()
     {

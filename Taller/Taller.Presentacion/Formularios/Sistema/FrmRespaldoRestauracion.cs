@@ -132,10 +132,17 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         _programa = await _servicio.ObtenerProgramaAsync();
         _configurando = true;
         dgvCopias.DataSource = estado.Copias.ToList();
+        dgvRestaurar.DataSource = estado.Copias.Where(c => c.Tipo == TipoRespaldo.Completa || c.BaseId.HasValue && estado.Copias.Any(b => b.Id == c.BaseId && b.Tipo == TipoRespaldo.Completa && !b.SoloCopia)).ToList();
+        dgvPaquetes.DataSource = estado.Copias.ToList();
         dgvHistorial.DataSource = estado.Historial.Select(x => new { FechaLocal = FechaHoraTaller.DesdeUtc(x.FechaUtc).DateTime, x.Accion, x.Resultado, x.Autor, x.SegundoAprobador, x.Detalle }).ToList();
         dgvCopias.ClearSelection();
+        dgvRestaurar.ClearSelection();
+        dgvRestaurar.CurrentCell = null;
+        dgvPaquetes.ClearSelection();
+        dgvPaquetes.CurrentCell = null;
+        lblSeleccion.Text = "Ninguna copia seleccionada.";
         dgvHistorial.ClearSelection();
-        chkAzureAuto.Checked = _programa.CopiarAzure;
+        txtCarpetaDrive.Text = _programa.CarpetaDrive;
         chkProgramado.Checked = _programa.Activo;
         chkDiferenciales.Checked = _programa.Diferenciales;
         txtCarpetaAuto.Text = _programa.CarpetaServidor;
@@ -150,7 +157,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         bool reciente = _programa.UltimaSenalAgenteUtc is { } ultima && DateTimeOffset.UtcNow - ultima < TimeSpan.FromMinutes(3);
         txtEstadoPrograma.Text = $"{(reciente ? "Agente con señal reciente" : "ATENCIÓN: agente sin señal reciente; no se garantiza ejecución automática")}. {senal}.\r\nPróxima ejecución: {(_programa.ProximaUtc is { } p ? TimeZoneInfo.ConvertTime(p, Taller.Aplicacion.Respaldos.PoliticaRespaldos.ResolverZona(_programa.ZonaHoraria)).ToString("dd/MM/yyyy HH:mm zzz") : "Desactivada")} · Zona: {_programa.ZonaHoraria}.\r\nÚltimo resultado: {_programa.UltimoResultado}";
         _plan = null;
-        txtPlan.Text = "Seleccione una copia registrada y presione Ensayar restauración. La completa base se incorpora automáticamente si selecciona una diferencial.";
+        txtPlan.Text = "Seleccione una copia en la tabla de Restaurar y presione Ensayar restauración. La completa base se incorpora automáticamente si selecciona una diferencial.";
         lblEstado.Text = $"Base: {estado.BaseDatos} · Generación {estado.Generacion} · {estado.Copias.Count} copias registradas. {estado.Detalle}";
         _configurando = false;
     }
@@ -158,15 +165,18 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
     private async Task ActualizarAsync() => await EjecutarAsync(CargarDatosAsync);
     private void ActualizarAcciones()
     {
-        btnEnsayar.Enabled = dgvCopias.SelectedRows.Count == 1;
+        btnEnsayar.Enabled = dgvRestaurar.SelectedRows.Count == 1;
+        btnExportarPaquete.Enabled = dgvPaquetes.SelectedRows.Count == 1;
         btnRestaurar.Enabled = _plan != null;
-        Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnEnsayar, btnRestaurar);
+
     }
 
     private void DgvCopias_SelectionChanged(object? sender, EventArgs e)
     {
         if (_configurando)
             return;
+        lblSeleccion.Text = dgvRestaurar.SelectedRows.Count == 1 && dgvRestaurar.SelectedRows[0].DataBoundItem is CopiaRespaldoDto seleccionada
+            ? $"Copia seleccionada: {seleccionada.FechaServidor:dd/MM/yyyy HH:mm:ss} · {seleccionada.Tipo} · {seleccionada.RutaServidor}" : "Ninguna copia seleccionada.";
         _plan = null;
         txtPlan.Text = "Selección modificada: debe ensayar nuevamente antes de restaurar.";
         ActualizarAcciones();
@@ -177,20 +187,9 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
     {
         await EjecutarAsync(async () =>
         {
-            var copia = await _servicio.CrearAsync((TipoRespaldo)cboTipo.SelectedItem!, txtCarpetaManual.Text, Progreso(), chkAzureManual.Checked);
+            var copia = await _servicio.CrearAsync((TipoRespaldo)cboTipo.SelectedItem!, txtCarpetaManual.Text, Progreso());
             await CargarDatosAsync();
-            MessageBox.Show(this, "Copia principal creada y verificada.\n" + copia.RutaServidor + "\n" + copia.Advertencia + "\n" + copia.AdvertenciaAzure, "Respaldo", MessageBoxButtons.OK, copia.Advertencia.Length == 0 && copia.AdvertenciaAzure.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
-        });
-    }
-
-    private async void BtnReintentarAzure_Click(object? sender, EventArgs e)
-    {
-        if (dgvCopias.SelectedRows.Count != 1 || dgvCopias.SelectedRows[0].DataBoundItem is not CopiaRespaldoDto copia)
-            return;
-        await EjecutarAsync(async () =>
-        {
-            await _servicio.ReintentarAzureAsync(copia.Id);
-            await CargarDatosAsync();
+            MessageBox.Show(this, "Copia principal creada y verificada.\n" + copia.RutaServidor + "\n" + copia.Advertencia, "Respaldo", MessageBoxButtons.OK, copia.Advertencia.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
         });
     }
 
@@ -200,7 +199,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         {
             var p = _programa with
             {
-                CopiarAzure = chkAzureAuto.Checked,
+                CarpetaDrive = txtCarpetaDrive.Text.Trim(),
                 Activo = chkProgramado.Checked,
                 Diferenciales = chkDiferenciales.Checked,
                 DiaCompleta = (DayOfWeek)cboDia.SelectedValue!,
@@ -210,19 +209,20 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
             };
             await _servicio.GuardarProgramaAsync(p);
             await CargarDatosAsync();
-            MessageBox.Show(this, "Plan guardado. Revise la señal del agente: guardar el plan no instala ni inicia el servicio de Windows.", "Programación");
+            MessageBox.Show(this, "Plan guardado. Revise la señal del agente: guardar el plan no instala ni inicia el agente. Ejecute scripts/Instalar-AgenteDrive.ps1 en el equipo SQL con la sesión de Windows que usa Drive.", "Programación");
         });
     }
 
     private async void BtnEnsayar_Click(object? sender, EventArgs e)
     {
-        if (dgvCopias.SelectedRows.Count != 1 || dgvCopias.SelectedRows[0].DataBoundItem is not CopiaRespaldoDto c)
+        if (dgvRestaurar.SelectedRows.Count != 1 || dgvRestaurar.SelectedRows[0].DataBoundItem is not CopiaRespaldoDto c)
             return;
         _plan = null;
         ActualizarAcciones();
         await EjecutarAsync(async () =>
         {
             _plan = await _servicio.ProbarRestauracionAsync(c.Id, Progreso());
+            lblEstado.Text = "Ensayo finalizado: integridad y esquema correctos. Los datos activos no se modificaron.";
             txtPlan.Text = _plan.Resumen + $"\r\nPlan válido hasta {FechaHoraTaller.DesdeUtc(_plan.VenceUtc):dd/MM/yyyy HH:mm:ss zzz} (Argentina). La autorización exige dos cuentas distintas y una ventana de mantenimiento.";
         });
     }

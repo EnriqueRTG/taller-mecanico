@@ -107,7 +107,7 @@ try {
     $agente = @{ ConnectionStrings=@{Default=$cadena;Mantenimiento=$cadena}; Respaldos=@{Habilitado=$true;BaseControl='SGTM_DB_Demo_Control'} }
     [IO.File]::WriteAllText($configAgente, ($agente | ConvertTo-Json -Depth 10), $utf8)
     Write-Host "Preparación terminada. Configuración anterior: $reserva"
-    Write-Host "Reabra Visual Studio, ejecute el perfil del proyecto e ingrese como administrador. Cree una copia Completa en $destino, sin Azure."
+    Write-Host "Reabra Visual Studio, ejecute el perfil del proyecto e ingrese como administrador. Cree una copia Completa en $destino."
     Write-Host 'La copia real comprueba los permisos efectivos de SQL sobre el archivo; preparar el control no sustituye esta prueba.'
     Write-Host 'Para probar programación, ejecute scripts\Iniciar-AgenteDemo.ps1 en otra terminal. Para operación desatendida instale el servicio documentado.'
     Write-Host 'Antes de habilitar otra PC, configure en ella la misma base compartida, base de control y Respaldos:Habilitado=true.'

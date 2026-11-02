@@ -4,7 +4,7 @@ Para la demostración Windows local, existe una [preparación asistida](../insta
 
 ## Alcance y decisiones
 
-El administrador dispone de cuatro apartados en **Respaldos y recuperación**: copias manuales, programación automática, restaurar e historial/aprobaciones. La misma pantalla muestra resultado, archivos del servidor y estado del agente. Los controles y eventos están en Designer; los servicios concentran autorización y reglas; Infraestructura ejecuta SQL nativo con conexiones independientes del contexto de negocio.
+El administrador dispone de cinco apartados en **Respaldos y recuperación**: copias manuales, programación automática, restaurar historial/aprobaciones y Google Drive. La misma pantalla muestra resultado, archivos del servidor y estado del agente. Los controles y eventos están en Designer; los servicios concentran autorización y reglas; Infraestructura ejecuta SQL nativo con conexiones independientes del contexto de negocio.
 
 Se implementan **completas y diferenciales**. Una diferencial contiene los cambios desde su completa base; para restaurarla se necesitan esos dos archivos. No se etiqueta como una cadena incremental de log ni como recuperación a cualquier instante. Los backups de log y recuperación punto en el tiempo quedan para una política DBA específica; no se cambia automáticamente el modelo de recuperación de SQL Server.
 
@@ -60,15 +60,9 @@ El instalador es explícito e idempotente. Si ya existe la base de control, veri
 El DBA debe crear los usuarios de control que correspondan a los logins reales. Por ejemplo, en la base auxiliar puede crear un rol de lectura y concederle SELECT solo sobre `dbo.EstadoSGTM`, agregar los usuarios de las estaciones a ese rol y verificar el uso de `sp_getapplock`. La cuenta administrativa y el agente requieren acceso adicional a las tablas del módulo. Revisar los requisitos de permisos nativos según versión de SQL Server; en SQL Server 2022 algunas vistas de sesiones requieren VIEW SERVER PERFORMANCE STATE.
 
 7. Configurar `Respaldos:Habilitado=true` y el mismo `Respaldos:BaseControl` en **todos los clientes** y en el agente. Reiniciar clientes. El interceptor de conexiones debe estar activo en todos ellos antes de utilizar restauración; las versiones antiguas no participan del protocolo. Una base de control inaccesible bloquea las operaciones, no se ignora silenciosamente.
-8. Para el servicio de Windows, usar una cuenta técnica con acceso SQL y derecho **Iniciar sesión como servicio**, y proteger la carpeta de publicación/configuración mediante permisos de Windows. En PowerShell elevado:
+8. Para Google Drive instale el agente de sesión siguiendo [la guía Drive](google-drive.md). Utilice `scripts/Instalar-AgenteDrive.ps1` con la misma cuenta Windows que usa Drive. No instale simultáneamente el antiguo servicio SGTMRespaldos. La ventana SGTM puede estar cerrada, pero Windows y Drive deben mantener la sesión iniciada.
 
-```powershell
-.\scripts\Instalar-AgenteRespaldos.ps1 -DirectorioPublicacion C:\SGTM\AgenteRespaldos
-```
-
-El script solicita una credencial de Windows mediante el mecanismo seguro de PowerShell; no la guarda en un archivo de texto ni la imprime. No reemplaza ni detiene un servicio existente. La contraseña de una cuenta de Windows usada por el servicio es distinta de los usuarios internos de SGTM. Revisar SQL/Windows al cambiar esa contraseña.
-
-9. Desde SGTM como administrador, crear una completa manual, revisar el archivo verificado y el historial, configurar el plan y comprobar **señal reciente del agente** y una ejecución real. Cerrar la interfaz y comprobar que el servicio continúa ejecutándolo. El mero estado Running del servicio no confirma que sus conexiones/permisos funcionen.
+9. Desde SGTM como administrador, crear una completa manual, revisar el archivo verificado y el historial, configurar el plan y comprobar **señal reciente del agente** y una ejecución real. Cerrar la interfaz y comprobar que el agente continúa ejecutándolo. El mero estado de la tarea no confirma que sus conexiones/permisos funcionen.
 
 No se debe ejecutar SGTM contra una base de producción para probar esta instalación por primera vez. Hacer el recorrido sobre una copia y validar la recuperación con el responsable técnico.
 
@@ -93,7 +87,7 @@ Los horarios inexistentes por un salto de cambio horario se omiten para ese día
 ## Restauración planificada
 
 1. Coordinar una ventana de mantenimiento y acompañamiento del personal técnico. Informar que se reemplaza la **base completa**, no registros aislados. Se retroceden atenciones, tareas, cobros, usuarios y contraseñas al punto recuperado. Evaluar antes si el problema se resuelve con una corrección de datos ordinaria; un pago incorrecto no justifica por sí solo restaurar toda la base.
-2. Seleccionar una copia registrada. Si es diferencial, el sistema incorpora su completa base. Se requieren los archivos de ambas.
+2. En **Restaurar**, seleccionar una copia de su propia tabla. Si es diferencial, el sistema incorpora su completa base. Se requieren los archivos de ambas.
 3. **Ensayar restauración:** verificar identidad/checksum, recuperar en una base temporal con archivos nuevos, ejecutar CHECKDB y comparar el esquema. No se modifica la base operativa. Se rechazan esquemas de otra versión; las migraciones posteriores deben tratarse por una recuperación técnica en otra base.
 4. El plan ensayado dura diez minutos y pertenece al administrador solicitante; el formulario no puede sustituir sus rutas ni su copia. Cambiar la selección obliga a ensayar otra vez.
 5. **Autorizar y restaurar:** el administrador de la sesión vuelve a ingresar su contraseña. Otro usuario distinto ingresa sus credenciales: otro administrador o un administrativo. Deben estar activos, con rol válido. Se exige motivo y reconocer las consecuencias y la coordinación de la ventana. No basta con escribir dos nombres o usar dos veces la misma cuenta. No se cambia la sesión al autenticar al segundo aprobador.

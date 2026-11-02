@@ -20,6 +20,8 @@ public sealed partial class RespaldoSqlServer
         var archivos = new List<CopiaRespaldoDto> { plan.Completa };
         if (plan.Diferencial != null) archivos.Add(plan.Diferencial);
         var ruta = await PaqueteRespaldo.ExportarAsync(destino, copia, archivos, ct);
+        var exportada = (plan.Diferencial ?? plan.Completa) with { RutaPaqueteDrive = ruta, EstadoDrive = "Paquete verificado; comprobar sincronización en Drive", UltimoIntentoDriveUtc = reloj.GetUtcNow() };
+        await ActualizarCopiaAsync(control, exportada, ct);
         await _registro.EventoAsync(control, "PaqueteExportado", "Archivo verificado; sincronización externa", autor, "", ruta, ct);
         return ruta;
     }

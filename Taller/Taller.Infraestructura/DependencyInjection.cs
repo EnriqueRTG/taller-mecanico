@@ -37,7 +37,6 @@ public static class DependencyInjection
         services.AddSingleton<Taller.Infraestructura.Respaldos.GeneracionMantenimiento>();
         services.AddSingleton<Taller.Infraestructura.Respaldos.IntercepcionMantenimiento>();
         services.AddSingleton<Taller.Infraestructura.Respaldos.RegistroRespaldosSql>();
-        services.AddSingleton<IArchivoRespaldoNube, Taller.Infraestructura.Respaldos.ArchivoRespaldoAzure>();
         services.AddSingleton<IRespaldoMotor, Taller.Infraestructura.Respaldos.RespaldoSqlServer>();
         services.AddDbContext<TallerDbContext>((proveedor, options) =>
         {

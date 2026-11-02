@@ -64,21 +64,4 @@ public sealed class SeguridadInicioPruebas
         Assert.Empty(await db.Usuarios.ToListAsync());
     }
 
-    [Theory]
-    [InlineData("http://cuenta.blob.core.windows.net/copias")]
-    [InlineData("https://cuenta.blob.core.windows.net/copias?sig=secreto")]
-    [InlineData("https://example.com/copias")]
-    [InlineData("https://cuenta.blob.core.windows.net/")]
-    public void Azure_NoAceptaHttpClavesOEndpointsArbitrarios(string uri)
-    {
-        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Respaldos:Azure:ContenedorUri"] = uri }).Build();
-        Assert.Throws<InvalidOperationException>(() => new ArchivoRespaldoAzure(config).ValidarConfiguracion());
-    }
-
-    [Fact]
-    public void Azure_AdmiteContenedorPrivadoSinCredencialEnUri()
-    {
-        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Respaldos:Azure:ContenedorUri"] = "https://cuenta.blob.core.windows.net/copias" }).Build();
-        new ArchivoRespaldoAzure(config).ValidarConfiguracion();
-    }
 }

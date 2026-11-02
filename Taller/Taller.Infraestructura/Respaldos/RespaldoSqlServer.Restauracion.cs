@@ -18,13 +18,9 @@ public sealed partial class RespaldoSqlServer
         var familia = await FamiliaAsync(master, ct);
         if (completa.Tipo != TipoRespaldo.Completa || completa.Familia != familia || completa.EsquemaHash != esquema || diferencial != null && (completa.SoloCopia || diferencial.Familia != familia || diferencial.EsquemaHash != esquema))
             throw new InvalidOperationException("La familia o la versión de SGTM no coincide. Para copias de otra versión se requiere recuperar en otra base y revisar con personal especializado.");
-        if (!File.Exists(completa.RutaServidor) && completa.AzureSolicitado)
-            await ExigirNube().RecuperarArchivoAsync(completa, ct);
         await VerificarArchivoAsync(master, completa, ct);
         if (diferencial != null)
         {
-            if (!File.Exists(diferencial.RutaServidor) && diferencial.AzureSolicitado)
-                await ExigirNube().RecuperarArchivoAsync(diferencial, ct);
             await VerificarArchivoAsync(master, diferencial, ct);
             if ((await LeerCabeceraAsync(master, diferencial.RutaServidor, ct)).Base != completa.BackupSetGuid)
                 throw new InvalidOperationException("La diferencial no depende de la completa seleccionada.");

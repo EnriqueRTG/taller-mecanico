@@ -171,7 +171,15 @@ partial class FrmPrepararPropuesta
         Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnGuardar);
         foreach (var b in new[] { btnAgregar, btnQuitar, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(b);
         tlpPrincipal.Controls.Add(lblAyuda, 0, 0);
-        tlpPrincipal.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 0, 1);
+        var busquedaCatalogo = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+        busquedaCatalogo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        busquedaCatalogo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 180));
+        var btnBuscarConcepto = new Button { Name = "btnBuscarConcepto", Text = "Buscar concepto…", Dock = DockStyle.Fill, Margin = new Padding(3, 20, 3, 3) };
+        btnBuscarConcepto.Click += BuscarConcepto;
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnBuscarConcepto);
+        busquedaCatalogo.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 0, 0);
+        busquedaCatalogo.Controls.Add(btnBuscarConcepto, 1, 0);
+        tlpPrincipal.Controls.Add(busquedaCatalogo, 0, 1);
         tlpPrincipal.Controls.Add(entrada, 0, 2);
         tlpPrincipal.Controls.Add(dgvItems, 0, 3);
         tlpPrincipal.Controls.Add(lblTotal, 0, 4);

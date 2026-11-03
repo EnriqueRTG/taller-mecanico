@@ -5,6 +5,7 @@ using Taller.Aplicacion.DTOs.Ejecuciones;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Enumeraciones;
 using Taller.Presentacion.Errores;
+using Taller.Presentacion.Formularios.Diagnosticos;
 
 namespace Taller.Presentacion.Formularios.Presupuestos;
 /// <summary>Valida la selección exacta del cliente o prepara una reformulación que requiere nueva aceptación.</summary>
@@ -78,6 +79,18 @@ public partial class FrmPrepararPropuesta : Form
         var q = txtBuscar.Text.Trim();
         cboConcepto.DisplayMember = nameof(ConceptoPropuestaDto.Etiqueta);
         cboConcepto.DataSource = _catalogo.Where(c => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{c.Nombre} {c.Categoria} {c.Descripcion}", q)).ToList();
+    }
+
+    /// <summary>Reutiliza el catálogo cargado y prepara el editor sin agregar ítems ni consultar nuevamente.</summary>
+    private void BuscarConcepto(object? s, EventArgs e)
+    {
+        if (_ocupado) return;
+        using var selector = new FrmBuscarConcepto(_catalogo, txtBuscar.Text);
+        if (selector.ShowDialog(this) != DialogResult.OK || selector.ConceptoSeleccionado is not { } concepto) return;
+        txtBuscar.Clear();
+        cboConcepto.SelectedItem = concepto;
+        nudCantidad.Focus();
+        nudCantidad.Select(0, nudCantidad.Text.Length);
     }
 
     private void SeleccionarConcepto(object? s, EventArgs e)

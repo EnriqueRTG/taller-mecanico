@@ -84,10 +84,19 @@ public sealed class IntercepcionMantenimiento(OpcionesRespaldos opciones, Genera
     /// el catálogo original al reutilizar la conexión. Si falla, descarta esa sesión
     /// al cerrarla; no deja una conexión dormida dentro de la base restaurable.
     /// </summary>
-    private static async Task EstacionarAsync(DbConnection c)
+    private async Task EstacionarAsync(DbConnection c)
     {
-        if (c is not SqlConnection sql || sql.State != ConnectionState.Open
-            || !new SqlConnectionStringBuilder(sql.ConnectionString).Pooling) return;
+        if (c is not SqlConnection sql || !new SqlConnectionStringBuilder(sql.ConnectionString).Pooling) return;
+        if (sql.State != ConnectionState.Open)
+        {
+            // Dispose del contexto puede cerrar internamente antes de este evento.
+            // Si aún conservamos el permiso, no pasó por ConnectionClosing: se
+            // descarta ese pool para retirar la sesión que no pudo estacionarse.
+            // Una disposición posterior a consultas normales no tiene permiso y
+            // conserva el pool; la ruta frecuente sigue reutilizando conexiones.
+            if (_permisos.ContainsKey(c)) SqlConnection.ClearPool(sql);
+            return;
+        }
         try { await sql.ChangeDatabaseAsync("master", CancellationToken.None).ConfigureAwait(false); }
         catch { SqlConnection.ClearPool(sql); }
     }

@@ -19,7 +19,12 @@ public sealed class InicioRepositorio(TallerDbContext db) : IInicioRepositorio
         var q = db.Atenciones.AsNoTracking().Where(a => a.Estado != EstadoAtencion.Cerrada && a.Estado != EstadoAtencion.Cancelada);
         if (rol == RolesSistema.TecnicoId)
             q = q.Where(a => a.Estado == EstadoAtencion.EnEvaluacionTecnica || a.Estado == EstadoAtencion.EnEjecucion || db.Presupuestos.Any(p => p.IdAtencion == a.IdAtencion && p.Vigente && p.Estado == EstadoPresupuesto.PendienteRevisionTecnica));
-        var datos = await q.Select(a => new { a.IdAtencion, a.Estado, a.IdTecnicoEnActividad, Fecha = db.HistorialAtenciones.Where(h => h.IdAtencion == a.IdAtencion).Select(h => (DateTime? )h.Fecha).Max() ?? a.FechaApertura, Descripcion = a.Vehiculo.Dominio + " · " + a.Cliente.Apellido + ", " + a.Cliente.Nombre + " · " + a.MotivoConsulta, Revision = db.Presupuestos.Any(p => p.IdAtencion == a.IdAtencion && p.Vigente && p.Estado == EstadoPresupuesto.PendienteRevisionTecnica), Presentar = db.Presupuestos.Any(p => p.IdAtencion == a.IdAtencion && p.Vigente && p.Estado == EstadoPresupuesto.PendientePresentacion), Pausa = a.Pausas.Any(p => p.FechaResolucion == null) }).ToListAsync();
+        var datos = await q.Select(a => new { a.IdAtencion, a.Estado, a.IdTecnicoEnActividad, Fecha = db.HistorialAtenciones.Where(h => h.IdAtencion == a.IdAtencion).Select(h => (DateTime? )h.Fecha).Max() ?? a.FechaApertura, Descripcion = a.Vehiculo.Dominio + " · " + a.Cliente.Apellido + ", " + a.Cliente.Nombre + " · " + a.MotivoConsulta, Revision = db.Presupuestos.Any(p => p.IdAtencion == a.IdAtencion && p.Vigente && p.Estado == EstadoPresupuesto.PendienteRevisionTecnica), Presentar = db.Presupuestos.Any(p => p.IdAtencion == a.IdAtencion && p.Vigente && p.Estado == EstadoPresupuesto.PendientePresentacion), Pausa = a.Pausas.Any(p => p.FechaResolucion == null) }).Select(a => new { Datos = a, Prioridad = rol == RolesSistema.TecnicoId ? a.Revision ? 0 : a.IdTecnicoEnActividad == usuario ? 1 : a.IdTecnicoEnActividad == null ? 2 : 9
+                : a.Presentar ? 0 : a.Estado == EstadoAtencion.PendienteDecision ? 1
+                : a.Estado == EstadoAtencion.TrabajoFinalizado || a.Estado == EstadoAtencion.PendienteLiquidacion ? 2
+                : a.Estado == EstadoAtencion.EnEvaluacionTecnica ? 3 : 9 })
+            .OrderBy(x => x.Prioridad).ThenByDescending(x => x.Datos.Fecha).ThenBy(x => "A-" + x.Datos.IdAtencion)
+            .Take(30).Select(x => x.Datos).ToListAsync();
         return datos.Select(a =>
         {
             var propio = a.IdTecnicoEnActividad == usuario;

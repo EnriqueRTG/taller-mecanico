@@ -46,28 +46,12 @@ public partial class FrmInicio : Form, IFormularioConOperacion
             btnActualizar.Enabled = false;
             LimpiarTarjetas();
             dgvActividad.DataSource = null;
-            var tipos = await _reportes.ListarTiposAsync();
+            var resumen = await _inicio.CargarAsync();
             var usuario = _sesion.UsuarioActual;
             lblBienvenida.Text = $"Bienvenido, {usuario?.Nombre} {usuario?.Apellido}";
             lblDescripcion.Text = $"Perfil: {usuario?.Rol?.Nombre} · Usuario: {usuario?.NombreUsuario}. Pendientes priorizados según su intervención.";
-            var seleccion = tipos.Contains(TipoReporte.MovimientosCobro) ? new[]
-            {
-                TipoReporte.Atenciones,
-                TipoReporte.MovimientosCobro,
-                TipoReporte.SaldosPendientes
-            }
-
-            : new[]
-            {
-                TipoReporte.CargaTecnica,
-                TipoReporte.ActividadTecnica,
-                TipoReporte.Presupuestos
-            };
-            var documentos = new List<ReporteDocumentoDto>();
-            foreach (var tipo in seleccion)
-                documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1), Hasta = FechaHoraTaller.Hoy }));
-            MostrarTarjetas(documentos);
-            var pendientes = await _inicio.ListarPendientesAsync();
+            MostrarTarjetas(resumen.Tarjetas);
+            var pendientes = resumen.Pendientes;
             dgvActividad.DataSource = pendientes;
             dgvActividad.Visible = pendientes.Count > 0;
             lblSinPendientes.Visible = pendientes.Count == 0;

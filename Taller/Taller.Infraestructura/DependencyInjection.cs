@@ -40,11 +40,12 @@ public static class DependencyInjection
         services.AddSingleton<IRespaldoMotor, Taller.Infraestructura.Respaldos.RespaldoSqlServer>();
         services.AddDbContext<TallerDbContext>((proveedor, options) =>
         {
-            // Cerrar una operación debe cerrar también la sesión física: el pool dejaría
-            // conexiones dormidas que impedirían entrar a SINGLE_USER sin forzarlas.
+            // Reutiliza sesiones físicas. El interceptor conserva el permiso hasta cerrar
+            // y estaciona la sesión en master antes de devolverla al pool, de modo
+            // que una conexión ociosa no impida restaurar la base de negocio.
             var conexionNegocio = respaldos.Habilitado ? new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString)
             {
-                Pooling = false
+                Pooling = true
             }.ConnectionString : connectionString;
             options.UseSqlServer(conexionNegocio);
             options.UsarSemillaCatalogo();

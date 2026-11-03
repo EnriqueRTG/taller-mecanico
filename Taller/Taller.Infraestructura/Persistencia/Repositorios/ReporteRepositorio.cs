@@ -9,6 +9,42 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
 {
     private static readonly string[] AccionesTecnicas = Taller.Aplicacion.Consultas.ActividadTecnicaReporte.Acciones.ToArray();
 
+    /// <summary>
+    /// Proyección liviana de indicadores. El servicio conserva una sola definición
+    /// de las fórmulas; no se materializan nombres, observaciones ni grafos de entidades.
+    /// </summary>
+    public Task<List<ReporteRegistroDto>> ListarIndicadoresAsync(TipoReporte tipo, DateTime desde, DateTime hastaExclusivo, int? tecnico)
+    {
+        return tipo switch
+        {
+            TipoReporte.Atenciones => contexto.Atenciones.AsNoTracking()
+                .Where(a => a.FechaApertura >= desde && a.FechaApertura < hastaExclusivo)
+                .Select(a => new ReporteRegistroDto { IdAtencion = a.IdAtencion, Estado = a.Estado.ToString() }).ToListAsync(),
+            TipoReporte.CargaTecnica => contexto.Atenciones.AsNoTracking()
+                .Where(a => (a.Estado == EstadoAtencion.EnEvaluacionTecnica || a.Estado == EstadoAtencion.EnEjecucion)
+                    && (!tecnico.HasValue || a.IdTecnicoEnActividad == null || a.IdTecnicoEnActividad == tecnico))
+                .Select(a => new ReporteRegistroDto { IdAtencion = a.IdAtencion,
+                    Estado = a.Pausas.Any(p => p.FechaResolucion == null) ? "Con pausas pendientes"
+                        : a.IdTecnicoEnActividad == null ? "Disponible para tomar" : "Reservada" }).ToListAsync(),
+            TipoReporte.ActividadTecnica => contexto.HistorialAtenciones.AsNoTracking()
+                .Where(h => h.Fecha >= desde && h.Fecha < hastaExclusivo && AccionesTecnicas.Contains(h.Accion)
+                    && (!tecnico.HasValue || h.IdUsuario == tecnico))
+                .Select(h => new ReporteRegistroDto { IdAtencion = h.IdAtencion }).ToListAsync(),
+            TipoReporte.SaldosPendientes => contexto.Comprobantes.AsNoTracking().Where(c => c.Total > c.TotalPagado)
+                .Select(c => new ReporteRegistroDto { IdAtencion = c.IdAtencion, Fecha = c.FechaEmision, Importe = c.Total - c.TotalPagado }).ToListAsync(),
+            TipoReporte.MovimientosCobro => contexto.PagoMedios.AsNoTracking()
+                .Where(m => m.Pago.Fecha >= desde && m.Pago.Fecha < hastaExclusivo)
+                .Select(m => new ReporteRegistroDto { IdAtencion = m.Pago.Comprobante.IdAtencion, Estado = "Cobro", Importe = m.Importe })
+                .Concat(contexto.PagoMedios.AsNoTracking()
+                    .Where(m => m.Pago.Anulado && m.Pago.FechaAnulacion >= desde && m.Pago.FechaAnulacion < hastaExclusivo)
+                    .Select(m => new ReporteRegistroDto { IdAtencion = m.Pago.Comprobante.IdAtencion, Estado = "Anulación", Importe = -m.Importe })).ToListAsync(),
+            // Esta consulta ya proyecta cantidades/precios por ítem. Se conserva el
+            // redondeo por ítem en .NET para no alterar importes autorizados.
+            TipoReporte.Presupuestos => ListarPresupuestosAsync(desde, hastaExclusivo, tecnico),
+            _ => throw new InvalidOperationException("El tipo no corresponde a una tarjeta de inicio.")
+        };
+    }
+
     public Task<List<ReporteRegistroDto>> ListarCargaAsync(int? tecnico) =>
         contexto.Atenciones
             .AsNoTracking()

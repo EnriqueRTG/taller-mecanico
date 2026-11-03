@@ -66,19 +66,34 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         RolesSistema.TecnicoId => [TipoReporte.CargaTecnica, TipoReporte.ActividadTecnica, TipoReporte.ConceptosRealizados, TipoReporte.Presupuestos],
         _ => []
     };
-    private async Task<Usuario> ExigirUsuarioAsync()
-    {
-        var u = sesion.UsuarioActual is { } actual ? await usuarios.ObtenerPorIdAsync(actual.Id) : null;
-        if (!UsuarioAutorizado.EstaHabilitado(u) || TiposParaRol(u.RolId).Count == 0)
-            throw new ValidacionException("Se requiere una sesión activa autorizada para consultar reportes.");
-        return u;
-    }
+    private readonly AutorizacionOperativa _acceso = new(usuarios, sesion);
+    private Task<Usuario> ExigirUsuarioAsync() => _acceso.ExigirRolesAsync(
+        RolesSistema.AdministradorId, RolesSistema.AdministrativoId, RolesSistema.TecnicoId);
 
     public async Task<IReadOnlyList<TipoReporte>> ListarTiposAsync() => TiposParaRol((await ExigirUsuarioAsync()).RolId);
     public async Task<ReporteDocumentoDto> GenerarAsync(SolicitudReporteDto solicitud)
     {
         ArgumentNullException.ThrowIfNull(solicitud);
-        var usuario = await ExigirUsuarioAsync();
+        return await GenerarAutorizadoAsync(solicitud, await ExigirUsuarioAsync(), false);
+    }
+
+    /// <summary>Usado por Inicio tras su autorización única. Comparte las fórmulas y redondeos de reportes.</summary>
+    internal async Task<List<ReporteDocumentoDto>> ResumirInicioAsync(Usuario usuario)
+    {
+        TipoReporte[] tipos = TiposParaRol(usuario.RolId).Contains(TipoReporte.MovimientosCobro)
+            ? [TipoReporte.Atenciones, TipoReporte.MovimientosCobro, TipoReporte.SaldosPendientes]
+            : [TipoReporte.CargaTecnica, TipoReporte.ActividadTecnica, TipoReporte.Presupuestos];
+        var hoy = FechaHoraTaller.Hoy;
+        var documentos = new List<ReporteDocumentoDto>();
+        // El contexto se utiliza secuencialmente; no se paralelizan operaciones EF sobre la misma instancia.
+        foreach (var tipo in tipos)
+            documentos.Add(await GenerarAutorizadoAsync(new SolicitudReporteDto {
+                Tipo = tipo, Desde = new DateTime(hoy.Year, hoy.Month, 1), Hasta = hoy }, usuario, true));
+        return documentos;
+    }
+
+    private async Task<ReporteDocumentoDto> GenerarAutorizadoAsync(SolicitudReporteDto solicitud, Usuario usuario, bool soloIndicadores)
+    {
         if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo))
             throw new ValidacionException("Su rol no permite consultar este reporte.");
         var estadosDisponibles = EstadosPara(solicitud.Tipo);
@@ -92,7 +107,9 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         int? tecnico = usuario.RolId == RolesSistema.TecnicoId ? usuario.Id : null;
         var desde = solicitud.Desde.Date;
         var hasta = (solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? hoy : solicitud.Hasta.Date).AddDays(1);
-        var registros = solicitud.Tipo switch
+        var registros = soloIndicadores
+            ? await reportes.ListarIndicadoresAsync(solicitud.Tipo, desde, hasta, tecnico)
+            : solicitud.Tipo switch
         {
             TipoReporte.CargaTecnica => await reportes.ListarCargaAsync(tecnico),
             TipoReporte.Atenciones => await reportes.ListarAtencionesAsync(desde, hasta),
@@ -162,6 +179,9 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             metodologia = "Atenciones recibidas durante el período, agrupadas por su estado actual. No reconstruye el estado que tenían al cierre del período ni incluye aperturas anteriores. El importe no se infiere del motivo ni del estado.";
             recomendacion = "Revisar las atenciones activas de mayor antigüedad y los casos pendientes de decisión; ampliar el período para incluir aperturas anteriores.";
         }
+
+        if (soloIndicadores)
+            return new ReporteDocumentoDto { Titulo = Nombre(solicitud.Tipo), Indicadores = indicadores };
 
         var grafico = registros.GroupBy(x => Legible(x.Grupo)).Select(g => new PuntoReporteDto(g.Key, monetario ? g.Sum(x => x.Importe ?? 0) : g.Count())).OrderByDescending(x => Math.Abs(x.Valor)).ThenBy(x => x.Etiqueta).ToList();
         if (grafico.Count > 8)

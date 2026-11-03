@@ -48,7 +48,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             AutorizacionOperativa.Version(datos.Version, p.Version);
             if (!p.Vigente || p.Estado != EstadoPresupuesto.PendienteDecision || (!p.EsAdicional && (p.Atencion.Estado != EstadoAtencion.PendienteDecision || p.Atencion.IdTecnicoEnActividad != null)) || (p.EsAdicional && p.Atencion.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))
                 throw new ValidacionException("La propuesta no está disponible para registrar una decisión.");
-            if (await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
+            if (await repositorio.ExisteLiquidacionAsync(p.IdAtencion))
                 throw new ValidacionException("La atención ya está liquidada.");
             if (datos.ItemsAceptados is null || datos.ItemsAceptados.Distinct().Count() != datos.ItemsAceptados.Count || datos.ItemsAceptados.Except(p.Detalles.Select(d => d.IdPresupuestoDetalle)).Any())
                 throw new ValidacionException("La selección contiene ítems repetidos o ajenos a esta propuesta.");
@@ -94,7 +94,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
             AutorizacionOperativa.Version(version, p.Version);
             if (p.EsAdicional)
             {
-                if (!p.Vigente || p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendienteRevisionTecnica || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || p.Atencion.FechaCierre != null || await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
+                if (!p.Vigente || p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendienteRevisionTecnica || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || p.Atencion.FechaCierre != null || await repositorio.ExisteLiquidacionAsync(p.IdAtencion))
                     throw new ValidacionException("Solo puede revisar un adicional sin ejecución, sin liquidación y aún vigente.");
                 p.Vigente = false;
                 var revision = new Presupuesto
@@ -123,7 +123,7 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                 return revision.IdPresupuesto;
             }
 
-            if (p.Estado == EstadoPresupuesto.PendienteRevisionTecnica || !p.Vigente || p.Estado == EstadoPresupuesto.Borrador || p.Atencion.IdTecnicoEnActividad != null || p.Atencion.Estado is EstadoAtencion.Cerrada or EstadoAtencion.Cancelada || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || await repositorio.ObtenerPorAtencionAsync(p.IdAtencion) != null)
+            if (p.Estado == EstadoPresupuesto.PendienteRevisionTecnica || !p.Vigente || p.Estado == EstadoPresupuesto.Borrador || p.Atencion.IdTecnicoEnActividad != null || p.Atencion.Estado is EstadoAtencion.Cerrada or EstadoAtencion.Cancelada || p.Detalles.Any(d => d.CantidadEjecutada > 0 || d.EstadoEjecucion != EstadoEjecucionDetalle.NoIniciado) || await repositorio.ExisteLiquidacionAsync(p.IdAtencion))
                 throw new ValidacionException("Solo puede revisar una propuesta vigente, sin reserva, sin ejecución ni liquidación. Con trabajos iniciados conserve el avance y resuelva las pausas o adicionales antes de continuar.");
             p.Vigente = false;
             var nueva = new Presupuesto

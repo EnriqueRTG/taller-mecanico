@@ -20,12 +20,11 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
             throw new ValidacionException("La atención debe haber terminado técnicamente, sin actividad reservada y sin entrega registrada.");
     }
 
-    private async Task<List<PresupuestoDetalle>> FacturablesAsync(int id)
+    private async Task<List<PresupuestoDetalle>> FacturablesAsync(Atencion a)
     {
-        var presupuestos = await evaluacion.ObtenerPresupuestosAsync(id);
+        var presupuestos = await evaluacion.ObtenerPresupuestosAsync(a.IdAtencion);
         if (presupuestos.Any(p => p.Vigente && p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendientePresentacion or EstadoPresupuesto.PendienteDecision or EstadoPresupuesto.PendienteRevisionTecnica))
             throw new ValidacionException("Debe resolver las propuestas vigentes antes de liquidar.");
-        var a = await AtencionAsync(id);
         if (a.Pausas.Any(p => p.FechaResolucion == null))
             throw new ValidacionException("Resuelva las pausas antes de liquidar.");
         var autorizados = presupuestos.Where(p => p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0))).ToList();
@@ -58,27 +57,10 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
     {
         try
         {
-            return await unidad.LeerConsistenteAsync(async () =>
-            {
-                await acceso.ExigirAsync(RolesSistema.AdministrativoId);
-                var atenciones = await repositorio.ListarAtencionesParaCobrosAsync();
-                var documentos = (await repositorio.ListarComprobantesAsync()).ToDictionary(d => d.IdAtencion);
-                return atenciones.Select(a =>
-                {
-                    documentos.TryGetValue(a.IdAtencion, out var d);
-                    return new AtencionCobroDto
-                    {
-                        IdAtencion = a.IdAtencion,
-                        Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
-                        Dominio = a.Vehiculo.Dominio,
-                        Estado = a.Estado,
-                        Fecha = d == null ? a.FechaApertura : d.Pagos.Select(p => p.FechaAnulacion ?? p.Fecha).Append(d.FechaEmision).Max(),
-                        IdComprobante = d?.IdComprobante,
-                        Total = d?.Total,
-                        Pagado = d?.TotalPagado
-                    };
-                }).ToList();
-            });
+            await acceso.ExigirAsync(RolesSistema.AdministrativoId);
+            // El resumen se resuelve en una consulta; no abre una transacción Serializable
+            // para recorrer el grafo completo de documentos, pagos y medios.
+            return await repositorio.ListarResumenCobrosAsync();
         }
         finally
         {
@@ -102,7 +84,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                     VersionAtencion = a.Version.ToArray(),
                     Resumen = $"Atención {idAtencion:D6} · {a.Cliente.Apellido}, {a.Cliente.Nombre} · {a.Vehiculo.Dominio} · {Taller.Aplicacion.DTOs.Atenciones.TextoAtencion.Estado(a.Estado)}" + (a.Estado == EstadoAtencion.Cerrada ? "\r\n" + a.Historial.Where(h => h.Accion == "VehiculoEntregado").OrderByDescending(h => h.Fecha).Select(h => $"Entrega {h.Fecha:dd/MM/yyyy HH:mm}: {h.Observaciones}").FirstOrDefault() : ""),
                     Comprobante = d == null ? null : Mapear(d),
-                    ItemsPorLiquidar = d != null || a.Estado == EstadoAtencion.Cerrada ? [] : Items(await FacturablesAsync(idAtencion))
+                    ItemsPorLiquidar = d != null || a.Estado == EstadoAtencion.Cerrada ? [] : Items(await FacturablesAsync(a))
                 };
             });
         }
@@ -123,7 +105,7 @@ public sealed class CobroServicio(ICircuitoRepositorio repositorio, IEvaluacionR
                 return existente.IdComprobante;
             AutorizacionOperativa.Version(version, a.Version);
             AbiertaParaCobros(a);
-            var origenes = await FacturablesAsync(idAtencion);
+            var origenes = await FacturablesAsync(a);
             var filas = Items(origenes);
             decimal total = 0;
             foreach (var f in filas)

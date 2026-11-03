@@ -35,12 +35,12 @@ public static class SqlRespaldos
         var c = new SqlConnection(cadena);
         try
         {
-            await c.OpenAsync(ct);
+            await c.OpenAsync(ct).ConfigureAwait(false);
             return c;
         }
         catch
         {
-            await c.DisposeAsync();
+            await c.DisposeAsync().ConfigureAwait(false);
             throw;
         }
     }
@@ -72,7 +72,7 @@ public static class SqlRespaldos
         }
         catch
         {
-            await c.DisposeAsync();
+            await c.DisposeAsync().ConfigureAwait(false);
             throw;
         }
     }

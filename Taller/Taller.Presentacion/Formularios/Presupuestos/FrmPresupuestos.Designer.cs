@@ -86,7 +86,7 @@ partial class FrmPresupuestos
         txtBuscar.PlaceholderText = "Buscar presupuesto, atención, cliente o dominio";
         txtBuscar.TextChanged += Filtrar;
         cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboEstado.Items.AddRange(new object[] { "Todos", "Por presentar", "Borradores", "Esperando decisión", "Revisión técnica de selección" });
+        cboEstado.Items.AddRange(new object[] { "Todos", "Por presentar", "Borradores", "Esperando decisión", "Revisión técnica de selección", "Aceptados", "Aceptados parcialmente", "Rechazados", "Históricos" });
         cboEstado.SelectedIndexChanged += Filtrar;
         dgvDatos.Columns.Add(new DataGridViewCheckBoxColumn { Name = "colVigente", DataPropertyName = "Vigente", HeaderText = "Vigente", FillWeight = 60, ReadOnly = true });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAceptado", DataPropertyName = "TotalAceptado", HeaderText = "Autorizado ARS", FillWeight = 90, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });

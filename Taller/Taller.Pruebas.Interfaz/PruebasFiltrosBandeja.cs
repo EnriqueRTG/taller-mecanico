@@ -39,7 +39,9 @@ internal static class PruebasFiltrosBandeja
                         : new[] { "txtBuscar", "cboEstado", "dtpDesde", "dtpHasta", "btnLimpiarFiltros", "btnActualizar" };
                     var rectangulos = editores.Select(nombre => (Nombre: nombre, Rect: Relativo(f.Controls.Find(nombre, true).Single(), tabla))).ToArray();
                     foreach (var (nombre, rect) in rectangulos)
-                        if (rect.Width < 90 || rect.Height < 20 || !tabla.ClientRectangle.Contains(rect))
+                        if (rect.Width < 90 || rect.Height < 20)
+                            throw new InvalidOperationException($"Filtro demasiado pequeño: {tipo.Name}/{nombre}, {ancho}: {rect}.");
+                        else if (!tabla.ClientRectangle.Contains(rect))
                             throw new InvalidOperationException($"Filtro recortado: {tipo.Name}/{nombre}, {ancho}: {rect}, tabla {tabla.ClientSize}.");
                     for (int i = 0; i < rectangulos.Length; i++)
                         for (int j = i + 1; j < rectangulos.Length; j++)

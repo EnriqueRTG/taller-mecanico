@@ -73,13 +73,27 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     {
         if (dtpDesde is null || dtpHasta is null) return;
         var q = txtBuscar.Text.Trim();
-        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision || cboEstado.SelectedIndex == 4 && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
+        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}", q)).Where(CoincideEstado).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
         dgvDatos.ClearSelection();
         dgvDatos.CurrentCell = null;
         Seleccion(null, EventArgs.Empty);
         if (!Taller.Presentacion.Estilos.FiltrosBandeja.RangoValido(dtpDesde, dtpHasta))
             lblAyuda.Text = "El rango no es válido: Desde debe ser anterior o igual a Hasta.";
     }
+
+    /// <summary>Los estados operativos consultan versiones vigentes; Históricos conserva las sustituidas.</summary>
+    private bool CoincideEstado(PresupuestoConsultaDto d) => (cboEstado.SelectedItem as string) switch
+    {
+        "Por presentar" => d.Vigente && d.Estado == EstadoPresupuesto.PendientePresentacion,
+        "Borradores" => d.Vigente && d.Estado == EstadoPresupuesto.Borrador,
+        "Esperando decisión" => d.Vigente && d.Estado == EstadoPresupuesto.PendienteDecision,
+        "Revisión técnica de selección" => d.Vigente && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica,
+        "Aceptados" => d.Vigente && d.Estado == EstadoPresupuesto.Aceptado && !d.Items.Any(i => i.AceptadoPorCliente == false),
+        "Aceptados parcialmente" => d.Vigente && d.Estado == EstadoPresupuesto.Aceptado && d.Items.Any(i => i.AceptadoPorCliente == false),
+        "Rechazados" => d.Vigente && d.Estado == EstadoPresupuesto.Rechazado,
+        "Históricos" => !d.Vigente,
+        _ => true
+    };
 
     private PresupuestoConsultaDto? Fila => dgvDatos.CurrentRow?.DataBoundItem as PresupuestoConsultaDto;
 
@@ -96,6 +110,7 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         btnSeguimiento.Text = recepcion ? "Consultar seguimiento" : "Seguimiento y hallazgos";
         lblAyuda.Text = Fila is null ? "Seleccione un presupuesto. Los borradores se continúan en Preparación técnica. Las acciones dependen del estado y del rol."
             : Fila.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? "Selección parcial: el técnico debe comprobar su viabilidad. Sin cambios, la validación habilita los ítems elegidos. Si se reformula, recepción presenta otra propuesta para su aceptación."
+            : Fila is { EsAdicional: true, Estado: EstadoPresupuesto.Borrador } ? "Corrección de adicional: el técnico debe abrir Corregir adicional y enviar una nueva propuesta a recepción para su presentación y aceptación."
             : Fila.Estado == EstadoPresupuesto.Borrador ? "Borrador: el técnico debe continuarlo y enviarlo desde Preparación técnica antes de informar al cliente."
             : Fila.Estado == EstadoPresupuesto.PendientePresentacion ? "Propuesta emitida: informe al cliente. Si detecta una falta o error, Pedir corrección técnica devuelve la propuesta al técnico; no modifica ni autoriza trabajos."
             : "Solicitar revisión conserva esta versión y pide otra al técnico; solo es posible sin ejecución ni liquidación. La ejecución requiere aceptación del cliente.";
@@ -106,7 +121,8 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         btnRevision.Text = Fila?.Estado == EstadoPresupuesto.PendientePresentacion ? "Pedir corrección técnica" : Fila?.Estado == EstadoPresupuesto.Aceptado ? "Revisar acuerdo (excepción)" : "Solicitar cambios del cliente";
         btnRevision.Enabled = !_ocupado && recepcion && Fila is { PuedeSolicitarRevision: true };
         btnVer.Enabled = btnSeguimiento.Enabled = !_ocupado && Fila != null;
-        btnValidarSeleccion.Enabled = !_ocupado && tecnico && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendienteRevisionTecnica };
+        btnValidarSeleccion.Text = Fila is { EsAdicional: true, Estado: EstadoPresupuesto.Borrador } ? "Corregir adicional" : "Revisar selección parcial";
+        btnValidarSeleccion.Enabled = !_ocupado && tecnico && Fila is { Vigente: true } d && (d.Estado == EstadoPresupuesto.PendienteRevisionTecnica || d.EsAdicional && d.Estado == EstadoPresupuesto.Borrador && d.IdPresupuestoAnterior.HasValue);
         btnPresentar.Enabled = !_ocupado && _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId && Fila is { Vigente: true, Estado: EstadoPresupuesto.PendientePresentacion };
         Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnPresentar, btnDecidir, btnRevision, btnValidarSeleccion, btnVer, btnSeguimiento);
     }

@@ -106,15 +106,13 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
                     IdHallazgoAtencion = p.IdHallazgoAtencion,
                     IdPresupuestoAnterior = p.IdPresupuesto,
 
-                    Estado = EstadoPresupuesto.PendienteRevisionTecnica,
+                    // La corrección administrativa no es una decisión del cliente.
+                    Estado = EstadoPresupuesto.Borrador,
                     IdUsuarioCreacion = usuario.Id,
                     FechaCreacion = FechaHoraTaller.Ahora,
-                    FechaPresentacion = FechaHoraTaller.Ahora,
-                    FechaDecision = FechaHoraTaller.Ahora,
-                    IdUsuarioDecision = usuario.Id,
                     MotivoRevision = motivo,
-                    ObservacionesDecision = motivo,
-                    Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdSolicitudAtencion = d.IdSolicitudAtencion, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, OrigenMaterial = d.OrigenMaterial, AceptadoPorCliente = true }).ToList()
+                    Observaciones = motivo,
+                    Detalles = p.Detalles.Select(d => new PresupuestoDetalle { IdSolicitudAtencion = d.IdSolicitudAtencion, IdConcepto = d.IdConcepto, Descripcion = d.Descripcion, Cantidad = d.Cantidad, PrecioUnitario = d.PrecioUnitario, OrigenMaterial = d.OrigenMaterial }).ToList()
                 };
                 evaluacion.AgregarPresupuesto(revision);
                 evaluacion.PrepararVersion(p.Atencion, p.Atencion.Version);

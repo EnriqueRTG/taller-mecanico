@@ -94,7 +94,7 @@ public sealed class FrmBuscarConcepto : Form
     {
         var q = _buscar.Text.Trim();
         _lista.DataSource = _catalogo.Where(c =>
-            ($"{c.Nombre} {c.Descripcion} {c.Categoria}").Contains(q, StringComparison.OrdinalIgnoreCase)
+            Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{c.Nombre} {c.Descripcion} {c.Categoria}", q)
             && (_tipo.SelectedItem is not TipoConcepto tipo || c.Tipo == tipo)
             && (_categoria.SelectedIndex == 0 || c.Categoria == (string?)_categoria.SelectedItem)).ToList();
         _resumen.Text = $"{_lista.RowCount} conceptos · Precio orientativo: revise su vigencia antes de presupuestar.";

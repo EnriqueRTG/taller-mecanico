@@ -91,7 +91,7 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
         var id = _sesion.UsuarioActual?.Id;
         var q = txtBuscar.Text.Trim();
         var filtro = cboEstado.SelectedItem as string;
-        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => ($"{d.IdAtencion:D6} {d.Cliente} {d.Vehiculo} {d.Motivo} {d.Tecnico}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => filtro switch {
+        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{d.IdAtencion:D6} {d.Cliente} {d.Vehiculo} {d.Motivo} {d.Tecnico}", q)).Where(d => filtro switch {
             "Mis actividades" => !d.Finalizada && d.IdTecnico == id,
             "Disponibles" => !d.Finalizada && d.IdTecnico == null,
             "Reservadas" => !d.Finalizada && d.IdTecnico != null,

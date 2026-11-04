@@ -121,7 +121,7 @@ public partial class FrmEvaluarAtencion : Form
     {
         var q = txtBuscar.Text.Trim();
         cboConcepto.DisplayMember = nameof(ConceptoPropuestaDto.Etiqueta);
-        cboConcepto.DataSource = _catalogo.Where(c => ($"{c.Nombre} {c.Categoria} {c.Descripcion}").Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
+        cboConcepto.DataSource = _catalogo.Where(c => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{c.Nombre} {c.Categoria} {c.Descripcion}", q)).ToList();
     }
 
     private void BuscarConcepto(object? s, EventArgs e)
@@ -144,7 +144,7 @@ public partial class FrmEvaluarAtencion : Form
         if (c.Tipo == TipoConcepto.Servicio) chkAportaCliente.Checked = false;
         nudCantidad.Value = 1;
         txtDescripcion.Text = c.Nombre;
-        nudPrecio.Value = Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
+        nudPrecio.Value = chkAportaCliente.Checked ? 0 : Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
         lblPrecio.Text = c.PrecioReferencia.HasValue ? "Precio de referencia: revise su vigencia." : "Sin precio de referencia: establezca el importe (0 si es sin cargo).";
     }
 

@@ -11,7 +11,7 @@ public enum EstadoPresupuesto
 {
     /// <summary>Propuesta en elaboración, todavía no disponible para presentar.</summary>
     Borrador = 0,
-    /// <summary>Selección del cliente aún no autorizada: requiere propuesta técnicamente viable y nueva aceptación.</summary>
+    /// <summary>Selección parcial del cliente pendiente de viabilidad técnica. Sin cambios se valida; con cambios requiere nueva aceptación.</summary>
     PendienteRevisionTecnica = 5,
     /// <summary>
     /// La propuesta está registrada y espera ser comunicada
@@ -27,8 +27,7 @@ public enum EstadoPresupuesto
     /// El cliente autorizó los conceptos y precios propuestos.
     /// </summary>
     /// <remarks>
-    /// El presupuesto del diagnóstico inicial se registra
-    /// directamente en este estado al confirmar su autorización.
+    /// Tanto la inspección adicional como la reparación requieren presentación y decisión del cliente.
     /// </remarks>
     Aceptado = 3,
     /// <summary>

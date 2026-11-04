@@ -28,8 +28,8 @@ partial class FrmTrabajosEnCurso
         cboEstado = new ComboBox { Name = "cboEstado", Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
         cboEstado.Items.AddRange(["Todos", "Disponibles", "Asignados", "Con pausas"]); cboEstado.SelectedIndex = 0; cboEstado.SelectedIndexChanged += Filtrar;
         var botonesFiltros = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = false, AutoScroll = true };
-        var limpiar = new Button { Name = "btnLimpiarFiltros", Text = "Limpiar filtros", AutoSize = true, Height = 32 }; limpiar.Click += Limpiar;
-        var actualizar = new Button { Name = "btnActualizar", Text = "Actualizar", AutoSize = true, Height = 32 }; actualizar.Click += Actualizar;
+        var limpiar = new Button { Name = "btnLimpiarFiltros", Text = "Limpiar filtros", MinimumSize = new Size(110, 32), AutoSize = true, Height = 32 }; limpiar.Click += Limpiar;
+        var actualizar = new Button { Name = "btnActualizar", Text = "Actualizar", MinimumSize = new Size(110, 32), AutoSize = true, Height = 32 }; actualizar.Click += Actualizar;
         botonesFiltros.Name = "flpFiltrosAcciones";
         botonesFiltros.Controls.AddRange([limpiar, actualizar]);
         dtpDesde = Estilos.FiltrosBandeja.CrearFecha("dtpDesde");

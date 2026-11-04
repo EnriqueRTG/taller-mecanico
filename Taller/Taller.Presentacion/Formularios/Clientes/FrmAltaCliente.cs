@@ -82,7 +82,8 @@ public partial class FrmAltaCliente : Form
         txtTelefono.MaxLength = 30;
         txtTelefono.PlaceholderText = "Obligatorio: ej. +54 379 4123456";
         txtEmail.MaxLength = 120;
-        txtCalle.MaxLength = 100;
+        txtCalle.MaxLength = 200;
+        txtCalle.PlaceholderText = "Dirección (altura opcional)";
         txtAltura.MaxLength = 10;
     }
 
@@ -148,17 +149,10 @@ public partial class FrmAltaCliente : Form
             return false;
         }
 
-        if (!tieneAltura)
-        {
-            MessageBox.Show("Debe ingresar la altura correspondiente a la calle indicada.", "Datos del cliente", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            txtAltura.Focus();
-            return false;
-        }
-
         string direccionCompleta = $"{calle} {altura}".Trim();
-        if (direccionCompleta.Length > 120)
+        if (direccionCompleta.Length > 200)
         {
-            MessageBox.Show("La dirección completa no puede superar los 120 caracteres.", "Datos del cliente", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show("La dirección completa no puede superar los 200 caracteres.", "Datos del cliente", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             txtCalle.Focus();
             return false;
         }

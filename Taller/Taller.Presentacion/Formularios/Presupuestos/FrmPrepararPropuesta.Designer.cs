@@ -13,7 +13,7 @@ partial class FrmPrepararPropuesta
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblAyuda = null!, lblTotal = null!;
     private TextBox txtBuscar = null!, txtDescripcion = null!, txtMotivo = null!;
-    private ComboBox cboConcepto = null!, cboOrigen = null!;
+    private ComboBox cboConcepto = null!, cboOrigen = null!, cboSolicitud = null!;
     private NumericUpDown nudCantidad = null!, nudPrecio = null!;
     private DataGridView dgvItems = null!;
     private CheckBox chkCondiciones = null!;
@@ -51,10 +51,11 @@ partial class FrmPrepararPropuesta
         {
             Dock = DockStyle.Fill,
             ColumnCount = 3,
-            RowCount = 3,
+            RowCount = 4,
             AutoSize = true,
             AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
+        entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -124,6 +125,9 @@ partial class FrmPrepararPropuesta
         accionesItems.Controls.AddRange(new Control[] { btnAgregar, btnQuitar });
         entrada.Controls.Add(accionesItems, 0, 2);
         entrada.SetColumnSpan(accionesItems, 3);
+        cboSolicitud = new ComboBox { Name = "cboSolicitud", Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
+        entrada.Controls.Add(Campo("Solicitud asociada", cboSolicitud), 0, 3);
+        entrada.SetColumnSpan(cboSolicitud.Parent!, 3);
         dgvItems = new DataGridView
         {
             Dock = DockStyle.Fill,
@@ -140,6 +144,7 @@ partial class FrmPrepararPropuesta
             BackgroundColor = Color.White
         };
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Concepto / alcance", FillWeight = 220, MinimumWidth = 210 });
+        dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSolicitud", DataPropertyName = "SolicitudDescripcion", HeaderText = "Solicitud", MinimumWidth = 130 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporte", MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad", MinimumWidth = 90, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPrecio", DataPropertyName = "PrecioUnitario", HeaderText = "Precio unitario", MinimumWidth = 100, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });

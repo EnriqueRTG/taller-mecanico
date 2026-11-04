@@ -60,6 +60,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 IdAtencion = id,
                 Version = a.Version.ToArray(),
                 Estado = a.Estado,
+                Solicitudes = a.Solicitudes.Select(s => new SolicitudIngresoDto { IdSolicitud = s.IdSolicitudAtencion, Tipo = s.Tipo, Descripcion = s.Descripcion }).ToList(),
                 Progreso = ps.Where(p => !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado)
                     .SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0)))
                     .OrderBy(d => d.IdPresupuestoDetalle).Select(d => new EjecucionItemDto {
@@ -258,7 +259,9 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var a = await CargarAsync(p.IdAtencion);
             await ExigirAbiertaAsync(a);
             ExigirTecnicoDisponible(a, u);
-            if (!p.Vigente || p.Estado != EstadoPresupuesto.PendienteRevisionTecnica)
+            // Un borrador adicional con antecesor es una corrección; nunca autoriza sin nueva aceptación.
+            bool correccion = p.EsAdicional && p.IdPresupuestoAnterior.HasValue && p.Estado == EstadoPresupuesto.Borrador;
+            if (!p.Vigente || (p.Estado != EstadoPresupuesto.PendienteRevisionTecnica && !correccion))
                 throw new ValidacionException("La selección ya no está pendiente de revisión.");
             if (items is null || items.Any(i => i is null || i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
                 throw new ValidacionException("Revise las solicitudes asociadas a los ítems de la revisión.");
@@ -266,7 +269,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var seleccion = p.Detalles.Where(d => d.AceptadoPorCliente == true).ToList();
             // Solo una selección parcial real del cliente puede autorizarse sin otra decisión.
             // Cambiar importe, cantidad, descripción, origen o solicitud exige una propuesta nueva.
-            bool mismaSeleccion = !condicionesModificadas && seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
+            bool mismaSeleccion = !correccion && !condicionesModificadas && seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
                 && p.FechaDecision.HasValue && p.IdUsuarioDecision.HasValue
                 && items.Count == seleccion.Count
                 && items.Select(i => (i.IdConcepto, i.IdSolicitudAtencion)).Distinct().Count() == items.Count

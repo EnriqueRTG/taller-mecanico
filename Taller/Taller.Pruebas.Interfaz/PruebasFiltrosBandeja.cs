@@ -94,6 +94,16 @@ internal static class PruebasFiltrosBandeja
                         throw new InvalidOperationException("Un informe existente debe ser consultable por recepción y técnico.");
                     if (rol == 2 && f.Controls.Find("btnTrabajar", true).Single().Enabled)
                         throw new InvalidOperationException("Recepción no puede preparar trabajos técnicos.");
+                    grilla.CurrentCell = grilla.Rows.Cast<DataGridViewRow>().Single(r => r.DataBoundItem is EvaluacionBandejaDto { IdAtencion: 3 }).Cells[0];
+                    tipo.GetMethod("Seleccion", Privado)!.Invoke(f, [null, EventArgs.Empty]);
+                    if (f.Controls.Find("btnInforme", true).Single().Enabled)
+                        throw new InvalidOperationException("Una preparación sin diagnóstico no debe ofrecer un informe inexistente.");
+                    var estado = (ComboBox)f.Controls.Find("cboEstado", true).Single();
+                    estado.SelectedItem = "Disponibles";
+                    if (grilla.Rows.Count != 1 || grilla.Rows[0].DataBoundItem is not EvaluacionBandejaDto { IdAtencion: 1 })
+                        throw new InvalidOperationException("Disponibles debe mantener su significado en ambos roles.");
+                    estado.SelectedItem = "Finalizadas";
+                    if (grilla.Rows.Count != 2) throw new InvalidOperationException("Finalizadas no debe depender del índice de Mis actividades.");
                 }
                 Console.WriteLine($"Filtros, fechas inclusivas y distribución: {tipo.Name}, rol {rol}.");
             }

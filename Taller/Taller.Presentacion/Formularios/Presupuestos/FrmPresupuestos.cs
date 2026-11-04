@@ -27,14 +27,12 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
         _empresa = empresa;
     }
 
-    private void Filtros_SizeChanged(object? sender, EventArgs e) =>
-        Taller.Presentacion.Estilos.DisposicionFiltros.Ajustar(tlpFiltros, flpFiltrosAcciones, DeviceDpi);
-
     private void LimpiarFiltros_Click(object? sender, EventArgs e)
     {
         if (OperacionEnCurso) return;
         txtBuscar.Clear();
         cboEstado.SelectedIndex = 0;
+        dtpDesde.Checked = dtpHasta.Checked = false;
         Filtrar(null, EventArgs.Empty);
         txtBuscar.Focus();
     }
@@ -73,11 +71,14 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
 
     private void Filtrar(object? s, EventArgs e)
     {
+        if (dtpDesde is null || dtpHasta is null) return;
         var q = txtBuscar.Text.Trim();
-        dgvDatos.DataSource = _datos.Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision || cboEstado.SelectedIndex == 4 && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
+        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => ($"{d.IdPresupuesto} {d.IdAtencion} {d.Cliente} {d.Vehiculo}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.Estado == EstadoPresupuesto.PendientePresentacion || cboEstado.SelectedIndex == 2 && d.Estado == EstadoPresupuesto.Borrador || cboEstado.SelectedIndex == 3 && d.Estado == EstadoPresupuesto.PendienteDecision || cboEstado.SelectedIndex == 4 && d.Estado == EstadoPresupuesto.PendienteRevisionTecnica).OrderBy(d => !d.Vigente ? 5 : d.Estado == EstadoPresupuesto.PendienteRevisionTecnica ? 0 : d.Estado == EstadoPresupuesto.PendientePresentacion ? 0 : d.Estado == EstadoPresupuesto.Borrador ? 1 : d.Estado == EstadoPresupuesto.PendienteDecision ? 2 : 3).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdPresupuesto).ToList();
         dgvDatos.ClearSelection();
         dgvDatos.CurrentCell = null;
         Seleccion(null, EventArgs.Empty);
+        if (!Taller.Presentacion.Estilos.FiltrosBandeja.RangoValido(dtpDesde, dtpHasta))
+            lblAyuda.Text = "El rango no es válido: Desde debe ser anterior o igual a Hasta.";
     }
 
     private PresupuestoConsultaDto? Fila => dgvDatos.CurrentRow?.DataBoundItem as PresupuestoConsultaDto;

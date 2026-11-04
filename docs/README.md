@@ -15,6 +15,7 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 | Estados reales y filtros agrupados | [Estados](arquitectura/estados-circuito-actual.md) |
 | Recorrido habitual de recepción a entrega | [Circuito principal](operacion/circuito-principal.md) |
 | Selección parcial, hallazgos, pausas y materiales | [Alternativas](operacion/alternativas.md) |
+| Filtros, fechas y consulta de informes técnicos | [Filtros de listados](operacion/filtros-listados.md) |
 | Clientes, vehículos y catálogo consultable | [Datos maestros](operacion/catalogo-clientes-vehiculos.md) |
 | Qué significa cada reporte | [Reportes por rol](reportes/reportes-por-rol.md) |
 | Logo, CSV, impresión y documentos | [Documentos](operacion/documentos.md) |

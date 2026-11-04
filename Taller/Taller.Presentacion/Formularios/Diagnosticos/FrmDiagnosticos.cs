@@ -24,17 +24,20 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
         _servicio = servicio;
         _diagnosticos = diagnosticos;
         _sesion = sesion;
+        cboEstado.Items.Clear();
+        cboEstado.Items.Add("Todas las actividades");
+        if (_sesion.UsuarioActual?.RolId == RolesSistema.TecnicoId) cboEstado.Items.Add("Mis actividades");
+        cboEstado.Items.AddRange(["Disponibles", "Reservadas", "Finalizadas"]);
+        cboEstado.SelectedIndex = 0;
     }
 
     public void PrepararAperturaDiagnostico(int idAtencion) => _abrir = idAtencion;
-    private void Filtros_SizeChanged(object? sender, EventArgs e) =>
-        Taller.Presentacion.Estilos.DisposicionFiltros.Ajustar(tlpFiltros, flpFiltrosAcciones, DeviceDpi);
-
     private void LimpiarFiltros_Click(object? sender, EventArgs e)
     {
         if (OperacionEnCurso) return;
         txtBuscar.Clear();
         cboEstado.SelectedIndex = 0;
+        dtpDesde.Checked = dtpHasta.Checked = false;
         Filtrar(null, EventArgs.Empty);
         txtBuscar.Focus();
     }
@@ -84,13 +87,21 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
 
     private void Filtrar(object? s, EventArgs e)
     {
+        if (dtpDesde is null || dtpHasta is null) return;
         var id = _sesion.UsuarioActual?.Id;
         var q = txtBuscar.Text.Trim();
-        var filtro = cboEstado.SelectedIndex;
-        dgvDatos.DataSource = _datos.Where(d => ($"{d.IdAtencion:D6} {d.Cliente} {d.Vehiculo} {d.Motivo} {d.Tecnico}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => filtro == 0 || filtro == 1 && !d.Finalizada && d.IdTecnico == id || filtro == 2 && !d.Finalizada && d.IdTecnico == null || filtro == 3 && d.Finalizada).OrderBy(d => d.Finalizada ? 3 : d.IdTecnico == id ? 0 : d.IdTecnico == null ? 1 : 2).ThenBy(d => d.Finalizada ? DateTime.MaxValue.Ticks - d.Fecha.Ticks : d.Fecha.Ticks).ThenBy(d => d.IdAtencion).ToList();
+        var filtro = cboEstado.SelectedItem as string;
+        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => ($"{d.IdAtencion:D6} {d.Cliente} {d.Vehiculo} {d.Motivo} {d.Tecnico}").Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => filtro switch {
+            "Mis actividades" => !d.Finalizada && d.IdTecnico == id,
+            "Disponibles" => !d.Finalizada && d.IdTecnico == null,
+            "Reservadas" => !d.Finalizada && d.IdTecnico != null,
+            "Finalizadas" => d.Finalizada,
+            _ => true }).OrderBy(d => d.Finalizada ? 3 : d.IdTecnico == id ? 0 : d.IdTecnico == null ? 1 : 2).ThenBy(d => d.Finalizada ? DateTime.MaxValue.Ticks - d.Fecha.Ticks : d.Fecha.Ticks).ThenBy(d => d.IdAtencion).ToList();
         dgvDatos.ClearSelection();
         dgvDatos.CurrentCell = null;
         Seleccion(null, EventArgs.Empty);
+        if (!Taller.Presentacion.Estilos.FiltrosBandeja.RangoValido(dtpDesde, dtpHasta))
+            lblEstado.Text = "El rango no es válido: Desde debe ser anterior o igual a Hasta.";
     }
 
     private EvaluacionBandejaDto? Fila => dgvDatos.CurrentRow?.DataBoundItem as EvaluacionBandejaDto;
@@ -104,7 +115,14 @@ public partial class FrmDiagnosticos : Form, Taller.Presentacion.Navegacion.IFor
         btnTrabajar.Text = d?.IdTecnico == _sesion.UsuarioActual?.Id ? "Continuar" : d?.TipoSolicitud == Taller.Dominio.Enumeraciones.TipoSolicitudAtencion.ServicioDefinido ? "Preparar presupuesto" : "Diagnosticar y presupuestar";
         btnLiberar.Enabled = !_ocupado && tech && d is { Finalizada: false } && d.IdTecnico == _sesion.UsuarioActual?.Id;
         btnInforme.Enabled = !_ocupado && d?.IdDiagnostico != null;
-        lblEstado.Text = d is null ? "Seleccione una atención. Mis actividades primero; disponibles por antigüedad; finalizadas al final." : d.Finalizada ? "Evaluación finalizada. Consulte la propuesta en Presupuestos." : d.IdTecnico == null ? "Disponible para tomar." : $"Reservada por {d.Tecnico}. Cerrar el formulario no la libera.";
+        lblEstado.Text = d is null
+            ? tech ? "Seleccione una atención. Mis actividades primero; disponibles por antigüedad; finalizadas al final."
+                : "Consulta de preparación técnica: recepción puede consultar informes, pero no tomar ni modificar trabajos."
+            : d.Finalizada ? d.IdDiagnostico.HasValue
+                ? "Preparación finalizada. Puede consultar el informe técnico y la propuesta en Presupuestos."
+                : "Preparación finalizada sin informe de diagnóstico. Consulte la propuesta en Presupuestos."
+            : d.IdTecnico == null ? tech ? "Disponible para tomar." : "Sin reserva técnica. Pendiente de preparación."
+            : $"Reservada por {d.Tecnico}." + (tech ? " Cerrar el formulario no la libera." : " Recepción solo consulta.");
         Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnTrabajar, btnLiberar, btnInforme);
     }
 

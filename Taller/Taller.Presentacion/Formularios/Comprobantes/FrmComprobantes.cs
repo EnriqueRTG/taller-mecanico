@@ -21,14 +21,12 @@ public partial class FrmComprobantes : Form, IFormularioConOperacion
         _empresa = empresa;
     }
 
-    private void Filtros_SizeChanged(object? sender, EventArgs e) =>
-        Taller.Presentacion.Estilos.DisposicionFiltros.Ajustar(tlpFiltros, flpFiltrosAcciones, DeviceDpi);
-
     private void LimpiarFiltros_Click(object? sender, EventArgs e)
     {
         if (OperacionEnCurso) return;
         txtBuscar.Clear();
         cboEstado.SelectedIndex = 0;
+        dtpDesde.Checked = dtpHasta.Checked = false;
         Filtrar(null, EventArgs.Empty);
         txtBuscar.Focus();
     }
@@ -66,11 +64,14 @@ public partial class FrmComprobantes : Form, IFormularioConOperacion
 
     private void Filtrar(object? s, EventArgs e)
     {
+        if (dtpDesde is null || dtpHasta is null) return;
         var q = txtBuscar.Text.Trim();
-        dgvDatos.DataSource = _datos.Where(d => $"{d.IdAtencion:D6} {d.IdComprobante} {d.Cliente} {d.Dominio}".Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.IdComprobante == null && d.Estado != EstadoAtencion.Cerrada || cboEstado.SelectedIndex == 2 && d.Saldo > 0 || cboEstado.SelectedIndex == 3 && d.Estado != EstadoAtencion.Cerrada && d.Saldo == 0 || cboEstado.SelectedIndex == 4 && d.Estado == EstadoAtencion.Cerrada).OrderBy(d => d.Estado == EstadoAtencion.Cerrada ? 3 : d.Saldo > 0 ? 0 : d.IdComprobante == null ? 1 : 2).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdAtencion).ToList();
+        dgvDatos.DataSource = _datos.Where(d => Taller.Presentacion.Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => $"{d.IdAtencion:D6} {d.IdComprobante} {d.Cliente} {d.Dominio}".Contains(q, StringComparison.OrdinalIgnoreCase)).Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.IdComprobante == null && d.Estado != EstadoAtencion.Cerrada || cboEstado.SelectedIndex == 2 && d.Saldo > 0 || cboEstado.SelectedIndex == 3 && d.Estado != EstadoAtencion.Cerrada && d.Saldo == 0 || cboEstado.SelectedIndex == 4 && d.Estado == EstadoAtencion.Cerrada).OrderBy(d => d.Estado == EstadoAtencion.Cerrada ? 3 : d.Saldo > 0 ? 0 : d.IdComprobante == null ? 1 : 2).ThenByDescending(d => d.Fecha).ThenByDescending(d => d.IdAtencion).ToList();
         dgvDatos.ClearSelection();
         dgvDatos.CurrentCell = null;
         Seleccion(null, EventArgs.Empty);
+        if (!Taller.Presentacion.Estilos.FiltrosBandeja.RangoValido(dtpDesde, dtpHasta))
+            lblAyuda.Text = "El rango no es válido: Desde debe ser anterior o igual a Hasta.";
     }
 
     private void Seleccion(object? s, EventArgs e) => btnGestionar.Visible = btnGestionar.Enabled = dgvDatos.CurrentRow?.DataBoundItem is AtencionCobroDto;

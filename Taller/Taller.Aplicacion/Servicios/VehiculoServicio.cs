@@ -55,14 +55,14 @@ public sealed class VehiculoServicio(IVehiculoRepositorio vehiculos, IModeloRepo
     public async Task<List<Marca>> ListarMarcasAsync()
     {
         await RecepcionAsync();
-        return (await modelos.ListarParaEdicionAsync(0)).Select(m => m.Marca).DistinctBy(m => m.IdMarca).OrderBy(m => m.Nombre).ToList();
+        return await modelos.ListarMarcasDisponiblesAsync();
     }
 
     public async Task<List<Modelo>> ListarModelosPorMarcaAsync(int idMarca)
     {
         await RecepcionAsync();
         DatosMaestros.Id(idMarca);
-        return (await modelos.ListarParaEdicionAsync(0)).Where(m => m.IdMarca == idMarca).ToList();
+        return await modelos.ListarDisponiblesPorMarcaAsync(idMarca);
     }
 
     private async Task AsignarAsync(Vehiculo v, string dominio, int anio, string color, int idModelo)

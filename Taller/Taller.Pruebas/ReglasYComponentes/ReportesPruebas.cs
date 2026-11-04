@@ -106,7 +106,9 @@ public sealed class ReportesPruebas
         foreach (var consulta in new Func<Task>[] {
             async () => { await new CircuitoRepositorio(db).ListarResumenCobrosAsync(); },
             async () => { await new EvaluacionRepositorio(db).ListarEjecucionesAsync(); },
-            async () => { await new InicioRepositorio(db).ListarPendientesAsync(3, 3); }
+            async () => { await new InicioRepositorio(db).ListarPendientesAsync(3, 3); },
+            async () => { await new ModeloRepositorio(db).ListarMarcasDisponiblesAsync(); },
+            async () => { await new ModeloRepositorio(db).ListarDisponiblesPorMarcaAsync(1); }
         })
         {
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(consulta);

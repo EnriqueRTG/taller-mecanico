@@ -32,9 +32,6 @@ public sealed class CircuitoRepositorio(TallerDbContext contexto) : ICircuitoRep
     public Task<Comprobante?> ObtenerPorAtencionAsync(int idAtencion) => Documentos().SingleOrDefaultAsync(x => x.IdAtencion == idAtencion);
     public Task<Pago?> ObtenerPagoPorOperacionAsync(Guid id) => contexto.Set<Pago>().AsNoTracking().Include(x => x.Medios).SingleOrDefaultAsync(x => x.IdOperacion == id);
     public Task<List<MedioPago>> ListarMediosAsync() => contexto.Set<MedioPago>().AsNoTracking().Where(x => x.Activo).OrderBy(x => x.Nombre).ToListAsync();
-    public Task<List<Atencion>> ListarAtencionesParaCobrosAsync() => contexto.Atenciones.AsNoTracking().Include(x => x.Cliente).Include(x => x.Vehiculo)
-        .Where(x => x.Estado == EstadoAtencion.TrabajoFinalizado || x.Estado == EstadoAtencion.PendienteLiquidacion || x.Estado == EstadoAtencion.Cerrada).ToListAsync();
-    public Task<List<Comprobante>> ListarComprobantesAsync() => Documentos().AsNoTracking().ToListAsync();
     public void AgregarComprobante(Comprobante d) => contexto.Add(d);
     public void AgregarPago(Pago p) => contexto.Add(p);
     public void PrepararVersion(Comprobante d, byte[] version)

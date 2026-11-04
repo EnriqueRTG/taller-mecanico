@@ -55,3 +55,5 @@ Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DO
 - [Verificación de Demo v5](pruebas/demo-ampliada-v5.md).
 
 - [Revisión general de código previa al cierre documental](pruebas/revision-final-codigo.md).
+
+Estado de entrega y cierre de inconsistencias: [revisión del 04/11/2026](pruebas/cierre-coherencia-2026-11-04.md).

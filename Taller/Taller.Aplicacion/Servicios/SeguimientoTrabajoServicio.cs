@@ -249,6 +249,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
         }
     }
 
+    /// <summary>Valida una selección parcial exacta o emite una nueva propuesta al reformular o corregir un adicional.</summary>
     public async Task<int> RevisarSeleccionAsync(int id, byte[] version, List<ItemPropuestaDto> items, string justificacion, bool condicionesModificadas = false)
     {
         try
@@ -312,7 +313,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             repositorio.AgregarPresupuesto(nueva);
             if (!p.EsAdicional)
                 a.Estado = EstadoAtencion.EnEvaluacionTecnica;
-            await GuardarAsync(a, u, "SeleccionParcialRevisada", $"Se conserva propuesta {id}; nueva propuesta viable pendiente de comunicar y aceptar. {justificacion}");
+            await GuardarAsync(a, u, correccion ? "CorreccionAdicionalPreparada" : "SeleccionParcialRevisada", $"Se conserva propuesta {id}; nueva propuesta viable pendiente de comunicar y aceptar. {justificacion}");
             return nueva.IdPresupuesto;
         }
         finally

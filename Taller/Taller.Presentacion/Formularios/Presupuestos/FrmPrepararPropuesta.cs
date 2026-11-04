@@ -58,8 +58,9 @@ public partial class FrmPrepararPropuesta : Form
             else
                 lblAyuda.Text = inspeccion ? "Ampliación de inspección: presupueste solo servicios necesarios para determinar la causa, fuera del alcance habitual. Recepción debe informar y obtener autorización antes de realizarlos. La reparación se presupuesta por separado." : "Adicional independiente: no sustituye lo autorizado. Incluya solo trabajos/materiales nuevos. Recepción comunicará esta propuesta; no se ejecuta hasta su aceptación.";
             if (inspeccion) _catalogo = _catalogo.Where(c => c.Tipo == TipoConcepto.Servicio).ToList();
-            chkCondiciones.Visible = _revision != null;
-            tlpPrincipal.RowStyles[6].Height = _revision != null ? 30 : 0;
+            bool seleccionParcial = _revision?.Estado == EstadoPresupuesto.PendienteRevisionTecnica;
+            chkCondiciones.Visible = seleccionParcial;
+            tlpPrincipal.RowStyles[6].Height = seleccionParcial ? 30 : 0;
             dgvItems.DataSource = _items;
             Filtrar(s, e);
             ActualizarTotal();
@@ -140,7 +141,7 @@ public partial class FrmPrepararPropuesta : Form
         }
     }
 
-    private bool ConservaSeleccion => !chkCondiciones.Checked && _revision != null && _revision.Items.Any(i => !i.Aceptar)
+    private bool ConservaSeleccion => !chkCondiciones.Checked && _revision is { Estado: EstadoPresupuesto.PendienteRevisionTecnica } && _revision.Items.Any(i => i.Aceptar) && _revision.Items.Any(i => !i.Aceptar)
         && _items.Count == _revision.Items.Count(i => i.Aceptar)
         && _items.All(i => _revision.Items.Any(d => d.Aceptar && d.IdConcepto == i.IdConcepto && d.IdSolicitudAtencion == i.IdSolicitudAtencion
             && d.Descripcion == i.Descripcion && d.Cantidad == i.Cantidad && d.PrecioUnitario == i.PrecioUnitario && d.OrigenMaterial == i.OrigenMaterial));

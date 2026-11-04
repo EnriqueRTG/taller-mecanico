@@ -39,9 +39,9 @@ Visual Studio debe usar SGTM_CONN de su propio perfil/proceso o ConnectionString
 5. Confirmar conexión, catálogos, permisos y un recorrido de aceptación en el entorno de prueba antes de operar datos reales.
 6. Configurar el agente de respaldos y su base de control con permisos separados. Probar recuperación en una copia antes de habilitarla como procedimiento operativo.
 
-## Azure: siguiente etapa
+## Google Drive: respaldo transportable
 
-El sistema de negocio sigue conectado a SQL Server. Los archivos de respaldo se almacenan en Azure Blob Storage privado mediante Respaldos:Azure:ContenedorUri e identidad Microsoft Entra/DefaultAzureCredential; no requiere trasladar automáticamente la base a Azure SQL ni publicar una contraseña de almacenamiento en la cadena SGTM_CONN. Se configurará la cuenta/contenedor, identidad y permisos con el usuario. No se crean recursos Azure ni se incurre en gastos por cargar este lote.
+El negocio sigue conectado a SQL Server. SQL escribe la copia nativa en una carpeta local con permisos. SGTM exporta un paquete transportable a una carpeta de Google Drive para escritorio; una diferencial incluye su completa base. El paquete no contiene la base de control. No requiere claves API ni mover la base SQL a la nube. Para automatizar Drive se instala el agente como tarea de inicio de sesión con la misma cuenta Windows que usa Drive; el equipo y la sesión deben permanecer disponibles. Ver [preparación, importación y automatización](../respaldos/google-drive.md). SGTM verifica los archivos locales; comprobar la sincronización completada en Drive web.
 
 ## Verificación antes de F5
 
@@ -57,4 +57,4 @@ SELECT COUNT(*) AS Conceptos FROM dbo.Conceptos;
 
 Deben existir las seis migraciones indicadas al principio, hasta ExigirContactoDecisionPresupuesto, y siete estados de atención admitidos por las restricciones. No debe generar migraciones nuevas en su PC: aplicar las existentes. Al abrir Visual Studio configurar la misma base del cargador, reconstruir y ejecutar. La producción vacía lleva solo inicialización mínima y cuentas reales, no el lote académico.
 
-Los respaldos anteriores no corresponden al esquema actual. El registro y la base técnica de respaldos se configurarán para este entorno nuevo al preparar Azure. La conexión a SQL Server y la identidad/contenedor de Azure son configuraciones distintas.
+Los respaldos anteriores no corresponden al esquema actual. El registro y la base técnica de respaldos se configurarán para este entorno nuevo al preparar Google Drive. La conexión SQL, el control y la carpeta de sincronización son configuraciones distintas.

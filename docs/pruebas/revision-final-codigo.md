@@ -1,3 +1,5 @@
+> Registro histórico de la etapa indicada. Estado vigente y alcance de las pruebas: [cierre de coherencia del 04/11/2026](cierre-coherencia-2026-11-04.md).
+
 # Revisión general de código y preparación documental
 
 Fecha: 04/11/2026. Base revisada: `f6d3ab2`, rama `mejora/rendimiento-operaciones`, posterior a la prueba manual satisfactoria del usuario. Esta revisión complementa la optimización; no representa una nueva aceptación manual de todas las pantallas ni una certificación de ausencia de errores.

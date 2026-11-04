@@ -30,7 +30,7 @@ Los siete reportes aplican alcance por rol, filtros, indicadores, gráficos y de
 
 ## Fuera del alcance actual
 
-Cierre con interrupción, ABM de catálogo desde formularios, inventario, compras/proveedores, reposición por mínimos, turnos/capacidad, integración fiscal/bancaria, anticipos, financiación y devolución bancaria automática. Los respaldos reales requieren configuración local/SQL y, para nube, identidad/contenedor Azure; disponer del formulario no significa que ese entorno ya esté instalado.
+Cierre con interrupción, ABM de catálogo desde formularios, inventario, compras/proveedores, reposición por mínimos, turnos/capacidad, integración fiscal/bancaria, anticipos, financiación y devolución bancaria automática. Los respaldos reales requieren configuración local/SQL y, para nube, carpeta de Google Drive para escritorio y sesión Windows activa; disponer del formulario no significa que ese entorno ya esté instalado.
 
 ## Esquema y evidencia
 

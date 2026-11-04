@@ -107,6 +107,22 @@ internal static class PruebasFiltrosBandeja
                     estado.SelectedItem = "Finalizadas";
                     if (grilla.Rows.Count != 2) throw new InvalidOperationException("Finalizadas no debe depender del índice de Mis actividades.");
                 }
+                if (tipo == typeof(FrmPresupuestos))
+                {
+                    var estado = (ComboBox)f.Controls.Find("cboEstado", true).Single();
+                    tipo.GetField("_datos", Privado)!.SetValue(f, new List<PresupuestoConsultaDto> {
+                        new() { IdPresupuesto = 1, Vigente = true, Estado = EstadoPresupuesto.PendientePresentacion },
+                        new() { IdPresupuesto = 2, Vigente = false, Estado = EstadoPresupuesto.PendientePresentacion },
+                        new() { IdPresupuesto = 3, Vigente = true, Estado = EstadoPresupuesto.Aceptado },
+                        new() { IdPresupuesto = 4, Vigente = true, Estado = EstadoPresupuesto.Aceptado, Items = [new() { AceptadoPorCliente = false }] },
+                        new() { IdPresupuesto = 5, Vigente = true, Estado = EstadoPresupuesto.Rechazado } });
+                    foreach (var (filtro, id) in new[] { ("Por presentar", 1), ("Históricos", 2), ("Aceptados", 3), ("Aceptados parcialmente", 4), ("Rechazados", 5) })
+                    {
+                        estado.SelectedItem = filtro;
+                        if (grilla.Rows.Count != 1 || grilla.Rows[0].DataBoundItem is not PresupuestoConsultaDto fila || fila.IdPresupuesto != id)
+                            throw new InvalidOperationException($"Filtro de presupuesto incorrecto: {filtro}.");
+                    }
+                }
                 Console.WriteLine($"Filtros, fechas inclusivas y distribución: {tipo.Name}, rol {rol}.");
             }
         }

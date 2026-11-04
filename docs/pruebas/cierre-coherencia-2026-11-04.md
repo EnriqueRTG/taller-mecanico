@@ -24,7 +24,7 @@ La revisión se entrega en el [PR 75](https://github.com/EnriqueRTG/taller-mecan
 En el commit 8d0693b los cuatro checks finalizaron correctamente:
 
 - [Windows / formularios](https://github.com/EnriqueRTG/taller-mecanico/actions/runs/41889169285/job/126781625264): construcción y disposición, filtros y fechas inclusivas en ambos roles, informes existentes y acciones de recepción, selector de catálogo, revisión parcial, ejecución, cobros y documentos.
-- [SQL Server real](https://github.com/EnriqueRTG/taller-mecanico/actions/runs/41889169299/job/126781626069): integración de circuito, concurrencia, compatibilidad de inicio y respaldos/recuperaciones.
+- [SQL Server real](https://github.com/EnriqueRTG/taller-mecanico/actions/runs/41889169299/job/126781626069): 32 pruebas aprobadas, ninguna omitida: circuito, concurrencia, compatibilidad de inicio y respaldos/recuperaciones.
 - [Compilación y reglas](https://github.com/EnriqueRTG/taller-mecanico/actions/runs/41889169299/job/126781626613): solución completa y pruebas locales.
 - GitGuardian: sin secretos detectados.
 

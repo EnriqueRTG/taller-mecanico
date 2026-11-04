@@ -127,8 +127,8 @@ public partial class FrmAltaCliente : Form
 #endregion
 #region Dirección
     /// <summary>
-    /// Verifica que la calle y la altura se hayan ingresado conjuntamente
-    /// y que la dirección completa respete los 200 caracteres admitidos por el servicio. La altura es opcional.
+    /// Verifica que una altura informada tenga calle y que la dirección completa
+    /// respete los 200 caracteres admitidos por el servicio. La altura es opcional.
     /// </summary>
     /// <returns>
     /// <see langword="true"/> cuando el domicilio es válido o está vacío;

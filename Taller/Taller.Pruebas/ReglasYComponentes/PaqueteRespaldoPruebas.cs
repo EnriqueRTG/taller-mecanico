@@ -10,6 +10,27 @@ public sealed class PaqueteRespaldoPruebas : IDisposable
     public PaqueteRespaldoPruebas() => Directory.CreateDirectory(_carpeta);
     public void Dispose() => Directory.Delete(_carpeta, true);
     [Fact]
+    public async Task ManifiestoIncompleto_InformaComoRecuperarLaDescargaSinTocarArchivos()
+    {
+        await File.WriteAllTextAsync(Path.Combine(_carpeta, "sgtm-respaldo.json"), "{\"Version\":1,");
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => PaqueteRespaldo.LeerAsync(_carpeta));
+        Assert.Contains("Drive", error.Message);
+        Assert.IsType<JsonException>(error.InnerException);
+        Assert.Single(Directory.GetFiles(_carpeta));
+    }
+
+    [Fact]
+    public async Task TipoDesconocido_SeRechazaAntesDeInterpretarLaCadena()
+    {
+        var copia = new CopiaRespaldoDto { Id = Guid.NewGuid(), Tipo = (TipoRespaldo)99 };
+        var manifiesto = new PaqueteRespaldo.Manifiesto(1, copia.Id, [new(copia, copia.Id.ToString("N") + ".bak", 3, new string('A', 64))]);
+        await File.WriteAllTextAsync(Path.Combine(_carpeta, "sgtm-respaldo.json"), JsonSerializer.Serialize(manifiesto));
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => PaqueteRespaldo.LeerAsync(_carpeta));
+        Assert.Equal("Datos de archivo inválidos.", error.Message);
+        Assert.Single(Directory.GetFiles(_carpeta));
+    }
+
+    [Fact]
     public async Task ExportaYLeeCompletaSinRutasOriginales()
     {
         var original = Path.Combine(_carpeta, "original.bak");

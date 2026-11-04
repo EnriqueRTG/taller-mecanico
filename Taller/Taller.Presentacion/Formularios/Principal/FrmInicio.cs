@@ -8,15 +8,13 @@ namespace Taller.Presentacion.Formularios.Principal;
 /// <summary>Resumen real por rol, con período y alcance explícitos; comparte las definiciones de los reportes.</summary>
 public partial class FrmInicio : Form, IFormularioConOperacion
 {
-    private readonly ReporteServicio _reportes;
     private readonly InicioServicio _inicio;
     private readonly SesionUsuario _sesion;
     public bool OperacionEnCurso { get; private set; }
 
-    public FrmInicio(ReporteServicio reportes, SesionUsuario sesion, InicioServicio inicio)
+    public FrmInicio(SesionUsuario sesion, InicioServicio inicio)
     {
         InitializeComponent();
-        _reportes = reportes;
         _inicio = inicio;
         _sesion = sesion;
     }

@@ -44,3 +44,12 @@ La segunda revisión agrega Usuarios.Version y guardias de edición en sus SP (C
 - Lectura de cuenta: CobroServicio consulta mediante IUnidadDeTrabajo.LeerConsistenteAsync; aislamiento Serializable limitado a la consulta, sin conservarlo mientras se opera la ventana.
 - Reportes: estados validados por ReporteServicio; conciliación de los siete tipos sobre el lote SQL en DemostracionSqlPruebas.
 - Unicidad del diagnóstico: UX_Diagnosticos_Atencion y traducción en UnidadDeTrabajo; prueba SQL de duplicado sin residuos.
+
+## Revisión vigente de simplicidad y capas — 04/11/2026
+
+- Búsqueda común: BusquedaTexto en reportes y bandejas. ReportesPruebas compara los siete tipos con/sin tildes y mayúsculas y conserva indicadores y gráficos.
+- Actividad técnica: selección de hitos; las correcciones adicionales quedan en el expediente sin un filtro nuevo. No equivale a auditoría completa ni productividad.
+- Recepción: AtencionServicio normaliza una vez las solicitudes y deriva el tipo/motivo; conserva la revalidación transaccional de maestros y el índice de vehículo activo.
+- Fallos de maestros: los repositorios conservan la pila de la excepción técnica desconocida. ErroresPersistenciaPruebas cubre altas y ediciones; no se expone el detalle SQL al operador.
+- Paquete Drive: manifiesto incompleto o tipo desconocido se rechaza antes de importar datos. PaqueteRespaldoPruebas comprueba mensajes y ausencia de modificaciones.
+- [Inventario por capas, evidencia y oportunidades](../pruebas/revision-por-capas-2026-11-04.md).

@@ -45,7 +45,9 @@ public sealed class ClienteRepositorio : IClienteRepositorio
         }
         catch (DbUpdateException ex)
         {
-            throw ErroresPersistencia.Traducir(ex, "IX_Clientes_TipoDocumento_Documento", "Ya existe un cliente con ese tipo y número de documento.");
+            var traducido = ErroresPersistencia.Traducir(ex, "IX_Clientes_TipoDocumento_Documento", "Ya existe un cliente con ese tipo y número de documento.");
+            if (ReferenceEquals(traducido, ex)) throw; // Conserva el origen del fallo técnico.
+            throw traducido;
         }
         finally
         {
@@ -66,7 +68,9 @@ public sealed class ClienteRepositorio : IClienteRepositorio
         }
         catch (DbUpdateException ex)
         {
-            throw ErroresPersistencia.Traducir(ex, "IX_Clientes_TipoDocumento_Documento", "Ya existe un cliente con ese tipo y número de documento.");
+            var traducido = ErroresPersistencia.Traducir(ex, "IX_Clientes_TipoDocumento_Documento", "Ya existe un cliente con ese tipo y número de documento.");
+            if (ReferenceEquals(traducido, ex)) throw; // Conserva el origen del fallo técnico.
+            throw traducido;
         }
         finally
         {

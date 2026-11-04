@@ -54,6 +54,41 @@ public sealed class ReportesPruebas
         public Task<ReporteDocumentoDto> Generar(TipoReporte tipo, string busqueda = "", string estado = "Todos") => Servicio.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = Hoy, Hasta = Hoy, Busqueda = busqueda, Estado = estado });
         public void Dispose() => Db.Dispose();
     }
+    [Fact]
+    public async Task TodosLosReportes_CompartenBusquedaSinTildesNiMayusculas()
+    {
+        using var c = new Caso();
+        foreach (var u in await c.Db.Usuarios.ToListAsync()) u.Apellido = "Pérez";
+        foreach (var a in await c.Db.Atenciones.ToListAsync()) a.MotivoConsulta = "Revisión Pérez";
+        foreach (var cuenta in await c.Db.Comprobantes.ToListAsync()) cuenta.Cliente = "Ana Pérez";
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+        foreach (var tipo in Enum.GetValues<TipoReporte>())
+        {
+            var conTilde = await c.Generar(tipo, "PÉREZ");
+            var sinTilde = await c.Generar(tipo, "  perez  ");
+            Assert.NotEmpty(conTilde.Registros);
+            Assert.Equal(conTilde.Registros.Select(x => x.Codigo), sinTilde.Registros.Select(x => x.Codigo));
+            Assert.Equal(conTilde.Grafico, sinTilde.Grafico);
+            Assert.Equal(conTilde.Indicadores, sinTilde.Indicadores);
+        }
+    }
+
+    [Fact]
+    public async Task CorreccionDeAdicional_ConservaHistorialSinAgregarOtroHitoAlReporte()
+    {
+        using var c = new Caso();
+        var antes = await c.Generar(TipoReporte.ActividadTecnica);
+        c.Db.HistorialAtenciones.Add(new HistorialAtencion { IdAtencion = 1, IdUsuario = 3, Fecha = c.Hoy, Accion = "CorreccionAdicionalPreparada", EstadoAnterior = EstadoAtencion.EnEvaluacionTecnica, EstadoNuevo = EstadoAtencion.EnEvaluacionTecnica, Observaciones = "Se conserva la corrección en el expediente" });
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+        var despues = await c.Generar(TipoReporte.ActividadTecnica);
+        Assert.True(await c.Db.HistorialAtenciones.AnyAsync(x => x.Accion == "CorreccionAdicionalPreparada"));
+        Assert.Equal(antes.Registros.Select(x => x.Codigo), despues.Registros.Select(x => x.Codigo));
+        Assert.DoesNotContain("CorreccionAdicionalPreparada", Taller.Aplicacion.Consultas.ActividadTecnicaReporte.AccionesFiltrables);
+        Assert.Contains("no es una auditoría completa", despues.Metodologia);
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(2)]

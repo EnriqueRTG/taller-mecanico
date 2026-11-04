@@ -104,7 +104,7 @@ public partial class FrmUsuarios : Form
         IEnumerable<Usuario> consulta = _usuarios;
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
-            consulta = consulta.Where(usuario => usuario.NombreUsuario.Contains(busqueda, StringComparison.OrdinalIgnoreCase) || usuario.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) || usuario.Apellido.Contains(busqueda, StringComparison.OrdinalIgnoreCase));
+            consulta = consulta.Where(usuario => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{usuario.NombreUsuario} {usuario.Nombre} {usuario.Apellido}", busqueda));
         }
 
         consulta = cboEstado.SelectedIndex switch

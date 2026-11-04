@@ -120,7 +120,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
             _ => throw new ValidacionException("Tipo de reporte inválido.")};
         string texto = (solicitud.Busqueda ?? "").Trim();
-        registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
+        registros = registros.Where(x => (texto.Length == 0 || BusquedaTexto.Coincide($"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}", texto)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
         if (solicitud.Tipo == TipoReporte.SaldosPendientes)
             registros = registros.OrderBy(x => x.Fecha).ThenByDescending(x => x.Importe).ToList();
         if (solicitud.Tipo == TipoReporte.CargaTecnica)
@@ -170,7 +170,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         }
         else if (solicitud.Tipo == TipoReporte.ActividadTecnica)
         {
-            metodologia = "Eventos del historial realizados por usuarios técnicos durante el período. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos. El filtro ofrece hitos principales y tres alternativas habituales; «Todos» conserva además avances, liberaciones, pausas y materiales.";
+            metodologia = "Selección de hitos operativos del historial realizados por técnicos durante el período; no es una auditoría completa de todas las acciones. Las correcciones administrativas y la preparación de su nueva versión se consultan en el historial de la atención. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos. El filtro ofrece hitos principales y tres alternativas habituales; «Todos» conserva además avances, liberaciones, pausas y materiales.";
             recomendacion = "Revisar el inicio y finalización de evaluaciones y trabajos; consultar hallazgos y revisiones del alcance cuando corresponda.";
         }
         else

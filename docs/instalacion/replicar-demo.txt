@@ -14,7 +14,7 @@ no deben compararse como una copia binaria exacta entre instalaciones.
 - Git y SQL Server en ejecucion. En SSMS comprobar la conexion.
 - Para usar la misma cadena en todos: instancia localhost\SQLEXPRESS y
   autenticacion de Windows. Si la instancia tiene otro nombre, ajustar Server.
-- No hace falta Azure para probar el circuito; respaldos quedan deshabilitados.
+- Para probar el circuito no hace falta configurar Drive; respaldos quedan deshabilitados hasta preparar SQL y el control.
 
 2. DESCARGAR O ACTUALIZAR EL CODIGO (PowerShell)
 Si es la primera descarga, elegir carpeta y ejecutar:
@@ -122,7 +122,14 @@ y conteos 88, 256, 240 y 354 antes de operar.
 7. REPLICAR Y CONTINUAR
 Repetir los pasos en cada equipo con el mismo main. Para trabajo conjunto
 sobre la MISMA atencion, se requiere una base compartida; localhost no lo hace.
-El agente/Azure se configuran despues con su identidad, permisos y base de
-control. No habilitar respaldos por cambiar solamente una opcion visual.
+Los respaldos se configuran despues: conexion de mantenimiento al mismo
+servidor SQL, base de control separada y permisos sobre una carpeta local.
+Crear y verificar primero una completa manual. Para Drive, seguir
+docs/respaldos/google-drive.md: exportar paquetes a la carpeta sincronizada
+y comprobar la subida desde Drive web. No usar la unidad virtual de Drive
+como destino BACKUP/RESTORE SQL. Para automatizar Drive instalar una unica
+tarea con scripts/Preparar-AgenteDriveDemo.ps1, usando la cuenta Windows que
+utiliza Drive. El equipo, Windows y Drive deben mantener la sesion iniciada.
+No habilitar respaldos por cambiar solamente una opcion visual.
 Guia completa e indice: docs/README.md. Esta version incorpora ExigirContactoDecisionPresupuesto. Ver la guia de
 actualizacion antes de cambiar una base anterior; no generar migraciones propias.

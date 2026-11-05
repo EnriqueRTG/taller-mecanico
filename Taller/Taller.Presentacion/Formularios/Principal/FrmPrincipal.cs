@@ -23,6 +23,7 @@ public partial class FrmPrincipal : Form
     private readonly IServiceProvider _serviceProvider;
     private readonly AutorizacionNavegacion _autorizacionNavegacion;
     private Form? _formularioActivo;
+    internal Form? FormularioActivoParaAyuda => _formularioActivo;
     public event EventHandler? CerrarSesionSolicitada;
     public event EventHandler? SalirSolicitado;
     /// <summary>
@@ -35,6 +36,28 @@ public partial class FrmPrincipal : Form
         _sesionUsuario = sesionUsuario;
         _serviceProvider = serviceProvider;
         _autorizacionNavegacion = autorizacionNavegacion;
+        AgregarOpcionAyuda("? Ayuda de esta pantalla (F1)", () => Ayuda.AyudaContextual.AbrirTema(this));
+        AgregarOpcionAyuda("Manual de usuario", () => Ayuda.AyudaContextual.AbrirManual(this));
+    }
+
+    private void AgregarOpcionAyuda(string texto, Action abrir)
+    {
+        var boton = new Button
+        {
+            Text = texto,
+            Dock = DockStyle.Top,
+            Height = btnInicio.Height,
+            Padding = btnInicio.Padding,
+            TextAlign = btnInicio.TextAlign,
+            ForeColor = btnInicio.ForeColor,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        boton.FlatAppearance.BorderSize = 0;
+        boton.FlatAppearance.MouseOverBackColor = btnInicio.FlatAppearance.MouseOverBackColor;
+        boton.Click += (_, _) => abrir();
+        pnlOpciones.Controls.Add(boton);
+        boton.SendToBack();
     }
 
     /// <summary>

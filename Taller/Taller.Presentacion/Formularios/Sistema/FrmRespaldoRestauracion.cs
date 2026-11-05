@@ -46,7 +46,7 @@ public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
         _configurando = false;
         if (!_servicio.Habilitado)
         {
-            lblEstado.Text = "Configuración técnica pendiente. Para Demo local, cierre SGTM y ejecute scripts/Preparar-RespaldosDemo.ps1 en el servidor como administrador de Windows. Luego reinicie Visual Studio. Para otras instalaciones consulte docs/respaldos/operacion.md.";
+            lblEstado.Text = "Configuración técnica pendiente. Para Demo local, cierre SGTM y ejecute scripts/Preparar-RespaldosDemo.ps1 en el servidor como administrador de Windows. Luego reinicie Visual Studio. Para otras instalaciones consulte REFERENCIA-TECNICA.md (Respaldos y restauración).";
             tabs.Enabled = btnActualizar.Enabled = false;
             return;
         }

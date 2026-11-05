@@ -38,8 +38,8 @@ Si contiene el esquema/lote anterior y se decidio descartarlo: cerrar SGTM y
 eliminar SOLO SGTM_DB_Demo desde SSMS. Confirmar el nombre; esa eliminacion
 pierde sus registros. No eliminar SGTM_DB ni otras bases por confusion.
 Si ya cargo Demo v5 correctamente, NO repetir la carga: aplicar las migraciones
-pendientes segun docs/instalacion/actualizacion-coloquio.md y luego ir al paso 5.
-Si tiene Demo v4 o anterior, leer docs/instalacion/actualizacion-coloquio.md antes de actualizar.
+pendientes segun REFERENCIA-TECNICA.md (Actualización para el circuito de coloquio) y luego ir al paso 5.
+Si tiene Demo v4 o anterior, leer REFERENCIA-TECNICA.md (Actualización para el circuito de coloquio) antes de actualizar.
 
 4. CREAR ESQUEMA Y CARGAR LOTE (misma ventana PowerShell, raiz del repositorio)
 Copiar los comandos siguientes, uno por uno:
@@ -125,7 +125,7 @@ sobre la MISMA atencion, se requiere una base compartida; localhost no lo hace.
 Los respaldos se configuran despues: conexion de mantenimiento al mismo
 servidor SQL, base de control separada y permisos sobre una carpeta local.
 Crear y verificar primero una completa manual. Para Drive, seguir
-docs/respaldos/google-drive.md: exportar paquetes a la carpeta sincronizada
+REFERENCIA-TECNICA.md (Respaldo transportable con Google Drive): exportar paquetes a la carpeta sincronizada
 y comprobar la subida desde Drive web. No usar la unidad virtual de Drive
 como destino BACKUP/RESTORE SQL. Para automatizar Drive instalar una unica
 tarea con scripts/Preparar-AgenteDriveDemo.ps1, usando la cuenta Windows que

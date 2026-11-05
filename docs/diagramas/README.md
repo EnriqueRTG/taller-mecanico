@@ -17,6 +17,6 @@
 
 La vista de clases es una síntesis de diseño, no el inventario completo de atributos. Ese inventario está en el DER y diccionario. Los flujos no son FK; las referencias de proyectos no representan herencia de clases. Los casos de uso no usan include para expresar una mera secuencia temporal.
 
-[Requisitos y trazabilidad](../especificacion/trazabilidad.md) · [Modelo relacional](../arquitectura/modelo-relacional.md)
+[Requisitos y trazabilidad](../especificacion/trazabilidad.md) · [Modelo relacional](../../REFERENCIA-TECNICA.md#arquitectura-modelo-relacional)
 
-El [flujo de respaldo y recuperación manual](../respaldos/operacion.md#recorrido-manual-de-entrega) complementa CU10 y distingue el ensayo de la restauración efectiva.
+El [flujo de respaldo y recuperación manual](../../REFERENCIA-TECNICA.md#respaldos-operacion) complementa CU10 y distingue el ensayo de la restauración efectiva.

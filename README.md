@@ -5,7 +5,7 @@ Proyecto académico de Taller de Programación II, Licenciatura en Sistemas de I
 ## Ejecutar la demostración
 
 1. Descargar main y compilar `Taller/Taller.sln` con el SDK indicado en `global.json`.
-2. Seguir el [instructivo breve de instalación Demo](docs/instalacion/replicar-demo.txt). La base acordada es **SGTM_DB_Demo** y el cargador se ejecuta expresamente antes del primer inicio.
+2. Seguir el [instructivo breve de instalación Demo](scripts/recursos/replicar-demo.txt). La base acordada es **SGTM_DB_Demo** y el cargador se ejecuta expresamente antes del primer inicio.
 3. Seleccionar **Taller.Presentacion** como proyecto de inicio. El perfil local debe apuntar a la misma base que se cargó.
 
 El esquema vigente parte de **EsquemaInicialCircuitoActual**. No aplicar esta migración inicial sobre tablas de versiones anteriores. Una base ya creada con este esquema no necesita recrearse por una reorganización de archivos. La instalación real usa SGTM_DB y no carga el lote académico.
@@ -25,7 +25,7 @@ El esquema vigente parte de **EsquemaInicialCircuitoActual**. No aplicar esta mi
 | Taller.Pruebas | Reglas/componentes, arquitectura e integración SQL aislada. |
 | Taller.Pruebas.Interfaz | Construcción de formularios y validación de DI en Windows/STA. |
 
-[Índice de documentación](docs/README.md) · [Organización y dependencias](docs/arquitectura/estructura-solucion.md)
+[Entrega académica](docs/README.md) · [Referencia técnica](REFERENCIA-TECNICA.md) · [Scripts](scripts/README.md)
 
 ## Circuito y roles
 
@@ -61,6 +61,6 @@ Las pruebas SQL requieren una instancia desechable explícitamente autorizada; n
 
 La [documentación v2.0](docs/README.md) incluye ERS, casos de uso, diccionario, DER, diagramas y [trazabilidad](docs/especificacion/trazabilidad.md) alineados con el circuito vigente.
 
-Esta versión utiliza las seis migraciones del circuito actual y el lote ampliado Demo v5. Antes de abrir una base existente, seguir [actualización](docs/instalacion/actualizacion-coloquio.md). Para dos puestos, [red privada](docs/instalacion/red-privada.md); para copias, [prueba local de recuperación](docs/instalacion/respaldos-locales-demo.md).
+Esta versión utiliza las seis migraciones del circuito actual y el lote ampliado Demo v5. Antes de abrir una base existente, seguir [actualización](REFERENCIA-TECNICA.md#instalacion-actualizacion-coloquio). Para dos puestos, [red privada](REFERENCIA-TECNICA.md#instalacion-red-privada); para copias, [prueba local de recuperación](REFERENCIA-TECNICA.md#instalacion-respaldos-locales-demo).
 
-La limpieza `RetirarVinculoCambioSinUso` incorpora una tercera migración sin alterar las anteriores. Para una base actual no hace falta recrear Demo: respaldar, cerrar clientes/agente y aplicar la migración existente siguiendo la [guía de actualización](docs/instalacion/actualizacion-coloquio.md). Los respaldos nuevos deben corresponder al esquema actualizado.
+La limpieza `RetirarVinculoCambioSinUso` incorpora una tercera migración sin alterar las anteriores. Para una base actual no hace falta recrear Demo: respaldar, cerrar clientes/agente y aplicar la migración existente siguiendo la [guía de actualización](REFERENCIA-TECNICA.md#instalacion-actualizacion-coloquio). Los respaldos nuevos deben corresponder al esquema actualizado.

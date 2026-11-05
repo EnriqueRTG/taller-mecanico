@@ -43,11 +43,11 @@ Los archivos de diagramas derivan del mismo modelo. Las tablas ref. repetidas en
 
 ## Verificación reproducible
 
-La [evidencia manual de entrega](../pruebas/evidencia-cierre.md#evidencia-de-entrega--05112026) identifica los casos y recorridos observados, y separa los límites de esa prueba de la cobertura automatizada.
+La [evidencia manual de entrega](../pruebas.md#pruebas-evidencia-cierre) identifica los casos y recorridos observados, y separa los límites de esa prueba de la cobertura automatizada.
 
-Consultar [plan integral](../pruebas/aceptacion-version-actual.md), [SQL de contraste](../reportes/verificacion-reportes.sql) y [estado de verificación](../pruebas/evidencia-cierre.md). Para CU10, el [alcance implementado](alcance-implementado.md#respaldo-y-recuperación-en-la-entrega) distingue la evidencia manual en la instalación de demostración de las pruebas automatizadas y de la restauración efectiva.
+Consultar [plan integral](../pruebas.md#pruebas-aceptacion-version-actual), [SQL de contraste](../../scripts/recursos/verificacion-reportes.sql) y [estado de verificación](../pruebas.md#pruebas-evidencia-cierre). Para CU10, el [alcance implementado](../../REFERENCIA-TECNICA.md#especificacion-alcance-implementado) distingue la evidencia manual en la instalación de demostración de las pruebas automatizadas y de la restauración efectiva.
 
-La segunda revisión agrega Usuarios.Version y guardias de edición en sus SP (CU02/RNF-05), unifica la entrega estructurada (CU04/RF-27) y revalida maestros del alta en transacción breve (CU04/RNF-04). Evidencia: Usuarios_SPRechazanVersionObsoletaEnDatosCredencialesYEstado, AltaAtencion_RevalidaMaestrosAntesDeGuardarYPermiteReintentarSinResiduos y AtencionPersistenciaPruebas. Véase [segunda revisión](../pruebas/revision-integral-2.md).
+La segunda revisión agrega Usuarios.Version y guardias de edición en sus SP (CU02/RNF-05), unifica la entrega estructurada (CU04/RF-27) y revalida maestros del alta en transacción breve (CU04/RNF-04). Evidencia: Usuarios_SPRechazanVersionObsoletaEnDatosCredencialesYEstado, AltaAtencion_RevalidaMaestrosAntesDeGuardarYPermiteReintentarSinResiduos y AtencionPersistenciaPruebas. Véase [segunda revisión](https://github.com/EnriqueRTG/taller-mecanico/blob/4404dd1/docs/pruebas/revision-integral-2.md).
 
 ## Tercera revisión
 
@@ -64,4 +64,4 @@ La segunda revisión agrega Usuarios.Version y guardias de edición en sus SP (C
 - Recepción: AtencionServicio normaliza una vez las solicitudes y deriva el tipo/motivo; conserva la revalidación transaccional de maestros y el índice de vehículo activo.
 - Fallos de maestros: los repositorios conservan la pila de la excepción técnica desconocida. ErroresPersistenciaPruebas cubre altas y ediciones; no se expone el detalle SQL al operador.
 - Paquete Drive: manifiesto incompleto o tipo desconocido se rechaza antes de importar datos. PaqueteRespaldoPruebas comprueba mensajes y ausencia de modificaciones.
-- [Inventario por capas, evidencia y oportunidades](../pruebas/revision-por-capas-2026-11-04.md).
+- [Inventario por capas, evidencia y oportunidades](https://github.com/EnriqueRTG/taller-mecanico/blob/4404dd1/docs/pruebas/revision-por-capas-2026-11-04.md).

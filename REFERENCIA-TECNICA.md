@@ -68,11 +68,11 @@ Los tres DOCX académicos y los diagramas v2.0 describen las reglas actuales; ve
 
 ### Limpieza documental y de esquema del 29/10/2026
 
-La tercera migración `20261029090000_RetirarVinculoCambioSinUso` retira únicamente IdPresupuestoCambio, su FK, índice y CHECK. Las revisiones válidas usan Presupuesto.IdPresupuestoAnterior. No cambia estados, precios, solicitudes ni cobros del lote.
+La migración `20261029090000_RetirarVinculoCambioSinUso` retira únicamente IdPresupuestoCambio, su FK, índice y CHECK. Las revisiones válidas usan Presupuesto.IdPresupuestoAnterior. No cambia estados, precios, solicitudes ni cobros del lote.
 
 Para una base ya actualizada a tres estados: respaldar, cerrar todos los puestos y agente, confirmar destino y aplicar `dotnet ef database update` con los proyectos indicados arriba. No crear otra migración ni recrear la base por esta limpieza. Si hay vínculos antiguos no nulos, la migración se detiene sin borrarlos; solicitar revisión de esos registros. La reversión técnica reconstruye la columna nullable, no recupera valores descartados; por eso se impide descartarlos en Up.
 
-Aplicar el mismo código en todas las estaciones. Las copias anteriores a la tercera migración no se deben restaurar como si tuvieran el esquema actual: el ensayo comprueba compatibilidad. Conservarlas identificadas y crear una completa nueva tras la actualización verificada.
+Aplicar el mismo código en todas las estaciones. Las copias con un esquema anterior no se deben restaurar como si tuvieran el esquema actual: el ensayo comprueba compatibilidad. Conservarlas identificadas y crear una completa nueva tras la actualización verificada.
 
 ### Teléfono obligatorio del cliente
 

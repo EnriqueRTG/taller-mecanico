@@ -9,6 +9,6 @@ Los tres DOCX v2.0 son la instantánea de entrega del circuito actual. Se usan c
 - [Trazabilidad](../especificacion/trazabilidad.md)
 - [Plan de aceptación](../pruebas.md#pruebas-aceptacion-version-actual)
 
-La instantánea vigente es la de este repositorio, revisada el 04/11/2026 con Google Drive, correcciones de adicionales y filtros por rol/fecha. Una copia en Google Docs o una exportación anterior debe cotejarse con estos archivos antes de presentarse; este cambio no acredita la actualización de copias externas.
+La instantánea vigente es la de este repositorio, cotejada con el circuito integrado en el PR #75 y consolidada documentalmente en los PR #76 y #77. Una copia en Google Docs o una exportación anterior debe cotejarse con estos archivos antes de presentarse; este cambio no acredita la actualización de copias externas.
 
 No tratar como requisitos vigentes las notas o exportaciones de entregas anteriores. Para una modificación futura: revisar regla, servicio y persistencia, actualizar requisito/CU/modelo afectado, ejecutar pruebas y regenerar la instantánea documental. Una corrección de documentación no aplica migraciones ni modifica la base de los puestos.

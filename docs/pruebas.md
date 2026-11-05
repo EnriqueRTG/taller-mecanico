@@ -73,6 +73,8 @@ Referencia de código: `ef2b2e844f85188f3065e34572d84179b9eca2a5` (integración 
 | Cobros (CU09) | Filtro por atención 244: dos registros, $40.000 en efectivo y $54.000 por transferencia. Se revisó la vista previa y el ajuste de paginación. | Evidencia manual de este reporte. |
 | Respaldo manual (CU10) | Copia completa verificada, exportada a Drive y visible en web; paquete descargado e importado; ensayo en base temporal con integridad y esquema correctos. | La base activa no se reemplazó. La programación automática queda fuera de la validación manual de entrega. |
 
+En el [PR #77](https://github.com/EnriqueRTG/taller-mecanico/pull/77) finalizaron correctamente los workflows de construcción WinForms y compilación/pruebas, incluida la integración SQL aislada. El análisis de PowerShell verifica sintaxis; no acredita la ejecución de los asistentes en el equipo de presentación.
+
 ---
 
 <a id="pruebas-circuito-principal"></a>
@@ -93,7 +95,7 @@ dotnet test Taller/Taller.Pruebas/Taller.Pruebas.csproj -c Release --no-build
 
 No existe un segundo trámite de ingreso ni un catálogo de servicios obligatorios de ingreso. Solo una inspección extraordinaria presupuestada y aceptada por el cliente permite registrar su ejecución cobrable.
 
-### Recorrido manual obligatorio antes de fusionar
+### Recorrido manual para validar el entorno de presentación
 
 Usar cuentas activas de Administrativo y Técnico. El rol Administrador administra el sistema; no suplanta al operativo.
 

@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [ValidatePattern('^(localhost|\.|\(local\))(\\[A-Za-z0-9_]+)?$')]
     [string]$ServidorSql = 'localhost\SQLEXPRESS',
     [string]$DirectorioPublicacion = 'C:\SGTM\AgenteRespaldos'
 )

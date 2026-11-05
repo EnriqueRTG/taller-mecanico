@@ -34,5 +34,5 @@ var sp = scope.ServiceProvider;
 var db = sp.GetRequiredService<TallerDbContext>();
 var resumen = await PreparadorDemostracion.CargarAsync(sp, clave);
 Console.WriteLine($"Lote DEMO {PreparadorDemostracion.Version} completo: {resumen.Clientes} clientes, {resumen.Vehiculos} vehículos, {resumen.Atenciones} atenciones, {resumen.Marcas} marcas, {resumen.Modelos} modelos, {resumen.Categorias} categorías y {resumen.Conceptos} conceptos.");
-Console.WriteLine($"Operaciones: {resumen.Presupuestos} presupuestos, {resumen.Liquidaciones} liquidaciones y {resumen.Cobros} cobros. Consulte docs/pruebas/catalogo-demo.md. Retire SGTM_DEMO_PASSWORD al terminar.");
+Console.WriteLine($"Operaciones: {resumen.Presupuestos} presupuestos, {resumen.Liquidaciones} liquidaciones y {resumen.Cobros} cobros. Consulte REFERENCIA-TECNICA.md (Lote ampliado de demostración). Retire SGTM_DEMO_PASSWORD al terminar.");
 return 0;

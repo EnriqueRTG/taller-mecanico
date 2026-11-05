@@ -341,7 +341,7 @@
         <mxCell id="j" value="Administrativo&#10;Liquidar lo autorizado/realizado&#10;Cobrar y emitir recibos" style="html=0;whiteSpace=wrap;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="690" y="760" width="380" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="k" value="Administrativo&#10;Registrar entrega con saldo cero&#10;y conformidad · Cerrar Atención" style="html=0;whiteSpace=wrap;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;rounded=1;" vertex="1" parent="1">
+        <mxCell id="k" value="Administrativo&#10;Liquidación y saldo cero&#10;Retiro conforme → Cerrar Atención" style="html=0;whiteSpace=wrap;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="690" y="930" width="380" height="90" as="geometry" />
         </mxCell>
       </root>

@@ -4,6 +4,19 @@
 
 # Evidencia de revisión de cierre
 
+## Evidencia de entrega — 05/11/2026
+
+Referencia de código: `ef2b2e844f85188f3065e34572d84179b9eca2a5` (integración del PR #75).
+
+| Recorrido | Evidencia observada | Límite |
+|---|---|---|
+| Atención 244 (CU04–CU08) | Alta, propuesta aceptada, tres ítems ejecutados, liquidación por $94.000, dos pagos y entrega con saldo cero. El expediente quedó cerrado. | Servicio definido; este recorrido no ejercitó los caminos alternativos. |
+| Cobros (CU09) | Filtro por atención 244: dos registros, $40.000 en efectivo y $54.000 por transferencia. Se revisó la vista previa y el ajuste de paginación. | Evidencia manual de este reporte. |
+| Respaldo manual (CU10) | Copia completa verificada, exportada a Drive y visible en web; paquete descargado e importado; ensayo en base temporal con integridad y esquema correctos. | La base activa no se reemplazó. La programación automática queda fuera de la validación manual de entrega. |
+
+Los resultados de las revisiones anteriores se conservan a continuación como antecedentes.
+
+
 Fecha: 29/10/2026. Base de código: main 253e7d6 y cambios de esta rama de cierre documental. La versión exacta se identifica con el commit que contiene este documento; no extrapolar resultados a una modificación posterior.
 
 ## Comprobaciones realizadas
@@ -17,7 +30,7 @@ Fecha: 29/10/2026. Base de código: main 253e7d6 y cambios de esta rama de cierr
 
 ## Comprobaciones que pertenecen al despliegue
 
-Ejecutar [plan integral](aceptacion-version-actual.md) en Windows y SQL Server del entorno de demostración: operación entre dos puestos, concurrencia, DPI, vista previa/impresión, lote, informes frente a SQL y configuración de agente/Azure. Probar recuperación en una copia descartable y conservar respaldo independiente. No se modificó la base real del usuario durante esta revisión.
+Ejecutar [plan integral](aceptacion-version-actual.md) en Windows y SQL Server del entorno de demostración: operación entre dos puestos, concurrencia, DPI, vista previa/impresión, lote, informes frente a SQL y configuración opcional del agente según el entorno. Probar recuperación en una copia descartable y conservar respaldo independiente. No se modificó la base real del usuario durante esta revisión.
 
 Las pruebas SQL de CI crean sus propias bases temporales y requieren SGTM_SQL_PRUEBAS, SGTM_PERMITIR_PRUEBAS_SQL y una carpeta accesible por el servicio SQL. Su resultado se consulta en el PR correspondiente; este documento no sustituye ese resultado ni afirma aprobación futura.
 

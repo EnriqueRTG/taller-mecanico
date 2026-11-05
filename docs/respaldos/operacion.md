@@ -4,13 +4,34 @@ Para la demostración Windows local, existe una [preparación asistida](../insta
 
 ## Alcance y decisiones
 
-El administrador dispone de cinco apartados en **Respaldos y recuperación**: copias manuales, programación automática, restaurar historial/aprobaciones y Google Drive. La misma pantalla muestra resultado, archivos del servidor y estado del agente. Los controles y eventos están en Designer; los servicios concentran autorización y reglas; Infraestructura ejecuta SQL nativo con conexiones independientes del contexto de negocio.
+El administrador dispone de cinco apartados en **Respaldos y recuperación**: copias manuales, programación automática, restaurar, historial/aprobaciones y Google Drive. La misma pantalla muestra resultado, archivos del servidor y estado del agente. Los controles y eventos están en Designer; los servicios concentran autorización y reglas; Infraestructura ejecuta SQL nativo con conexiones independientes del contexto de negocio.
 
 Se implementan **completas y diferenciales**. Una diferencial contiene los cambios desde su completa base; para restaurarla se necesitan esos dos archivos. No se etiqueta como una cadena incremental de log ni como recuperación a cualquier instante. Los backups de log y recuperación punto en el tiempo quedan para una política DBA específica; no se cambia automáticamente el modelo de recuperación de SQL Server.
 
 Las copias nativas se hacen con CHECKSUM y se someten a RESTORE VERIFYONLY. Esto valida lectura/conjunto/checksums, pero no reemplaza una recuperación real: antes de autorizar una restauración, SGTM recupera la cadena en una **base temporal**, ejecuta **DBCC CHECKDB sin reparar datos** y comprueba el esquema de migraciones.
 
 Las copias están en el **servidor SQL**, no en la PC que abre el formulario. El explorador se habilita solo cuando se confirma el mismo equipo Windows; en otro puesto se indica la ruta del servidor. La carpeta debe existir y permitir escritura a la cuenta del servicio SQL Server. Se usan nombres únicos, un conjunto por archivo y no se sobrescriben/eliminan copias anteriores desde la aplicación. El administrador debe disponer además de almacenamiento externo al equipo y una política de conservación supervisada: guardar todas las copias en el mismo disco no protege contra la pérdida de ese disco.
+
+## Recorrido manual de entrega
+
+Para crear una copia completa y ensayar su recuperación no hace falta iniciar el agente ni programar copias. La instalación sí necesita la base de control y los permisos SQL descritos más abajo. Google Drive es un destino opcional para el paquete; para probarlo, se descarga la carpeta completa, se importa a una ruta local accesible por SQL y se selecciona la copia importada para el ensayo.
+
+```mermaid
+flowchart TD
+    A["Crear y verificar copia"] --> B{"¿Usar Drive?"}
+    B -->|Sí| C["Exportar y comprobar sincronización"]
+    C --> D["Descargar e importar paquete"]
+    B -->|No| E["Seleccionar copia catalogada"]
+    D --> E
+    E --> F["Ensayar en base temporal"]
+    F --> G{"¿Ensayo correcto?"}
+    G -->|No| H["Revisar el error"]
+    G -->|Sí| I["Ensayo validado; base activa intacta"]
+    I -->|Solo para restauración efectiva| J["Doble aprobación y mantenimiento"]
+    J --> K["Copia protectora y restauración"]
+```
+
+La [evidencia de entrega](../pruebas/evidencia-cierre.md) cubre hasta el ensayo exitoso de la copia importada. La programación automática se documenta como opción de operación y no forma parte de esa prueba manual.
 
 ## Base de control separada
 
@@ -60,9 +81,9 @@ El instalador es explícito e idempotente. Si ya existe la base de control, veri
 El DBA debe crear los usuarios de control que correspondan a los logins reales. Por ejemplo, en la base auxiliar puede crear un rol de lectura y concederle SELECT solo sobre `dbo.EstadoSGTM`, agregar los usuarios de las estaciones a ese rol y verificar el uso de `sp_getapplock`. La cuenta administrativa y el agente requieren acceso adicional a las tablas del módulo. Revisar los requisitos de permisos nativos según versión de SQL Server; en SQL Server 2022 algunas vistas de sesiones requieren VIEW SERVER PERFORMANCE STATE.
 
 7. Configurar `Respaldos:Habilitado=true` y el mismo `Respaldos:BaseControl` en **todos los clientes** y en el agente. Reiniciar clientes. El interceptor de conexiones debe estar activo en todos ellos antes de utilizar restauración; las versiones antiguas no participan del protocolo. Una base de control inaccesible bloquea las operaciones, no se ignora silenciosamente.
-8. Para Google Drive instale el agente de sesión siguiendo [la guía Drive](google-drive.md). Utilice `scripts/Instalar-AgenteDrive.ps1` con la misma cuenta Windows que usa Drive. No instale simultáneamente el antiguo servicio SGTMRespaldos. La ventana SGTM puede estar cerrada, pero Windows y Drive deben mantener la sesión iniciada.
+8. Si se requiere exportación **automática** a Google Drive, instale el agente de sesión siguiendo [la guía Drive](google-drive.md). Utilice `scripts/Instalar-AgenteDrive.ps1` con la misma cuenta Windows que usa Drive. No instale simultáneamente el antiguo servicio SGTMRespaldos. La ventana SGTM puede estar cerrada, pero Windows y Drive deben mantener la sesión iniciada.
 
-9. Desde SGTM como administrador, crear una completa manual, revisar el archivo verificado y el historial, configurar el plan y comprobar **señal reciente del agente** y una ejecución real. Cerrar la interfaz y comprobar que el agente continúa ejecutándolo. El mero estado de la tarea no confirma que sus conexiones/permisos funcionen.
+9. Desde SGTM como administrador, crear una completa manual y revisar el archivo verificado y el historial. Si se habilita la programación, configurar el plan y comprobar **señal reciente del agente** y una ejecución real. Cerrar la interfaz y comprobar que el agente continúa ejecutándolo. El mero estado de la tarea no confirma que sus conexiones/permisos funcionen.
 
 No se debe ejecutar SGTM contra una base de producción para probar esta instalación por primera vez. Hacer el recorrido sobre una copia y validar la recuperación con el responsable técnico.
 

@@ -7,6 +7,7 @@ partial class FrmTrabajosEnCurso
     private TableLayoutPanel tlpPrincipal = null!;
     private TextBox txtBuscar = null!;
     private ComboBox cboEstado = null!;
+    private DateTimePicker dtpDesde = null!, dtpHasta = null!;
     private DataGridView dgvDatos = null!;
     private Button btnGestionar = null!, btnProgreso = null!;
     private Label lblAyuda = null!;
@@ -16,24 +17,27 @@ partial class FrmTrabajosEnCurso
         tlpPrincipal = new TableLayoutPanel { Name = "tlpPrincipal", Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5, Padding = new Padding(12) };
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
         tlpPrincipal.Controls.Add(new Label { Text = "Trabajos en curso · Ejecución autorizada y progreso", Dock = DockStyle.Fill, Font = new Font("Segoe UI", 12, FontStyle.Bold) }, 0, 0);
-        var filtros = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 2 };
-        filtros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65)); filtros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35)); filtros.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260));
-        filtros.RowStyles.Add(new RowStyle(SizeType.Absolute, 24)); filtros.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        var filtros = new TableLayoutPanel();
         txtBuscar = new TextBox { Name = "txtBuscar", Dock = DockStyle.Fill, PlaceholderText = "Atención, cliente, dominio o motivo" };
         txtBuscar.TextChanged += Filtrar;
         cboEstado = new ComboBox { Name = "cboEstado", Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
         cboEstado.Items.AddRange(["Todos", "Disponibles", "Asignados", "Con pausas"]); cboEstado.SelectedIndex = 0; cboEstado.SelectedIndexChanged += Filtrar;
-        filtros.Controls.Add(new Label { Text = "Buscar", Dock = DockStyle.Fill }, 0, 0); filtros.Controls.Add(txtBuscar, 0, 1);
-        filtros.Controls.Add(new Label { Text = "Situación", Dock = DockStyle.Fill }, 1, 0); filtros.Controls.Add(cboEstado, 1, 1);
         var botonesFiltros = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = false, AutoScroll = true };
-        var limpiar = new Button { Name = "btnLimpiarFiltros", Text = "Limpiar filtros", AutoSize = true, Height = 32 }; limpiar.Click += Limpiar;
-        var actualizar = new Button { Name = "btnActualizar", Text = "Actualizar", AutoSize = true, Height = 32 }; actualizar.Click += Actualizar;
-        botonesFiltros.Controls.AddRange([limpiar, actualizar]); filtros.Controls.Add(botonesFiltros, 2, 1);
+        var limpiar = new Button { Name = "btnLimpiarFiltros", Text = "Limpiar filtros", MinimumSize = new Size(110, 32), AutoSize = true, Height = 32 }; limpiar.Click += Limpiar;
+        var actualizar = new Button { Name = "btnActualizar", Text = "Actualizar", MinimumSize = new Size(110, 32), AutoSize = true, Height = 32 }; actualizar.Click += Actualizar;
+        botonesFiltros.Name = "flpFiltrosAcciones";
+        botonesFiltros.Controls.AddRange([limpiar, actualizar]);
+        dtpDesde = Estilos.FiltrosBandeja.CrearFecha("dtpDesde");
+        dtpHasta = Estilos.FiltrosBandeja.CrearFecha("dtpHasta");
+        Estilos.FiltrosBandeja.Configurar(filtros, botonesFiltros, ("Buscar", txtBuscar), ("Situación", cboEstado),
+            ("Desde · último movimiento", dtpDesde), ("Hasta · último movimiento", dtpHasta));
+        dtpDesde.ValueChanged += Filtrar;
+        dtpHasta.ValueChanged += Filtrar;
         tlpPrincipal.Controls.Add(filtros, 0, 1);
         dgvDatos = new DataGridView { Name = "dgvDatos", Dock = DockStyle.Fill, AutoGenerateColumns = false, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false,
             MultiSelect = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, RowHeadersVisible = false, BackgroundColor = Color.White, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };

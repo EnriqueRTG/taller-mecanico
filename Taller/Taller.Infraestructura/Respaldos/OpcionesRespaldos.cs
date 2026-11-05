@@ -42,6 +42,12 @@ public sealed class OpcionesRespaldos
         ApplicationName = "SGTM-Mantenimiento"
     }.ConnectionString;
     public string Control(bool administracion = true) => Cadena(administracion ? _administracion : _negocio, BaseControl);
+    /// <summary>Pool exclusivo del control cotidiano; cada préstamo libera su applock antes de retornar.</summary>
+    public string ControlCliente() => new SqlConnectionStringBuilder(Control(false))
+    {
+        Pooling = true,
+        ApplicationName = "SGTM-ControlCliente"
+    }.ConnectionString;
     public string Master() => Cadena(_administracion, "master");
     public string RecursoMantenimiento => "SGTM:Negocio:" + BaseDatos.ToUpperInvariant();
     public string RecursoCopias => "SGTM:Copias:" + BaseDatos.ToUpperInvariant();

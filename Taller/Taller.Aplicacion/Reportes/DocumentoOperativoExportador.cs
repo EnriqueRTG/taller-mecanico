@@ -16,7 +16,7 @@ public static class DocumentoOperativoExportador
         "<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>" + H(titulo)
         + "</title><style>body{font:14px Segoe UI,Arial,sans-serif;color:#172033;max-width:1000px;margin:24px auto;padding:16px}h1{font-size:24px}h2{font-size:18px;color:#1e40af}table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:9px;border:1px solid #cbd5e1;text-align:left;overflow-wrap:anywhere}th{background:#eff6ff}.numero{text-align:right;white-space:nowrap}.totales{margin:16px 0 16px auto;width:55%}.totales th{text-align:right}.totales td{font-size:18px;font-weight:bold}.texto{white-space:pre-wrap;overflow-wrap:anywhere}.aviso{background:#f1f5f9;padding:12px}tr{break-inside:avoid}thead{display:table-header-group}h2{break-after:avoid}footer{color:#475569}@page{size:A4;margin:16mm}@media print{body{margin:0;padding:0}}</style></head><body>"
         + DocumentoReporteExportador.Cabecera(empresa) + "<h1>" + H(titulo) + "</h1>";
-    private const string Fin = "<footer><p>SGTM · Documento interno sin validez fiscal. La emisión no registra autorización ni pago.</p></footer></body></html>";
+    private const string Fin = "<footer><p>SGTM · La emisión no registra autorización ni pago.</p></footer></body></html>";
 
     public static string Presupuesto(PresupuestoConsultaDto d, EmpresaDocumentoDto empresa)
     {

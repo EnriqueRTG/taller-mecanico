@@ -5,6 +5,7 @@ using Taller.Aplicacion.DTOs.Ejecuciones;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Enumeraciones;
 using Taller.Presentacion.Errores;
+using Taller.Presentacion.Formularios.Diagnosticos;
 
 namespace Taller.Presentacion.Formularios.Presupuestos;
 /// <summary>Valida la selección exacta del cliente o prepara una reformulación que requiere nueva aceptación.</summary>
@@ -41,21 +42,25 @@ public partial class FrmPrepararPropuesta : Form
             _catalogo = await _evaluacion.ListarCatalogoAsync();
             var expediente = await _servicio.ObtenerAsync(_atencion);
             _version = expediente.Version;
+            cboSolicitud.DisplayMember = nameof(SolicitudIngresoDto.Descripcion);
+            cboSolicitud.DataSource = new List<SolicitudIngresoDto> { new() { Descripcion = "Adicional sin solicitud inicial" } }.Concat(expediente.Solicitudes).ToList();
             bool inspeccion = expediente.Estado == EstadoAtencion.EnEvaluacionTecnica;
             if (_presupuesto is int id)
             {
                 _revision = await _presupuestos.ObtenerAsync(id);
-                if (_revision.Estado != EstadoPresupuesto.PendienteRevisionTecnica || !_revision.Vigente)
+                bool correccion = _revision.EsAdicional && _revision.Estado == EstadoPresupuesto.Borrador;
+                if ((_revision.Estado != EstadoPresupuesto.PendienteRevisionTecnica && !correccion) || !_revision.Vigente)
                     throw new InvalidOperationException("La selección ya no espera revisión.");
                 inspeccion = _revision.EsInspeccion;
-                _items = new(_revision.Items.Where(i => i.Aceptar).Select(i => new ItemPropuestaDto { IdSolicitudAtencion = i.IdSolicitudAtencion, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList());
-                lblAyuda.Text = "Selección solicitada por el cliente. Revise dependencias, quite o agregue tareas y justifique la viabilidad. Sin cambios, su validación habilita el trabajo sin otra aceptación. Si modifica el alcance se enviará otra propuesta a recepción. Solicitud: " + _revision.Observaciones;
+                _items = new(_revision.Items.Where(i => correccion || i.Aceptar).Select(i => new ItemPropuestaDto { SolicitudDescripcion = expediente.Solicitudes.FirstOrDefault(s => s.IdSolicitud == i.IdSolicitudAtencion)?.Descripcion ?? "Sin solicitud inicial", IdSolicitudAtencion = i.IdSolicitudAtencion, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList());
+                lblAyuda.Text = correccion ? "Corrección de adicional: revise el alcance y envíe una nueva propuesta a recepción. Siempre requiere presentación y aceptación del cliente. Motivo: " + _revision.Observaciones : "Selección solicitada por el cliente. Revise dependencias, quite o agregue tareas y justifique la viabilidad. Sin cambios, su validación habilita el trabajo sin otra aceptación. Si modifica el alcance se enviará otra propuesta a recepción. Solicitud: " + _revision.Observaciones;
             }
             else
                 lblAyuda.Text = inspeccion ? "Ampliación de inspección: presupueste solo servicios necesarios para determinar la causa, fuera del alcance habitual. Recepción debe informar y obtener autorización antes de realizarlos. La reparación se presupuesta por separado." : "Adicional independiente: no sustituye lo autorizado. Incluya solo trabajos/materiales nuevos. Recepción comunicará esta propuesta; no se ejecuta hasta su aceptación.";
             if (inspeccion) _catalogo = _catalogo.Where(c => c.Tipo == TipoConcepto.Servicio).ToList();
-            chkCondiciones.Visible = _revision != null;
-            tlpPrincipal.RowStyles[6].Height = _revision != null ? 30 : 0;
+            bool seleccionParcial = _revision?.Estado == EstadoPresupuesto.PendienteRevisionTecnica;
+            chkCondiciones.Visible = seleccionParcial;
+            tlpPrincipal.RowStyles[6].Height = seleccionParcial ? 30 : 0;
             dgvItems.DataSource = _items;
             Filtrar(s, e);
             ActualizarTotal();
@@ -80,13 +85,25 @@ public partial class FrmPrepararPropuesta : Form
         cboConcepto.DataSource = _catalogo.Where(c => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{c.Nombre} {c.Categoria} {c.Descripcion}", q)).ToList();
     }
 
+    /// <summary>Reutiliza el catálogo cargado y prepara el editor sin agregar ítems ni consultar nuevamente.</summary>
+    private void BuscarConcepto(object? s, EventArgs e)
+    {
+        if (_ocupado) return;
+        using var selector = new FrmBuscarConcepto(_catalogo, txtBuscar.Text);
+        if (selector.ShowDialog(this) != DialogResult.OK || selector.ConceptoSeleccionado is not { } concepto) return;
+        txtBuscar.Clear();
+        cboConcepto.SelectedItem = concepto;
+        nudCantidad.Focus();
+        nudCantidad.Select(0, nudCantidad.Text.Length);
+    }
+
     private void SeleccionarConcepto(object? s, EventArgs e)
     {
         if (cboConcepto.SelectedItem is ConceptoPropuestaDto c)
         {
             nudCantidad.Value = 1;
             txtDescripcion.Text = c.Nombre;
-            nudPrecio.Value = Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
+            nudPrecio.Value = cboOrigen.SelectedIndex == 1 ? 0 : Math.Min(nudPrecio.Maximum, c.PrecioReferencia ?? 0);
         }
     }
 
@@ -94,9 +111,11 @@ public partial class FrmPrepararPropuesta : Form
     {
         if (cboConcepto.SelectedItem is not ConceptoPropuestaDto c || string.IsNullOrWhiteSpace(txtDescripcion.Text))
             return;
-        if (_items.Any(i => i.IdConcepto == c.IdConcepto))
+        var solicitud = cboSolicitud.SelectedItem as SolicitudIngresoDto;
+        int? idSolicitud = solicitud?.IdSolicitud > 0 ? solicitud.IdSolicitud : null;
+        if (_items.Any(i => i.IdConcepto == c.IdConcepto && i.IdSolicitudAtencion == idSolicitud))
         {
-            MessageBox.Show(this, "El concepto ya está agregado. Quite la fila para reemplazarlo.");
+            MessageBox.Show(this, "El concepto ya está agregado para esa solicitud. Quite la fila para reemplazarlo.");
             return;
         }
 
@@ -107,7 +126,7 @@ public partial class FrmPrepararPropuesta : Form
             return;
         }
 
-        _items.Add(new() { IdConcepto = c.IdConcepto, Descripcion = txtDescripcion.Text.Trim(), Cantidad = nudCantidad.Value, PrecioUnitario = origen == OrigenMaterial.Cliente ? 0 : nudPrecio.Value, OrigenMaterial = origen });
+        _items.Add(new() { IdSolicitudAtencion = idSolicitud, SolicitudDescripcion = solicitud?.Descripcion ?? "Sin solicitud inicial", IdConcepto = c.IdConcepto, Descripcion = txtDescripcion.Text.Trim(), Cantidad = nudCantidad.Value, PrecioUnitario = origen == OrigenMaterial.Cliente ? 0 : nudPrecio.Value, OrigenMaterial = origen });
         _sucio = true;
         ActualizarTotal();
     }
@@ -122,7 +141,7 @@ public partial class FrmPrepararPropuesta : Form
         }
     }
 
-    private bool ConservaSeleccion => !chkCondiciones.Checked && _revision != null && _revision.Items.Any(i => !i.Aceptar)
+    private bool ConservaSeleccion => !chkCondiciones.Checked && _revision is { Estado: EstadoPresupuesto.PendienteRevisionTecnica } && _revision.Items.Any(i => i.Aceptar) && _revision.Items.Any(i => !i.Aceptar)
         && _items.Count == _revision.Items.Count(i => i.Aceptar)
         && _items.All(i => _revision.Items.Any(d => d.Aceptar && d.IdConcepto == i.IdConcepto && d.IdSolicitudAtencion == i.IdSolicitudAtencion
             && d.Descripcion == i.Descripcion && d.Cantidad == i.Cantidad && d.PrecioUnitario == i.PrecioUnitario && d.OrigenMaterial == i.OrigenMaterial));

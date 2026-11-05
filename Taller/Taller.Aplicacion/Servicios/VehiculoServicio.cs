@@ -41,7 +41,8 @@ public sealed class VehiculoServicio(IVehiculoRepositorio vehiculos, IModeloRepo
     public async Task<Taller.Aplicacion.DTOs.Vehiculos.VehiculoEdicionDto> ObtenerEdicionAsync(int id)
     {
         await RecepcionAsync();
-        var v = await ObtenerPorIdAsync(id) ?? throw new ValidacionException("El vehículo ya no existe.");
+        DatosMaestros.Id(id);
+        var v = await vehiculos.ObtenerPorIdAsync(id) ?? throw new ValidacionException("El vehículo ya no existe.");
         return new(v.IdVehiculo, v.Dominio, v.Anio, v.Color, v.IdModelo, v.Modelo.Marca.Nombre, v.Modelo.Nombre, v.Activo, v.FechaAlta, v.Version.ToArray());
     }
 
@@ -54,14 +55,14 @@ public sealed class VehiculoServicio(IVehiculoRepositorio vehiculos, IModeloRepo
     public async Task<List<Marca>> ListarMarcasAsync()
     {
         await RecepcionAsync();
-        return (await modelos.ListarParaEdicionAsync(0)).Select(m => m.Marca).DistinctBy(m => m.IdMarca).OrderBy(m => m.Nombre).ToList();
+        return await modelos.ListarMarcasDisponiblesAsync();
     }
 
     public async Task<List<Modelo>> ListarModelosPorMarcaAsync(int idMarca)
     {
         await RecepcionAsync();
         DatosMaestros.Id(idMarca);
-        return (await modelos.ListarParaEdicionAsync(0)).Where(m => m.IdMarca == idMarca).ToList();
+        return await modelos.ListarDisponiblesPorMarcaAsync(idMarca);
     }
 
     private async Task AsignarAsync(Vehiculo v, string dominio, int anio, string color, int idModelo)

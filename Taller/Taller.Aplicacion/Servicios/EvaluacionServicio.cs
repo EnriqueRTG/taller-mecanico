@@ -11,14 +11,12 @@ namespace Taller.Aplicacion.Servicios;
 /// <summary>Coordina recepción, reserva, avances e informe/propuesta sin confundir autorización, ejecución y pago.</summary>
 public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsuarioRepositorio usuarios, IUnidadDeTrabajo unidad, SesionUsuario sesion)
 {
-    private async Task<Usuario> AutorizarAsync(bool tecnico = false, bool recepcion = false)
-    {
-        var id = sesion.UsuarioActual?.Id ?? throw new ValidacionException("Debe iniciar sesión.");
-        var usuario = await usuarios.ObtenerPorIdAsync(id);
-        if (!UsuarioAutorizado.EstaHabilitado(usuario) || (tecnico && usuario.RolId != RolesSistema.TecnicoId) || (recepcion && usuario.RolId != RolesSistema.AdministrativoId) || (!tecnico && !recepcion && usuario.RolId != RolesSistema.TecnicoId && usuario.RolId != RolesSistema.AdministrativoId))
-            throw new ValidacionException("No tiene permisos para esta operación.");
-        return usuario;
-    }
+    private readonly AutorizacionOperativa _acceso = new(usuarios, sesion);
+    /// <summary>Una autorización por comando; los auxiliares reciben los datos ya autorizados.</summary>
+    private Task<Usuario> AutorizarAsync(bool tecnico = false, bool recepcion = false) =>
+        tecnico ? _acceso.ExigirRolesAsync(RolesSistema.TecnicoId)
+        : recepcion ? _acceso.ExigirRolesAsync(RolesSistema.AdministrativoId)
+        : _acceso.ExigirAsync();
 
     private async Task<Atencion> AtencionAsync(int id)
     {
@@ -214,24 +212,9 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
             if (finalizar && !datos.SoloEvaluacion && !presupuestos.Any(p => p.Vigente && p.IdPresupuestoAnterior.HasValue) && a.Solicitudes.Any(s => !datos.Items.Any(i => i.IdSolicitudAtencion == s.IdSolicitudAtencion)))
                 throw new ValidacionException("El presupuesto debe responder a cada solicitud del cliente. Revise los pedidos antes de enviarlo.");
             var catalogo = (await repositorio.ListarCatalogoAsync()).ToDictionary(c => c.IdConcepto);
-            if (datos.Items.GroupBy(i => new { i.IdConcepto, i.IdSolicitudAtencion }).Any(g => g.Count() > 1))
-                throw new ValidacionException("No repita conceptos en la propuesta.");
-            if (datos.Items.Count > 0)
-                _ = SeguimientoTrabajoServicio.PrepararItems(datos.Items, catalogo.Values.ToList());
-            decimal total = 0;
-            const decimal maximo = 9999999999999999.99m;
-            foreach (var item in datos.Items)
-            {
-                if (!catalogo.ContainsKey(item.IdConcepto))
-                    throw new ValidacionException("Un concepto ya no está activo. Actualice el catálogo.");
-                if (string.IsNullOrWhiteSpace(item.Descripcion) || item.Descripcion.Trim().Length > 500)
-                    throw new ValidacionException("Cada ítem requiere una descripción de hasta 500 caracteres.");
-                if (item.Cantidad <= 0 || item.Cantidad > 999999999999999.999m || decimal.Round(item.Cantidad, 3) != item.Cantidad || item.PrecioUnitario < 0 || item.PrecioUnitario > maximo || decimal.Round(item.PrecioUnitario, 2) != item.PrecioUnitario || item.PrecioUnitario > maximo / item.Cantidad)
-                    throw new ValidacionException("Revise cantidades y precios: hasta tres y dos decimales respectivamente.");
-                if (item.Subtotal > maximo - total)
-                    throw new ValidacionException("El total supera el importe permitido.");
-                total += item.Subtotal;
-            }
+            // Una sola preparación valida y normaliza los ítems; su resultado se utiliza al guardar.
+            var detallesPreparados = datos.Items.Count == 0 ? new List<PresupuestoDetalle>()
+                : SeguimientoTrabajoServicio.PrepararItems(datos.Items, catalogo.Values.ToList());
 
             var iniciales = presupuestos.Where(p => p.EsInspeccion && p.Vigente && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles).ToList();
             if (datos.InspeccionesAutorizadas.Select(d => d.IdDetalle).Distinct().Count() != iniciales.Count || datos.InspeccionesAutorizadas.Count != iniciales.Count)
@@ -292,7 +275,7 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
                     repositorio.AgregarPresupuesto(propuesta);
                 }
 
-                repositorio.ReemplazarDetalles(propuesta, datos.Items.Select(i => new PresupuestoDetalle { IdSolicitudAtencion = i.IdSolicitudAtencion, OrigenMaterial = i.OrigenMaterial, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion.Trim(), Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario }));
+                repositorio.ReemplazarDetalles(propuesta, detallesPreparados);
                 propuesta.Observaciones = avance.Observaciones;
             }
 
@@ -367,9 +350,8 @@ public sealed class EvaluacionServicio(IEvaluacionRepositorio repositorio, IUsua
         try
         {
             var usuario = await AutorizarAsync(recepcion: true);
-            var datos = (await repositorio.ListarPresupuestosAsync()).SingleOrDefault(p => p.IdPresupuesto == idPresupuesto) ?? throw new ValidacionException("El presupuesto no existe.");
-            var a = await AtencionAsync(datos.IdAtencion);
-            var p = (await repositorio.ObtenerPresupuestosAsync(a.IdAtencion)).Single(p => p.IdPresupuesto == idPresupuesto);
+            var p = await repositorio.ObtenerPresupuestoAsync(idPresupuesto) ?? throw new ValidacionException("El presupuesto no existe.");
+            var a = p.Atencion;
             if ((!p.Vigente || p.Estado != EstadoPresupuesto.PendientePresentacion) || version is null || version.Length != 8 || !p.Version.SequenceEqual(version))
                 throw new ValidacionException("La propuesta cambió o ya fue presentada. Actualice el listado.");
             if ((!p.EsAdicional && (a.Estado != EstadoAtencion.EnEvaluacionTecnica || a.IdTecnicoEnActividad is not null)) || (p.EsAdicional && a.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))

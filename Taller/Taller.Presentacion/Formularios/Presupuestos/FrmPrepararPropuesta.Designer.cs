@@ -13,7 +13,7 @@ partial class FrmPrepararPropuesta
     private TableLayoutPanel tlpPrincipal = null!;
     private Label lblAyuda = null!, lblTotal = null!;
     private TextBox txtBuscar = null!, txtDescripcion = null!, txtMotivo = null!;
-    private ComboBox cboConcepto = null!, cboOrigen = null!;
+    private ComboBox cboConcepto = null!, cboOrigen = null!, cboSolicitud = null!;
     private NumericUpDown nudCantidad = null!, nudPrecio = null!;
     private DataGridView dgvItems = null!;
     private CheckBox chkCondiciones = null!;
@@ -29,9 +29,9 @@ partial class FrmPrepararPropuesta
             Padding = new Padding(12)
         };
         tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 85));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 140));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
@@ -50,13 +50,16 @@ partial class FrmPrepararPropuesta
         var entrada = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 4,
-            RowCount = 2
+            ColumnCount = 3,
+            RowCount = 4,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
-        entrada.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-        entrada.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-        entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-        entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+        entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        entrada.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
         entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
         entrada.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
         cboConcepto = new ComboBox
@@ -97,23 +100,34 @@ partial class FrmPrepararPropuesta
         btnAgregar = new Button
         {
             Text = "Agregar ítem",
-            AutoSize = true
+            AutoSize = true,
+            MinimumSize = new Size(140, 36),
+            Padding = new Padding(8, 4, 8, 4)
         };
         btnAgregar.Click += Agregar;
         btnQuitar = new Button
         {
             Text = "Quitar seleccionado",
-            AutoSize = true
+            AutoSize = true,
+            MinimumSize = new Size(170, 36),
+            Padding = new Padding(8, 4, 8, 4)
         };
         btnQuitar.Click += Quitar;
         entrada.Controls.Add(Campo("Concepto del catálogo", cboConcepto), 0, 0);
         entrada.SetColumnSpan(cboConcepto.Parent!, 2);
         entrada.Controls.Add(Campo("Quién aporta el material", cboOrigen), 2, 0);
-        entrada.Controls.Add(btnAgregar, 3, 0);
+
         entrada.Controls.Add(Campo("Descripción para el cliente", txtDescripcion), 0, 1);
         entrada.Controls.Add(Campo("Cantidad", nudCantidad), 1, 1);
         entrada.Controls.Add(Campo("Precio unitario ARS", nudPrecio), 2, 1);
-        entrada.Controls.Add(btnQuitar, 3, 1);
+        // Las acciones tienen su propia fila: no compiten con las etiquetas ni los editores.
+        var accionesItems = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, WrapContents = true, Margin = new Padding(3, 4, 3, 8) };
+        accionesItems.Controls.AddRange(new Control[] { btnAgregar, btnQuitar });
+        entrada.Controls.Add(accionesItems, 0, 2);
+        entrada.SetColumnSpan(accionesItems, 3);
+        cboSolicitud = new ComboBox { Name = "cboSolicitud", Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
+        entrada.Controls.Add(Campo("Solicitud asociada", cboSolicitud), 0, 3);
+        entrada.SetColumnSpan(cboSolicitud.Parent!, 3);
         dgvItems = new DataGridView
         {
             Dock = DockStyle.Fill,
@@ -130,6 +144,7 @@ partial class FrmPrepararPropuesta
             BackgroundColor = Color.White
         };
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Concepto / alcance", FillWeight = 220, MinimumWidth = 210 });
+        dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colSolicitud", DataPropertyName = "SolicitudDescripcion", HeaderText = "Solicitud", MinimumWidth = 130 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colOrigen", DataPropertyName = "OrigenMaterial", HeaderText = "Aporte", MinimumWidth = 90 });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad", MinimumWidth = 90, DefaultCellStyle = new DataGridViewCellStyle { Format = "N3" } });
         dgvItems.Columns.Add(new DataGridViewTextBoxColumn { Name = "colPrecio", DataPropertyName = "PrecioUnitario", HeaderText = "Precio unitario", MinimumWidth = 100, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
@@ -171,7 +186,16 @@ partial class FrmPrepararPropuesta
         Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonPrimario(btnGuardar);
         foreach (var b in new[] { btnAgregar, btnQuitar, btnCerrar }) Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(b);
         tlpPrincipal.Controls.Add(lblAyuda, 0, 0);
-        tlpPrincipal.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 0, 1);
+        var busquedaCatalogo = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+        busquedaCatalogo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        busquedaCatalogo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        busquedaCatalogo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 180));
+        var btnBuscarConcepto = new Button { Name = "btnBuscarConcepto", Text = "Buscar concepto…", Anchor = AnchorStyles.Left | AnchorStyles.Right, AutoSize = true, MinimumSize = new Size(170, 36), Margin = new Padding(3, 3, 3, 3) };
+        btnBuscarConcepto.Click += BuscarConcepto;
+        Taller.Presentacion.Estilos.EstilosInterfaz.AplicarBotonSecundario(btnBuscarConcepto);
+        busquedaCatalogo.Controls.Add(Campo("Buscar en el catálogo", txtBuscar), 0, 0);
+        busquedaCatalogo.Controls.Add(btnBuscarConcepto, 1, 0);
+        tlpPrincipal.Controls.Add(busquedaCatalogo, 0, 1);
         tlpPrincipal.Controls.Add(entrada, 0, 2);
         tlpPrincipal.Controls.Add(dgvItems, 0, 3);
         tlpPrincipal.Controls.Add(lblTotal, 0, 4);
@@ -179,7 +203,7 @@ partial class FrmPrepararPropuesta
         tlpPrincipal.Controls.Add(chkCondiciones, 0, 6);
         tlpPrincipal.Controls.Add(acciones, 0, 7);
         tlpPrincipal.AutoScroll = true;
-        tlpPrincipal.AutoScrollMinSize = new Size(0, 680);
+        tlpPrincipal.AutoScrollMinSize = new Size(0, 720);
         dgvItems.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         dgvItems.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
         dgvItems.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -188,17 +212,18 @@ partial class FrmPrepararPropuesta
         AutoScaleDimensions = new SizeF(7F, 15F);
         Font = new Font("Segoe UI", 10);
         Text = "Preparar propuesta técnica";
-        ClientSize = new Size(1140, 700);
+        ClientSize = new Size(1140, 760);
         MinimumSize = new Size(820, 580);
         StartPosition = FormStartPosition.CenterParent;
         Load += Cargar;
         FormClosing += AlCerrar;
         static Control Campo(string texto, Control editor)
         {
-            var grupo = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Margin = new Padding(3, 3, 6, 6) };
-            grupo.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
-            grupo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            grupo.Controls.Add(new Label { Text = texto, Dock = DockStyle.Fill, AutoEllipsis = true }, 0, 0);
+            var grupo = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, MinimumSize = new Size(0, 64), Margin = new Padding(3, 3, 6, 6) };
+            grupo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            grupo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            grupo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            grupo.Controls.Add(new Label { Text = texto, Dock = DockStyle.Fill, AutoSize = true }, 0, 0);
             grupo.Controls.Add(editor, 0, 1);
             return grupo;
         }

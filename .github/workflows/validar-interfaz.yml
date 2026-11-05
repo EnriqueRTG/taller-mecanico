@@ -1,7 +1,7 @@
 name: Verificar construcción WinForms
 on:
   pull_request:
-    paths: ['Taller/**', '.github/workflows/validar-interfaz.yml']
+    paths: ['Taller/**', 'scripts/**', 'global.json', '.github/workflows/validar-interfaz.yml']
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,3 +1,5 @@
+> Registro histórico de la etapa indicada. Estado vigente y alcance de las pruebas: [cierre de coherencia del 04/11/2026](cierre-coherencia-2026-11-04.md).
+
 > Evidencia histórica de la etapa descrita en este documento. Para el estado más reciente, consultar [tercera revisión](revision-integral-3.md) y las comprobaciones del commit entregado.
 
 # Evidencia de revisión de cierre

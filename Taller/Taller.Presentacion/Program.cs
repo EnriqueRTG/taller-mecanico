@@ -54,6 +54,12 @@ internal static class Program
         {
             inicializador.InicializarAsync().GetAwaiter().GetResult();
         }
+        catch (Taller.Aplicacion.Excepciones.ValidacionException ex)
+        {
+            Log.Warning(ex, "Instalación incompatible con la versión de SGTM");
+            MessageBox.Show(ex.Message, "Verificar versión de la base", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
         catch (Exception ex)
         {
             var referencia = Guid.NewGuid().ToString("N")[..10];

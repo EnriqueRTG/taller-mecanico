@@ -86,7 +86,7 @@ partial class FrmPresupuestos
         txtBuscar.PlaceholderText = "Buscar presupuesto, atención, cliente o dominio";
         txtBuscar.TextChanged += Filtrar;
         cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
-        cboEstado.Items.AddRange(new object[] { "Todos", "Por presentar", "Borradores", "Esperando decisión", "Revisión técnica de selección" });
+        cboEstado.Items.AddRange(new object[] { "Todos", "Por presentar", "Borradores", "Esperando decisión", "Revisión técnica de selección", "Aceptados", "Aceptados parcialmente", "Rechazados", "Históricos" });
         cboEstado.SelectedIndexChanged += Filtrar;
         dgvDatos.Columns.Add(new DataGridViewCheckBoxColumn { Name = "colVigente", DataPropertyName = "Vigente", HeaderText = "Vigente", FillWeight = 60, ReadOnly = true });
         dgvDatos.Columns.Add(new DataGridViewTextBoxColumn { Name = "colAceptado", DataPropertyName = "TotalAceptado", HeaderText = "Autorizado ARS", FillWeight = 90, DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" } });
@@ -151,40 +151,15 @@ partial class FrmPresupuestos
         btnPresentar.BackColor = Color.FromArgb(30, 64, 175);
         btnPresentar.ForeColor = Color.White;
         btnPresentar.FlatStyle = FlatStyle.Flat;
-        tlpFiltros.Name = "tlpFiltros";
-        tlpFiltros.Dock = DockStyle.Top;
-        tlpFiltros.AutoSize = true;
-        tlpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        tlpFiltros.BackColor = Color.White;
-        tlpFiltros.Padding = new Padding(12, 8, 12, 8);
-        tlpFiltros.ColumnCount = 3;
-        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F));
-        tlpFiltros.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        tlpFiltros.RowCount = 2;
-        tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        tlpFiltros.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        var grupoBuscar = new Panel { Name = "grupoBuscar", Size = new Size(400, 52), MinimumSize = new Size(0, 52), Dock = DockStyle.Fill, Margin = new Padding(0, 0, 16, 0) };
-        var grupoEstado = new Panel { Name = "grupoEstado", Size = new Size(248, 52), MinimumSize = new Size(0, 52), Dock = DockStyle.Fill, Margin = new Padding(0, 0, 12, 0) };
-        grupoBuscar.Controls.Add(new Label { Text = "Buscar", AutoSize = true, Location = new Point(0, 0), ForeColor = Color.FromArgb(51, 65, 85) });
-        grupoBuscar.Controls.Add(txtBuscar);
-        txtBuscar.Dock = DockStyle.Bottom;
-        grupoEstado.Controls.Add(new Label { Text = "Estado", AutoSize = true, Location = new Point(0, 0), ForeColor = Color.FromArgb(51, 65, 85) });
-        grupoEstado.Controls.Add(cboEstado);
-        cboEstado.Dock = DockStyle.Bottom;
+        dtpDesde = Taller.Presentacion.Estilos.FiltrosBandeja.CrearFecha("dtpDesde");
+        dtpHasta = Taller.Presentacion.Estilos.FiltrosBandeja.CrearFecha("dtpHasta");
         flpFiltrosAcciones.Name = "flpFiltrosAcciones";
-        flpFiltrosAcciones.AutoSize = true;
-        flpFiltrosAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        flpFiltrosAcciones.WrapContents = false;
-        flpFiltrosAcciones.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
-        flpFiltrosAcciones.Margin = new Padding(0);
-        flpFiltrosAcciones.Controls.Add(btnLimpiarFiltros);
-        flpFiltrosAcciones.Controls.Add(btnActualizar);
-        tlpFiltros.Controls.Add(grupoBuscar, 0, 0);
-        tlpFiltros.Controls.Add(grupoEstado, 1, 0);
-        tlpFiltros.Controls.Add(flpFiltrosAcciones, 0, 1);
-        tlpFiltros.SetColumnSpan(flpFiltrosAcciones, 3);
-        tlpFiltros.SizeChanged += Filtros_SizeChanged;
+        flpFiltrosAcciones.Controls.AddRange([btnLimpiarFiltros, btnActualizar]);
+        Taller.Presentacion.Estilos.FiltrosBandeja.Configurar(tlpFiltros, flpFiltrosAcciones,
+            ("Buscar", txtBuscar), ("Situación", cboEstado),
+            ("Desde · último movimiento", dtpDesde), ("Hasta · último movimiento", dtpHasta));
+        dtpDesde.ValueChanged += Filtrar;
+        dtpHasta.ValueChanged += Filtrar;
         btnLimpiarFiltros.Name = "btnLimpiarFiltros";
         btnLimpiarFiltros.Text = "Limpiar filtros";
         btnLimpiarFiltros.Click += LimpiarFiltros_Click;
@@ -315,6 +290,7 @@ partial class FrmPresupuestos
     private Button btnPresentar = null!;
     private Button btnActualizar = null!;
     private TableLayoutPanel tlpFiltros = null!;
+    private DateTimePicker dtpDesde = null!, dtpHasta = null!;
     private FlowLayoutPanel flpFiltrosAcciones = null!;
     private Button btnLimpiarFiltros = null!;
 }

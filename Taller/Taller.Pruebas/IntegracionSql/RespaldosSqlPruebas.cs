@@ -150,7 +150,7 @@ public sealed class RespaldosSqlPruebas
             Token = Guid.NewGuid(),
             VenceUtc = DateTimeOffset.UtcNow.AddMinutes(10)
         };
-        public TallerDbContext Contexto(GeneracionMantenimiento generacion) => new(new DbContextOptionsBuilder<TallerDbContext>().UseSqlServer(Conexion).AddInterceptors(new IntercepcionMantenimiento(Opciones, generacion)).Options);
+        public TallerDbContext Contexto(GeneracionMantenimiento generacion) => new(new DbContextOptionsBuilder<TallerDbContext>().UseSqlServer(new SqlConnectionStringBuilder(Conexion) { Pooling = true }.ConnectionString).AddInterceptors(new IntercepcionMantenimiento(Opciones, generacion)).Options);
         public async ValueTask DisposeAsync()
         {
             foreach (var db in new[]
@@ -260,6 +260,33 @@ public sealed class RespaldosSqlPruebas
         await Assert.ThrowsAsync<InvalidOperationException>(() => anterior.Database.ExecuteSqlRawAsync("SELECT 1"));
         await using var nueva = c.Contexto(new GeneracionMantenimiento());
         await nueva.Database.ExecuteSqlRawAsync("SELECT 1");
+    }
+
+    [SqlRespaldoFact]
+    public async Task PoolReutilizaSesionSinRetenerNegocio_NiPermisoDeControl()
+    {
+        await using var c = await Caso.CrearAsync();
+        var generacion = new GeneracionMantenimiento();
+        async Task<int> SesionAsync(bool sincronica)
+        {
+            await using var db = c.Contexto(generacion);
+            if (sincronica) db.Database.OpenConnection(); else await db.Database.OpenConnectionAsync();
+            var conexion = (SqlConnection)db.Database.GetDbConnection();
+            Assert.Equal(c.Nombre, conexion.Database);
+            var id = Convert.ToInt32(await new SqlCommand("SELECT @@SPID", conexion).ExecuteScalarAsync());
+            if (sincronica) db.Database.CloseConnection(); else await db.Database.CloseConnectionAsync();
+            return id;
+        }
+        int primera = await SesionAsync(false);
+        Assert.Equal(primera, await SesionAsync(false));
+        Assert.Equal(primera, await SesionAsync(true));
+        // Una sesión dormida en negocio impediría SINGLE_USER. Un permiso filtrado
+        // impediría adquirir el exclusivo: la recuperación real comprueba ambos.
+        var copia = await c.Motor.CrearAsync(TipoRespaldo.Completa, c.Carpeta, "Admin");
+        var plan = await c.PlanAsync(copia.Id);
+        Assert.True((await c.Motor.RestaurarAsync(plan, c.Primero, c.Segundo, "Restaurar después de reutilizar el pool")).Restaurada);
+        await using var anterior = c.Contexto(generacion);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => anterior.Database.ExecuteSqlRawAsync("SELECT 1"));
     }
 
     private sealed class FallarTrasCompleta : IProgress<string>

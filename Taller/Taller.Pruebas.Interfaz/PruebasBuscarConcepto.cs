@@ -27,6 +27,8 @@ internal static class PruebasBuscarConcepto
         tipo.SelectedIndex = 0;
         if (lista.RowCount != 1) throw new Exception("Debe filtrar por categoría.");
         categoria.SelectedIndex = 0;
+        buscar.Text = "suspension";
+        if (lista.RowCount != 2) throw new Exception("La búsqueda debe ignorar tildes en la categoría.");
         buscar.Text = "Por unidad";
         if (lista.RowCount != 1) throw new Exception("Debe buscar por descripción.");
         typeof(FrmBuscarConcepto).GetMethod("Seleccionar", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.Invoke(f, null);

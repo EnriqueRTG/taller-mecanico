@@ -8,15 +8,13 @@ namespace Taller.Presentacion.Formularios.Principal;
 /// <summary>Resumen real por rol, con período y alcance explícitos; comparte las definiciones de los reportes.</summary>
 public partial class FrmInicio : Form, IFormularioConOperacion
 {
-    private readonly ReporteServicio _reportes;
     private readonly InicioServicio _inicio;
     private readonly SesionUsuario _sesion;
     public bool OperacionEnCurso { get; private set; }
 
-    public FrmInicio(ReporteServicio reportes, SesionUsuario sesion, InicioServicio inicio)
+    public FrmInicio(SesionUsuario sesion, InicioServicio inicio)
     {
         InitializeComponent();
-        _reportes = reportes;
         _inicio = inicio;
         _sesion = sesion;
     }
@@ -46,28 +44,12 @@ public partial class FrmInicio : Form, IFormularioConOperacion
             btnActualizar.Enabled = false;
             LimpiarTarjetas();
             dgvActividad.DataSource = null;
-            var tipos = await _reportes.ListarTiposAsync();
+            var resumen = await _inicio.CargarAsync();
             var usuario = _sesion.UsuarioActual;
             lblBienvenida.Text = $"Bienvenido, {usuario?.Nombre} {usuario?.Apellido}";
             lblDescripcion.Text = $"Perfil: {usuario?.Rol?.Nombre} · Usuario: {usuario?.NombreUsuario}. Pendientes priorizados según su intervención.";
-            var seleccion = tipos.Contains(TipoReporte.MovimientosCobro) ? new[]
-            {
-                TipoReporte.Atenciones,
-                TipoReporte.MovimientosCobro,
-                TipoReporte.SaldosPendientes
-            }
-
-            : new[]
-            {
-                TipoReporte.CargaTecnica,
-                TipoReporte.ActividadTecnica,
-                TipoReporte.Presupuestos
-            };
-            var documentos = new List<ReporteDocumentoDto>();
-            foreach (var tipo in seleccion)
-                documentos.Add(await _reportes.GenerarAsync(new SolicitudReporteDto { Tipo = tipo, Desde = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1), Hasta = FechaHoraTaller.Hoy }));
-            MostrarTarjetas(documentos);
-            var pendientes = await _inicio.ListarPendientesAsync();
+            MostrarTarjetas(resumen.Tarjetas);
+            var pendientes = resumen.Pendientes;
             dgvActividad.DataSource = pendientes;
             dgvActividad.Visible = pendientes.Count > 0;
             lblSinPendientes.Visible = pendientes.Count == 0;

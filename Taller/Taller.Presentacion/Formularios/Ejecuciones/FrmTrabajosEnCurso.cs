@@ -26,14 +26,17 @@ public partial class FrmTrabajosEnCurso : Form, Navegacion.IFormularioConOperaci
         catch (Exception ex) { _datos = []; dgvDatos.DataSource = null; Seleccion(null, EventArgs.Empty); Error(ex); }
         finally { OperacionEnCurso = false; tlpPrincipal.Enabled = true; Seleccion(null, EventArgs.Empty); }
     }
-    private void Limpiar(object? s, EventArgs e) { txtBuscar.Clear(); cboEstado.SelectedIndex = 0; Filtrar(s, e); }
+    private void Limpiar(object? s, EventArgs e) { txtBuscar.Clear(); cboEstado.SelectedIndex = 0; dtpDesde.Checked = dtpHasta.Checked = false; Filtrar(s, e); }
     private void Filtrar(object? s, EventArgs e)
     {
+        if (dtpDesde is null || dtpHasta is null) return;
         var q = txtBuscar.Text.Trim(); var id = _sesion.UsuarioActual?.Id;
-        dgvDatos.DataSource = _datos.Where(d => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{d.IdAtencion:D6} {d.Cliente} {d.Vehiculo} {d.Motivo}", q))
+        dgvDatos.DataSource = _datos.Where(d => Estilos.FiltrosBandeja.Incluye(d.Fecha, dtpDesde, dtpHasta)).Where(d => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{d.IdAtencion:D6} {d.Cliente} {d.Vehiculo} {d.Motivo}", q))
             .Where(d => cboEstado.SelectedIndex <= 0 || cboEstado.SelectedIndex == 1 && d.IdTecnico == null || cboEstado.SelectedIndex == 2 && d.IdTecnico != null || cboEstado.SelectedIndex == 3 && d.Pausas > 0)
             .OrderBy(d => d.IdTecnico == id ? 0 : d.IdTecnico == null ? 1 : 2).ThenByDescending(d => d.Pausas > 0).ThenByDescending(d => d.Fecha).ThenBy(d => d.IdAtencion).ToList();
         dgvDatos.ClearSelection(); dgvDatos.CurrentCell = null; Seleccion(s, e);
+        if (!Estilos.FiltrosBandeja.RangoValido(dtpDesde, dtpHasta))
+            lblAyuda.Text = "El rango no es válido: Desde debe ser anterior o igual a Hasta.";
     }
     private TrabajoEnCursoDto? Fila => dgvDatos.CurrentRow?.DataBoundItem as TrabajoEnCursoDto;
     private void Seleccion(object? s, EventArgs e)
@@ -42,7 +45,7 @@ public partial class FrmTrabajosEnCurso : Form, Navegacion.IFormularioConOperaci
         btnGestionar.Visible = tecnico;
         btnGestionar.Enabled = !OperacionEnCurso && tecnico && Fila is { } d && (d.IdTecnico == null || d.IdTecnico == _sesion.UsuarioActual?.Id);
         btnProgreso.Enabled = !OperacionEnCurso && Fila != null;
-        lblAyuda.Text = Fila is null ? "Mis trabajos primero, luego disponibles. Seleccione una atención; los avances guardados se consultan desde Ver progreso. Cerradas y canceladas no se incluyen."
+        lblAyuda.Text = Fila is null ? tecnico ? "Mis trabajos primero, luego disponibles. Los avances guardados se consultan desde Ver progreso. Cerradas y canceladas no se incluyen." : "Consulta de ejecución: recepción puede ver el progreso y las reservas; no modifica trabajos. Cerradas y canceladas no se incluyen."
             : $"{Fila.Progreso}. {(Fila.Pausas > 0 ? "Hay pausas: consulte sus causas antes de continuar." : "Cerrar la ejecución conserva la reserva del técnico.")}";
         Taller.Presentacion.Estilos.AccionesContextuales.Actualizar(btnGestionar, btnProgreso);
     }

@@ -8,36 +8,30 @@ namespace Taller.Infraestructura.Persistencia.Repositorios;
 /// <summary>Carga entidades con seguimiento para operaciones coordinadas por la unidad de trabajo.</summary>
 public sealed class EvaluacionRepositorio(TallerDbContext contexto) : IEvaluacionRepositorio
 {
+    public Task<Presupuesto?> ObtenerPresupuestoAsync(int id) => contexto.Presupuestos.Include(p => p.Atencion).SingleOrDefaultAsync(p => p.IdPresupuesto == id);
     public Task<Atencion?> ObtenerAtencionAsync(int id) => contexto.Atenciones.Include(a => a.Solicitudes).Include(a => a.Historial).Include(a => a.Hallazgos).Include(a => a.Pausas).AsSplitQuery().Include(a => a.Cliente).Include(a => a.Vehiculo).ThenInclude(v => v.Modelo).ThenInclude(m => m.Marca).SingleOrDefaultAsync(a => a.IdAtencion == id);
     public Task<EvaluacionAtencion?> ObtenerAvanceAsync(int id) => contexto.Set<EvaluacionAtencion>().SingleOrDefaultAsync(e => e.IdAtencion == id);
     public Task<List<Presupuesto>> ObtenerPresupuestosAsync(int id) => contexto.Presupuestos.Include(p => p.Detalles).Where(p => p.IdAtencion == id).ToListAsync();
     public Task<List<Diagnostico>> ObtenerDiagnosticosAsync(int id) => contexto.Diagnosticos.Where(d => d.IdAtencion == id).ToListAsync();
     public Task<List<Concepto>> ListarCatalogoAsync() => contexto.Conceptos.AsNoTracking().Include(c => c.Categoria).Where(c => c.Activo && c.Categoria.Activo).OrderBy(c => c.Nombre).ToListAsync();
     public Task<List<EvaluacionBandejaDto>> ListarAsync() => contexto.Atenciones.AsNoTracking().Where(a => a.Estado != EstadoAtencion.Cerrada && a.Estado != EstadoAtencion.Cancelada && (a.Estado == EstadoAtencion.EnEvaluacionTecnica || contexto.Set<EvaluacionAtencion>().Any(e => e.IdAtencion == a.IdAtencion && e.Finalizada))).Select(a => new EvaluacionBandejaDto { IdAtencion = a.IdAtencion, Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre, Vehiculo = a.Vehiculo.Dominio + " · " + a.Vehiculo.Modelo.Nombre, Motivo = a.MotivoConsulta, TipoSolicitud = a.TipoSolicitud, Fecha = a.Historial.Select(h => (DateTime? )h.Fecha).Max() ?? a.FechaApertura, IdTecnico = a.IdTecnicoEnActividad, Tecnico = a.TecnicoEnActividad == null ? "Disponible" : a.TecnicoEnActividad.Apellido + ", " + a.TecnicoEnActividad.Nombre, Finalizada = contexto.Set<EvaluacionAtencion>().Any(e => e.IdAtencion == a.IdAtencion && e.Finalizada), IdDiagnostico = a.Diagnosticos.Select(d => (int? )d.IdDiagnostico).FirstOrDefault() }).ToListAsync();
-    public async Task<List<Taller.Aplicacion.DTOs.Ejecuciones.TrabajoEnCursoDto>> ListarEjecucionesAsync()
-    {
-        var propuestas = await contexto.Presupuestos.AsNoTracking()
-            .Where(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado
-                && p.Atencion.Estado == EstadoAtencion.EnEjecucion && p.Atencion.FechaCierre == null)
-            .Include(p => p.Detalles).Include(p => p.Atencion).ThenInclude(a => a.Cliente)
-            .Include(p => p.Atencion).ThenInclude(a => a.Vehiculo)
-            .Include(p => p.Atencion).ThenInclude(a => a.TecnicoEnActividad)
-            .Include(p => p.Atencion).ThenInclude(a => a.Pausas)
-            .Include(p => p.Atencion).ThenInclude(a => a.Historial).AsSplitQuery().ToListAsync();
-        return propuestas.GroupBy(p => p.IdAtencion).Select(g =>
-        {
-            var a = g.First().Atencion;
-            var items = g.SelectMany(p => p.Detalles).Where(d => d.AceptadoPorCliente == true).ToList();
-            return new Taller.Aplicacion.DTOs.Ejecuciones.TrabajoEnCursoDto {
-                IdAtencion = a.IdAtencion, Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
-                Vehiculo = a.Vehiculo.Dominio, Motivo = a.MotivoConsulta, IdTecnico = a.IdTecnicoEnActividad,
-                Tecnico = a.TecnicoEnActividad == null ? "Disponible" : a.TecnicoEnActividad.Apellido + ", " + a.TecnicoEnActividad.Nombre,
-                Fecha = a.Historial.Select(h => h.Fecha).DefaultIfEmpty(a.FechaApertura).Max(),
-                Total = items.Count, Completados = items.Count(d => d.EstadoEjecucion == EstadoEjecucionDetalle.Completado),
-                EnCurso = items.Count(d => d.EstadoEjecucion == EstadoEjecucionDetalle.EnCurso), Pausas = a.Pausas.Count(p => p.FechaResolucion == null)
-            };
-        }).ToList();
-    }
+    /// <summary>Proyecta sólo los datos y contadores necesarios para la bandeja de ejecución.</summary>
+    public Task<List<Taller.Aplicacion.DTOs.Ejecuciones.TrabajoEnCursoDto>> ListarEjecucionesAsync() => contexto.Atenciones.AsNoTracking()
+        .Where(a => a.Estado == EstadoAtencion.EnEjecucion && a.FechaCierre == null
+            && contexto.Presupuestos.Where(p => p.IdAtencion == a.IdAtencion).Any(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado))
+        .Select(a => new Taller.Aplicacion.DTOs.Ejecuciones.TrabajoEnCursoDto {
+            IdAtencion = a.IdAtencion, Cliente = a.Cliente.Apellido + ", " + a.Cliente.Nombre,
+            Vehiculo = a.Vehiculo.Dominio, Motivo = a.MotivoConsulta, IdTecnico = a.IdTecnicoEnActividad,
+            Tecnico = a.TecnicoEnActividad == null ? "Disponible" : a.TecnicoEnActividad.Apellido + ", " + a.TecnicoEnActividad.Nombre,
+            Fecha = a.Historial.Select(h => (DateTime?)h.Fecha).Max() ?? a.FechaApertura,
+            Total = contexto.Presupuestos.Where(p => p.IdAtencion == a.IdAtencion).Where(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado)
+                .SelectMany(p => p.Detalles).Count(d => d.AceptadoPorCliente == true),
+            Completados = contexto.Presupuestos.Where(p => p.IdAtencion == a.IdAtencion).Where(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado)
+                .SelectMany(p => p.Detalles).Count(d => d.AceptadoPorCliente == true && d.EstadoEjecucion == EstadoEjecucionDetalle.Completado),
+            EnCurso = contexto.Presupuestos.Where(p => p.IdAtencion == a.IdAtencion).Where(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado)
+                .SelectMany(p => p.Detalles).Count(d => d.AceptadoPorCliente == true && d.EstadoEjecucion == EstadoEjecucionDetalle.EnCurso),
+            Pausas = a.Pausas.Count(p => p.FechaResolucion == null)
+        }).ToListAsync();
 
     public async Task<List<PresupuestoConsultaDto>> ListarPresupuestosAsync(int? idAtencion = null)
     {

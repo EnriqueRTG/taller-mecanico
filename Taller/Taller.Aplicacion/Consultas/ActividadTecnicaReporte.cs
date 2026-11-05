@@ -1,5 +1,6 @@
 namespace Taller.Aplicacion.Consultas;
-/// <summary>Define las acciones del historial incluidas en el reporte de actividad técnica.</summary>
+/// <summary>Selecciona hitos útiles para seguimiento técnico; no representa una auditoría exhaustiva del historial.</summary>
+/// <remarks>CorreccionAdicionalPreparada permanece en el expediente, sin agregar un filtro o una magnitud de negocio al reporte.</remarks>
 public static class ActividadTecnicaReporte
 {
     public static IReadOnlyList<string> Acciones { get; } = Array.AsReadOnly(new[]

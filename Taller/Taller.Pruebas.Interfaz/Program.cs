@@ -1,3 +1,5 @@
+using Taller.Aplicacion.DTOs.Atenciones;
+using Taller.Dominio.Enumeraciones;
 using System.Reflection;
 using Taller.Aplicacion.DTOs.Reportes;
 using Microsoft.Extensions.Configuration;
@@ -44,6 +46,7 @@ internal static class Program
                 Console.WriteLine($"Construcción y layout: {tipo.Name}, rol {rol}");
             }
         }
+        PruebasFiltrosBandeja.Verificar(proveedor);
         PruebasBuscarConcepto.Verificar();
         PruebasDetalleAtencion.Verificar(config);
         VerificarSelectoresRespaldos(proveedor);
@@ -398,7 +401,23 @@ internal static class Program
             }
             if (grilla.Height < 150) throw new InvalidOperationException("La revisión debe conservar una lista legible.");
         }
-        Console.WriteLine("Revisión parcial: descripción, cantidad, precio y quitar visibles sin solapar la lista.");
+        formulario.BindingContext = new BindingContext();
+        var origen = Campo<ComboBox>("cboOrigen");
+        var conceptos = Campo<ComboBox>("cboConcepto");
+        origen.SelectedIndex = 1;
+        conceptos.DataSource = new List<ConceptoPropuestaDto> { new() { IdConcepto = 10, Nombre = "Material", Tipo = TipoConcepto.Repuesto, PrecioReferencia = 150 } };
+        if (Campo<NumericUpDown>("nudPrecio").Value != 0 || Campo<NumericUpDown>("nudPrecio").Enabled)
+            throw new InvalidOperationException("El material del cliente debe mostrar precio cero incluso al cambiar concepto.");
+        var solicitudes = Campo<ComboBox>("cboSolicitud");
+        solicitudes.DataSource = new List<SolicitudIngresoDto> { new() { IdSolicitud = 1, Descripcion = "Primera solicitud" }, new() { IdSolicitud = 2, Descripcion = "Segunda solicitud" } };
+        var agregar = formulario.GetType().GetMethod("Agregar", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        agregar.Invoke(formulario, [null, EventArgs.Empty]);
+        solicitudes.SelectedIndex = 1;
+        agregar.Invoke(formulario, [null, EventArgs.Empty]);
+        var items = (System.ComponentModel.BindingList<ItemPropuestaDto>)formulario.GetType().GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(formulario)!;
+        if (items.Count != 2 || items.Select(i => i.IdSolicitudAtencion).Distinct().Count() != 2 || items.Any(i => i.PrecioUnitario != 0))
+            throw new InvalidOperationException("Un concepto puede asociarse a dos solicitudes distintas, conservando origen e importe.");
+        Console.WriteLine("Revisión parcial: distribución, solicitudes independientes y precio cero del cliente verificados.");
     }
 
     private static void VerificarEditorPresupuesto(IServiceProvider proveedor)

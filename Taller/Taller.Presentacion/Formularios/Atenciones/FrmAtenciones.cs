@@ -306,7 +306,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             string texto = txtBuscar.Text.Trim();
             if (!string.IsNullOrWhiteSpace(texto))
             {
-                consulta = consulta.Where(a => a.Numero.Contains(texto, StringComparison.OrdinalIgnoreCase) || a.Dominio.Contains(texto, StringComparison.OrdinalIgnoreCase) || a.Cliente.Contains(texto, StringComparison.OrdinalIgnoreCase) || a.Documento.Contains(texto, StringComparison.OrdinalIgnoreCase) || a.Motivo.Contains(texto, StringComparison.OrdinalIgnoreCase));
+                consulta = consulta.Where(a => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{a.Numero} {a.Dominio} {a.Cliente} {a.Documento} {a.Motivo}", texto));
             }
 
             string estadoSeleccionado = cboEstado.SelectedItem?.ToString() ?? "Todas";

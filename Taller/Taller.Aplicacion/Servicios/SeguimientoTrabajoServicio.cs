@@ -27,7 +27,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
 
     private async Task ExigirAbiertaAsync(Atencion a)
     {
-        if (a.FechaCierre != null || a.Estado is not (EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) || await circuito.ObtenerPorAtencionAsync(a.IdAtencion) != null)
+        if (a.FechaCierre != null || a.Estado is not (EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) || await circuito.ExisteLiquidacionAsync(a.IdAtencion))
             throw new ValidacionException("La atención debe estar en proceso y sin liquidación. Actualice el expediente.");
     }
 
@@ -52,12 +52,15 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var a = await CargarAsync(id);
             var ps = await repositorio.ObtenerPresupuestosAsync(id);
             var informes = await repositorio.ObtenerDiagnosticosAsync(id);
-            var operable = a.FechaCierre == null && (a.Estado is EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) && await circuito.ObtenerPorAtencionAsync(id) == null;
+            // El estado económico se consulta una vez y se reutiliza para las acciones de la pantalla.
+            var liquidada = await circuito.ExisteLiquidacionAsync(id);
+            var operable = a.FechaCierre == null && (a.Estado is EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) && !liquidada;
             return new()
             {
                 IdAtencion = id,
                 Version = a.Version.ToArray(),
                 Estado = a.Estado,
+                Solicitudes = a.Solicitudes.Select(s => new SolicitudIngresoDto { IdSolicitud = s.IdSolicitudAtencion, Tipo = s.Tipo, Descripcion = s.Descripcion }).ToList(),
                 Progreso = ps.Where(p => !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado)
                     .SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0)))
                     .OrderBy(d => d.IdPresupuestoDetalle).Select(d => new EjecucionItemDto {
@@ -67,7 +70,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 InformeInicial = string.Join("\n\n", informes.Select(d => $"Informe {d.IdDiagnostico} · {d.FechaDiagnostico:dd/MM/yyyy HH:mm} · Técnico {d.IdTecnicoAutor}\nConclusión: {d.FallaDetectada}\nRecomendación: {d.TrabajoRecomendado}\n{d.Observaciones}")),
                 TrabajosRegistrados = string.Join("\n\n", ps.Where(p => p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true && (p.Vigente || d.CantidadEjecutada > 0))).Select(d => $"P{d.IdPresupuesto} / Ítem {d.IdPresupuestoDetalle}: {d.Descripcion} · Aporta {d.OrigenMaterial}\nAutorizado {d.Cantidad:N3}; realizado {d.CantidadEjecutada:N3}; estado {new EjecucionItemDto { Estado = d.EstadoEjecucion }.EstadoDescripcion}; técnico {d.IdTecnicoRegistro}; registro {d.FechaRegistroEjecucion:dd/MM/yyyy HH:mm}\n{d.ObservacionesEjecucion}")),
                 Resumen = $"Atención {id:D6} · {a.Vehiculo.Dominio} · {a.Cliente.Apellido}, {a.Cliente.Nombre}",
-                PuedeRegistrar = u.RolId == RolesSistema.TecnicoId && a.FechaCierre == null && (a.Estado is EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) && (a.IdTecnicoEnActividad == null || a.IdTecnicoEnActividad == u.Id) && await circuito.ObtenerPorAtencionAsync(id) == null,
+                PuedeRegistrar = u.RolId == RolesSistema.TecnicoId && a.FechaCierre == null && (a.Estado is EstadoAtencion.EnEvaluacionTecnica or EstadoAtencion.PendienteDecision or EstadoAtencion.EnEjecucion) && (a.IdTecnicoEnActividad == null || a.IdTecnicoEnActividad == u.Id) && !liquidada,
                 Hallazgos = a.Hallazgos.OrderByDescending(x => x.Fecha).ThenByDescending(x => x.IdHallazgoAtencion).Select(x => new HallazgoConsultaDto { Id = x.IdHallazgoAtencion, IdTecnico = x.IdTecnico, Fecha = x.Fecha, Descripcion = x.Descripcion, Recomendacion = x.Recomendacion, ImpideContinuar = x.ImpideContinuar, IdDetalle = x.IdDetalleAfectado }).ToList(),
                 Pausas = a.Pausas.OrderBy(x => x.FechaResolucion != null).ThenByDescending(x => x.Fecha).Select(x => new PausaConsultaDto { Id = x.IdPausaTrabajo, IdUsuario = x.IdUsuario, IdTecnicoResolucion = x.IdTecnicoResolucion, IdDetalle = x.IdDetalle, Motivo = x.Motivo, Fecha = x.Fecha, FechaResolucion = x.FechaResolucion, Resolucion = x.Resolucion }).ToList(),
                 Items = ps.Where(p => p.Vigente && p.Estado == EstadoPresupuesto.Aceptado).SelectMany(p => p.Detalles.Where(d => d.AceptadoPorCliente == true)).Select(d => new MaterialTrabajoDto { IdDetalle = d.IdPresupuestoDetalle, IdPresupuesto = d.IdPresupuesto, Descripcion = d.Descripcion, Origen = d.OrigenMaterial, Cantidad = d.Cantidad, Recibida = d.CantidadRecibidaCliente, Conforme = d.MaterialClienteConforme, Observaciones = d.ObservacionesMaterial }).ToList()
@@ -220,6 +223,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 throw new ValidacionException("Revise las solicitudes asociadas a los ítems del adicional.");
             var motivo = AutorizacionOperativa.Texto(datos.Motivo);
             var h = datos.IdHallazgo is int hi ? a.Hallazgos.SingleOrDefault(h => h.IdHallazgoAtencion == hi) ?? throw new ValidacionException("El hallazgo no pertenece a la atención.") : null;
+            var catalogo = await repositorio.ListarCatalogoAsync();
             var p = new Presupuesto
             {
                 IdAtencion = a.IdAtencion,
@@ -231,9 +235,8 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 FechaCreacion = FechaHoraTaller.Ahora,
                 IdUsuarioCreacion = u.Id,
                 Observaciones = motivo,
-                Detalles = PrepararItems(datos.Items, await repositorio.ListarCatalogoAsync())
+                Detalles = PrepararItems(datos.Items, catalogo)
             };
-            var catalogo = await repositorio.ListarCatalogoAsync();
             if (p.EsInspeccion && p.Detalles.Any(d => !catalogo.Any(c => c.IdConcepto == d.IdConcepto && c.Tipo == TipoConcepto.Servicio)))
                 throw new ValidacionException("La ampliación de inspección admite servicios. Los materiales para reparación se incluyen en la propuesta de trabajo.");
             repositorio.AgregarPresupuesto(p);
@@ -246,6 +249,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
         }
     }
 
+    /// <summary>Valida una selección parcial exacta o emite una nueva propuesta al reformular o corregir un adicional.</summary>
     public async Task<int> RevisarSeleccionAsync(int id, byte[] version, List<ItemPropuestaDto> items, string justificacion, bool condicionesModificadas = false)
     {
         try
@@ -256,7 +260,9 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var a = await CargarAsync(p.IdAtencion);
             await ExigirAbiertaAsync(a);
             ExigirTecnicoDisponible(a, u);
-            if (!p.Vigente || p.Estado != EstadoPresupuesto.PendienteRevisionTecnica)
+            // Un borrador adicional con antecesor es una corrección; nunca autoriza sin nueva aceptación.
+            bool correccion = p.EsAdicional && p.IdPresupuestoAnterior.HasValue && p.Estado == EstadoPresupuesto.Borrador;
+            if (!p.Vigente || (p.Estado != EstadoPresupuesto.PendienteRevisionTecnica && !correccion))
                 throw new ValidacionException("La selección ya no está pendiente de revisión.");
             if (items is null || items.Any(i => i is null || i.IdSolicitudAtencion.HasValue && !a.Solicitudes.Any(s => s.IdSolicitudAtencion == i.IdSolicitudAtencion)))
                 throw new ValidacionException("Revise las solicitudes asociadas a los ítems de la revisión.");
@@ -264,7 +270,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
             var seleccion = p.Detalles.Where(d => d.AceptadoPorCliente == true).ToList();
             // Solo una selección parcial real del cliente puede autorizarse sin otra decisión.
             // Cambiar importe, cantidad, descripción, origen o solicitud exige una propuesta nueva.
-            bool mismaSeleccion = !condicionesModificadas && seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
+            bool mismaSeleccion = !correccion && !condicionesModificadas && seleccion.Count > 0 && p.Detalles.Any(d => d.AceptadoPorCliente == false)
                 && p.FechaDecision.HasValue && p.IdUsuarioDecision.HasValue
                 && items.Count == seleccion.Count
                 && items.Select(i => (i.IdConcepto, i.IdSolicitudAtencion)).Distinct().Count() == items.Count
@@ -284,6 +290,7 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 return p.IdPresupuesto;
             }
             p.Vigente = false;
+            var catalogo = await repositorio.ListarCatalogoAsync();
             var nueva = new Presupuesto
             {
                 IdAtencion = p.IdAtencion,
@@ -299,15 +306,14 @@ public sealed class SeguimientoTrabajoServicio(IEvaluacionRepositorio repositori
                 MotivoRevision = justificacion,
                 Observaciones = justificacion,
                 AlcanceValidado = true,
-                Detalles = PrepararItems(items, await repositorio.ListarCatalogoAsync())
+                Detalles = PrepararItems(items, catalogo)
             };
-            var catalogo = await repositorio.ListarCatalogoAsync();
             if (nueva.EsInspeccion && nueva.Detalles.Any(d => !catalogo.Any(c => c.IdConcepto == d.IdConcepto && c.Tipo == TipoConcepto.Servicio)))
                 throw new ValidacionException("La ampliación de inspección admite servicios.");
             repositorio.AgregarPresupuesto(nueva);
             if (!p.EsAdicional)
                 a.Estado = EstadoAtencion.EnEvaluacionTecnica;
-            await GuardarAsync(a, u, "SeleccionParcialRevisada", $"Se conserva propuesta {id}; nueva propuesta viable pendiente de comunicar y aceptar. {justificacion}");
+            await GuardarAsync(a, u, correccion ? "CorreccionAdicionalPreparada" : "SeleccionParcialRevisada", $"Se conserva propuesta {id}; nueva propuesta viable pendiente de comunicar y aceptar. {justificacion}");
             return nueva.IdPresupuesto;
         }
         finally

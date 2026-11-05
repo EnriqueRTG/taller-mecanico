@@ -4,6 +4,8 @@ namespace Taller.Aplicacion.Abstracciones.Persistencia;
 /// <summary>Consultas y preparación de cambios del expediente técnico. No confirma guardados.</summary>
 public interface IEvaluacionRepositorio
 {
+    /// <summary>Propuesta y atención necesarias para registrar su presentación.</summary>
+    Task<Presupuesto?> ObtenerPresupuestoAsync(int id);
     Task<Atencion?> ObtenerAtencionAsync(int id);
     Task<EvaluacionAtencion?> ObtenerAvanceAsync(int id);
     Task<List<Presupuesto>> ObtenerPresupuestosAsync(int id);

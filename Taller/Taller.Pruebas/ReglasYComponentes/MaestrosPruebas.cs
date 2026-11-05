@@ -42,6 +42,27 @@ public sealed class MaestrosPruebas
         public void Dispose() => Db.Dispose();
     }
 
+    [Fact]
+    public async Task SelectoresVehiculoFiltranEnPersistenciaSinOfrecerModelosInactivos()
+    {
+        using var c = new Caso();
+        c.Db.Marcas.AddRange(new Marca { IdMarca = 92, Nombre = "Sin modelos" },
+            new Marca { IdMarca = 93, Nombre = "Marca inactiva", Activo = false },
+            new Marca { IdMarca = 94, Nombre = "Solo modelos inactivos" });
+        c.Db.Modelos.AddRange(new Modelo { IdModelo = 92, IdMarca = 91, Nombre = "Inactivo", Activo = false },
+            new Modelo { IdModelo = 93, IdMarca = 93, Nombre = "De marca inactiva" },
+            new Modelo { IdModelo = 94, IdMarca = 94, Nombre = "Inactivo", Activo = false });
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+
+        Assert.Equal(91, Assert.Single(await c.Vehiculos.ListarMarcasAsync()).IdMarca);
+        Assert.Equal(91, Assert.Single(await c.Vehiculos.ListarModelosPorMarcaAsync(91)).IdModelo);
+        Assert.Empty(await c.Vehiculos.ListarModelosPorMarcaAsync(93));
+        // La edición conserva un modelo histórico deshabilitado; el alta no lo ofrece.
+        Assert.Contains(await c.Vehiculos.ListarModelosAsync(92), m => m.Id == 92 && !m.Activo);
+        Assert.Empty(c.Db.ChangeTracker.Entries());
+    }
+
     [Theory]
     [InlineData("dni", "12345678", "DNI", "12345678")]
     [InlineData("CUIT", "20-12345678-6", "CUIT", "20123456786")]

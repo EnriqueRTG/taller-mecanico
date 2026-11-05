@@ -21,6 +21,7 @@ public sealed class PresupuestoConsultaDto
     public string TipoDescripcion => EsInspeccion ? "Inspección adicional" : EsAdicional ? "Adicional de reparación" : "Propuesta de trabajo";
     public string EstadoDescripcion => Estado switch
     {
+        EstadoPresupuesto.Borrador when EsAdicional && IdPresupuestoAnterior.HasValue => "Corrección técnica pendiente",
         EstadoPresupuesto.Aceptado when Items.Any(i => i.AceptadoPorCliente == false) => "Aceptado parcialmente",
         EstadoPresupuesto.PendienteRevisionTecnica => "Revisión técnica pendiente",
         EstadoPresupuesto.PendientePresentacion => "Por presentar",

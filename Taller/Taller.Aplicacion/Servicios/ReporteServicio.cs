@@ -66,19 +66,34 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         RolesSistema.TecnicoId => [TipoReporte.CargaTecnica, TipoReporte.ActividadTecnica, TipoReporte.ConceptosRealizados, TipoReporte.Presupuestos],
         _ => []
     };
-    private async Task<Usuario> ExigirUsuarioAsync()
-    {
-        var u = sesion.UsuarioActual is { } actual ? await usuarios.ObtenerPorIdAsync(actual.Id) : null;
-        if (!UsuarioAutorizado.EstaHabilitado(u) || TiposParaRol(u.RolId).Count == 0)
-            throw new ValidacionException("Se requiere una sesión activa autorizada para consultar reportes.");
-        return u;
-    }
+    private readonly AutorizacionOperativa _acceso = new(usuarios, sesion);
+    private Task<Usuario> ExigirUsuarioAsync() => _acceso.ExigirRolesAsync(
+        RolesSistema.AdministradorId, RolesSistema.AdministrativoId, RolesSistema.TecnicoId);
 
     public async Task<IReadOnlyList<TipoReporte>> ListarTiposAsync() => TiposParaRol((await ExigirUsuarioAsync()).RolId);
     public async Task<ReporteDocumentoDto> GenerarAsync(SolicitudReporteDto solicitud)
     {
         ArgumentNullException.ThrowIfNull(solicitud);
-        var usuario = await ExigirUsuarioAsync();
+        return await GenerarAutorizadoAsync(solicitud, await ExigirUsuarioAsync(), false);
+    }
+
+    /// <summary>Usado por Inicio tras su autorización única. Comparte las fórmulas y redondeos de reportes.</summary>
+    internal async Task<List<ReporteDocumentoDto>> ResumirInicioAsync(Usuario usuario)
+    {
+        TipoReporte[] tipos = TiposParaRol(usuario.RolId).Contains(TipoReporte.MovimientosCobro)
+            ? [TipoReporte.Atenciones, TipoReporte.MovimientosCobro, TipoReporte.SaldosPendientes]
+            : [TipoReporte.CargaTecnica, TipoReporte.ActividadTecnica, TipoReporte.Presupuestos];
+        var hoy = FechaHoraTaller.Hoy;
+        var documentos = new List<ReporteDocumentoDto>();
+        // El contexto se utiliza secuencialmente; no se paralelizan operaciones EF sobre la misma instancia.
+        foreach (var tipo in tipos)
+            documentos.Add(await GenerarAutorizadoAsync(new SolicitudReporteDto {
+                Tipo = tipo, Desde = new DateTime(hoy.Year, hoy.Month, 1), Hasta = hoy }, usuario, true));
+        return documentos;
+    }
+
+    private async Task<ReporteDocumentoDto> GenerarAutorizadoAsync(SolicitudReporteDto solicitud, Usuario usuario, bool soloIndicadores)
+    {
         if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo))
             throw new ValidacionException("Su rol no permite consultar este reporte.");
         var estadosDisponibles = EstadosPara(solicitud.Tipo);
@@ -92,7 +107,9 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         int? tecnico = usuario.RolId == RolesSistema.TecnicoId ? usuario.Id : null;
         var desde = solicitud.Desde.Date;
         var hasta = (solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? hoy : solicitud.Hasta.Date).AddDays(1);
-        var registros = solicitud.Tipo switch
+        var registros = soloIndicadores
+            ? await reportes.ListarIndicadoresAsync(solicitud.Tipo, desde, hasta, tecnico)
+            : solicitud.Tipo switch
         {
             TipoReporte.CargaTecnica => await reportes.ListarCargaAsync(tecnico),
             TipoReporte.Atenciones => await reportes.ListarAtencionesAsync(desde, hasta),
@@ -103,7 +120,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
             _ => throw new ValidacionException("Tipo de reporte inválido.")};
         string texto = (solicitud.Busqueda ?? "").Trim();
-        registros = registros.Where(x => (texto.Length == 0 || $"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}".Contains(texto, StringComparison.OrdinalIgnoreCase)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
+        registros = registros.Where(x => (texto.Length == 0 || BusquedaTexto.Coincide($"{x.Codigo} {x.IdAtencion} {x.Descripcion} {x.Responsable}", texto)) && (solicitud.Estado == "Todos" || Legible(x.Estado) == solicitud.Estado)).OrderByDescending(x => x.Fecha).ThenBy(x => x.Codigo).ToList();
         if (solicitud.Tipo == TipoReporte.SaldosPendientes)
             registros = registros.OrderBy(x => x.Fecha).ThenByDescending(x => x.Importe).ToList();
         if (solicitud.Tipo == TipoReporte.CargaTecnica)
@@ -153,7 +170,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         }
         else if (solicitud.Tipo == TipoReporte.ActividadTecnica)
         {
-            metodologia = "Eventos del historial realizados por usuarios técnicos durante el período. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos. El filtro ofrece hitos principales y tres alternativas habituales; «Todos» conserva además avances, liberaciones, pausas y materiales.";
+            metodologia = "Selección de hitos operativos del historial realizados por técnicos durante el período; no es una auditoría completa de todas las acciones. Las correcciones administrativas y la preparación de su nueva versión se consultan en el historial de la atención. Un evento no equivale a un diagnóstico, una hora ni un trabajo terminado; varias acciones pueden pertenecer a la misma atención. El técnico consulta exclusivamente sus propios eventos. El filtro ofrece hitos principales y tres alternativas habituales; «Todos» conserva además avances, liberaciones, pausas y materiales.";
             recomendacion = "Revisar el inicio y finalización de evaluaciones y trabajos; consultar hallazgos y revisiones del alcance cuando corresponda.";
         }
         else
@@ -162,6 +179,9 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             metodologia = "Atenciones recibidas durante el período, agrupadas por su estado actual. No reconstruye el estado que tenían al cierre del período ni incluye aperturas anteriores. El importe no se infiere del motivo ni del estado.";
             recomendacion = "Revisar las atenciones activas de mayor antigüedad y los casos pendientes de decisión; ampliar el período para incluir aperturas anteriores.";
         }
+
+        if (soloIndicadores)
+            return new ReporteDocumentoDto { Titulo = Nombre(solicitud.Tipo), Indicadores = indicadores };
 
         var grafico = registros.GroupBy(x => Legible(x.Grupo)).Select(g => new PuntoReporteDto(g.Key, monetario ? g.Sum(x => x.Importe ?? 0) : g.Count())).OrderByDescending(x => Math.Abs(x.Valor)).ThenBy(x => x.Etiqueta).ToList();
         if (grafico.Count > 8)

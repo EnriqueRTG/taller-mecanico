@@ -125,6 +125,22 @@ public sealed class IntegracionSqlPruebas
     }
 
     [SqlRespaldoFact]
+    public async Task CompatibilidadDeInicio_RechazaVersionAnteriorYDesconocidaSinModificarDatos()
+    {
+        await using var b = await BasePrueba.CrearAsync();
+        await using var db = b.Contexto();
+        await Taller.Infraestructura.Persistencia.Inicializacion.CompatibilidadEsquema.VerificarAsync(db);
+        string ultima = db.Database.GetMigrations().Last();
+        await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM dbo.__EFMigrationsHistory WHERE MigrationId={ultima}");
+        var error = await Assert.ThrowsAsync<ValidacionException>(() => Taller.Infraestructura.Persistencia.Inicializacion.CompatibilidadEsquema.VerificarAsync(db));
+        Assert.Contains("versión", error.Message);
+        await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion) VALUES ({ultima}, N'10.0.0')");
+        await db.Database.ExecuteSqlRawAsync("INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion) VALUES (N'99999999999999_VersionDesconocida', N'10.0.0')");
+        await Assert.ThrowsAsync<ValidacionException>(() => Taller.Infraestructura.Persistencia.Inicializacion.CompatibilidadEsquema.VerificarAsync(db));
+        Assert.Equal(3, await db.Roles.CountAsync());
+    }
+
+    [SqlRespaldoFact]
     public async Task IndiceUnicoResuelveDosAltasSimultaneasSinExponerSqlAlOperador()
     {
         await using var b = await BasePrueba.CrearAsync();
@@ -522,11 +538,43 @@ public sealed class IntegracionSqlPruebas
         await Assert.ThrowsAsync<ConflictoConcurrenciaException>(() => seg.PausarAsync(a.IdAtencion, seguimiento.Version, null, "Token anterior al hallazgo"));
         seguimiento = await seg.ObtenerAsync(a.IdAtencion);
         int adicional = await seg.CrearAdicionalAsync(new() { IdAtencion = a.IdAtencion, Version = seguimiento.Version, IdHallazgo = seguimiento.Hallazgos.Single().Id, Motivo = "El cliente aportará la pieza, el taller realiza el trabajo", Items = [new() { IdConcepto = repuesto.IdConcepto, Descripcion = "Pieza aportada", Cantidad = 1, OrigenMaterial = OrigenMaterial.Cliente }, new() { IdConcepto = ids.Concepto, Descripcion = "Trabajo adicional", Cantidad = 1, PrecioUnitario = 50 , IdSolicitudAtencion = a.Solicitudes.Single().IdSolicitudAtencion }] });
+        // Recorre ambas correcciones: antes de presentar y después de aceptar.
+        // SQL real aplica CHECK, FK y rowversion que InMemory no reproduce.
+        async Task<int> CorregirAdicionalAsync(int anterior)
+        {
+            sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+            var documento = await ps.ObtenerAsync(anterior);
+            int borradorId = await ps.SolicitarRevisionAsync(anterior, documento.Version, "Recepción solicita corregir la descripción del adicional");
+            var borrador = await db.Presupuestos.AsNoTracking().Include(x => x.Detalles).SingleAsync(x => x.IdPresupuesto == borradorId);
+            Assert.Equal(EstadoPresupuesto.Borrador, borrador.Estado);
+            Assert.Null(borrador.FechaPresentacion);
+            Assert.Null(borrador.FechaDecision);
+            Assert.Null(borrador.IdUsuarioDecision);
+            Assert.Null(borrador.PersonaDecision);
+            Assert.Null(borrador.MedioDecision);
+            Assert.All(borrador.Detalles, x => Assert.Null(x.AceptadoPorCliente));
+            Assert.False((await ps.ObtenerAsync(anterior)).Vigente);
+            sesion.Iniciar(new Usuario { Id = ids.Tecnico });
+            Assert.Single((await ejec.ObtenerAsync(a.IdAtencion)).Items);
+            var items = documento.Items.Select(i => new ItemPropuestaDto { IdSolicitudAtencion = i.IdSolicitudAtencion, IdConcepto = i.IdConcepto, Descripcion = i.Descripcion, Cantidad = i.Cantidad, PrecioUnitario = i.PrecioUnitario, OrigenMaterial = i.OrigenMaterial }).ToList();
+            int nuevo = await seg.RevisarSeleccionAsync(borradorId, borrador.Version, items, "Se conserva el alcance y se aclara el pedido");
+            Assert.NotEqual(borradorId, nuevo);
+            Assert.Equal(EstadoPresupuesto.PendientePresentacion, (await ps.ObtenerAsync(nuevo)).Estado);
+            Assert.Single((await ejec.ObtenerAsync(a.IdAtencion)).Items);
+            sesion.Iniciar(new Usuario { Id = ids.Recepcion });
+            return nuevo;
+        }
+        adicional = await CorregirAdicionalAsync(adicional);
         sesion.Iniciar(new Usuario { Id = ids.Recepcion });
         var ad = await ps.ObtenerAsync(adicional);
         await ev.PresentarAsync(adicional, ad.Version);
         ad = await ps.ObtenerAsync(adicional);
         await ps.DecidirAsync(new() { IdPresupuesto = adicional, Version = ad.Version, ItemsAceptados = ad.Items.Select(i => i.IdDetalle).ToList() , PersonaDecision = "Cliente de prueba" , MedioDecision = "Presencial" });
+        adicional = await CorregirAdicionalAsync(adicional);
+        ad = await ps.ObtenerAsync(adicional);
+        await ev.PresentarAsync(adicional, ad.Version);
+        ad = await ps.ObtenerAsync(adicional);
+        await ps.DecidirAsync(new() { IdPresupuesto = adicional, Version = ad.Version, ItemsAceptados = ad.Items.Select(i => i.IdDetalle).ToList(), PersonaDecision = "Cliente de prueba", MedioDecision = "Presencial" });
         sesion.Iniciar(new Usuario { Id = ids.Tecnico });
         seguimiento = await seg.ObtenerAsync(a.IdAtencion);
         var material = seguimiento.Items.Single(i => i.Origen == OrigenMaterial.Cliente);

@@ -43,11 +43,20 @@ public static class PaqueteRespaldo
     {
         var ruta = Path.Combine(carpeta, "sgtm-respaldo.json");
         if (!File.Exists(ruta) || new FileInfo(ruta).Length > 1024 * 1024) throw new InvalidOperationException("Seleccione una carpeta de respaldo SGTM terminada, con su manifiesto.");
-        var m = JsonSerializer.Deserialize<Manifiesto>(await File.ReadAllTextAsync(ruta, ct)) ?? throw new InvalidOperationException("Manifiesto inválido.");
+        Manifiesto m;
+        try
+        {
+            m = JsonSerializer.Deserialize<Manifiesto>(await File.ReadAllTextAsync(ruta, ct))
+                ?? throw new InvalidOperationException("El manifiesto del paquete no es válido.");
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException("El manifiesto está incompleto o no es válido. Espere a que Drive termine de descargar el paquete y vuelva a intentar.", ex);
+        }
         if (m.Version != 1 || m.Archivos is null || m.Archivos.Count is < 1 or > 2 || m.Archivos.Where(a => a?.Copia != null).Select(a => a.Copia.Id).Distinct().Count() != m.Archivos.Count || !m.Archivos.Any(a => a.Copia.Id == m.Seleccionada)) throw new InvalidOperationException("El paquete no tiene una cadena válida.");
         foreach (var a in m.Archivos)
         {
-            if (a?.Copia == null || a.Sha256 == null || a.Nombre != a.Copia.Id.ToString("N") + ".bak" || a.Longitud <= 0 || a.Sha256.Length != 64) throw new InvalidOperationException("Datos de archivo inválidos.");
+            if (a?.Copia == null || !Enum.IsDefined(a.Copia.Tipo) || a.Sha256 == null || a.Nombre != a.Copia.Id.ToString("N") + ".bak" || a.Longitud <= 0 || a.Sha256.Length != 64) throw new InvalidOperationException("Datos de archivo inválidos.");
             var f = Path.Combine(carpeta, a.Nombre);
             if (!File.Exists(f) || new FileInfo(f).Length != a.Longitud || await Hash(f, ct) != a.Sha256) throw new InvalidOperationException("El respaldo está incompleto o dañado. Espere la descarga de Drive y vuelva a intentar.");
         }

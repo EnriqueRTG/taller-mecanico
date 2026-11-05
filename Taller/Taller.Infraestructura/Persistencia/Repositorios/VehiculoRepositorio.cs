@@ -41,7 +41,9 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
         }
         catch (DbUpdateException ex)
         {
-            throw ErroresPersistencia.Traducir(ex, "IX_Vehiculos_Dominio", "Ya existe un vehículo con ese dominio.");
+            var traducido = ErroresPersistencia.Traducir(ex, "IX_Vehiculos_Dominio", "Ya existe un vehículo con ese dominio.");
+            if (ReferenceEquals(traducido, ex)) throw; // Conserva el origen del fallo técnico.
+            throw traducido;
         }
         finally
         {
@@ -62,7 +64,9 @@ public sealed class VehiculoRepositorio : IVehiculoRepositorio
         }
         catch (DbUpdateException ex)
         {
-            throw ErroresPersistencia.Traducir(ex, "IX_Vehiculos_Dominio", "Ya existe un vehículo con ese dominio.");
+            var traducido = ErroresPersistencia.Traducir(ex, "IX_Vehiculos_Dominio", "Ya existe un vehículo con ese dominio.");
+            if (ReferenceEquals(traducido, ex)) throw; // Conserva el origen del fallo técnico.
+            throw traducido;
         }
         finally
         {

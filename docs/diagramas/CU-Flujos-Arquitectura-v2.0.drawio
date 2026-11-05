@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mxfile host="app.diagrams.net" compressed="false">
+<mxfile host="app.diagrams.net" compressed="false" modified="2026-11-04T18:00:00.000Z">
   <diagram name="CU Administrador" id="ZOWYEN9VeXnVAd0EEV2K">
     <mxGraphModel dx="1250" dy="1250" grid="1" page="1" pageWidth="1250" pageHeight="1250">
       <root>
@@ -732,6 +732,56 @@
         </mxCell>
         <mxCell id="Pago" value="Pago&#10;IdOperacion · Importe · Anulado&#10;Medios de pago" style="html=0;whiteSpace=wrap;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="690" y="820" width="380" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="correccion-adicional" name="Corrección de adicional">
+    <mxGraphModel dx="1250" dy="1030" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1250" pageHeight="1030">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a" value="Recepción pide corrección&#10;Adicional vigente, sin ejecución&#10;Sin liquidación ni atención cerrada" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="70" y="160" width="450" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="b" value="Conservar anterior como histórico&#10;Crear Borrador enlazado&#10;Sin presentación ni decisión ficticias" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="70" y="340" width="450" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="c" value="Técnico: Corregir adicional&#10;Revisar alcance, solicitudes y motivo&#10;Confirmar nueva propuesta" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="70" y="520" width="450" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="d" value="PendientePresentacion&#10;Nueva versión enlazada&#10;Sin autorización para ejecutar" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="700" y="520" width="450" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="e" value="Recepción comunica y registra decisión&#10;Persona, medio e ítems reales&#10;No reutilizar consentimiento anterior" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="700" y="340" width="450" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="f" value="Aceptado: ejecutar solo lo autorizado&#10;Rechazado: no ejecutar adicional&#10;Acuerdo principal conservado" style="rounded=1;whiteSpace=wrap;html=0;fontSize=18;fillColor=#eff6ff;strokeColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="700" y="160" width="450" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="edge0" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;html=0;" edge="1" source="a" target="b" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;html=0;" edge="1" source="b" target="c" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;html=0;" edge="1" source="c" target="d" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;html=0;" edge="1" source="d" target="e" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;html=0;" edge="1" source="e" target="f" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="SGTM Corrección de adicionales" style="text;html=0;whiteSpace=wrap;fontSize=28;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="1160" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Borrador no es una decisión del cliente. Siempre requiere nueva presentación y aceptación." style="text;html=0;whiteSpace=wrap;fontSize=17;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="1160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="La selección parcial real se trata en la vista 5: solo esa selección exacta puede validarse sin otra aceptación." style="text;html=0;whiteSpace=wrap;fontSize=18;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="720" width="1080" height="100" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

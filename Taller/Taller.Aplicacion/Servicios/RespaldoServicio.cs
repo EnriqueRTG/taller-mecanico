@@ -21,13 +21,8 @@ public sealed class RespaldoServicio(IRespaldoMotor motor, IUsuarioRepositorio u
         return await motor.ImportarPaqueteAsync(origen, PoliticaRespaldos.Carpeta(carpetaServidor), $"{u.Id} · {u.Apellido}, {u.Nombre}");
     }
 
-    private async Task<Usuario> AdministradorAsync()
-    {
-        var u = sesion.UsuarioActual is { } actual ? await usuarios.ObtenerPorIdAsync(actual.Id) : null;
-        if (u is null || !u.Activo || u.RolId != RolesSistema.AdministradorId || u.Rol is null || !u.Rol.Activo || u.Rol.Nombre != RolesSistema.Administrador)
-            throw new ValidacionException("Se requiere una sesión de administrador activa.");
-        return u;
-    }
+    private readonly Taller.Aplicacion.Seguridad.AutorizacionOperativa _acceso = new(usuarios, sesion);
+    private Task<Usuario> AdministradorAsync() => _acceso.ExigirRolesAsync(RolesSistema.AdministradorId);
 
     public async Task<EstadoRespaldosDto> ConsultarAsync()
     {

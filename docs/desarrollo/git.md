@@ -37,7 +37,7 @@ Si pull --ff-only se detiene, no forzarlo: revisar las diferencias y conservar l
 7. Esperar los controles de GitHub Actions y revisar antes de fusionar. Un PR abierto todavía no actualiza main.
 8. Tras fusionar, actualizar main en cada equipo y comparar el identificador del commit.
 
-Las pruebas SQL crean bases temporales aisladas; las de interfaz necesitan Windows. La compilación no sustituye la comprobación de navegación, impresión ni la configuración real de Azure. No añadir migraciones vacías por una reorganización de archivos. Los cambios de esquema se revisan y documentan por separado.
+Las pruebas SQL crean bases temporales aisladas; las de interfaz necesitan Windows. La compilación no sustituye la comprobación de navegación, impresión ni la sincronización real de Google Drive. No añadir migraciones vacías por una reorganización de archivos. Los cambios de esquema se revisan y documentan por separado.
 
 ## Comprobaciones locales
 

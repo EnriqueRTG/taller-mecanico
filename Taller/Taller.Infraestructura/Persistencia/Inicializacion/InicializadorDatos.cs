@@ -39,6 +39,8 @@ public sealed class InicializadorDatos
             return;
         }
 
+        await CompatibilidadEsquema.VerificarAsync(_contexto);
+
         // Un instalador/cargador puede coordinar una transacción mayor: no abrir
         // otra transacción local ni confirmar la que pertenece al llamador.
         await using var transaccion = _contexto.Database.CurrentTransaction is null

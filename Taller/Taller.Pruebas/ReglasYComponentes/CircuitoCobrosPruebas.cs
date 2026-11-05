@@ -1093,7 +1093,13 @@ public sealed class CircuitoCobrosPruebas
         int revision = await c.Presupuestos.SolicitarRevisionAsync(adicional, p.Version, "Solicita otra alternativa y precio");
         await c.VersionesAsync();
         Assert.False((await c.Presupuestos.ObtenerAsync(adicional)).Vigente);
-        Assert.Equal(EstadoPresupuesto.PendienteRevisionTecnica, (await c.Presupuestos.ObtenerAsync(revision)).Estado);
+        Assert.Equal(EstadoPresupuesto.Borrador, (await c.Presupuestos.ObtenerAsync(revision)).Estado);
+        var borrador = await c.Db.Presupuestos.AsNoTracking().Include(x => x.Detalles).SingleAsync(x => x.IdPresupuesto == revision);
+        Assert.Null(borrador.FechaDecision);
+        Assert.Null(borrador.IdUsuarioDecision);
+        Assert.Null(borrador.FechaPresentacion);
+        Assert.Single(borrador.Detalles);
+        Assert.All(borrador.Detalles, i => Assert.Null(i.AceptadoPorCliente));
         c.Entrar(1);
         Assert.Equal(2, (await c.Ejecucion.ObtenerAsync(1)).Items.Count);
         p = await c.Presupuestos.ObtenerAsync(revision);

@@ -32,7 +32,7 @@ public static class DocumentoReporteExportador
                 b.Append("<td").Append(i >= 4 ? " class='numero'" : "").Append(">").Append(H(fila[i]).Replace("\n", "<br>")) .Append("</td>");
             b.Append("</tr>");
         }
-        return b.Append("</tbody></table></div><footer><p>Documento de gestión. Sin validez fiscal. La situación de los registros puede cambiar después de su generación.</p></footer></body></html>").ToString();
+        return b.Append("</tbody></table></div><footer><p>La situación de los registros puede cambiar después de su generación.</p></footer></body></html>").ToString();
     }
 
     /// <summary>Detalle compartido por HTML e impresión: solo incluye magnitudes presentes,

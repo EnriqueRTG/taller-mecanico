@@ -11,6 +11,8 @@ public sealed class SeguimientoTrabajoDto
     public EstadoAtencion Estado { get; set; }
     public string InformeInicial { get; set; } = "";
     public string TrabajosRegistrados { get; set; } = "";
+    /// <summary>Solicitudes ya cargadas con la atención, para asociar correctamente los ítems.</summary>
+    public List<SolicitudIngresoDto> Solicitudes { get; set; } = [];
     public List<EjecucionItemDto> Progreso { get; set; } = [];
     public bool PuedePausar { get; set; }
     public bool PuedeRegistrar { get; set; }

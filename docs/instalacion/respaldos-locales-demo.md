@@ -1,6 +1,6 @@
 # Prueba local de respaldo y recuperación
 
-Usar Demo v5 y el servidor seleccionado. Azure no es requisito para este recorrido. Distinguir usuarios internos SGTM de identidades SQL, servicio Windows y permisos de archivos. Estos pasos requieren acceso técnico al servidor, no se ejecutan automáticamente al actualizar Git.
+Usar Demo v5 y el servidor seleccionado. Google Drive no es requisito para este recorrido. Distinguir usuarios internos SGTM de identidades SQL, servicio Windows y permisos de archivos. Estos pasos requieren acceso técnico al servidor, no se ejecutan automáticamente al actualizar Git.
 
 ## Preparación técnica
 
@@ -11,7 +11,7 @@ Usar Demo v5 y el servidor seleccionado. Azure no es requisito para este recorri
 
 ## Aceptación manual y recuperación
 
-1. Administrador: abrir Respaldos y recuperación, elegir C:\SGTM\Respaldos, Completa y Azure desmarcado. Crear y verificar copia; comprobar ruta, historial y archivo .bak en el servidor. Verificar también el respaldo auxiliar del control o resolver su advertencia.
+1. Administrador: abrir Respaldos y recuperación, elegir C:\SGTM\Respaldos, Completa y sin exportar todavía a Google Drive. Crear y verificar copia; comprobar ruta, historial y archivo .bak en el servidor. Verificar también el respaldo auxiliar del control o resolver su advertencia.
 2. Crear un cliente ficticio identificable posterior a la copia. Generar una Diferencial y comprobar su dependencia de la completa. No eliminar ni reemplazar la completa.
 3. Seleccionar la completa y Ensayar restauración. Debe recuperar una base temporal y comprobar integridad/esquema, sin borrar el cliente posterior en la base operativa.
 4. Para la restauración real, acordar mantenimiento, cerrar la segunda aplicación y consultas externas sobre Demo. Administrador confirma con su contraseña y una segunda identidad distinta, administrador o administrativo, aprueba. Registrar motivo y consecuencias. No hacer este ensayo en una base real.
@@ -25,7 +25,7 @@ Publicar e instalar un solo servicio de Windows siguiendo [operación](../respal
 
 ## Nube después de la prueba local
 
-Azure Blob Storage es réplica opcional de archivos, no el alojamiento de la base. Seguir [Azure](../respaldos/azure.md): contenedor privado, identidad Entra autorizada y ContenedorUri sin secretos. Probar copia local+remota verificada, fallo de transferencia y reintento. La identidad desatendida del servicio es distinta de una sesión interactiva de Visual Studio. No se afirma que exista una cuenta/contenedor real por disponer de las clases implementadas.
+Google Drive almacena paquetes de recuperación; la base operativa permanece en SQL Server. Seguir [Google Drive](../respaldos/google-drive.md): exportar el paquete completo, verificar su sincronización en la web y ensayar su importación antes de autorizar una restauración. Para automatizar con Drive para escritorio, usar la tarea de inicio de sesión documentada; un servicio de Windows no comparte automáticamente la unidad de Drive de la sesión interactiva.
 
 ## Preparación asistida de Demo en un solo equipo Windows
 
@@ -39,9 +39,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Preparar-Respa
 
 `Bypass` se limita a ese proceso; no cambia permanentemente la política del equipo. Revisar el script antes de ejecutarlo. La cuenta Windows debe tener acceso SQL a la Demo y permisos de crear la base de control; ser administrador de Windows no concede automáticamente permisos en SQL Server.
 
-La herramienta verifica acceso/esquema de Demo sin modificarlo, detecta la cuenta real del servicio SQL, crea `C:\SGTM\Respaldos` y concede a esa cuenta permiso Modify en esa carpeta. Instala y consulta `SGTM_DB_Demo_Control`; solo después habilita los perfiles Project F5 y prepara la configuración local del agente. Conserva las configuraciones anteriores fuera del repositorio, en `%LOCALAPPDATA%\SGTM\Configuracion`. No elimina copias, no restaura, no carga registros de negocio y no activa Azure. Si falla puede quedar la carpeta o la base de control creada; corregir el problema y repetir es admisible. No borre bases para resolver un fallo de preparación.
+La herramienta verifica acceso/esquema de Demo sin modificarlo, detecta la cuenta real del servicio SQL, crea `C:\SGTM\Respaldos` y concede a esa cuenta permiso Modify en esa carpeta. Instala y consulta `SGTM_DB_Demo_Control`; solo después habilita los perfiles Project F5 y prepara la configuración local del agente. Conserva las configuraciones anteriores fuera del repositorio, en `%LOCALAPPDATA%\SGTM\Configuracion`. No elimina copias, no restaura, no carga registros de negocio y no configura Google Drive. Si falla puede quedar la carpeta o la base de control creada; corregir el problema y repetir es admisible. No borre bases para resolver un fallo de preparación.
 
-Reabrir Visual Studio, reconstruir y ejecutar el perfil Project. Entrar como `demo.admin` y abrir Respaldos y recuperación. Crear una **Completa**, carpeta `C:\SGTM\Respaldos`, Azure desmarcado. Comprobar el mensaje, el archivo `.bak` y el catálogo. Esta copia real es la que comprueba los permisos efectivos de respaldo SQL y del sistema de archivos. Una carpeta creada o control consultable por sí solos no garantizan una copia correcta.
+Reabrir Visual Studio, reconstruir y ejecutar el perfil Project. Entrar como `demo.admin` y abrir Respaldos y recuperación. Crear una **Completa**, carpeta `C:\SGTM\Respaldos`, sin exportar todavía a Google Drive. Comprobar el mensaje, el archivo `.bak` y el catálogo. Esta copia real es la que comprueba los permisos efectivos de respaldo SQL y del sistema de archivos. Una carpeta creada o control consultable por sí solos no garantizan una copia correcta.
 
 ### Comprobación de programación antes de instalar un servicio
 

@@ -16,7 +16,7 @@ partial class FrmCatalogo
         tlpPrincipal = new TableLayoutPanel();
         lblTitulo = new Label();
         lblDescripcion = new Label();
-        flpFiltros = new FlowLayoutPanel();
+        tlpFiltros = new TableLayoutPanel();
         txtBuscar = new TextBox();
         cmbCategorias = new ComboBox();
         cmbTiposConcepto = new ComboBox();
@@ -49,7 +49,7 @@ partial class FrmCatalogo
         Controls.Add(tlpPrincipal);
         tlpPrincipal.Controls.Add(lblTitulo, 0, 0);
         tlpPrincipal.Controls.Add(lblDescripcion, 0, 1);
-        tlpPrincipal.Controls.Add(flpFiltros, 0, 2);
+        tlpPrincipal.Controls.Add(tlpFiltros, 0, 2);
         tlpPrincipal.Controls.Add(dgvConceptos, 0, 3);
         tlpPrincipal.Controls.Add(txtDetalle, 0, 4);
         tlpPrincipal.Controls.Add(lblCantidad, 0, 5);
@@ -60,14 +60,6 @@ partial class FrmCatalogo
         lblDescripcion.Name = "lblDescripcion";
         lblDescripcion.Dock = DockStyle.Fill;
         lblDescripcion.Text = "Oferta del negocio y precios de referencia en ARS. Disponible significa habilitado en catálogo; no confirma existencias de stock. Seleccione una fila para leer su descripción.";
-        flpFiltros.Name = "flpFiltros";
-        flpFiltros.Dock = DockStyle.Fill;
-        flpFiltros.AutoScroll = false;
-        flpFiltros.AutoSize = true;
-        flpFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        flpFiltros.BackColor = Color.White;
-        flpFiltros.Padding = new Padding(8);
-        flpFiltros.WrapContents = true;
         txtBuscar.Name = "txtBuscar";
         txtBuscar.Width = 270;
         txtBuscar.PlaceholderText = "Código, nombre, descripción o categoría";
@@ -88,7 +80,11 @@ partial class FrmCatalogo
         btnLimpiar.Name = "btnLimpiar";
         btnLimpiar.Text = "Limpiar filtros";
         btnLimpiar.AutoSize = true;
-        flpFiltros.Controls.AddRange([txtBuscar, cmbCategorias, cmbTiposConcepto, cboDisponibilidad, btnLimpiar, btnActualizar]);
+        var accionesFiltros = new FlowLayoutPanel { Name = "tlpFiltrosAcciones" };
+        accionesFiltros.Controls.AddRange([btnLimpiar, btnActualizar]);
+        Taller.Presentacion.Estilos.FiltrosBandeja.Configurar(tlpFiltros, accionesFiltros,
+            ("Buscar código, nombre o descripción", txtBuscar), ("Categoría", cmbCategorias),
+            ("Tipo de concepto", cmbTiposConcepto), ("Disponibilidad", cboDisponibilidad));
         dgvConceptos.Name = "dgvConceptos";
         dgvConceptos.Dock = DockStyle.Fill;
         dgvConceptos.ColumnHeadersHeightSizeMode=DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -204,7 +200,7 @@ partial class FrmCatalogo
     }
 
     private TableLayoutPanel tlpPrincipal = null!;
-    private FlowLayoutPanel flpFiltros = null!;
+    private TableLayoutPanel tlpFiltros = null!;
     private Label lblTitulo = null!, lblDescripcion = null!, lblCantidad = null!;
     private TextBox txtBuscar = null!, txtDetalle = null!;
     private ComboBox cmbCategorias = null!, cmbTiposConcepto = null!, cboDisponibilidad = null!;

@@ -42,7 +42,7 @@ Esta es una aplicación de escritorio que se conecta directamente a SQL Server: 
 
 ## Verificación
 
-Hay pruebas de sesión sin vencimiento temporal y revocación de autorización, instalación sin contraseña fija, validación del destino Azure y pruebas SQL del contador persistente y lote completo. La autorización, integridad del circuito y concurrencia cuentan además con las pruebas de integración existentes. La cuenta Azure real y la aceptación visual en Windows deben probarse en la instalación; compilar no demuestra seguridad absoluta.
+Hay pruebas de sesión sin vencimiento temporal y revocación de autorización, instalación sin contraseña fija, validación de paquetes y rutas de Drive y pruebas SQL del contador persistente y lote completo. La autorización, integridad del circuito y concurrencia cuentan además con las pruebas de integración existentes. La sincronización remota de Drive y la aceptación visual en Windows deben probarse en la instalación; compilar no demuestra seguridad absoluta.
 
 ## Política común de contraseñas
 

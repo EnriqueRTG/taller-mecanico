@@ -61,7 +61,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             AutorizacionOperativa.Version(version, a.Version);
             var propuestas = await PropuestasAsync(id);
             var detalles = propuestas.SelectMany(p => p.Detalles).ToList();
-            if (a.Estado != EstadoAtencion.EnEjecucion || a.IdTecnicoEnActividad != null || await circuito.ObtenerPorAtencionAsync(id) != null)
+            if (a.Estado != EstadoAtencion.EnEjecucion || a.IdTecnicoEnActividad != null || await circuito.ExisteLiquidacionAsync(id))
                 throw new ValidacionException("La ejecución no está disponible para tomar.");
             var motivo = AutorizacionOperativa.Texto(observaciones, detalles.Any(d => d.AceptadoPorCliente != true) && propuestas.Any(p => !p.AlcanceValidado));
             a.IdTecnicoEnActividad = u.Id;
@@ -113,9 +113,12 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
             var a = await AtencionAsync(datos.IdAtencion);
             AutorizacionOperativa.Version(datos.Version, a.Version);
             ExigirReserva(a, u);
-            var propuestas = await PropuestasAsync(a.IdAtencion);
+            // Una misma lectura alimenta la validación de avance y la de finalización.
+            var presupuestos = await repositorio.ObtenerPresupuestosAsync(a.IdAtencion);
+            var propuestas = presupuestos.Where(p => p.Vigente && !p.EsInspeccion && p.Estado == EstadoPresupuesto.Aceptado).ToList();
+            if (propuestas.Count == 0) throw new ValidacionException("La atención no tiene una propuesta vigente aceptada.");
             var detalles = propuestas.SelectMany(p => p.Detalles).ToList();
-            if (propuestas.Any(p => !p.AlcanceValidado) || await circuito.ObtenerPorAtencionAsync(a.IdAtencion) != null)
+            if (propuestas.Any(p => !p.AlcanceValidado) || await circuito.ExisteLiquidacionAsync(a.IdAtencion))
                 throw new ValidacionException("El alcance no está validado o ya fue liquidado.");
             var items = detalles.Where(d => d.AceptadoPorCliente == true).ToDictionary(d => d.IdPresupuestoDetalle);
             if (datos.Items is null || datos.Items.Any(d => d is null) || datos.Items.Count != items.Count || datos.Items.Select(d => d.IdDetalle).Distinct().Count() != items.Count)
@@ -157,7 +160,7 @@ public sealed class EjecucionServicio(IEvaluacionRepositorio repositorio, ICircu
                 }
             }
 
-            if (finalizar && ((await repositorio.ObtenerPresupuestosAsync(a.IdAtencion)).Any(p => p.Vigente && p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendientePresentacion or EstadoPresupuesto.PendienteDecision or EstadoPresupuesto.PendienteRevisionTecnica) || a.Pausas.Any(p => p.FechaResolucion == null)))
+            if (finalizar && (presupuestos.Any(p => p.Vigente && p.Estado is EstadoPresupuesto.Borrador or EstadoPresupuesto.PendientePresentacion or EstadoPresupuesto.PendienteDecision or EstadoPresupuesto.PendienteRevisionTecnica) || a.Pausas.Any(p => p.FechaResolucion == null)))
                 throw new ValidacionException("Antes de finalizar resuelva las propuestas y las pausas abiertas. Puede guardar el avance de tareas independientes.");
             var anterior = a.Estado;
             if (finalizar)

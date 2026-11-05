@@ -1,7 +1,7 @@
 name: Compilar y probar Taller
 on:
   pull_request:
-    paths: ['Taller/**', '.github/workflows/validar-taller.yml']
+    paths: ['Taller/**', 'scripts/**', 'global.json', '.github/workflows/validar-taller.yml']
   workflow_dispatch:
 permissions:
   contents: read

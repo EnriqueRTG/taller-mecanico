@@ -55,6 +55,103 @@ public sealed class ReportesPruebas
         public void Dispose() => Db.Dispose();
     }
     [Fact]
+    public async Task TodosLosReportes_CompartenBusquedaSinTildesNiMayusculas()
+    {
+        using var c = new Caso();
+        foreach (var u in await c.Db.Usuarios.ToListAsync()) u.Apellido = "Pérez";
+        foreach (var a in await c.Db.Atenciones.ToListAsync()) a.MotivoConsulta = "Revisión Pérez";
+        foreach (var cuenta in await c.Db.Comprobantes.ToListAsync()) cuenta.Cliente = "Ana Pérez";
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+        foreach (var tipo in Enum.GetValues<TipoReporte>())
+        {
+            var conTilde = await c.Generar(tipo, "PÉREZ");
+            var sinTilde = await c.Generar(tipo, "  perez  ");
+            Assert.NotEmpty(conTilde.Registros);
+            Assert.Equal(conTilde.Registros.Select(x => x.Codigo), sinTilde.Registros.Select(x => x.Codigo));
+            Assert.Equal(conTilde.Grafico, sinTilde.Grafico);
+            Assert.Equal(conTilde.Indicadores, sinTilde.Indicadores);
+        }
+    }
+
+    [Fact]
+    public async Task CorreccionDeAdicional_ConservaHistorialSinAgregarOtroHitoAlReporte()
+    {
+        using var c = new Caso();
+        var antes = await c.Generar(TipoReporte.ActividadTecnica);
+        c.Db.HistorialAtenciones.Add(new HistorialAtencion { IdAtencion = 1, IdUsuario = 3, Fecha = c.Hoy, Accion = "CorreccionAdicionalPreparada", EstadoAnterior = EstadoAtencion.EnEvaluacionTecnica, EstadoNuevo = EstadoAtencion.EnEvaluacionTecnica, Observaciones = "Se conserva la corrección en el expediente" });
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+        var despues = await c.Generar(TipoReporte.ActividadTecnica);
+        Assert.True(await c.Db.HistorialAtenciones.AnyAsync(x => x.Accion == "CorreccionAdicionalPreparada"));
+        Assert.Equal(antes.Registros.Select(x => x.Codigo), despues.Registros.Select(x => x.Codigo));
+        Assert.DoesNotContain("CorreccionAdicionalPreparada", Taller.Aplicacion.Consultas.ActividadTecnicaReporte.AccionesFiltrables);
+        Assert.Contains("no es una auditoría completa", despues.Metodologia);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public async Task InicioLivianoConservaIndicadoresDelReporteParaCadaRol(int id)
+    {
+        using var c = new Caso();
+        c.Entrar(id);
+        var acceso = new Taller.Aplicacion.Seguridad.AutorizacionOperativa(new UsuarioRepositorio(c.Db), c.Sesion);
+        var inicio = new InicioServicio(new InicioRepositorio(c.Db), acceso, c.Servicio);
+        var resumen = await inicio.CargarAsync();
+        Assert.Equal(3, resumen.Tarjetas.Count);
+        // La sesión de prueba sólo contiene ID: el servicio debe consultar el rol real.
+        var rol = (await c.Db.Usuarios.AsNoTracking().SingleAsync(u => u.Id == id)).RolId;
+        TipoReporte[] seleccion = rol == RolesSistema.TecnicoId
+            ? [TipoReporte.CargaTecnica, TipoReporte.ActividadTecnica, TipoReporte.Presupuestos]
+            : [TipoReporte.Atenciones, TipoReporte.MovimientosCobro, TipoReporte.SaldosPendientes];
+        for (int n = 0; n < seleccion.Length; n++)
+        {
+            var documento = await c.Servicio.GenerarAsync(new SolicitudReporteDto {
+                Tipo = seleccion[n], Desde = new DateTime(c.Hoy.Year, c.Hoy.Month, 1), Hasta = c.Hoy });
+            Assert.Equal(documento.Indicadores, resumen.Tarjetas[n].Indicadores);
+            Assert.Empty(resumen.Tarjetas[n].Registros);
+        }
+    }
+
+    [Theory]
+    [InlineData(TipoReporte.Atenciones)]
+    [InlineData(TipoReporte.CargaTecnica)]
+    [InlineData(TipoReporte.ActividadTecnica)]
+    [InlineData(TipoReporte.SaldosPendientes)]
+    [InlineData(TipoReporte.MovimientosCobro)]
+    [InlineData(TipoReporte.Presupuestos)]
+    public async Task IndicadoresSeTraducenASqlServer(TipoReporte tipo)
+    {
+        using var db = new TallerDbContext(new DbContextOptionsBuilder<TallerDbContext>()
+            .UseSqlServer("Server=localhost;Database=NoSeConecta;Trusted_Connection=True;TrustServerCertificate=True")
+            .AddInterceptors(new DetenerConexion()).Options);
+        var repo = new ReporteRepositorio(db);
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.ListarIndicadoresAsync(tipo, FechaHoraTaller.Hoy, FechaHoraTaller.Hoy.AddDays(1), 3));
+        Assert.Equal("SQL traducido; conexión evitada", ex.Message);
+    }
+
+    [Fact]
+    public async Task BandejasOptimizadasSeTraducenASqlServer()
+    {
+        using var db = new TallerDbContext(new DbContextOptionsBuilder<TallerDbContext>()
+            .UseSqlServer("Server=localhost;Database=NoSeConecta;Trusted_Connection=True;TrustServerCertificate=True")
+            .AddInterceptors(new DetenerConexion()).Options);
+        foreach (var consulta in new Func<Task>[] {
+            async () => { await new CircuitoRepositorio(db).ListarResumenCobrosAsync(); },
+            async () => { await new EvaluacionRepositorio(db).ListarEjecucionesAsync(); },
+            async () => { await new InicioRepositorio(db).ListarPendientesAsync(3, 3); },
+            async () => { await new ModeloRepositorio(db).ListarMarcasDisponiblesAsync(); },
+            async () => { await new ModeloRepositorio(db).ListarDisponiblesPorMarcaAsync(1); }
+        })
+        {
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(consulta);
+            Assert.Equal("SQL traducido; conexión evitada", ex.Message);
+        }
+    }
+
+    [Fact]
     public void FiltroDeActividadSoloOfreceAccionesDelCircuitoActual()
     {
         var acciones = Taller.Aplicacion.Consultas.ActividadTecnicaReporte.Acciones;

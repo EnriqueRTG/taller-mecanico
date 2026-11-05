@@ -15,6 +15,7 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 | Estados reales y filtros agrupados | [Estados](arquitectura/estados-circuito-actual.md) |
 | Recorrido habitual de recepción a entrega | [Circuito principal](operacion/circuito-principal.md) |
 | Selección parcial, hallazgos, pausas y materiales | [Alternativas](operacion/alternativas.md) |
+| Filtros, fechas y consulta de informes técnicos | [Filtros de listados](operacion/filtros-listados.md) |
 | Clientes, vehículos y catálogo consultable | [Datos maestros](operacion/catalogo-clientes-vehiculos.md) |
 | Qué significa cada reporte | [Reportes por rol](reportes/reportes-por-rol.md) |
 | Logo, CSV, impresión y documentos | [Documentos](operacion/documentos.md) |
@@ -26,8 +27,7 @@ Este índice es el punto de entrada. Cada guía tiene una ubicación única; no 
 | Fechas y zona horaria | [Fechas](arquitectura/fechas-y-zona-horaria.md) |
 | Credenciales y configuración segura | [Seguridad](instalacion/seguridad.md) |
 | Preparar y operar el agente | [Respaldos y restauración](respaldos/operacion.md) |
-| Configurar almacenamiento Azure | [Azure](respaldos/azure.md) |
-| Preparar Azure en las notebooks de la demostración | [Preparación guiada](respaldos/azure-demo.md) |
+| Configurar paquetes y sincronización con Google Drive | [Google Drive](respaldos/google-drive.md) |
 | Trabajo colaborativo con Git | [Git](desarrollo/git.md) |
 
 ## Material académico editable
@@ -40,7 +40,7 @@ La versión 2.0 está sincronizada con el circuito actual y las seis migraciones
 - [Diagramas editables y vistas](diagramas/README.md)
 - [Trazabilidad de requisitos, servicios y pruebas](especificacion/trazabilidad.md)
 - [Plan integral de aceptación](pruebas/aceptacion-version-actual.md)
-- [Evidencia y límites de verificación](pruebas/evidencia-cierre.md)
+- [Revisión por capas y límites de verificación](pruebas/revision-por-capas-2026-11-04.md)
 
 Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DOCX y diagramas del repositorio son la instantánea de entrega; deben actualizarse conjuntamente si cambian reglas o esquema. Se retiraron las notas de diseño previas que proponían entidades o estados ya descartados.
 
@@ -53,3 +53,9 @@ Los originales de Google Docs/diagrams.net conservan sus identificadores. Los DO
 `Taller.Pruebas/Arquitectura` protege el sentido de referencias; `ReglasYComponentes` comprueba servicios, validaciones, fechas y documentos (varios casos usan EF InMemory); `IntegracionSql` comprueba restricciones, transacciones, rowversion, recuperación y el lote en SQL real. Son verificaciones complementarias, no copias redundantes. `Taller.Pruebas.Interfaz` comprueba controles y construcción Windows/STA; no reemplaza la revisión visual manual.
 
 - [Verificación de Demo v5](pruebas/demo-ampliada-v5.md).
+
+- [Revisión general de código previa al cierre documental](pruebas/revision-final-codigo.md).
+
+Estado de entrega y cierre de inconsistencias: [revisión del 04/11/2026](pruebas/cierre-coherencia-2026-11-04.md).
+
+Revisión vigente por capas, simplificaciones y oportunidades pendientes: [revisión por capas del 04/11/2026](pruebas/revision-por-capas-2026-11-04.md). Los informes de revisiones anteriores conservan evidencia histórica, no instrucciones de configuración vigentes.

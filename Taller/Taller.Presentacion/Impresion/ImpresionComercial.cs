@@ -59,17 +59,21 @@ internal static class ImpresionComercial
             bool Numerica(int columna) => columnasNumericas?.Contains(columna) ?? columna > 0;
             var cabeceras = datos.Columnas.Select((t, i) => Envolver(g, t, fuente, anchos[i] - 12)).ToArray();
             float altoCabecera = cabeceras.Max(c => c.Count) * altoLinea + 12;
-            g.FillRectangle(Brushes.AliceBlue, area.Left, y, area.Width, altoCabecera);
-            float x = area.Left;
-            for (int c = 0; c < cabeceras.Length; c++)
-            {
-                for (int l = 0; l < cabeceras[c].Count; l++)
-                    g.DrawString(cabeceras[c][l], fuente, Brushes.Black, new RectangleF(x + 6, y + 6 + l * altoLinea, anchos[c] - 12, altoLinea), Numerica(c) ? derecha : izquierda);
-                x += anchos[c];
-            }
-            y += altoCabecera;
-            float inicioContenido = y, limite = area.Bottom - 30;
             bloques ??= Construir(g, datos, fuente, area.Width, anchos);
+            // Las páginas que solo continúan notas no necesitan cabeceras de columnas.
+            if (fila < datos.Filas.Count)
+            {
+                g.FillRectangle(Brushes.AliceBlue, area.Left, y, area.Width, altoCabecera);
+                float x = area.Left;
+                for (int c = 0; c < cabeceras.Length; c++)
+                {
+                    for (int l = 0; l < cabeceras[c].Count; l++)
+                        g.DrawString(cabeceras[c][l], fuente, Brushes.Black, new RectangleF(x + 6, y + 6 + l * altoLinea, anchos[c] - 12, altoLinea), Numerica(c) ? derecha : izquierda);
+                    x += anchos[c];
+                }
+                y += altoCabecera;
+            }
+            float inicioContenido = y, limite = area.Bottom - 30;
             int filaInicial = fila, lineaInicial = linea;
             while (fila < bloques.Count)
             {
@@ -78,11 +82,11 @@ internal static class ImpresionComercial
                 int caben = (int)((limite - y - 12) / altoLinea);
                 if (caben <= 0) break;
                 // Una fila normal pasa completa a la siguiente página; una extraordinariamente extensa se continúa.
-                if (linea == 0 && totalLineas > caben && totalLineas * altoLinea + 12 <= limite - inicioContenido) break;
+                if (fila < datos.Filas.Count + datos.Totales.Count && linea == 0 && totalLineas > caben && totalLineas * altoLinea + 12 <= limite - inicioContenido) break;
                 int tomar = Math.Min(caben, totalLineas - linea);
                 float alto = tomar * altoLinea + 12;
                 if (b.Total) g.FillRectangle(Brushes.AliceBlue, area.Left, y, area.Width, alto);
-                x = area.Left;
+                float x = area.Left;
                 for (int c = 0; c < b.Celdas.Length; c++)
                 {
                     for (int l = 0; l < tomar && linea + l < b.Celdas[c].Count; l++)
@@ -95,7 +99,7 @@ internal static class ImpresionComercial
                 linea += tomar;
                 if (linea >= totalLineas) { fila++; linea = 0; }
             }
-            g.DrawString($"SGTM · Documento interno sin validez fiscal · Página {pagina}", fuente, Brushes.DimGray, area.Left, area.Bottom - 20);
+            g.DrawString($"SGTM · Página {pagina}", fuente, Brushes.DimGray, area.Left, area.Bottom - 20);
             if (pagina > 1 && fila == filaInicial && linea == lineaInicial && fila < bloques.Count)
                 throw new InvalidOperationException("El encabezado no deja espacio para el detalle. Use A4 y márgenes normales.");
             e.HasMorePages = fila < bloques.Count;
@@ -111,7 +115,11 @@ internal static class ImpresionComercial
         float[] totales = [ancho * .76f, ancho * .24f];
         foreach (var t in d.Totales)
             resultado.Add(new Bloque([Envolver(g, t.Key, fuente, totales[0] - 12), Envolver(g, t.Value, fuente, totales[1] - 12)], totales, true));
-        if (!string.IsNullOrWhiteSpace(d.Notas)) resultado.Add(new Bloque([Envolver(g, d.Notas, fuente, ancho - 12)], [ancho]));
+        // Cada párrafo se pagina por separado: las notas aprovechan el espacio tras el detalle
+        // y solo continúan en otra hoja cuando realmente no caben.
+        foreach (var parrafo in d.Notas.Replace("\r", "").Split("\n\n", StringSplitOptions.RemoveEmptyEntries))
+            if (!string.IsNullOrWhiteSpace(parrafo))
+                resultado.Add(new Bloque([Envolver(g, parrafo, fuente, ancho - 12)], [ancho]));
         return resultado;
     }
 

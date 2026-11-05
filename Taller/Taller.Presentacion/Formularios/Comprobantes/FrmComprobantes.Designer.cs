@@ -61,7 +61,7 @@ partial class FrmComprobantes
         dgvDatos.Dock = DockStyle.Fill;
         tlpPrincipal.Controls.Add(lblAyuda, 0, 4);
         lblAyuda.Dock = DockStyle.Fill;
-        lblAyuda.Text = "Saldo pendiente primero. Se permiten cobros parciales y distintos medios; la entrega exige saldo cero. Documentos internos sin validez fiscal.";
+        lblAyuda.Text = "Saldo pendiente primero. Se permiten cobros parciales y distintos medios; la entrega exige saldo cero.";
         tlpPrincipal.Controls.Add(flpAcciones, 0, 5);
         flpAcciones.Dock = DockStyle.Fill;
         txtBuscar.PlaceholderText="Buscar atención, liquidación, cliente o dominio";txtBuscar.TextChanged+=Filtrar;

@@ -23,7 +23,7 @@ internal static class ImpresionDocumento
             graficos.MeasureString(pendiente, fuente, area, formato, out var caracteres, out _);
             if (caracteres <= 0) throw new InvalidOperationException("El área de impresión es demasiado pequeña.");
             graficos.DrawString(pendiente[..caracteres], fuente, Brushes.Black, contenido, formato);
-            graficos.DrawString($"SGTM · Documento interno sin validez fiscal · Página {pagina}", fuente, Brushes.DimGray, e.MarginBounds.X, e.MarginBounds.Bottom - 22);
+            graficos.DrawString($"SGTM · Página {pagina}", fuente, Brushes.DimGray, e.MarginBounds.X, e.MarginBounds.Bottom - 22);
             inicio += caracteres; e.HasMorePages = inicio < texto.Length;
         };
         using var vista = new VistaPreviaDocumento(documento, () => pagina);

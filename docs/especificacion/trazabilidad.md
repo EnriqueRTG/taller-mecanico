@@ -1,6 +1,6 @@
 # Trazabilidad de requisitos e implementación
 
-Versión documental 2.0. CU01 a CU10 son comunes a la ERS, al Apéndice A y a los diagramas. Los enlaces apuntan a clases reales; las pruebas automatizadas complementan la aceptación manual. No representan aprobación de una instalación aún no probada.
+Versión documental 2.0. Referencia de código para el cierre: `ef2b2e8` (PR #75). CU01 a CU10 son comunes a la ERS, al Apéndice A y a los diagramas. Los enlaces apuntan a clases reales; las pruebas automatizadas complementan la aceptación manual. No representan aprobación de una instalación aún no probada.
 
 | CU | RF | Servicio de Aplicación | Datos principales | Evidencia automatizada |
 |---|---|---|---|---|
@@ -14,6 +14,16 @@ Versión documental 2.0. CU01 a CU10 son comunes a la ERS, al Apéndice A y a lo
 | CU08 Liquidar y registrar cobros | RF-43, RF-44, RF-45, RF-46, RF-47, RF-48, RF-49, RF-50, RF-51, RF-71 | [CobroServicio](../../Taller/Taller.Aplicacion/Servicios/CobroServicio.cs) | Comprobantes, ComprobanteDetalles, Pagos, PagoMedios, MediosPago | [CircuitoCobrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/CircuitoCobrosPruebas.cs) |
 | CU09 Generar reportes por rol | RF-52, RF-53, RF-54, RF-55, RF-56, RF-57 | [ReporteServicio](../../Taller/Taller.Aplicacion/Servicios/ReporteServicio.cs) | Consultas de negocio e historial; sin tabla de reporte | [ReportesPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/ReportesPruebas.cs) |
 | CU10 Gestionar respaldos y recuperación | RF-58, RF-59, RF-60, RF-61, RF-62, RF-63, RF-64, RF-72, RF-73 | [RespaldoServicio](../../Taller/Taller.Aplicacion/Servicios/RespaldoServicio.cs) | Base de negocio y control externo EstadoSGTM, ProgramaSGTM, CopiasSGTM, EventosSGTM | [RespaldosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/RespaldosPruebas.cs), [RespaldosSqlPruebas](../../Taller/Taller.Pruebas/IntegracionSql/RespaldosSqlPruebas.cs) |
+
+## Reglas de transición para leer los diagramas
+
+El estado de la atención, el estado del presupuesto y el avance de cada ítem representan momentos distintos del expediente. El [estado de atención](../../Taller/Taller.Dominio/Enumeraciones/EstadoAtencion.cs) gobierna la etapa general; el [estado de presupuesto](../../Taller/Taller.Dominio/Enumeraciones/EstadoPresupuesto.cs) registra la situación de cada propuesta. Una pausa tiene alcance propio y se registra aparte.
+
+| Regla | Diagrama | Implementación |
+|---|---|---|
+| CU06: una selección parcial idéntica puede validarse técnicamente y conservar la decisión original. Cualquier cambio requiere presentar una nueva versión. | [Vista 5](../diagramas/vista-5.svg) | `SeguimientoTrabajoServicio.RevisarSeleccionAsync` |
+| CU06: una corrección de adicional empieza como borrador y requiere nueva decisión aun si conserva los ítems. | [Vista 9](../diagramas/vista-9.svg) | `PresupuestoServicio` y `SeguimientoTrabajoServicio.RevisarSeleccionAsync` |
+| CU04/CU08: la entrega requiere liquidación, saldo cero consistente con los pagos vigentes, persona que retira y conformidad. | [Vistas 4](../diagramas/vista-4.svg) y [6](../diagramas/vista-6.svg) | `CobroServicio.EntregarAsync` |
 
 ## Recorrido entre capas
 
@@ -33,7 +43,9 @@ Los archivos de diagramas derivan del mismo modelo. Las tablas ref. repetidas en
 
 ## Verificación reproducible
 
-Consultar [plan integral](../pruebas/aceptacion-version-actual.md), [SQL de contraste](../reportes/verificacion-reportes.sql) y [estado de verificación](../pruebas/evidencia-cierre.md). Ninguna guía debe afirmar que SQL real o sincronización remota de Drive se probaron si no hay evidencia de esa ejecución.
+La [evidencia manual de entrega](../pruebas/evidencia-cierre.md#evidencia-de-entrega--05112026) identifica los casos y recorridos observados, y separa los límites de esa prueba de la cobertura automatizada.
+
+Consultar [plan integral](../pruebas/aceptacion-version-actual.md), [SQL de contraste](../reportes/verificacion-reportes.sql) y [estado de verificación](../pruebas/evidencia-cierre.md). Para CU10, el [alcance implementado](alcance-implementado.md#respaldo-y-recuperación-en-la-entrega) distingue la evidencia manual en la instalación de demostración de las pruebas automatizadas y de la restauración efectiva.
 
 La segunda revisión agrega Usuarios.Version y guardias de edición en sus SP (CU02/RNF-05), unifica la entrega estructurada (CU04/RF-27) y revalida maestros del alta en transacción breve (CU04/RNF-04). Evidencia: Usuarios_SPRechazanVersionObsoletaEnDatosCredencialesYEstado, AltaAtencion_RevalidaMaestrosAntesDeGuardarYPermiteReintentarSinResiduos y AtencionPersistenciaPruebas. Véase [segunda revisión](../pruebas/revision-integral-2.md).
 

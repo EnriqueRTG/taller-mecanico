@@ -1,4 +1,6 @@
-# Manual de usuario
+# Guía de operación del SGTM
+
+Material de base para el manual definitivo. Describe el circuito, las acciones por rol y sus excepciones; la instalación y los permisos técnicos se consultan en la [referencia técnica](../REFERENCIA-TECNICA.md).
 
 - [Atención, selección parcial, hallazgos y materiales del cliente](#operacion-alternativas)
 - [Catálogo, clientes y vehículos](#operacion-catalogo-clientes-vehiculos)

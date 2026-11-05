@@ -45,7 +45,7 @@ La sesión permanece hasta cerrar sesión o salir. Las operaciones revalidan usu
 - Pagos parciales y varios medios por cobro; referencias de operaciones electrónicas, recibos y anulaciones justificadas. Entrega explícita con saldo cero.
 - Documentos económicos internos en ARS, **sin validez fiscal**. Sin anticipos, financiación, crédito posterior a la entrega ni devolución bancaria automática.
 - Siete reportes con filtros, gráficos, HTML autocontenido, CSV e impresión/PDF. No calculan rentabilidad ni horas de productividad, porque no se registran esos costos/horas.
-- Respaldos completos/diferenciales, manuales/programados y paquetes para Google Drive. Requieren configurar permisos, control y agente; permanecen deshabilitados hasta instalar ese entorno. Recuperación con mantenimiento y doble aprobación; sin promesa de operación sin interrupción ni copias de log.
+- Respaldos completos/diferenciales, manuales/programados y paquetes para Google Drive. El respaldo manual requiere permisos SQL, carpeta y base de control. El agente se usa para la programación automática; Google Drive es opcional. Recuperación con mantenimiento y doble aprobación; sin promesa de operación sin interrupción ni copias de log.
 
 ## Verificaciones
 
@@ -62,5 +62,3 @@ Las pruebas SQL requieren una instancia desechable explícitamente autorizada; n
 La [documentación v2.0](docs/README.md) incluye ERS, casos de uso, diccionario, DER, diagramas y [trazabilidad](docs/especificacion/trazabilidad.md) alineados con el circuito vigente.
 
 Esta versión utiliza las seis migraciones del circuito actual y el lote ampliado Demo v5. Antes de abrir una base existente, seguir [actualización](REFERENCIA-TECNICA.md#instalacion-actualizacion-coloquio). Para dos puestos, [red privada](REFERENCIA-TECNICA.md#instalacion-red-privada); para copias, [prueba local de recuperación](REFERENCIA-TECNICA.md#instalacion-respaldos-locales-demo).
-
-La limpieza `RetirarVinculoCambioSinUso` incorpora una tercera migración sin alterar las anteriores. Para una base actual no hace falta recrear Demo: respaldar, cerrar clientes/agente y aplicar la migración existente siguiendo la [guía de actualización](REFERENCIA-TECNICA.md#instalacion-actualizacion-coloquio). Los respaldos nuevos deben corresponder al esquema actualizado.

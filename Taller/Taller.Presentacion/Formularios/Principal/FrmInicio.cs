@@ -10,6 +10,9 @@ public partial class FrmInicio : Form, IFormularioConOperacion
 {
     private readonly InicioServicio _inicio;
     private readonly SesionUsuario _sesion;
+    internal string TemaAyuda => _sesion.UsuarioActual?.RolId == RolesSistema.AdministradorId
+        ? "inicio-administrador"
+        : "inicio";
     public bool OperacionEnCurso { get; private set; }
 
     public FrmInicio(SesionUsuario sesion, InicioServicio inicio)

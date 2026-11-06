@@ -101,6 +101,8 @@ partial class FrmAuditoriaAccesos
             Name = "grilla",
             Dock = DockStyle.Fill,
             ReadOnly = true,
+            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+            MultiSelect = false,
             AutoGenerateColumns = false,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,

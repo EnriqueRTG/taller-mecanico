@@ -60,6 +60,7 @@ public partial class FrmInicio : Form, IFormularioConOperacion
                 ? "Sin accesos rechazados en los últimos 7 días. Los accesos correctos pueden consultarse en Auditoría de accesos."
                 : "No hay tareas pendientes para su perfil. Actualice el resumen después de registrar operaciones.";
             dgvActividad.ClearSelection();
+            dgvActividad.CurrentCell = null;
             lblEstado.Text = $"Actualizado {FechaHoraTaller.Ahora:dd/MM/yyyy HH:mm:ss} · Indicadores: mes actual; saldos y carga: situación actual. Pendientes sin filtro de fecha. Detalle en Reportes.";
         }
         catch (Exception ex)

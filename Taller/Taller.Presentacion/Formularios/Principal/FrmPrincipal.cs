@@ -37,10 +37,11 @@ public partial class FrmPrincipal : Form
         _serviceProvider = serviceProvider;
         _autorizacionNavegacion = autorizacionNavegacion;
         AgregarOpcionAyuda("Manual de usuario", () => Ayuda.AyudaContextual.AbrirManual(this));
-        AgregarOpcionAyuda("? Ayuda de esta pantalla (F1)", () => Ayuda.AyudaContextual.AbrirTema(this));
+        AgregarOpcionAyuda("❔ Ayuda", () => Ayuda.AyudaContextual.AbrirTema(this),
+            "Abre la ayuda de la pantalla actual. Atajo: F1.");
     }
 
-    private void AgregarOpcionAyuda(string texto, Action abrir)
+    private void AgregarOpcionAyuda(string texto, Action abrir, string? descripcion = null)
     {
         var boton = new Button
         {
@@ -53,6 +54,13 @@ public partial class FrmPrincipal : Form
         };
         boton.FlatAppearance.BorderSize = 0;
         boton.FlatAppearance.MouseOverBackColor = btnCerrarSesion.FlatAppearance.MouseOverBackColor;
+        if (descripcion is not null)
+        {
+            boton.AccessibleName = "Ayuda de esta pantalla";
+            boton.AccessibleDescription = descripcion;
+            new ToolTip(components).SetToolTip(boton, descripcion);
+        }
+
         boton.Click += (_, _) => abrir();
         pnlMenu.Controls.Add(boton);
         pnlMenu.Controls.SetChildIndex(boton, pnlMenu.Controls.GetChildIndex(btnCerrarSesion));

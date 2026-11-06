@@ -66,7 +66,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             : "Estado";
         bool periodo = tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica);
         dtpDesde.Enabled = dtpHasta.Enabled = periodo;
-        lblMetodo.Text = tipo is { } reporte
+        lblMetodo.Text = _rol != 0 && tipo is { } reporte
             ? $"Alcance: {ReporteServicio.AlcancePara(reporte, _rol)}. " +
                 (periodo ? "El período utiliza la fecha indicada para el reporte." : "Situación actual, sin filtro de fechas.")
             : "";

@@ -11,6 +11,9 @@ public partial class FrmPresupuestos : Form, Taller.Presentacion.Navegacion.IFor
     private readonly Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto _empresa;
     private readonly EvaluacionServicio _servicio;
     private readonly SesionUsuario _sesion;
+    internal string TemaAyuda => _sesion.UsuarioActual?.RolId == RolesSistema.AdministrativoId
+        ? "decision"
+        : "presupuestos";
     private readonly PresupuestoServicio _presupuestos;
     private List<PresupuestoConsultaDto> _datos = [];
     private bool _ocupado;

@@ -23,6 +23,7 @@ public partial class FrmPrincipal : Form
     private readonly IServiceProvider _serviceProvider;
     private readonly AutorizacionNavegacion _autorizacionNavegacion;
     private Form? _formularioActivo;
+    internal Form? FormularioActivoParaAyuda => _formularioActivo;
     public event EventHandler? CerrarSesionSolicitada;
     public event EventHandler? SalirSolicitado;
     /// <summary>
@@ -35,6 +36,34 @@ public partial class FrmPrincipal : Form
         _sesionUsuario = sesionUsuario;
         _serviceProvider = serviceProvider;
         _autorizacionNavegacion = autorizacionNavegacion;
+        AgregarOpcionAyuda("Manual de usuario", () => Ayuda.AyudaContextual.AbrirManual(this));
+        AgregarOpcionAyuda("❔ Ayuda", () => Ayuda.AyudaContextual.AbrirTema(this),
+            "Abre la ayuda de la pantalla actual. Atajo: F1.");
+    }
+
+    private void AgregarOpcionAyuda(string texto, Action abrir, string? descripcion = null)
+    {
+        var boton = new Button
+        {
+            Text = texto,
+            Dock = DockStyle.Bottom,
+            Height = btnCerrarSesion.Height,
+            ForeColor = btnCerrarSesion.ForeColor,
+            FlatStyle = btnCerrarSesion.FlatStyle,
+            Cursor = Cursors.Hand
+        };
+        boton.FlatAppearance.BorderSize = 0;
+        boton.FlatAppearance.MouseOverBackColor = btnCerrarSesion.FlatAppearance.MouseOverBackColor;
+        if (descripcion is not null)
+        {
+            boton.AccessibleName = "Ayuda de esta pantalla";
+            boton.AccessibleDescription = descripcion;
+            new ToolTip(components).SetToolTip(boton, descripcion);
+        }
+
+        boton.Click += (_, _) => abrir();
+        pnlMenu.Controls.Add(boton);
+        pnlMenu.Controls.SetChildIndex(boton, pnlMenu.Controls.GetChildIndex(btnCerrarSesion));
     }
 
     /// <summary>

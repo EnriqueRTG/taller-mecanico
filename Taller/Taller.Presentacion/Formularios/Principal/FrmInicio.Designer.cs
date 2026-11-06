@@ -121,6 +121,8 @@ partial class FrmInicio
         dgvActividad.Dock = DockStyle.Fill;
         dgvActividad.AutoGenerateColumns = false;
         dgvActividad.ReadOnly = true;
+        dgvActividad.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        dgvActividad.MultiSelect = false;
         dgvActividad.AllowUserToAddRows = false;
         dgvActividad.AllowUserToDeleteRows = false;
         dgvActividad.AllowUserToResizeColumns = true;

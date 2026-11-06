@@ -55,6 +55,41 @@ public sealed class ReportesPruebas
         public void Dispose() => Db.Dispose();
     }
     [Fact]
+    public async Task Administrativo_ConsultaSoloSusIntervencionesYMovimientos()
+    {
+        using var c = new Caso();
+        var otro = new Usuario { Id = 5, RolId = RolesSistema.AdministrativoId, Nombre = "Otra", Apellido = "Recepción" };
+        c.Db.Usuarios.Add(otro);
+        c.Db.HistorialAtenciones.AddRange(
+            new HistorialAtencion { IdAtencion = 1, IdUsuario = 2, Fecha = c.Hoy, Accion = "PresupuestoPresentado" },
+            new HistorialAtencion { IdAtencion = 1, IdUsuario = 2, Fecha = c.Hoy, Accion = "PagoRegistrado" },
+            new HistorialAtencion { IdAtencion = 1, IdUsuario = 5, Fecha = c.Hoy, Accion = "PagoAnulado" });
+        var pago = await c.Db.Pagos.FindAsync(1);
+        pago!.IdUsuarioAnulacion = 5;
+        var presupuesto = await c.Db.Presupuestos.FindAsync(1);
+        presupuesto!.IdUsuarioDecision = 2;
+        presupuesto.FechaDecision = c.Hoy;
+        presupuesto.FechaCreacion = c.Hoy.AddDays(-5);
+        await c.Db.SaveChangesAsync();
+        c.Db.ChangeTracker.Clear();
+
+        c.Entrar(2);
+        var intervenciones = await c.Generar(TipoReporte.Atenciones);
+        Assert.Equal(2, intervenciones.Registros.Count);
+        Assert.All(intervenciones.Registros, registro => Assert.Equal(1, registro.IdAtencion));
+        Assert.Single((await c.Generar(TipoReporte.Atenciones, estado: "Comunicación de presupuesto")).Registros);
+        Assert.Single((await c.Generar(TipoReporte.Presupuestos)).Registros);
+        Assert.Equal("Cobro", Assert.Single((await c.Generar(TipoReporte.MovimientosCobro)).Registros).Estado);
+        Assert.Equal(60m, Assert.Single((await c.Generar(TipoReporte.SaldosPendientes)).Registros).Importe);
+
+        c.Entrar(5);
+        Assert.Empty((await c.Generar(TipoReporte.Presupuestos)).Registros);
+        Assert.All((await c.Generar(TipoReporte.MovimientosCobro)).Registros,
+            registro => Assert.Equal("Anulación", registro.Estado));
+        Assert.Equal(60m, Assert.Single((await c.Generar(TipoReporte.SaldosPendientes)).Registros).Importe);
+    }
+
+    [Fact]
     public async Task TodosLosReportes_CompartenBusquedaSinTildesNiMayusculas()
     {
         using var c = new Caso();

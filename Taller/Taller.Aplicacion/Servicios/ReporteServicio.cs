@@ -25,8 +25,37 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         TipoReporte.ActividadTecnica => "Actividad técnica registrada",
         TipoReporte.ConceptosRealizados => "Conceptos realizados registrados",
         _ => throw new ValidacionException("Tipo de reporte inválido.")};
+    public static string Nombre(TipoReporte tipo, bool alcancePersonal) =>
+        alcancePersonal ? tipo switch
+        {
+            TipoReporte.Atenciones => "Intervenciones en atenciones",
+            TipoReporte.SaldosPendientes => "Saldos pendientes de atenciones gestionadas",
+            _ => Nombre(tipo)
+        } : Nombre(tipo);
+
+    public static string AlcancePara(TipoReporte tipo, int rol) => (rol, tipo) switch
+    {
+        (RolesSistema.AdministradorId, _) => "Todo el taller",
+        (RolesSistema.AdministrativoId, TipoReporte.Atenciones) => "Acciones registradas por el usuario actual",
+        (RolesSistema.AdministrativoId, TipoReporte.Presupuestos) => "Decisiones registradas por el usuario actual",
+        (RolesSistema.AdministrativoId, TipoReporte.MovimientosCobro) => "Cobros y anulaciones registrados por el usuario actual",
+        (RolesSistema.AdministrativoId, TipoReporte.SaldosPendientes) => "Atenciones con al menos una intervención del usuario actual",
+        (RolesSistema.TecnicoId, TipoReporte.CargaTecnica) => "Reservas del técnico actual y trabajos disponibles",
+        (RolesSistema.TecnicoId, TipoReporte.Presupuestos) => "Presupuestos de autoría del técnico actual",
+        (RolesSistema.TecnicoId, TipoReporte.ActividadTecnica) => "Eventos registrados por el técnico actual",
+        (RolesSistema.TecnicoId, TipoReporte.ConceptosRealizados) => "Conceptos cuyo último registro corresponde al técnico actual",
+        _ => throw new ValidacionException("Tipo de reporte no disponible para este rol.")
+    };
+
     public static string Legible(string valor) => valor switch
     {
+        "RecepcionRegistrada" => "Apertura",
+        "PresupuestoPresentado" => "Comunicación de presupuesto",
+        "DecisionPresupuestoRegistrada" => "Registro de decisión",
+        "LiquidacionEmitida" => "Emisión de liquidación",
+        "PagoRegistrado" => "Registro de cobro",
+        "PagoAnulado" => "Anulación de cobro",
+        "VehiculoEntregado" => "Entrega de vehículo",
         "EnEvaluacionTecnica" => "En preparación técnica",
         "PendienteRevisionTecnica" => "Revisión técnica pendiente",
         "PendientePresentacion" => "Por presentar",
@@ -41,11 +70,11 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         _ => Regex.Replace(valor, "([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])", "$1 $2")
     };
     /// <summary>Opciones del dominio de cada reporte; no dependen de generar un documento ni de que existan filas.</summary>
-    public static IReadOnlyList<string> EstadosPara(TipoReporte tipo)
+    public static IReadOnlyList<string> EstadosPara(TipoReporte tipo, bool alcancePersonal = false)
     {
         IEnumerable<string> valores = tipo switch
         {
-        TipoReporte.Atenciones => Enum.GetNames<EstadoAtencion>(),
+        TipoReporte.Atenciones => alcancePersonal ? IntervencionAdministrativaReporte.Acciones : Enum.GetNames<EstadoAtencion>(),
         TipoReporte.Presupuestos => Enum.GetNames<EstadoPresupuesto>().Append("Aceptado parcialmente"),
         TipoReporte.MovimientosCobro => new[] { "Cobro", "Anulación" },
         TipoReporte.SaldosPendientes => new[] { "Sin cobros", "Cobrado parcialmente" },
@@ -71,6 +100,8 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         RolesSistema.AdministradorId, RolesSistema.AdministrativoId, RolesSistema.TecnicoId);
 
     public async Task<IReadOnlyList<TipoReporte>> ListarTiposAsync() => TiposParaRol((await ExigirUsuarioAsync()).RolId);
+    public async Task<int> ObtenerRolAsync() => (await ExigirUsuarioAsync()).RolId;
+
     public async Task<ReporteDocumentoDto> GenerarAsync(SolicitudReporteDto solicitud)
     {
         ArgumentNullException.ThrowIfNull(solicitud);
@@ -96,7 +127,9 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
     {
         if (!TiposParaRol(usuario.RolId).Contains(solicitud.Tipo))
             throw new ValidacionException("Su rol no permite consultar este reporte.");
-        var estadosDisponibles = EstadosPara(solicitud.Tipo);
+        bool alcancePersonal = usuario.RolId == RolesSistema.AdministrativoId;
+        int? administrativo = alcancePersonal ? usuario.Id : null;
+        var estadosDisponibles = EstadosPara(solicitud.Tipo, alcancePersonal);
         if (solicitud.Estado != "Todos" && !estadosDisponibles.Contains(solicitud.Estado))
             throw new ValidacionException("Seleccione un estado válido para el tipo de reporte.");
         var hoy = FechaHoraTaller.Hoy;
@@ -107,15 +140,17 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         int? tecnico = usuario.RolId == RolesSistema.TecnicoId ? usuario.Id : null;
         var desde = solicitud.Desde.Date;
         var hasta = (solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? hoy : solicitud.Hasta.Date).AddDays(1);
-        var registros = soloIndicadores
+        var registros = soloIndicadores && !alcancePersonal
             ? await reportes.ListarIndicadoresAsync(solicitud.Tipo, desde, hasta, tecnico)
             : solicitud.Tipo switch
         {
             TipoReporte.CargaTecnica => await reportes.ListarCargaAsync(tecnico),
-            TipoReporte.Atenciones => await reportes.ListarAtencionesAsync(desde, hasta),
-            TipoReporte.Presupuestos => await reportes.ListarPresupuestosAsync(desde, hasta, tecnico),
-            TipoReporte.MovimientosCobro => await reportes.ListarMovimientosAsync(desde, hasta),
-            TipoReporte.SaldosPendientes => await reportes.ListarSaldosAsync(),
+            TipoReporte.Atenciones => alcancePersonal
+                ? await reportes.ListarIntervencionesAsync(desde, hasta, usuario.Id)
+                : await reportes.ListarAtencionesAsync(desde, hasta),
+            TipoReporte.Presupuestos => await reportes.ListarPresupuestosAsync(desde, hasta, tecnico, administrativo),
+            TipoReporte.MovimientosCobro => await reportes.ListarMovimientosAsync(desde, hasta, administrativo),
+            TipoReporte.SaldosPendientes => await reportes.ListarSaldosAsync(administrativo),
             TipoReporte.ActividadTecnica => await reportes.ListarActividadAsync(desde, hasta, tecnico),
             TipoReporte.ConceptosRealizados => await reportes.ListarConceptosAsync(desde, hasta, tecnico),
             _ => throw new ValidacionException("Tipo de reporte inválido.")};
@@ -127,7 +162,7 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             registros = registros.OrderByDescending(x => x.Estado == "Reservada").ThenBy(x => x.Fecha).ToList();
         var indicadores = new List<IndicadorReporteDto>
         {
-            new("Registros", registros.Count.ToString(Cultura)),
+            new(alcancePersonal && solicitud.Tipo == TipoReporte.Atenciones ? "Intervenciones" : "Registros", registros.Count.ToString(Cultura)),
             new("Atenciones distintas", registros.Select(x => x.IdAtencion).Distinct().Count().ToString(Cultura))
         };
         bool monetario = solicitud.Tipo is TipoReporte.MovimientosCobro or TipoReporte.SaldosPendientes;
@@ -180,8 +215,24 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
             recomendacion = "Revisar las atenciones activas de mayor antigüedad y los casos pendientes de decisión; ampliar el período para incluir aperturas anteriores.";
         }
 
+        if (alcancePersonal)
+        {
+            metodologia = solicitud.Tipo switch
+            {
+                TipoReporte.Atenciones => "Una fila por acción propia en la fecha de intervención. Una atención puede aparecer varias veces. El detalle muestra su estado al generar el reporte.",
+                TipoReporte.Presupuestos => "Propuestas vigentes con decisión del cliente registrada por usted, filtradas por fecha de decisión. Las comunicaciones se consultan en Intervenciones en atenciones. El resultado mostrado es el vigente al generar.",
+                TipoReporte.SaldosPendientes => "Incluye liquidaciones con saldo de atenciones con al menos una intervención propia registrada. Muestra el saldo actual completo de cada liquidación y considera los pagos de todos los operadores.",
+                _ => metodologia + " Solo incluye cobros registrados y anulaciones efectuadas por usted."
+            };
+            if (solicitud.Tipo == TipoReporte.Atenciones)
+            {
+                indicadores.RemoveAt(indicadores.Count - 1);
+                recomendacion = "Use Acción para distinguir las intervenciones y revise el estado actual de cada atención en el detalle.";
+            }
+        }
+
         if (soloIndicadores)
-            return new ReporteDocumentoDto { Titulo = Nombre(solicitud.Tipo), Indicadores = indicadores };
+            return new ReporteDocumentoDto { Titulo = Nombre(solicitud.Tipo, alcancePersonal), Indicadores = indicadores };
 
         var grafico = registros.GroupBy(x => Legible(x.Grupo)).Select(g => new PuntoReporteDto(g.Key, monetario ? g.Sum(x => x.Importe ?? 0) : g.Count())).OrderByDescending(x => Math.Abs(x.Valor)).ThenBy(x => x.Etiqueta).ToList();
         if (grafico.Count > 8)
@@ -194,11 +245,11 @@ public sealed class ReporteServicio(IReporteRepositorio reportes, IUsuarioReposi
         return new ReporteDocumentoDto
         {
             EstadosDisponibles = estadosDisponibles,
-            Titulo = Nombre(solicitud.Tipo),
+            Titulo = Nombre(solicitud.Tipo, alcancePersonal),
             Generado = FechaHoraTaller.Ahora,
             EmitidoPor = $"{usuario.Apellido}, {usuario.Nombre}",
-            Alcance = tecnico.HasValue ? (solicitud.Tipo == TipoReporte.CargaTecnica ? "Reservas propias y actividades disponibles" : "Solo registros propios del técnico autenticado") : "Taller completo · " + RolesSistema.ObtenerNombreEsperado(usuario.RolId),
-            Filtros = solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? $"Situación actual · Estado: {solicitud.Estado} · Búsqueda: {texto}" : $"Desde {desde:dd/MM/yyyy} hasta {solicitud.Hasta:dd/MM/yyyy} inclusive · Estado: {solicitud.Estado} · Búsqueda: {texto}",
+            Alcance = AlcancePara(solicitud.Tipo, usuario.RolId),
+            Filtros = solicitud.Tipo is TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica ? $"Situación actual · Estado: {solicitud.Estado} · Búsqueda: {texto}" : $"Desde {desde:dd/MM/yyyy} hasta {solicitud.Hasta:dd/MM/yyyy} inclusive · {(alcancePersonal && solicitud.Tipo == TipoReporte.Atenciones ? "Acción" : "Estado")}: {solicitud.Estado} · Búsqueda: {texto}",
             Metodologia = metodologia,
             Recomendacion = registros.Count == 0 ? "No hay registros para estos filtros. No implica ausencia de actividad fuera del alcance consultado." : recomendacion,
             UnidadGrafico = monetario ? "ARS" : "Registros",

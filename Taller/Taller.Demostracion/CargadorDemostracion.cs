@@ -118,7 +118,10 @@ internal static class CargadorDemostracion
             int idCliente = idsClientes[i % idsClientes.Count];
             string nombreCliente = nombresClientes[idCliente];
             int tecnico = tecnicos[i % tecnicos.Count];
-            await Entrar(recepcionistas[i % recepcionistas.Length]);
+            int operadorApertura = recepcionistas[i % recepcionistas.Length];
+            int operadorPresupuesto = recepcionistas[(i + 1) % recepcionistas.Length];
+            int operadorCaja = recepcionistas[(i + 2) % recepcionistas.Length];
+            await Entrar(operadorApertura);
             bool definido = i % 3 == 1;
             var solicitudes = new List<SolicitudIngresoDto> { new() { Tipo = definido ? TipoSolicitudIngreso.TrabajoSolicitado : TipoSolicitudIngreso.ProblemaInformado, Descripcion = $"DEMO-{i + 1:000} · {(definido ? caso.Pedido : caso.Sintoma)}" } };
             if (i % 3 == 2) solicitudes.Add(new() { Tipo = TipoSolicitudIngreso.TrabajoSolicitado, Descripcion = "Control preventivo de niveles y luces solicitado por el cliente" });
@@ -159,7 +162,7 @@ internal static class CargadorDemostracion
                 int adicional = await seguimiento.CrearAdicionalAsync(new() { IdAtencion = id, Version = seg.Version, IdHallazgo = seg.Hallazgos[0].Id,
                     Motivo = "Desarme para determinar causa, separado del presupuesto de reparación.",
                     Items = [new() { IdConcepto = inspeccion.IdConcepto, Descripcion = inspeccion.Nombre, Cantidad = 1, PrecioUnitario = inspeccion.PrecioReferencia!.Value }] });
-                await Entrar(recepcion.Id);
+                await Entrar(operadorPresupuesto);
                 var consulta = await Actual(adicional);
                 await evaluacion.PresentarAsync(adicional, consulta.Version);
                 consulta = await Actual(adicional);
@@ -237,7 +240,7 @@ internal static class CargadorDemostracion
                 continue;
             }
 
-            await Entrar(recepcion.Id);
+            await Entrar(operadorPresupuesto);
             await evaluacion.PresentarAsync(propuesta.IdPresupuesto, propuesta.Version);
             if (etapa == 4)
             {
@@ -268,7 +271,7 @@ internal static class CargadorDemostracion
                         OrigenMaterial = x == original.Items[0] ? OrigenMaterial.Taller : OrigenMaterial.Cliente }).ToList();
                 int revisado = await seguimiento.RevisarSeleccionAsync(original.IdPresupuesto, original.Version, alcanceViable,
                     "Se conserva el servicio solicitado y los materiales necesarios, ahora a cargo del cliente y sin venta del taller. Requieren recepción conforme antes de utilizarse.");
-                await Entrar(recepcion.Id);
+                await Entrar(operadorPresupuesto);
                 var revision = await Actual(revisado);
                 await evaluacion.PresentarAsync(revisado, revision.Version);
                 revision = await Actual(revisado);
@@ -336,30 +339,37 @@ internal static class CargadorDemostracion
                 continue;
             }
 
-            await Entrar(recepcion.Id);
+            await Entrar(operadorPresupuesto);
             var cuenta = await cobros.ObtenerAsync(id);
             await cobros.LiquidarAsync(id, cuenta.VersionAtencion, "Liquidación del trabajo autorizado y efectivamente realizado.");
             var comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
             if (etapa >= 13)
             {
+                await Entrar(operadorCaja);
                 decimal parcial = decimal.Round(comprobante.Total / 3, 2);
                 var primerImporte = decimal.Round(parcial / 2, 2);
                 int recibo = await cobros.RegistrarPagoAsync(new() { IdComprobante = comprobante.IdComprobante, Version = comprobante.Version, Medios = [new() { IdMedioPago = 1 + i % 5, Importe = primerImporte, Referencia = $"DEMO-A-{i}" }, new() { IdMedioPago = 1 + (i + 1) % 5, Importe = parcial - primerImporte, Referencia = $"DEMO-B-{i}" }] });
                 if (etapa == 13 && i >= 32)
                 {
                     comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
+                    await Entrar(operadorApertura);
                     await cobros.AnularPagoAsync(comprobante.IdComprobante, recibo, comprobante.Version, "Se anula el cobro registrado por medio equivocado; se conserva la evidencia.");
                     comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
+                    await Entrar(operadorPresupuesto);
                     await cobros.RegistrarPagoAsync(new() { IdComprobante = comprobante.IdComprobante, Version = comprobante.Version, Medios = [new() { IdMedioPago = 2, Importe = parcial, Referencia = $"DEMO-CORREGIDO-{i}" }] });
                 }
 
                 comprobante = (await cobros.ObtenerAsync(id)).Comprobante!;
                 if (etapa == 14)
                 {
+                    await Entrar(operadorPresupuesto);
                     await cobros.RegistrarPagoAsync(new() { IdComprobante = comprobante.IdComprobante, Version = comprobante.Version, Medios = [new() { IdMedioPago = 2, Importe = comprobante.Saldo, Referencia = $"DEMO-TRX-{i + 1:000}" }] });
                     if (i != 14)
+                    {
+                        await Entrar(operadorApertura);
                         await cobros.EntregarAsync(new() { IdAtencion = id, Version = (await cobros.ObtenerAsync(id)).VersionAtencion,
                             PersonaRetira = nombreCliente, ConformidadRecepcion = true, Observaciones = "Retiro presencial tras pago registrado." });
+                    }
                 }
             }
 

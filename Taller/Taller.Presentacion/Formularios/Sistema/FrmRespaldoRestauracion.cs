@@ -7,6 +7,8 @@ namespace Taller.Presentacion.Formularios.Sistema;
 /// <summary>Administración real de copias, agente y recuperación. Las rutas se interpretan en SQL Server.</summary>
 public partial class FrmRespaldoRestauracion : Form, IFormularioConOperacion
 {
+    internal string TemaAyuda => tabs.SelectedTab == tabRestaurar ? "restauracion" : "respaldos";
+
     private readonly RespaldoServicio _servicio;
     private readonly SesionUsuario _sesion;
     private ProgramaRespaldoDto _programa = new();

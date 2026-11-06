@@ -18,6 +18,7 @@ public partial class FrmPrepararPropuesta : Form
     private readonly EvaluacionServicio _evaluacion;
     private readonly PresupuestoServicio _presupuestos;
     private PresupuestoGestionDto? _revision;
+    internal string TemaAyuda => _presupuesto.HasValue ? "revision" : "adicionales";
     private byte[] _version = [];
     private BindingList<ItemPropuestaDto> _items = [];
     private List<ConceptoPropuestaDto> _catalogo = [];

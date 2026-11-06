@@ -69,6 +69,15 @@ internal static class Program
         }
 
         var aplicacionContexto = scope.ServiceProvider.GetRequiredService<AplicacionContexto>();
-        Application.Run(aplicacionContexto);
+        var ayuda = new Ayuda.AyudaContextual();
+        Application.AddMessageFilter(ayuda);
+        try
+        {
+            Application.Run(aplicacionContexto);
+        }
+        finally
+        {
+            Application.RemoveMessageFilter(ayuda);
+        }
     }
 }

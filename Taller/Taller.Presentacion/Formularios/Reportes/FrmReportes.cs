@@ -14,6 +14,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     private readonly EmpresaDocumentoDto _empresa;
     private ReporteDocumentoDto? _documento;
     private bool _configurando;
+    private bool _alcancePersonal;
     public bool OperacionEnCurso { get; private set; }
 
     public FrmReportes(ReporteServicio servicio, EmpresaDocumentoDto empresa)
@@ -37,7 +38,8 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             cboTipo.ValueMember = "Tipo";
             cboEstado.Items.Add("Todos");
             cboEstado.SelectedIndex = 0;
-            cboTipo.DataSource = (await _servicio.ListarTiposAsync()).Select(t => new Opcion(t, ReporteServicio.Nombre(t))).ToList();
+            _alcancePersonal = await _servicio.TieneAlcanceAdministrativoPersonalAsync();
+            cboTipo.DataSource = (await _servicio.ListarTiposAsync()).Select(t => new Opcion(t, ReporteServicio.Nombre(t, _alcancePersonal))).ToList();
         }
         catch (Exception ex)
         {
@@ -57,7 +59,10 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     private sealed record Opcion(TipoReporte Tipo, string Nombre);
     private void ConfigurarPeriodo()
     {
-        lblEstado.Text = (cboTipo.SelectedItem as Opcion)?.Tipo == TipoReporte.ActividadTecnica ? "Acción" : "Estado";
+        var tipo = (cboTipo.SelectedItem as Opcion)?.Tipo;
+        lblEstado.Text = tipo == TipoReporte.ActividadTecnica || (_alcancePersonal && tipo == TipoReporte.Atenciones)
+            ? "Acción"
+            : "Estado";
         bool periodo = (cboTipo.SelectedItem as Opcion)?.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica);
         dtpDesde.Enabled = dtpHasta.Enabled = periodo;
         lblMetodo.Text = periodo ? "El período utiliza la fecha del registro indicada en cada reporte. Presione Generar para consultar." : "Situación actual completa, incluyendo registros antiguos. Este reporte no utiliza filtro de fechas.";
@@ -95,7 +100,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             cboEstado.Items.Clear();
             cboEstado.Items.Add("Todos");
             if (cboTipo.SelectedItem is Opcion opcion)
-                foreach (var estado in ReporteServicio.EstadosPara(opcion.Tipo)) cboEstado.Items.Add(estado);
+                foreach (var estado in ReporteServicio.EstadosPara(opcion.Tipo, _alcancePersonal)) cboEstado.Items.Add(estado);
             cboEstado.SelectedIndex = 0;
         }
         finally { _configurando = false; }

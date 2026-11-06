@@ -299,13 +299,17 @@ La pantalla **Reportes** genera un documento para tomar decisiones: título, usu
 
 | Reporte | Administrador | Administrativo | Técnico | Uso y fecha de referencia |
 | --- | --- | --- | --- | --- |
-| Atenciones recibidas y situación actual | Taller | Taller | — | Cohorte por fecha de apertura; estado actual. Ayuda a revisar el ingreso y las atenciones todavía activas. |
-| Decisiones de presupuestos vigentes | Taller | Taller | Autoría propia | Cohorte por creación de presupuestos vigentes, incluidas inspecciones y adicionales; excluye versiones reemplazadas. Aceptación entre las ya decididas, incluyendo aceptación parcial. |
-| Cobros y anulaciones por medio de pago | Taller | Taller | — | Cada medio del cobro suma en la fecha del recibo y resta en la fecha de anulación. Ayuda a conciliar caja/banco, no calcula utilidad. |
-| Saldos pendientes actuales | Taller | Taller | — | Todas las liquidaciones con saldo positivo, también las antiguas. No usa fechas. Antigüedad desde emisión, no días de mora. |
+| Atenciones recibidas y situación actual | Taller | Mis intervenciones en atenciones | — | Para el Administrador, cohorte por fecha de apertura y estado actual. Ayuda a revisar el ingreso y las atenciones todavía activas. |
+| Decisiones de presupuestos vigentes | Taller | Mis decisiones registradas de presupuestos vigentes | Autoría propia | Para Administrador y Técnico, cohorte por creación de presupuestos vigentes, incluidas inspecciones y adicionales; excluye versiones reemplazadas. Aceptación entre las ya decididas, incluyendo aceptación parcial. |
+| Cobros y anulaciones por medio de pago | Taller | Mis cobros y anulaciones por medio de pago | — | Cada medio del cobro suma en la fecha del recibo y resta en la fecha de anulación. Ayuda a conciliar caja/banco, no calcula utilidad. |
+| Saldos pendientes actuales | Taller | Saldos de atenciones en las que intervine | — | Todas las liquidaciones con saldo positivo, también las antiguas. No usa fechas. Antigüedad desde emisión, no días de mora. |
 | Carga técnica actual y trabajo disponible | Taller | — | Reservas propias y disponibles | Todas las evaluaciones y ejecuciones actuales; incluye pendientes de fechas anteriores y excluye reservas ajenas para el técnico. No usa fechas. |
 | Actividad técnica registrada | Taller | — | Eventos propios | Acciones técnicas del historial por fecha de evento. Varias acciones pueden corresponder al mismo trabajo. |
 | Conceptos realizados registrados | Taller | — | Último registro propio | Ítems con cantidad ejecutada positiva, por fecha de última actualización. Cantidad acumulada y valor a precio acordado; no producción incremental ni ingresos cobrados. |
+
+Para el Administrativo, el alcance se fija con la cuenta autenticada. En Mis intervenciones, Acción distingue apertura, comunicación, registro de decisión, emisión de liquidación, cobro, anulación y entrega. El período usa la fecha de la acción. Una atención puede figurar en varias filas y se cuenta una sola vez en Atenciones distintas.
+
+En presupuestos vigentes, se usa la fecha de la decisión registrada por el usuario. Las comunicaciones se consultan en Mis intervenciones. Los cobros y las anulaciones se atribuyen a quien ejecutó cada movimiento. Los saldos de las atenciones en las que intervino incluyen todos los pagos de la liquidación y se consultan sin filtro de fechas.
 
 Los permisos se revalidan contra el usuario activo de la base en cada generación, no solamente al mostrar el menú. Los reportes técnicos no exponen caja ni saldos. La carga disponible no incluye cerradas ni canceladas. La actividad se identifica por la acción histórica, de modo que un cambio posterior de rol no borre el trabajo registrado.
 

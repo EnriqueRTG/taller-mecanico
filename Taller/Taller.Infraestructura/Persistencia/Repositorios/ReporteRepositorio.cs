@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Abstracciones.Persistencia;
+using Taller.Aplicacion.Consultas;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Dominio.Enumeraciones;
 
@@ -8,6 +9,7 @@ namespace Taller.Infraestructura.Persistencia.Repositorios;
 public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepositorio
 {
     private static readonly string[] AccionesTecnicas = Taller.Aplicacion.Consultas.ActividadTecnicaReporte.Acciones.ToArray();
+    private static readonly string[] AccionesAdministrativas = IntervencionAdministrativaReporte.Acciones.ToArray();
 
     /// <summary>
     /// Proyección liviana de indicadores. El servicio conserva una sola definición
@@ -61,6 +63,22 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
             })
             .ToListAsync();
 
+    public Task<List<ReporteRegistroDto>> ListarIntervencionesAsync(DateTime desde, DateTime hastaExclusivo, int administrativo) =>
+        contexto.HistorialAtenciones.AsNoTracking()
+            .Where(h => h.IdUsuario == administrativo && h.Fecha >= desde && h.Fecha < hastaExclusivo
+                && AccionesAdministrativas.Contains(h.Accion))
+            .Select(h => new ReporteRegistroDto
+            {
+                Codigo = "I-" + h.IdHistorialAtencion,
+                IdAtencion = h.IdAtencion,
+                Fecha = h.Fecha,
+                Descripcion = h.Atencion.Vehiculo.Dominio + " · Estado actual: " + h.Atencion.Estado.ToString()
+                    + " · " + (h.Observaciones ?? ""),
+                Responsable = h.Usuario.Apellido + ", " + h.Usuario.Nombre,
+                Estado = h.Accion,
+                Grupo = h.Accion
+            }).ToListAsync();
+
     public Task<List<ReporteRegistroDto>> ListarAtencionesAsync(DateTime desde, DateTime hastaExclusivo) =>
         contexto.Atenciones
             .AsNoTracking()
@@ -77,19 +95,24 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
             })
             .ToListAsync();
 
-    public async Task<List<ReporteRegistroDto>> ListarPresupuestosAsync(DateTime desde, DateTime hastaExclusivo, int? tecnico)
+    public async Task<List<ReporteRegistroDto>> ListarPresupuestosAsync(DateTime desde, DateTime hastaExclusivo, int? tecnico, int? administrativo = null)
     {
         var propuestas = await contexto.Presupuestos
             .AsNoTracking()
-            .Where(p => p.Vigente && p.FechaCreacion >= desde && p.FechaCreacion < hastaExclusivo && (!tecnico.HasValue || p.IdUsuarioCreacion == tecnico))
+            .Where(p => p.Vigente && (!tecnico.HasValue || p.IdUsuarioCreacion == tecnico)
+                && (administrativo.HasValue
+                    ? p.IdUsuarioDecision == administrativo && p.FechaDecision >= desde && p.FechaDecision < hastaExclusivo
+                    : p.FechaCreacion >= desde && p.FechaCreacion < hastaExclusivo))
             .Select(p => new
             {
                 p.IdPresupuesto,
                 p.IdAtencion,
-                p.FechaCreacion,
+                Fecha = administrativo.HasValue ? p.FechaDecision!.Value : p.FechaCreacion,
                 p.Estado,
                 Dominio = p.Atencion.Vehiculo.Dominio,
-                Responsable = p.UsuarioCreacion.Apellido + ", " + p.UsuarioCreacion.Nombre,
+                Responsable = administrativo.HasValue
+                    ? p.UsuarioDecision!.Apellido + ", " + p.UsuarioDecision.Nombre
+                    : p.UsuarioCreacion.Apellido + ", " + p.UsuarioCreacion.Nombre,
                 Detalles = p.Detalles
                     .Select(d => new { d.Cantidad, d.PrecioUnitario, d.AceptadoPorCliente })
                     .ToList()
@@ -101,7 +124,7 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
             {
                 Codigo = "P-" + p.IdPresupuesto,
                 IdAtencion = p.IdAtencion,
-                Fecha = p.FechaCreacion,
+                Fecha = p.Fecha,
                 Descripcion = p.Dominio + " · Atención " + p.IdAtencion,
                 Responsable = p.Responsable,
                 Estado = p.Estado == EstadoPresupuesto.Aceptado && p.Detalles.Any(d => d.AceptadoPorCliente == false) ? "Aceptado parcialmente" : p.Estado.ToString(),
@@ -113,13 +136,14 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
             .ToList();
     }
 
-    public Task<List<ReporteRegistroDto>> ListarMovimientosAsync(DateTime desde, DateTime hastaExclusivo)
+    public Task<List<ReporteRegistroDto>> ListarMovimientosAsync(DateTime desde, DateTime hastaExclusivo, int? administrativo = null)
     {
         // Un solo comando SQL evita mezclar dos lecturas entre un cobro concurrente y su anulación.
         var medios = contexto.PagoMedios
             .AsNoTracking();
         var cobros = medios
-            .Where(m => m.Pago.Fecha >= desde && m.Pago.Fecha < hastaExclusivo)
+            .Where(m => m.Pago.Fecha >= desde && m.Pago.Fecha < hastaExclusivo
+                && (!administrativo.HasValue || m.Pago.IdUsuarioRegistro == administrativo))
             .Select(m => new
             {
                 m.IdPago,
@@ -133,7 +157,8 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
                 m.Importe
             });
         var anulaciones = medios
-            .Where(m => m.Pago.Anulado && m.Pago.FechaAnulacion >= desde && m.Pago.FechaAnulacion < hastaExclusivo)
+            .Where(m => m.Pago.Anulado && m.Pago.FechaAnulacion >= desde && m.Pago.FechaAnulacion < hastaExclusivo
+                && (!administrativo.HasValue || m.Pago.IdUsuarioAnulacion == administrativo))
             .Select(m => new
             {
                 m.IdPago,
@@ -161,10 +186,11 @@ public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepos
             .ToListAsync();
     }
 
-    public Task<List<ReporteRegistroDto>> ListarSaldosAsync() =>
+    public Task<List<ReporteRegistroDto>> ListarSaldosAsync(int? administrativo = null) =>
         contexto.Comprobantes
             .AsNoTracking()
-            .Where(c => c.Total > c.TotalPagado)
+            .Where(c => c.Total > c.TotalPagado && (!administrativo.HasValue || c.Atencion.Historial.Any(h =>
+                h.IdUsuario == administrativo && AccionesAdministrativas.Contains(h.Accion))))
             .Select(c => new ReporteRegistroDto
             {
                 Codigo = "L-" + c.IdComprobante,

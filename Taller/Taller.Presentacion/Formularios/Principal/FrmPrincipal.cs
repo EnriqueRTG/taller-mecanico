@@ -36,8 +36,8 @@ public partial class FrmPrincipal : Form
         _sesionUsuario = sesionUsuario;
         _serviceProvider = serviceProvider;
         _autorizacionNavegacion = autorizacionNavegacion;
-        AgregarOpcionAyuda("? Ayuda de esta pantalla (F1)", () => Ayuda.AyudaContextual.AbrirTema(this));
         AgregarOpcionAyuda("Manual de usuario", () => Ayuda.AyudaContextual.AbrirManual(this));
+        AgregarOpcionAyuda("? Ayuda de esta pantalla (F1)", () => Ayuda.AyudaContextual.AbrirTema(this));
     }
 
     private void AgregarOpcionAyuda(string texto, Action abrir)
@@ -45,19 +45,17 @@ public partial class FrmPrincipal : Form
         var boton = new Button
         {
             Text = texto,
-            Dock = DockStyle.Top,
-            Height = btnInicio.Height,
-            Padding = btnInicio.Padding,
-            TextAlign = btnInicio.TextAlign,
-            ForeColor = btnInicio.ForeColor,
-            FlatStyle = FlatStyle.Flat,
+            Dock = DockStyle.Bottom,
+            Height = btnCerrarSesion.Height,
+            ForeColor = btnCerrarSesion.ForeColor,
+            FlatStyle = btnCerrarSesion.FlatStyle,
             Cursor = Cursors.Hand
         };
         boton.FlatAppearance.BorderSize = 0;
-        boton.FlatAppearance.MouseOverBackColor = btnInicio.FlatAppearance.MouseOverBackColor;
+        boton.FlatAppearance.MouseOverBackColor = btnCerrarSesion.FlatAppearance.MouseOverBackColor;
         boton.Click += (_, _) => abrir();
-        pnlOpciones.Controls.Add(boton);
-        boton.SendToBack();
+        pnlMenu.Controls.Add(boton);
+        pnlMenu.Controls.SetChildIndex(boton, pnlMenu.Controls.GetChildIndex(btnCerrarSesion));
     }
 
     /// <summary>

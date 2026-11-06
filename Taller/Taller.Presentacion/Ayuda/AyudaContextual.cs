@@ -54,7 +54,8 @@ internal sealed class AyudaContextual : IMessageFilter
             var tema = actual switch
             {
                 FrmPrincipal principal when principal.FormularioActivoParaAyuda is { } activo => ResolverTema(activo),
-                FrmLogin or FrmInicio => "inicio",
+                FrmLogin => "inicio",
+                FrmInicio inicio => inicio.TemaAyuda,
                 FrmNuevaAtencion => "ingreso",
                 FrmAtenciones or FrmDetalleAtencion => "atenciones",
                 FrmSeguimientoTrabajo => "seguimiento",

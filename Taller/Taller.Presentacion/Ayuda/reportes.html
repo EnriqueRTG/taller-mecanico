@@ -12,16 +12,17 @@
 <h1>Reportes y exportación</h1>
 <h2>Generar un reporte</h2><p>Abrir Reportes, seleccionar el tipo disponible para el rol y ajustar período, estado o acción y búsqueda. Pulsar Generar. Revisar alcance, indicadores, gráfico y detalle. Las consultas de situación actual incluyen pendientes antiguos y deshabilitan el período. Para exportar tras cambiar filtros, generar nuevamente.</p>
 <table><tr><th scope="col">Reporte</th><th scope="col">Administrador</th><th scope="col">Administrativo</th><th scope="col">Técnico</th></tr>
-<tr><td>Atenciones recibidas y situación actual</td><td>Taller</td><td>Mis intervenciones en atenciones</td><td>—</td></tr>
-<tr><td>Decisiones de presupuestos vigentes</td><td>Taller</td><td>Mis decisiones registradas de presupuestos vigentes</td><td>Autoría propia</td></tr>
-<tr><td>Cobros y anulaciones por medio de pago</td><td>Taller</td><td>Mis cobros y anulaciones por medio de pago</td><td>—</td></tr>
-<tr><td>Saldos pendientes actuales</td><td>Taller</td><td>Saldos de atenciones en las que intervine</td><td>—</td></tr>
-<tr><td>Carga técnica actual y trabajo disponible</td><td>Taller</td><td>—</td><td>Reservas propias y disponibles</td></tr>
-<tr><td>Actividad técnica registrada</td><td>Taller</td><td>—</td><td>Eventos propios</td></tr>
-<tr><td>Conceptos realizados registrados</td><td>Taller</td><td>—</td><td>Último registro propio</td></tr>
+<tr><td>Atenciones recibidas y situación actual</td><td>Todo el taller</td><td>Intervenciones en atenciones · Acciones registradas por el usuario actual</td><td>—</td></tr>
+<tr><td>Decisiones de presupuestos vigentes</td><td>Todo el taller</td><td>Decisiones registradas por el usuario actual</td><td>Presupuestos de autoría del técnico actual</td></tr>
+<tr><td>Cobros y anulaciones por medio de pago</td><td>Todo el taller</td><td>Cobros y anulaciones registrados por el usuario actual</td><td>—</td></tr>
+<tr><td>Saldos pendientes actuales</td><td>Todo el taller</td><td>Saldos pendientes de atenciones gestionadas · Atenciones con al menos una intervención del usuario actual</td><td>—</td></tr>
+<tr><td>Carga técnica actual y trabajo disponible</td><td>Todo el taller</td><td>—</td><td>Reservas del técnico actual y trabajos disponibles</td></tr>
+<tr><td>Actividad técnica registrada</td><td>Todo el taller</td><td>—</td><td>Eventos registrados por el técnico actual</td></tr>
+<tr><td>Conceptos realizados registrados</td><td>Todo el taller</td><td>—</td><td>Conceptos cuyo último registro corresponde al técnico actual</td></tr>
 </table><h2>Alcance personal del Administrativo</h2>
-<p>Para el Administrativo, el alcance se fija con la cuenta autenticada. En Mis intervenciones, Acción distingue apertura, comunicación, registro de decisión, emisión de liquidación, cobro, anulación y entrega. El período usa la fecha de la acción. Una atención puede figurar en varias filas y se cuenta una sola vez en Atenciones distintas.</p>
-<p>En presupuestos vigentes, se usa la fecha de la decisión registrada por el usuario. Las comunicaciones se consultan en Mis intervenciones. Los cobros y las anulaciones se atribuyen a quien ejecutó cada movimiento. Los saldos de las atenciones en las que intervino incluyen todos los pagos de la liquidación y se consultan sin filtro de fechas.</p>
+<p>Para el Administrativo, el alcance se fija con la cuenta autenticada. En Intervenciones en atenciones, Acción distingue apertura, comunicación, registro de decisión, emisión de liquidación, cobro, anulación y entrega. El período usa la fecha de la acción. Una atención puede figurar en varias filas y se cuenta una sola vez en Atenciones distintas.</p>
+<p>En presupuestos vigentes, se usa la fecha de la decisión registrada por el usuario. Las comunicaciones se consultan en Intervenciones en atenciones. Los cobros y las anulaciones se atribuyen a quien ejecutó cada movimiento. Los saldos de las atenciones en las que intervino incluyen todos los pagos de la liquidación y se consultan sin filtro de fechas.</p>
+<p>El alcance aparece debajo del selector antes de generar y se incluye en la exportación.</p>
 <h2>Interpretar resultados</h2><p>• En el reporte general, Atenciones usa la fecha de apertura y muestra el estado al generar. Para Administrador y Técnico, Presupuestos usa la fecha de creación y cuenta las versiones vigentes. La tasa de aceptación toma las propuestas ya decididas.</p>
 <p>• Cobros suma por medio y fecha de recibo y resta por fecha de anulación. Un neto negativo puede corresponder a un recibo anulado de un período anterior.</p>
 <p>• Saldos muestra deudas actuales. Carga técnica muestra reservas y trabajo disponible. Con Todos también se identifican atenciones con pausas.</p>

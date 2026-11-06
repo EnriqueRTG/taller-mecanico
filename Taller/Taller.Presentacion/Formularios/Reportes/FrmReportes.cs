@@ -1,4 +1,5 @@
 using Taller.Dominio.Tiempo;
+using Taller.Dominio.Constantes;
 using System.Text;
 using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Aplicacion.Reportes;
@@ -14,7 +15,8 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     private readonly EmpresaDocumentoDto _empresa;
     private ReporteDocumentoDto? _documento;
     private bool _configurando;
-    private bool _alcancePersonal;
+    private int _rol;
+    private bool AlcanceAdministrativo => _rol == RolesSistema.AdministrativoId;
     public bool OperacionEnCurso { get; private set; }
 
     public FrmReportes(ReporteServicio servicio, EmpresaDocumentoDto empresa)
@@ -38,8 +40,8 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             cboTipo.ValueMember = "Tipo";
             cboEstado.Items.Add("Todos");
             cboEstado.SelectedIndex = 0;
-            _alcancePersonal = await _servicio.TieneAlcanceAdministrativoPersonalAsync();
-            cboTipo.DataSource = (await _servicio.ListarTiposAsync()).Select(t => new Opcion(t, ReporteServicio.Nombre(t, _alcancePersonal))).ToList();
+            _rol = await _servicio.ObtenerRolAsync();
+            cboTipo.DataSource = ReporteServicio.TiposParaRol(_rol).Select(t => new Opcion(t, ReporteServicio.Nombre(t, AlcanceAdministrativo))).ToList();
         }
         catch (Exception ex)
         {
@@ -51,7 +53,6 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             OperacionEnCurso = false;
             pnlFiltros.Enabled = flpAcciones.Enabled = true;
             CargarEstados();
-            ConfigurarPeriodo();
             Invalidar();
         }
     }
@@ -60,18 +61,22 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     private void ConfigurarPeriodo()
     {
         var tipo = (cboTipo.SelectedItem as Opcion)?.Tipo;
-        lblEstado.Text = tipo == TipoReporte.ActividadTecnica || (_alcancePersonal && tipo == TipoReporte.Atenciones)
+        lblEstado.Text = tipo == TipoReporte.ActividadTecnica || (AlcanceAdministrativo && tipo == TipoReporte.Atenciones)
             ? "Acción"
             : "Estado";
-        bool periodo = (cboTipo.SelectedItem as Opcion)?.Tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica);
+        bool periodo = tipo is not (TipoReporte.SaldosPendientes or TipoReporte.CargaTecnica);
         dtpDesde.Enabled = dtpHasta.Enabled = periodo;
-        lblMetodo.Text = periodo ? "El período utiliza la fecha del registro indicada en cada reporte. Presione Generar para consultar." : "Situación actual completa, incluyendo registros antiguos. Este reporte no utiliza filtro de fechas.";
+        lblMetodo.Text = tipo is { } reporte
+            ? $"Alcance: {ReporteServicio.AlcancePara(reporte, _rol)}. " +
+                (periodo ? "El período utiliza la fecha indicada para el reporte." : "Situación actual, sin filtro de fechas.")
+            : "";
     }
 
     private void Invalidar()
     {
         if (_configurando)
             return;
+        ConfigurarPeriodo();
         _documento = null;
         dgvDetalle.DataSource = null;
         txtResumen.Clear();
@@ -88,7 +93,6 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         if (_configurando)
             return;
         CargarEstados();
-        ConfigurarPeriodo();
         Invalidar();
     }
 
@@ -100,7 +104,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             cboEstado.Items.Clear();
             cboEstado.Items.Add("Todos");
             if (cboTipo.SelectedItem is Opcion opcion)
-                foreach (var estado in ReporteServicio.EstadosPara(opcion.Tipo, _alcancePersonal)) cboEstado.Items.Add(estado);
+                foreach (var estado in ReporteServicio.EstadosPara(opcion.Tipo, AlcanceAdministrativo)) cboEstado.Items.Add(estado);
             cboEstado.SelectedIndex = 0;
         }
         finally { _configurando = false; }
@@ -186,7 +190,6 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         dtpDesde.Value = new DateTime(FechaHoraTaller.Hoy.Year, FechaHoraTaller.Hoy.Month, 1);
         dtpHasta.Value = FechaHoraTaller.Hoy;
         _configurando = false;
-        ConfigurarPeriodo();
         Invalidar();
     }
 

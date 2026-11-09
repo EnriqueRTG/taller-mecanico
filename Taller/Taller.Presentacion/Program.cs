@@ -7,6 +7,7 @@ using Taller.Infraestructura;
 using Taller.Infraestructura.Persistencia.Inicializacion;
 using Taller.Presentacion.Formularios.Autenticacion;
 using Taller.Presentacion.Formularios.Principal;
+using System.Diagnostics;
 
 namespace Taller.Presentacion;
 internal static class Program
@@ -14,6 +15,13 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // El instalador usa este modo para preparar la conexión antes de abrir SGTM.
+        if (args.Length > 0 && args[0] == "--preparar-base")
+        {
+            Environment.ExitCode = PrepararBase(args);
+            return;
+        }
+
         var carpetaLog = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SGTM", "Logs");
         Serilog.Log.Logger = new Serilog.LoggerConfiguration().WriteTo.File(Path.Combine(carpetaLog, "sgtm-.log"), rollingInterval: Serilog.RollingInterval.Day, retainedFileCountLimit: 7, fileSizeLimitBytes: 2_000_000, rollOnFileSizeLimit: true).CreateLogger();
         ApplicationConfiguration.Initialize();
@@ -30,6 +38,92 @@ internal static class Program
         finally
         {
             Serilog.Log.CloseAndFlush();
+        }
+    }
+
+    private static int PrepararBase(string[] args)
+    {
+        // Esta primera integración solo acepta una base existente indicada
+        // explícitamente. El nombre de la base de prueba se pasa desde afuera.
+        if (args.Length != 3
+            || (args[1] != "--usar-base-existente" && args[1] != "--crear-base")
+            || string.IsNullOrWhiteSpace(args[2]))
+        {
+            return 2;
+        }
+
+        // Busca el script junto al ejecutable, aunque el proceso se inicie
+        // desde otro directorio.
+        var carpetaAplicacion = AppContext.BaseDirectory;
+        var rutaScript = Path.Combine(carpetaAplicacion, "Preparar-BaseSGTM.ps1");
+
+        if (!File.Exists(rutaScript))
+        {
+            return 3;
+        }
+
+        // Usa Windows PowerShell, el mismo que se probó manualmente.
+        var rutaPowerShell = Path.Combine(
+            Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe");
+
+        var inicio = new ProcessStartInfo
+        {
+            FileName = rutaPowerShell,
+            WorkingDirectory = carpetaAplicacion,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardError = true
+        };
+
+        // ArgumentList conserva cada argumento por separado, incluso si
+        // la ruta de instalación contiene espacios.
+        foreach (var argumento in new[]
+        {
+            "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned",
+            "-File", rutaScript,
+            "-Base", args[2],
+            "-CarpetaPreparacion", carpetaAplicacion
+        })
+        {
+            inicio.ArgumentList.Add(argumento);
+        }
+
+        // El script reutiliza la base solo cuando recibe este modificador.
+        if (args[1] == "--usar-base-existente")
+        {
+            inicio.ArgumentList.Add("-UsarBaseExistente");
+        }
+
+        try
+        {
+            using var proceso = Process.Start(inicio);
+            if (proceso is null)
+            {
+                return 4;
+            }
+
+            
+            // Lee el error de PowerShell mientras el proceso termina.
+            var errorPowerShell = proceso.StandardError.ReadToEnd();
+            proceso.WaitForExit();
+
+            if (proceso.ExitCode != 0)
+            {
+                // Guarda el diagnóstico fuera de la carpeta que el MSI puede revertir.
+                var identidad = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+                var rutaLog = Path.Combine(Path.GetTempPath(), "SGTM-PrepararBase-error.log");
+                File.WriteAllText(
+                    rutaLog,
+                    $"Cuenta: {identidad}{Environment.NewLine}" +
+                    $"Código: {proceso.ExitCode}{Environment.NewLine}" +
+                    errorPowerShell);
+            }
+
+            return proceso.ExitCode;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return 4;
         }
     }
 

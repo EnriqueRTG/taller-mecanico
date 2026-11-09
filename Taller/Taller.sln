@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.9.12120.119
@@ -27,15 +26,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03 Pruebas", "03 Pruebas", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04 Documentacion", "04 Documentacion", "{2F96B0AF-DB60-46A9-8324-4344B30290A4}"
 	ProjectSection(SolutionItems) = preProject
-		..\docs\README.md = ..\docs\README.md
-		..\scripts\recursos\replicar-demo.txt = ..\scripts\recursos\replicar-demo.txt
-		..\REFERENCIA-TECNICA.md = ..\REFERENCIA-TECNICA.md
-		..\docs\ERS\ERS-SGTM-v2.0.docx = ..\docs\ERS\ERS-SGTM-v2.0.docx
 		..\docs\ERS\Apendice-A-Casos-de-Uso-v2.0.docx = ..\docs\ERS\Apendice-A-Casos-de-Uso-v2.0.docx
 		..\docs\ERS\Apendice-C-Diccionario-de-Datos-v2.0.docx = ..\docs\ERS\Apendice-C-Diccionario-de-Datos-v2.0.docx
+		..\docs\ERS\ERS-SGTM-v2.0.docx = ..\docs\ERS\ERS-SGTM-v2.0.docx
+		..\docs\README.md = ..\docs\README.md
 		..\docs\diagramas\README.md = ..\docs\diagramas\README.md
+		..\REFERENCIA-TECNICA.md = ..\REFERENCIA-TECNICA.md
+		..\scripts\recursos\replicar-demo.txt = ..\scripts\recursos\replicar-demo.txt
 		..\docs\especificacion\trazabilidad.md = ..\docs\especificacion\trazabilidad.md
 	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SGTM.Instalador", "SGTM.Instalador\SGTM.Instalador.vdproj", "{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGTM.Setup", "SGTM.Setup\SGTM.Setup.csproj", "{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,6 +146,24 @@ Global
 		{8E356E5B-CE7C-48BE-B136-41AA83A7E8BA}.Release|x64.Build.0 = Release|Any CPU
 		{8E356E5B-CE7C-48BE-B136-41AA83A7E8BA}.Release|x86.ActiveCfg = Release|Any CPU
 		{8E356E5B-CE7C-48BE-B136-41AA83A7E8BA}.Release|x86.Build.0 = Release|Any CPU
+		{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}.Debug|Any CPU.ActiveCfg = Debug
+		{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}.Debug|x64.ActiveCfg = Debug
+		{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}.Debug|x86.ActiveCfg = Debug
+		{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}.Release|Any CPU.ActiveCfg = Release
+		{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}.Release|x64.ActiveCfg = Release
+		{8AEC4E41-F313-CD41-7A1A-57128BAAE7AC}.Release|x86.ActiveCfg = Release
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Debug|x64.Build.0 = Debug|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Debug|x86.Build.0 = Debug|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Release|x64.ActiveCfg = Release|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Release|x64.Build.0 = Release|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Release|x86.ActiveCfg = Release|Any CPU
+		{AA8ED7F6-3CCF-4F10-8B8B-71160F082E9D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,9 +173,9 @@ Global
 		{FAC21C46-02FC-451B-AE5A-19D3A93A6C1D} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
 		{01F6802A-F24A-47AE-9513-0895F3B418B0} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
 		{BD62F4EB-2901-4E7D-86A6-1EE30C83BE42} = {2F96B0AF-DB60-46A9-8324-4344B30290A1}
-		{E3121E70-D299-4E5F-A1B2-95839066D693} = {2F96B0AF-DB60-46A9-8324-4344B30290A2}
-		{F0D7B01A-EC9C-428E-BCC4-7CE786F4C874} = {2F96B0AF-DB60-46A9-8324-4344B30290A2}
 		{33690F90-813F-4FD8-B2A0-1FCAE6E73047} = {2F96B0AF-DB60-46A9-8324-4344B30290A3}
+		{F0D7B01A-EC9C-428E-BCC4-7CE786F4C874} = {2F96B0AF-DB60-46A9-8324-4344B30290A2}
+		{E3121E70-D299-4E5F-A1B2-95839066D693} = {2F96B0AF-DB60-46A9-8324-4344B30290A2}
 		{8E356E5B-CE7C-48BE-B136-41AA83A7E8BA} = {2F96B0AF-DB60-46A9-8324-4344B30290A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -162,7 +162,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_395DCE6426704C0C8DF2511DABB5CC53"
             {
-            "SourcePath" = "8:..\\..\\..\\SGTM-Preparacion\\BaseDatos\\SGTM-Esquema.sql"
+            "SourcePath" = "8:..\\..\\scripts\\instalacion\\BaseDatos\\SGTM-Esquema.sql"
             "TargetName" = "8:SGTM-Esquema.sql"
             "Tag" = "8:"
             "Folder" = "8:_CB3C2C2C2D1A4F6FAA7ED04B5BC4A870"
@@ -202,7 +202,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DCCCED67144E434C921D54B7F129A97E"
             {
-            "SourcePath" = "8:..\\..\\..\\SGTM-Preparacion\\BaseDatos\\SGTM-CatalogoInicial.sql"
+            "SourcePath" = "8:..\\..\\scripts\\instalacion\\BaseDatos\\SGTM-CatalogoInicial.sql"
             "TargetName" = "8:SGTM-CatalogoInicial.sql"
             "Tag" = "8:"
             "Folder" = "8:_CB3C2C2C2D1A4F6FAA7ED04B5BC4A870"

@@ -1,8 +1,8 @@
 # Trazabilidad de requisitos e implementación
 
-Versión documental 2.0. Línea base funcional: `d212cfa`. Revisión documental contrastada con la rama `main` en `bdcc1e0`. CU01 a CU10 son comunes a la ERS, al Apéndice A y a los diagramas. Los enlaces apuntan a clases reales; las pruebas automatizadas complementan la aceptación manual. No representan aprobación de una instalación aún no probada.
+Apéndice C.3 de la ERS v2.0 (REF-07). La correspondencia entre casos de uso y requisitos funcionales sigue la sección 3.6.3 de la ERS. La implementación y las verificaciones se contrastaron con el repositorio en `b8c33ee`. Las pruebas enlazadas identifican cobertura disponible. Los resultados y el entorno de ejecución se registran en la [evidencia de entrega](../pruebas.md#pruebas-evidencia-cierre).
 
-| CU | RF | Servicio de Aplicación | Datos principales | Pruebas automatizadas relacionadas |
+| CU | RF | Implementación principal | Datos principales | Pruebas automatizadas relacionadas |
 |---|---|---|---|---|
 | CU01 Iniciar y cerrar sesión | RF-01, RF-02, RF-03, RF-04, RF-05 | [AutenticacionServicio](../../Taller/Taller.Aplicacion/Servicios/AutenticacionServicio.cs) | Usuarios, Roles, ControlesAcceso, EventosAcceso | [SeguridadInicioPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/SeguridadInicioPruebas.cs) |
 | CU02 Gestionar usuarios | RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-73 | [UsuarioServicio](../../Taller/Taller.Aplicacion/Servicios/UsuarioServicio.cs), [AuditoriaAccesoServicio](../../Taller/Taller.Aplicacion/Servicios/AuditoriaAccesoServicio.cs) | Usuarios, Roles, EventosAcceso | [UsuariosValidacionPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/UsuariosValidacionPruebas.cs) |
@@ -33,7 +33,7 @@ Los números de la columna **Reglas** usan el prefijo RN. Las reglas se indican 
 | CU03 | RF-65 | 26 | Conceptos, Categorias | Consulta del catálogo por ambos roles |
 | CU04 | RF-21 a RF-22 | 04, 07–08, 21 | Atenciones, SolicitudesAtencion | P03–P05 |
 | CU04 | RF-23 a RF-24 | 08–10 | Atenciones, HistorialAtenciones | P03 y consulta de antecedentes |
-| CU04 | RF-25 | 09–10 | Atenciones, HistorialAtenciones | P08 para transiciones. Comprobar cancelación de apertura por separado |
+| CU04 | RF-25 | 09–10 | Atenciones, HistorialAtenciones | P03–P04 para transiciones del circuito. Para la cancelación inicial, véanse [CircuitoCobrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/CircuitoCobrosPruebas.cs) y [EvaluacionServicioPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/EvaluacionServicioPruebas.cs) |
 | CU04 | RF-27 | 32 | Atenciones, Comprobantes, Pagos, HistorialAtenciones | P17 |
 | CU05 | RF-28 a RF-30 | 11–12 | EvaluacionesAtencion, SolicitudesAtencion | P03–P05 |
 | CU05 | RF-31 a RF-32 | 11–14 | Diagnosticos, Presupuestos, HallazgosAtencion | P04 y P10 |
@@ -55,13 +55,27 @@ Los números de la columna **Reglas** usan el prefijo RN. Las reglas se indican 
 | CU09 | RF-52 a RF-54 | 01, 08 | Atenciones, HistorialAtenciones | P18 por rol y fecha |
 | CU09 | RF-55 | 01, 17, 36 | Presupuestos, PresupuestoDetalles, Atenciones, HistorialAtenciones | P18 por tipo y alcance |
 | CU09 | RF-56 | 01, 29–30, 33 | Comprobantes, Pagos, PagoMedios, HistorialAtenciones | P18 con cobros, anulaciones y saldos |
-| CU09 | RF-57 | 01 | Proyección de las consultas | P18 para filtros y exportación. P19 para impresión |
-| CU10 | RF-58 a RF-60 | 37 | CopiasSGTM, EventosSGTM | P20. Para exportación, comprobar sincronización por separado |
+| CU09 | RF-57 | 01 | Proyección de las consultas | P18 para filtros, indicadores y exportación. Comprobar impresión y salida PDF del reporte en Windows |
+| CU10 | RF-58 a RF-60 | 37 | CopiasSGTM, EventosSGTM | P20 para copias y P21 para réplica programada si está configurada. Verificar por separado la exportación manual y su estado |
 | CU10 | RF-61 a RF-64 | 37 | CopiasSGTM, EstadoSGTM, EventosSGTM | P22 |
 | CU10 | RF-72 | 37 | ProgramaSGTM, CopiasSGTM, EventosSGTM | P21 |
 | CU10 | RF-73 | 37 | EventosSGTM | P22 y consulta de historial |
 
-Los requisitos de interfaz y de información se verifican por escenario transversal. P01 cubre acceso y autorización, P02 y P23 cubren persistencia y esquema, P18–P19 cubren salidas de consulta e impresión y P20–P22 cubren respaldo y recuperación. REN-01 y REN-02 requieren mediciones registradas en el entorno de evaluación.
+## Requisitos transversales
+
+| Requisitos | Verificación y evidencia de referencia |
+|---|---|
+| RNF-01, RNF-02, RNF-15 | P01 para autenticación, permisos, revocación y cierre de sesión. Revisar [PasswordHasher](../../Taller/Taller.Infraestructura/Seguridad/PasswordHasher.cs) y [SeguridadInicioPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/SeguridadInicioPruebas.cs). P21 para disponibilidad del agente y P22 para invalidación durante la recuperación. |
+| RNF-03, RI-01, RI-04, RI-06 | P02 y P23 para validaciones, claves y restricciones. Contrastar las cardinalidades y la relación diagnóstico–propuesta de una misma atención con [ModeloPersistenciaPruebas](../../Taller/Taller.Pruebas/Arquitectura/ModeloPersistenciaPruebas.cs) y [IntegracionSqlPruebas](../../Taller/Taller.Pruebas/IntegracionSql/IntegracionSqlPruebas.cs). |
+| RNF-04, RNF-05, RNF-06 | P15 para reservas y conflictos de versión, P16 para reintentos de cobro. [IntegracionSqlPruebas](../../Taller/Taller.Pruebas/IntegracionSql/IntegracionSqlPruebas.cs) para versiones de usuarios y alta de atención. [AtencionPersistenciaPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/AtencionPersistenciaPruebas.cs) para descarte tras un fallo y [ErroresPersistenciaPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/ErroresPersistenciaPruebas.cs) para el tratamiento de errores. Comprobar los mensajes en Windows. |
+| RNF-07, RI-02, RI-03, RI-05 | P03–P04 y P17 para reconstrucción del expediente. P06–P07 para versiones y decisiones. P16 y P19 para cobros, anulaciones e importes históricos. Comprobar la consulta del expediente después de inhabilitar cada maestro vinculado. |
+| RNF-08 | [FechaHoraPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/FechaHoraPruebas.cs) y P18 para límites de fechas de consulta. Contrastar las marcas de tiempo de eventos de acceso y control en P01 y P20–P22. |
+| RNF-09 | Comprobación de formularios en Windows por rol, etapa, mensajes y escalado según el [plan de pruebas](../pruebas.md#pruebas-aceptacion-version-actual). |
+| RNF-10, REN-01, REN-02 | Registrar tiempos en el entorno académico conforme a la sección 3.3 de la ERS. Para reportes, usar los escenarios de P18 con el lote Demo y registrar rol, tipo y filtros. La relación con P18 no acredita una medición. |
+| RNF-11 | P20–P22 y [RespaldosSqlPruebas](../../Taller/Taller.Pruebas/IntegracionSql/RespaldosSqlPruebas.cs). Distinguir copia verificada, ensayo en una base temporal y restauración efectiva con el procedimiento de aprobación. |
+| RNF-12 | Verificar el instalador en Windows, la conexión a la instancia y base configuradas y el circuito P03 con SQL Server y sin réplica externa. Registrar la instalación como comprobación separada del recorrido funcional sobre una base ya preparada. |
+| RNF-13 | P19 para documentos internos. P18 y [ReportesPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/ReportesPruebas.cs) para exportación HTML y CSV. Comprobar la vista de impresión en Windows. |
+| RNF-14 | Registrar por separado reglas y componentes, integración con SQL Server e interfaz Windows en la [evidencia de entrega](../pruebas.md#pruebas-evidencia-cierre). |
 
 ## Reglas de transición para leer los diagramas
 

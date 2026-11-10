@@ -2,6 +2,12 @@
 
 Proyecto académico de Taller de Programación II, Licenciatura en Sistemas de Información, UNNE. Aplicación Windows Forms con SQL Server para recepción, preparación técnica, presupuestos, ejecución, liquidación, cobros y entrega.
 
+## Instalar SGTM en un equipo nuevo
+
+En Windows x64, prepará una instancia de SQL Server accesible y colocá `SGTM.Setup.exe` junto a `SGTM.Instalador.msi`. Abrí PowerShell con permisos de instalación y ejecutá `.\SGTM.Setup.exe --instalacion-inicial`. El asistente solicita la contraseña de `admin`, inicializa `SGTM_DB` con el catálogo y genera `appsettings.Local.json`. Si la instancia difiere de `localhost\SQLEXPRESS`, definí `SGTM_SQL_SERVIDOR` antes de iniciar.
+
+Consultá el [manual de instalación y configuración](docs/manuales/Manual-de-instalacion-y-configuracion-SGTM.docx) para permisos, primera apertura y respaldo. Para una base existente seguí el procedimiento de actualización de la referencia técnica.
+
 ## Ejecutar la demostración
 
 1. Descargar main y compilar `Taller/Taller.sln` con el SDK indicado en `global.json`.
@@ -31,8 +37,8 @@ El esquema vigente parte de **EsquemaInicialCircuitoActual**. No aplicar esta mi
 
 Recepción identifica cliente/vehículo y registra pedidos conocidos o síntomas, sin cargos automáticos. El técnico toma la preparación, documenta diagnóstico cuando corresponde y presupuesta. Recepción comunica y registra la decisión del cliente. La aceptación total habilita ejecución; la selección parcial exige validación técnica; sin cambios habilita ejecución, mientras que una reformulación requiere nueva aceptación. Se registran cantidades realmente ejecutadas y conformidad técnica; luego se liquida, se cobra y se entrega con saldo cero.
 
-- **Administrador:** usuarios, auditoría, reportes de gestión, respaldos y recuperación con las autorizaciones correspondientes.
-- **Administrativo:** clientes/vehículos, recepción, comunicación y decisión de presupuestos, liquidación, cobros, entrega y reportes de su rol.
+- **Administrador:** usuarios, auditoría, reportes de todo el taller, respaldos y recuperación con las autorizaciones correspondientes.
+- **Administrativo:** clientes/vehículos, recepción, comunicación y decisión de presupuestos, liquidación, cobros, entrega y reportes de sus intervenciones, decisiones y movimientos. En saldos consulta el saldo total de las atenciones en que intervino.
 - **Técnico:** informes/propuestas, revisión técnica, ejecución, hallazgos, pausas y materiales del cliente; consulta y reportes de su rol.
 
 La sesión permanece hasta cerrar sesión o salir. Las operaciones revalidan usuario/rol habilitados contra persistencia. Los controles visuales no reemplazan autorización ni concurrencia.

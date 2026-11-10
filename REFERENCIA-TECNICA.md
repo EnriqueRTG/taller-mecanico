@@ -157,12 +157,12 @@ Visual Studio debe usar SGTM_CONN de su propio perfil/proceso o ConnectionString
 
 ### Instalación del taller sin demostración
 
-1. Publicar la aplicación para Windows con el runtime correspondiente al proyecto o autocontenida; preparar SQL Server y su identidad de acceso.
-2. Configurar SGTM_CONN o ConnectionStrings:Default para SGTM_DB. No distribuir las credenciales del desarrollador. Configurar nombre/contacto/logo del taller.
-3. Aplicar todas las migraciones de Infraestructura sobre el destino nuevo confirmado mediante `dotnet ef database update --project Taller/Taller.Infraestructura --startup-project Taller/Taller.Infraestructura`. La base vacía debe recibir las seis migraciones, incluida ExigirContactoDecisionPresupuesto.
-4. Suministrar SGTM_ADMIN_INICIAL_PASSWORD de forma local y temporal para crear el administrador al primer inicio; retirarla después. Crear usuarios operativos con sus roles y credenciales.
-5. Confirmar conexión, catálogos, permisos y un recorrido de aceptación en el entorno de prueba antes de operar datos reales.
-6. Configurar el agente de respaldos y su base de control con permisos separados. Probar recuperación en una copia antes de habilitarla como procedimiento operativo.
+1. Preparar una instancia SQL Server accesible y una cuenta de Windows con permisos de instalación e inicialización SQL.
+2. Colocar `SGTM.Setup.exe` y `SGTM.Instalador.msi` juntos y ejecutar `.\SGTM.Setup.exe --instalacion-inicial` desde PowerShell elevado. Si corresponde, definir `SGTM_SQL_SERVIDOR` con la instancia del equipo.
+3. Ingresar la contraseña inicial de `admin` y conservar el destino indicado. El lanzador inicializa `SGTM_DB` con el esquema y catálogo y genera `appsettings.Local.json`.
+4. Iniciar sesión, crear usuarios operativos y configurar la identidad del taller. Configurar los respaldos por separado con la carpeta del servidor y la base de control. El agente se requiere para la programación.
+
+Para el detalle y las incidencias, consultar el [manual de instalación](docs/manuales/Manual-de-instalacion-y-configuracion-SGTM.docx). La actualización de una base existente y la carga Demo se documentan por separado.
 
 ### Google Drive: respaldo transportable
 
@@ -284,13 +284,13 @@ Para probar recuperación, seguir «Aceptación manual y recuperación» de esta
 - Cinco rechazos de credenciales por identidad normalizada dentro de 15 minutos bloquean nuevos intentos durante 15 minutos. El contador es SQL compartido entre estaciones. No se informa si la cuenta existe.
 - Auditoría de autenticaciones correctas/rechazadas en `EventosAcceso`, consultable exclusivamente por administrador (máximo 500 resultados por período). Los nombres no reconocidos no se guardan en claro; la clave del contador es SHA-256. El registro refleja intentos procesados; solicitudes ya bloqueadas o sintácticamente inválidas no generan nuevos eventos.
 - Sesión sin vencimiento temporal: se conserva hasta cerrar sesión o salir de la aplicación. Los servicios revalidan usuario habilitado y rol persistido antes de autorizar operaciones. Al dejar el puesto sin supervisión, bloquear Windows o cerrar sesión. Las aprobaciones y la vigencia de planes de restauración mantienen sus verificaciones independientes.
-- Restauraciones con ensayo separado, comprobaciones de integridad, doble aprobación y coordinación SQL ya existentes. Credenciales de nube mediante identidad Entra, sin SAS ni claves en el catálogo de copias.
+- Restauraciones con ensayo separado, comprobaciones de integridad, doble aprobación y coordinación SQL ya existentes. Los paquetes opcionales se sincronizan con Google Drive para escritorio en la cuenta configurada en Windows.
 
 ### Primera instalación
 
-Sobre una base nueva, aplicar todas las migraciones vigentes según [entornos](#instalacion-entornos). Incluye las tablas de seguridad; no se aplican migraciones retiradas sobre una base antigua. Para Demo, el cargador aplica el esquema antes de crear los usuarios.
+Para una instalación nueva usar el lanzador descrito en [entornos](#instalacion-entornos). En desarrollo, la preparación mediante migraciones se realiza sobre el destino confirmado. Para Demo, el cargador aplica el esquema antes de crear los usuarios.
 
-Una base sin usuarios necesita una credencial inicial suministrada por el instalador. En PowerShell, solicítela sin escribirla literalmente en el historial:
+El instalador solicita la contraseña inicial de forma interactiva. Si se inicia la aplicación desde código sobre una base de desarrollo preparada y sin usuarios, puede suministrarse una clave temporal desde PowerShell:
 
 ```powershell
 $claveSegura = Read-Host 'Contraseña inicial del administrador' -AsSecureString

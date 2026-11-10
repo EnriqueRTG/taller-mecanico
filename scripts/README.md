@@ -4,7 +4,8 @@ Ejecutar desde la raíz del repositorio en Windows PowerShell. Para compilar o p
 
 | Script | Cuándo usarlo | Qué cambia |
 |---|---|---|
-| [Cargar-Demostracion.ps1](Cargar-Demostracion.ps1) | Preparar el lote para una base cuyo nombre termina en `_Demo`. Requiere permisos SQL y solicita la contraseña de las cuentas Demo. | Ejecuta el cargador del proyecto. Ejemplo: `.scripts\Cargar-Demostracion.ps1 -Servidor 'localhost\SQLEXPRESS'`. |
+| [Preparar-BaseSGTM.ps1](instalacion/Preparar-BaseSGTM.ps1) | Preparar una instalación desde los archivos publicados. El lanzador lo invoca en la instalación inicial. | Aplica esquema y catálogo de [BaseDatos](instalacion/BaseDatos/) en una base nueva y genera la configuración local. |
+| [Cargar-Demostracion.ps1](Cargar-Demostracion.ps1) | Preparar el lote para una base cuyo nombre termina en `_Demo`. Requiere permisos SQL y solicita la contraseña de las cuentas Demo. | Ejecuta el cargador del proyecto. Ejemplo: `.\scripts\Cargar-Demostracion.ps1 -Servidor 'localhost\SQLEXPRESS'`. |
 | [Preparar-RespaldosDemo.ps1](Preparar-RespaldosDemo.ps1) | En el servidor de la Demo, con SGTM cerrado y PowerShell como administrador. | Crea o prepara la carpeta y la base de control, ajusta permisos del servicio SQL y configura los perfiles locales. No restaura datos. |
 | [Iniciar-AgenteDemo.ps1](Iniciar-AgenteDemo.ps1) | Prueba opcional de programación, después de preparar respaldos. | Ejecuta el agente en primer plano; Ctrl+C lo detiene. Las copias dependen del plan guardado en SGTM. |
 | [Preparar-AgenteDriveDemo.ps1](Preparar-AgenteDriveDemo.ps1) | Prueba opcional con Drive para escritorio, en la cuenta Windows que sincroniza. Requiere respaldos Demo preparados. | Publica y configura el agente Demo y registra su tarea de sesión. No aplica migraciones ni restaura datos. |

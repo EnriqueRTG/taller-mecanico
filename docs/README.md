@@ -1,5 +1,7 @@
 # Entrega académica del SGTM
 
+La entrega describe el circuito final de recepción a entrega. Usá la ERS para consultar el alcance, los manuales para operar o instalar y la matriz para ubicar la implementación y sus pruebas.
+
 - [ERS v2.0](ERS/ERS-SGTM-v2.0.docx)
 - [Apéndice A: especificación de casos de uso](ERS/Apendice-A-Casos-de-Uso-v2.0.docx)
 - [Apéndice C: diccionario de datos](ERS/Apendice-C-Diccionario-de-Datos-v2.0.docx)

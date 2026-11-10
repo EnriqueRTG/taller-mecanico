@@ -4,6 +4,8 @@
 - [Vista de conjunto de los casos de uso por rol](Casos-de-uso-por-rol.png)
 - [Casos de uso, flujo, estados, arquitectura y clases](CU-Flujos-Arquitectura-v2.0.drawio): nueve páginas editables. CU01–CU10 coinciden con ERS/Apéndice A. Las tres vistas por rol repiten casos compartidos, no crean casos nuevos.
 
+Los archivos `.drawio` son las fuentes editables. Para el coloquio, las vistas SVG permiten mostrar por separado los roles, el circuito principal y sus alternativas.
+
 | Vista | Contenido |
 |---|---|
 | [1](vista-1.svg) | Casos de uso del administrador |

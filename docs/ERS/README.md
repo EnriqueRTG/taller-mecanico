@@ -1,6 +1,6 @@
 # Documentación académica vigente
 
-Los tres DOCX v2.0 son la instantánea de entrega del circuito actual. Se usan con los diagramas, migraciones, matriz y pruebas del mismo commit.
+La ERS define el alcance y las reglas del circuito. El Apéndice A describe los casos de uso por actor y el Apéndice C especifica el modelo de datos. Consultalos junto con la matriz y los diagramas de esta entrega.
 
 - [ERS](ERS-SGTM-v2.0.docx)
 - [Apéndice A](Apendice-A-Casos-de-Uso-v2.0.docx)

@@ -2,6 +2,15 @@
 
 Proyecto académico de Taller de Programación II, Licenciatura en Sistemas de Información, UNNE. Aplicación Windows Forms con SQL Server para recepción, preparación técnica, presupuestos, ejecución, liquidación, cobros y entrega.
 
+## Elegir el entorno
+
+| Objetivo | Punto de partida |
+|---|---|
+| Presentar el circuito con datos de ejemplo | [Demo v5](scripts/recursos/replicar-demo.txt) en `SGTM_DB_Demo`. |
+| Instalar en Windows con una base nueva | [Manual de instalación](docs/manuales/Manual-de-instalacion-y-configuracion-SGTM.docx) y paquete publicado para inicializar `SGTM_DB`. |
+| Actualizar una base existente | [Procedimiento de actualización](REFERENCIA-TECNICA.md#instalacion-actualizacion-coloquio). |
+| Consultar la entrega académica | [Índice de documentación](docs/README.md). |
+
 ## Instalar SGTM en un equipo nuevo
 
 En Windows x64, prepará una instancia de SQL Server accesible y colocá `SGTM.Setup.exe` junto a `SGTM.Instalador.msi`. Abrí PowerShell con permisos de instalación y ejecutá `.\SGTM.Setup.exe --instalacion-inicial`. El asistente solicita la contraseña de `admin`, inicializa `SGTM_DB` con el catálogo y genera `appsettings.Local.json`. Si la instancia difiere de `localhost\SQLEXPRESS`, definí `SGTM_SQL_SERVIDOR` antes de iniciar.
@@ -10,7 +19,7 @@ Consultá el [manual de instalación y configuración](docs/manuales/Manual-de-i
 
 ## Ejecutar la demostración
 
-1. Descargar main y compilar `Taller/Taller.sln` con el SDK indicado en `global.json`.
+1. Descargar `main` y compilar [Taller.sln](Taller/Taller.sln) en Windows con el SDK .NET 10 indicado en [global.json](global.json) y SQL Server accesible.
 2. Seguir el [instructivo breve de instalación Demo](scripts/recursos/replicar-demo.txt). La base acordada es **SGTM_DB_Demo** y el cargador se ejecuta expresamente antes del primer inicio.
 3. Seleccionar **Taller.Presentacion** como proyecto de inicio. El perfil local debe apuntar a la misma base que se cargó.
 
@@ -22,6 +31,8 @@ El esquema vigente parte de **EsquemaInicialCircuitoActual**. No aplicar esta mi
 
 | Proyecto | Responsabilidad |
 |---|---|
+| SGTM.Setup | Lanzador del paquete de instalación e inicialización. |
+| SGTM.Instalador | Proyecto MSI que empaqueta la aplicación y los recursos de preparación. |
 | Taller.Dominio | Entidades, enumeraciones y constantes de negocio. |
 | Taller.Aplicacion | Servicios de casos de uso, validaciones, autorizaciones, DTOs y contratos. |
 | Taller.Infraestructura | Implementaciones EF/SQL, configuraciones, migración, unidad de trabajo, seguridad y respaldos. |
@@ -42,6 +53,8 @@ Recepción identifica cliente/vehículo y registra pedidos conocidos o síntomas
 - **Técnico:** informes/propuestas, revisión técnica, ejecución, hallazgos, pausas y materiales del cliente; consulta y reportes de su rol.
 
 La sesión permanece hasta cerrar sesión o salir. Las operaciones revalidan usuario/rol habilitados contra persistencia. Los controles visuales no reemplazan autorización ni concurrencia.
+
+Consultá la [guía de operación](docs/manual-usuario.md) o la [ayuda de la aplicación](Taller/Taller.Presentacion/Ayuda/index.html) para el recorrido por rol.
 
 ## Alcance implementado y límites
 

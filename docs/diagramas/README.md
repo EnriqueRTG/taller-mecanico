@@ -1,6 +1,7 @@
 # Diagramas de la versión actual
 
 - [DER editable](DER-SGTM-v2.0.drawio): ocho vistas del mismo esquema físico, con PK/FK, nulabilidad y registro de 43 relaciones; control separado.
+- [Vista de conjunto de los casos de uso por rol](Casos-de-uso-por-rol.png)
 - [Casos de uso, flujo, estados, arquitectura y clases](CU-Flujos-Arquitectura-v2.0.drawio): nueve páginas editables. CU01–CU10 coinciden con ERS/Apéndice A. Las tres vistas por rol repiten casos compartidos, no crean casos nuevos.
 
 | Vista | Contenido |

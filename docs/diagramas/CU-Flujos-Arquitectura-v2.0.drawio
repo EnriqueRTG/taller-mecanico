@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mxfile host="app.diagrams.net" compressed="false" modified="2026-11-04T18:00:00.000Z">
-  <diagram name="CU Administrador" id="ZOWYEN9VeXnVAd0EEV2K">
+<mxfile host="app.diagrams.net" compressed="false">
+  <diagram name="CU Administrador" id="sgtm-v2-1">
     <mxGraphModel dx="1250" dy="1250" grid="1" page="1" pageWidth="1250" pageHeight="1250">
       <root>
         <mxCell id="0" />
@@ -52,7 +52,7 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram name="CU Administrativo" id="iZn7FupcIIGdQgTtCZd9">
+  <diagram name="CU Administrativo" id="sgtm-v2-2">
     <mxGraphModel dx="1250" dy="1400" grid="1" page="1" pageWidth="1250" pageHeight="1400">
       <root>
         <mxCell id="0" />

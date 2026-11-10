@@ -4,7 +4,9 @@
 - [Apéndice A: especificación de casos de uso](ERS/Apendice-A-Casos-de-Uso-v2.0.docx)
 - [Apéndice C: diccionario de datos](ERS/Apendice-C-Diccionario-de-Datos-v2.0.docx)
 - [Diagramas: casos de uso, DER y vistas de apoyo](diagramas/README.md)
-- [Guía de operación (base del manual de usuario)](manual-usuario.md)
+- [Manual de usuario](manuales/Manual-de-usuario-SGTM.docx)
+- [Manual de instalación y configuración](manuales/Manual-de-instalacion-y-configuracion-SGTM.docx)
+- [Guía de operación para consulta rápida](manual-usuario.md)
 - [Plan y evidencia de pruebas](pruebas.md)
 - [Trazabilidad de requisitos, implementación y pruebas](especificacion/trazabilidad.md)
 

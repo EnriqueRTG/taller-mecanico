@@ -509,7 +509,7 @@ No existe FK Cliente–Vehículo: se relacionan en la Atención. No existe Orden
 
 EstadoSGTM, ProgramaSGTM, CopiasSGTM y EventosSGTM se crean por RegistroRespaldosSql en la base de control separada. No tienen FK cruzada con Usuarios ni entre documentos JSON. La recuperación de negocio no debe borrar aprobaciones, catálogo ni calendario.
 
-[DER editable](docs/diagramas/DER-SGTM-v2.0.drawio) · [Diccionario](docs/ERS/Apendice-C-Diccionario-de-Datos-v2.0.docx) · [Configuraciones](Taller/Taller.Infraestructura/Persistencia/Configuraciones) · [Migraciones](Taller/Taller.Infraestructura/Persistencia/Migraciones)
+[DER editable](docs/diagramas/DER-SGTM-v2.0.drawio) · [Diccionario](docs/ERS/Apendice-B-Diccionario-de-Datos-v2.0.docx) · [Configuraciones](Taller/Taller.Infraestructura/Persistencia/Configuraciones) · [Migraciones](Taller/Taller.Infraestructura/Persistencia/Migraciones)
 
 ---
 

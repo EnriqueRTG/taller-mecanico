@@ -1,12 +1,12 @@
 # Trazabilidad de requisitos e implementación
 
-Versión documental 2.0. Referencia de código para el cierre: `ef2b2e8` (PR #75). CU01 a CU10 son comunes a la ERS, al Apéndice A y a los diagramas. Los enlaces apuntan a clases reales; las pruebas automatizadas complementan la aceptación manual. No representan aprobación de una instalación aún no probada.
+Versión documental 2.0. Línea base funcional: `d212cfa`. Revisión documental contrastada con la rama `main` en `bdcc1e0`. CU01 a CU10 son comunes a la ERS, al Apéndice A y a los diagramas. Los enlaces apuntan a clases reales; las pruebas automatizadas complementan la aceptación manual. No representan aprobación de una instalación aún no probada.
 
-| CU | RF | Servicio de Aplicación | Datos principales | Evidencia automatizada |
+| CU | RF | Servicio de Aplicación | Datos principales | Pruebas automatizadas relacionadas |
 |---|---|---|---|---|
 | CU01 Iniciar y cerrar sesión | RF-01, RF-02, RF-03, RF-04, RF-05 | [AutenticacionServicio](../../Taller/Taller.Aplicacion/Servicios/AutenticacionServicio.cs) | Usuarios, Roles, ControlesAcceso, EventosAcceso | [SeguridadInicioPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/SeguridadInicioPruebas.cs) |
-| CU02 Gestionar usuarios | RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-73 | [UsuarioServicio](../../Taller/Taller.Aplicacion/Servicios/UsuarioServicio.cs), [AuditoriaAccesoServicio](../../Taller/Taller.Aplicacion/Servicios/AuditoriaAccesoServicio.cs) | Usuarios, Roles | [UsuariosValidacionPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/UsuariosValidacionPruebas.cs) |
-| CU03 Gestionar clientes y vehículos | RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-65 | [ClienteServicio](../../Taller/Taller.Aplicacion/Servicios/ClienteServicio.cs), [VehiculoServicio](../../Taller/Taller.Aplicacion/Servicios/VehiculoServicio.cs), [ConceptoServicio](../../Taller/Taller.Aplicacion/Servicios/ConceptoServicio.cs) | Clientes, Vehiculos, Modelos, Marcas | [MaestrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/MaestrosPruebas.cs) |
+| CU02 Gestionar usuarios | RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-73 | [UsuarioServicio](../../Taller/Taller.Aplicacion/Servicios/UsuarioServicio.cs), [AuditoriaAccesoServicio](../../Taller/Taller.Aplicacion/Servicios/AuditoriaAccesoServicio.cs) | Usuarios, Roles, EventosAcceso | [UsuariosValidacionPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/UsuariosValidacionPruebas.cs) |
+| CU03 Gestionar clientes y vehículos | RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-65 | [ClienteServicio](../../Taller/Taller.Aplicacion/Servicios/ClienteServicio.cs), [VehiculoServicio](../../Taller/Taller.Aplicacion/Servicios/VehiculoServicio.cs), [ConceptoServicio](../../Taller/Taller.Aplicacion/Servicios/ConceptoServicio.cs) | Clientes, Vehiculos, Modelos, Marcas, Conceptos, Categorias | [MaestrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/MaestrosPruebas.cs) |
 | CU04 Gestionar atención y entrega | RF-21, RF-22, RF-23, RF-24, RF-25, RF-27 | [AtencionServicio](../../Taller/Taller.Aplicacion/Servicios/AtencionServicio.cs), [EvaluacionServicio](../../Taller/Taller.Aplicacion/Servicios/EvaluacionServicio.cs), [CobroServicio](../../Taller/Taller.Aplicacion/Servicios/CobroServicio.cs) | Atenciones, SolicitudesAtencion, HistorialAtenciones | [CircuitoCobrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/CircuitoCobrosPruebas.cs) |
 | CU05 Preparar evaluación e informe técnico | RF-28, RF-29, RF-30, RF-31, RF-32 | [EvaluacionServicio](../../Taller/Taller.Aplicacion/Servicios/EvaluacionServicio.cs), [DiagnosticoServicio](../../Taller/Taller.Aplicacion/Servicios/DiagnosticoServicio.cs) | EvaluacionesAtencion, Diagnosticos, Presupuestos | [EvaluacionServicioPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/EvaluacionServicioPruebas.cs) |
 | CU06 Gestionar propuestas y decisiones | RF-33, RF-34, RF-35, RF-36, RF-37, RF-38, RF-39, RF-40, RF-41, RF-42, RF-69 | [EvaluacionServicio](../../Taller/Taller.Aplicacion/Servicios/EvaluacionServicio.cs), [PresupuestoServicio](../../Taller/Taller.Aplicacion/Servicios/PresupuestoServicio.cs), [SeguimientoTrabajoServicio](../../Taller/Taller.Aplicacion/Servicios/SeguimientoTrabajoServicio.cs) | Presupuestos, PresupuestoDetalles, HistorialAtenciones | [CircuitoCobrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/CircuitoCobrosPruebas.cs) |
@@ -14,6 +14,54 @@ Versión documental 2.0. Referencia de código para el cierre: `ef2b2e8` (PR #75
 | CU08 Liquidar y registrar cobros | RF-43, RF-44, RF-45, RF-46, RF-47, RF-48, RF-49, RF-50, RF-51, RF-71 | [CobroServicio](../../Taller/Taller.Aplicacion/Servicios/CobroServicio.cs) | Comprobantes, ComprobanteDetalles, Pagos, PagoMedios, MediosPago | [CircuitoCobrosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/CircuitoCobrosPruebas.cs) |
 | CU09 Generar reportes por rol | RF-52, RF-53, RF-54, RF-55, RF-56, RF-57 | [ReporteServicio](../../Taller/Taller.Aplicacion/Servicios/ReporteServicio.cs) | Consultas de negocio e historial; sin tabla de reporte | [ReportesPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/ReportesPruebas.cs) |
 | CU10 Gestionar respaldos y recuperación | RF-58, RF-59, RF-60, RF-61, RF-62, RF-63, RF-64, RF-72, RF-73 | [RespaldoServicio](../../Taller/Taller.Aplicacion/Servicios/RespaldoServicio.cs) | Base de negocio y control externo EstadoSGTM, ProgramaSGTM, CopiasSGTM, EventosSGTM | [RespaldosPruebas](../../Taller/Taller.Pruebas/ReglasYComponentes/RespaldosPruebas.cs), [RespaldosSqlPruebas](../../Taller/Taller.Pruebas/IntegracionSql/RespaldosSqlPruebas.cs) |
+
+## Correspondencia detallada entre requisitos y verificaciones
+
+Los números de la columna **Reglas** usan el prefijo RN. Las reglas se indican cuando aportan una condición de negocio aplicable. Los escenarios P01–P23 corresponden al [plan de pruebas](../pruebas.md). Las comprobaciones adicionales identifican aspectos que requieren verificación específica. La relación con un escenario indica qué comprobar y no acredita que se haya ejecutado ni que cubra cada variante.
+
+| CU | RF | Reglas | Datos o vista del DER | Verificación |
+|---|---|---|---|---|
+| CU01 | RF-01 a RF-02 | 01 | Usuarios, Roles | P01 |
+| CU01 | RF-03 a RF-04 | 01–02 | Usuarios, Roles | P01 |
+| CU01 | RF-05 | 01 | ControlesAcceso, EventosAcceso | P01 y comprobación de bloqueo y cierre de sesión |
+| CU02 | RF-06 a RF-07 | 02 | Usuarios, Roles | P02 |
+| CU02 | RF-08 a RF-11 | 01–03 | Usuarios, Roles | P02 y P15. Comprobar último administrador y cambios de credenciales |
+| CU02 | RF-73 | 01 | EventosAcceso | P01 y consulta de auditoría |
+| CU03 | RF-12 a RF-15 | 03, 05, 07 | Clientes, Atenciones | P02 |
+| CU03 | RF-16 a RF-19 | 03, 06–07 | Vehiculos, Modelos, Marcas, Atenciones | P02 |
+| CU03 | RF-20 | 04 | Clientes, Vehiculos, Atenciones | P03 |
+| CU03 | RF-65 | 26 | Conceptos, Categorias | Consulta del catálogo por ambos roles |
+| CU04 | RF-21 a RF-22 | 04, 07–08, 21 | Atenciones, SolicitudesAtencion | P03–P05 |
+| CU04 | RF-23 a RF-24 | 08–10 | Atenciones, HistorialAtenciones | P03 y consulta de antecedentes |
+| CU04 | RF-25 | 09–10 | Atenciones, HistorialAtenciones | P08 para transiciones. Comprobar cancelación de apertura por separado |
+| CU04 | RF-27 | 32 | Atenciones, Comprobantes, Pagos, HistorialAtenciones | P17 |
+| CU05 | RF-28 a RF-30 | 11–12 | EvaluacionesAtencion, SolicitudesAtencion | P03–P05 |
+| CU05 | RF-31 a RF-32 | 11–14 | Diagnosticos, Presupuestos, HallazgosAtencion | P04 y P10 |
+| CU06 | RF-33 a RF-36 | 14, 20, 26, 35 | Presupuestos, PresupuestoDetalles, Conceptos, SolicitudesAtencion | P03–P05 y P19 |
+| CU06 | RF-37 a RF-38 | 16, 18–19 | Presupuestos, PresupuestoDetalles, HistorialAtenciones | P03, P06–P07 y P09 |
+| CU06 | RF-39 a RF-40 | 15–17 | Presupuestos, PresupuestoDetalles | P07–P08 y P11 |
+| CU06 | RF-41 a RF-42 | 18–19 | Presupuestos, PresupuestoDetalles | P06–P07 |
+| CU06 | RF-69 | 15, 19, 21, 34 | Presupuestos, HallazgosAtencion, PausasTrabajo | P11 |
+| CU07 | RF-26 | 22, 36 | Atenciones, PresupuestoDetalles, PausasTrabajo | P14 |
+| CU07 | RF-66 | 01, 08 | Atenciones, PresupuestoDetalles | P15 |
+| CU07 | RF-67 | 21, 36 | PresupuestoDetalles | P14 |
+| CU07 | RF-68 | 34 | HallazgosAtencion, PausasTrabajo | P10 y P12 |
+| CU07 | RF-70 | 35 | PresupuestoDetalles | P13 |
+| CU08 | RF-43 a RF-45 | 21, 23–26 | Comprobantes, ComprobanteDetalles, PresupuestoDetalles | P03, P09 y P19 |
+| CU08 | RF-46 a RF-47 | 27, 30 | Comprobantes, Pagos, PagoMedios | P16 y P19 |
+| CU08 | RF-48 a RF-50 | 27–31 | Pagos, PagoMedios, MediosPago | P16 |
+| CU08 | RF-51 | 23–26 | Comprobantes, ComprobanteDetalles, Pagos, PagoMedios | P19 |
+| CU08 | RF-71 | 30, 33 | Pagos, PagoMedios, HistorialAtenciones | P16–P17 |
+| CU09 | RF-52 a RF-54 | 01, 08 | Atenciones, HistorialAtenciones | P18 por rol y fecha |
+| CU09 | RF-55 | 01, 17, 36 | Presupuestos, PresupuestoDetalles, Atenciones, HistorialAtenciones | P18 por tipo y alcance |
+| CU09 | RF-56 | 01, 29–30, 33 | Comprobantes, Pagos, PagoMedios, HistorialAtenciones | P18 con cobros, anulaciones y saldos |
+| CU09 | RF-57 | 01 | Proyección de las consultas | P18 para filtros y exportación. P19 para impresión |
+| CU10 | RF-58 a RF-60 | 37 | CopiasSGTM, EventosSGTM | P20. Para exportación, comprobar sincronización por separado |
+| CU10 | RF-61 a RF-64 | 37 | CopiasSGTM, EstadoSGTM, EventosSGTM | P22 |
+| CU10 | RF-72 | 37 | ProgramaSGTM, CopiasSGTM, EventosSGTM | P21 |
+| CU10 | RF-73 | 37 | EventosSGTM | P22 y consulta de historial |
+
+Los requisitos de interfaz y de información se verifican por escenario transversal. P01 cubre acceso y autorización, P02 y P23 cubren persistencia y esquema, P18–P19 cubren salidas de consulta e impresión y P20–P22 cubren respaldo y recuperación. REN-01 y REN-02 requieren mediciones registradas en el entorno de evaluación.
 
 ## Reglas de transición para leer los diagramas
 

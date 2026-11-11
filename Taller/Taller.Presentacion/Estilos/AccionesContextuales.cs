@@ -1,6 +1,9 @@
 namespace Taller.Presentacion.Estilos;
 
-/// <summary>Oculta acciones sin permiso, selección o etapa. No interpreta el bloqueo temporal de un panel ocupado como una regla de negocio.</summary>
+/// <summary>
+/// Oculta acciones sin permiso, selección o etapa. 
+/// No interpreta el bloqueo temporal de un panel ocupado como una regla de negocio.
+/// </summary>
 internal static class AccionesContextuales
 {
     public static void Actualizar(params Control[] acciones)

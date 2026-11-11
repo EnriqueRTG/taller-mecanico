@@ -1,6 +1,8 @@
 using Taller.Aplicacion.DTOs.Reportes;
 namespace Taller.Presentacion.Impresion;
-/// <summary>Dibuja la misma serie del documento en pantalla e impresión, admitiendo netos negativos.</summary>
+/// <summary>
+/// Dibuja la misma serie del documento en pantalla e impresión, admitiendo netos negativos.
+/// </summary>
 internal static class GraficoReporte
 {
     public static void Dibujar(Graphics g, Rectangle area, ReporteDocumentoDto d, TipoGraficoReporte tipo = TipoGraficoReporte.Barras)

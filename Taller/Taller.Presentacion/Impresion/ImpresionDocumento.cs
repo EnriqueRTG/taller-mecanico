@@ -1,6 +1,8 @@
 using System.Drawing.Printing;
 namespace Taller.Presentacion.Impresion;
-/// <summary>Previsualización e impresión paginada mediante las impresoras instaladas de Windows.</summary>
+/// <summary>
+/// Previsualización e impresión paginada mediante las impresoras instaladas de Windows.
+/// </summary>
 internal static class ImpresionDocumento
 {
     public static void Mostrar(Form propietario, string texto, Taller.Aplicacion.DTOs.Reportes.EmpresaDocumentoDto empresa, string nombreArchivo)

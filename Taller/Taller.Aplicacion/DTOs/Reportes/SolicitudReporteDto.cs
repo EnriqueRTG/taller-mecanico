@@ -1,4 +1,4 @@
-namespace Taller.Aplicacion.DTOs.Reportes;
+    namespace Taller.Aplicacion.DTOs.Reportes;
 /// <summary>Período inclusivo; saldos y reservas muestran situación actual y no reconstruyen el pasado.</summary>
 public sealed class SolicitudReporteDto
 {

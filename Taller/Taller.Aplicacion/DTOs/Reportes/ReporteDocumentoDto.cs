@@ -1,5 +1,8 @@
 namespace Taller.Aplicacion.DTOs.Reportes;
-/// <summary>Documento generado e inmutable por convención: filtros, indicadores, gráfico, interpretación y detalle de una misma consulta.</summary>
+/// <summary>
+/// Documento generado e inmutable por convención: 
+/// filtros, indicadores, gráfico, interpretación y detalle de una misma consulta.
+/// </summary>
 public sealed class ReporteDocumentoDto
 {
     /// <summary>Opciones válidas del tipo de reporte, independientes de las filas y de los filtros.</summary>

@@ -36,7 +36,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpBusquedaCliente = new TableLayoutPanel();
             lblTipoDocumento = new Label();
             cboTipoDocumento = new ComboBox();
-            editorSolicitudes = new EditorSolicitudes();
             lblDocumento = new Label();
             txtDocumento = new TextBox();
             btnBuscarCliente = new Button();
@@ -58,6 +57,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlMotivo = new Panel();
             tlpMotivo = new TableLayoutPanel();
             lblSeccionMotivo = new Label();
+            editorSolicitudes = new EditorSolicitudes();
             pnlAcciones = new Panel();
             flpAcciones = new FlowLayoutPanel();
             btnCancelar = new Button();
@@ -182,7 +182,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 155F));
             tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 155F));
             tlpContenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 400F));
-            tlpContenido.Size = new Size(812, 600);
+            tlpContenido.Size = new Size(812, 810);
             tlpContenido.TabIndex = 0;
             // 
             // pnlRecepcion
@@ -349,7 +349,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             cboTipoDocumento.Name = "cboTipoDocumento";
             cboTipoDocumento.Size = new Size(133, 23);
             cboTipoDocumento.TabIndex = 0;
-            cboTipoDocumento.SelectedIndexChanged += cboTipoDocumento_SelectedIndexChanged;
+            cboTipoDocumento.SelectedIndexChanged += CboTipoDocumento_SelectedIndexChanged;
             // 
             // lblDocumento
             // 
@@ -373,7 +373,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             txtDocumento.Name = "txtDocumento";
             txtDocumento.Size = new Size(303, 23);
             txtDocumento.TabIndex = 1;
-            txtDocumento.TextChanged += txtDocumento_TextChanged;
+            txtDocumento.TextChanged += TxtDocumento_TextChanged;
             // 
             // btnBuscarCliente
             // 
@@ -386,7 +386,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnBuscarCliente.TabIndex = 2;
             btnBuscarCliente.Text = "Buscar";
             btnBuscarCliente.UseVisualStyleBackColor = false;
-            btnBuscarCliente.Click += btnBuscarCliente_Click;
+            btnBuscarCliente.Click += BtnBuscarCliente_Click;
             // 
             // lblTituloClienteSeleccionado
             // 
@@ -442,7 +442,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnNuevoCliente.TabIndex = 3;
             btnNuevoCliente.Text = "+ Registrar cliente";
             btnNuevoCliente.UseVisualStyleBackColor = false;
-            btnNuevoCliente.Click += btnNuevoCliente_Click;
+            btnNuevoCliente.Click += BtnNuevoCliente_Click;
             // 
             // pnlVehiculo
             // 
@@ -532,7 +532,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             txtDominio.Name = "txtDominio";
             txtDominio.Size = new Size(543, 23);
             txtDominio.TabIndex = 4;
-            txtDominio.TextChanged += txtDominio_TextChanged;
+            txtDominio.TextChanged += TxtDominio_TextChanged;
             // 
             // btnBuscarVehiculo
             // 
@@ -546,7 +546,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnBuscarVehiculo.TabIndex = 5;
             btnBuscarVehiculo.Text = "Buscar";
             btnBuscarVehiculo.UseVisualStyleBackColor = false;
-            btnBuscarVehiculo.Click += btnBuscarVehiculo_Click;
+            btnBuscarVehiculo.Click += BtnBuscarVehiculo_Click;
             // 
             // lblTituloVehiculoSeleccionado
             // 
@@ -603,7 +603,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnNuevoVehiculo.TabIndex = 6;
             btnNuevoVehiculo.Text = "+ Registrar vehículo";
             btnNuevoVehiculo.UseVisualStyleBackColor = false;
-            btnNuevoVehiculo.Click += btnNuevoVehiculo_Click;
+            btnNuevoVehiculo.Click += BtnNuevoVehiculo_Click;
             // 
             // pnlMotivo
             // 
@@ -614,7 +614,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             pnlMotivo.Margin = new Padding(0);
             pnlMotivo.Name = "pnlMotivo";
             pnlMotivo.Padding = new Padding(18, 10, 18, 10);
-            pnlMotivo.Size = new Size(812, 190);
+            pnlMotivo.Size = new Size(812, 400);
             pnlMotivo.TabIndex = 3;
             // 
             // tlpMotivo
@@ -623,8 +623,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpMotivo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tlpMotivo.Controls.Add(lblSeccionMotivo, 0, 0);
             tlpMotivo.Controls.Add(editorSolicitudes, 0, 1);
-            editorSolicitudes.Dock = DockStyle.Fill;
-            editorSolicitudes.SolicitudesCambiadas += SolicitudesCambiadas;
             tlpMotivo.Dock = DockStyle.Fill;
             tlpMotivo.Location = new Point(18, 10);
             tlpMotivo.Margin = new Padding(0);
@@ -632,7 +630,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpMotivo.RowCount = 2;
             tlpMotivo.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
             tlpMotivo.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpMotivo.Size = new Size(776, 170);
+            tlpMotivo.Size = new Size(776, 380);
             tlpMotivo.TabIndex = 0;
             // 
             // lblSeccionMotivo
@@ -648,6 +646,16 @@ namespace Taller.Presentacion.Formularios.Atenciones
             lblSeccionMotivo.Text = "3. SOLICITUDES Y CONDICIONES DE INGRESO";
             lblSeccionMotivo.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // editorSolicitudes
+            // 
+            editorSolicitudes.BackColor = Color.White;
+            editorSolicitudes.Dock = DockStyle.Fill;
+            editorSolicitudes.Location = new Point(3, 25);
+            editorSolicitudes.MinimumSize = new Size(300, 320);
+            editorSolicitudes.Name = "editorSolicitudes";
+            editorSolicitudes.Size = new Size(770, 352);
+            editorSolicitudes.TabIndex = 1;
+            editorSolicitudes.SolicitudesCambiadas += SolicitudesCambiadas;
             // 
             // pnlAcciones
             // 
@@ -684,7 +692,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnCancelar.TabIndex = 8;
             btnCancelar.Text = "Cancelar";
             btnCancelar.UseVisualStyleBackColor = false;
-            btnCancelar.Click += btnCancelar_Click;
+            btnCancelar.Click += BtnCancelar_Click;
             // 
             // btnRegistrar
             // 
@@ -697,7 +705,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             btnRegistrar.TabIndex = 9;
             btnRegistrar.Text = "Registrar ingreso";
             btnRegistrar.UseVisualStyleBackColor = false;
-            btnRegistrar.Click += btnRegistrar_Click;
+            btnRegistrar.Click += BtnRegistrar_Click;
             // 
             // FrmNuevaAtencion
             // 
@@ -740,7 +748,6 @@ namespace Taller.Presentacion.Formularios.Atenciones
             tlpVehiculoSeleccionado.ResumeLayout(false);
             pnlMotivo.ResumeLayout(false);
             tlpMotivo.ResumeLayout(false);
-            tlpMotivo.PerformLayout();
             pnlAcciones.ResumeLayout(false);
             flpAcciones.ResumeLayout(false);
             ResumeLayout(false);

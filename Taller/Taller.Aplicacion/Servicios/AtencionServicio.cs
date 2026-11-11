@@ -88,21 +88,34 @@ public sealed class AtencionServicio
     public async Task<Atencion> RegistrarRecepcionAsync(RegistrarRecepcionDto datos)
     {
         ArgumentNullException.ThrowIfNull(datos);
+
         var recepcion = await ObtenerAdministrativoActualAsync();
+
         if (recepcion.Id != datos.IdUsuarioRecepcion)
             throw new ValidacionException("Usuario de recepción inválido.");
+
         ValidarId(datos.IdCliente, nameof(datos.IdCliente));
         ValidarId(datos.IdVehiculo, nameof(datos.IdVehiculo));
+
         var pedidos = ValidarSolicitudes(datos.Solicitudes);
+
         if (datos.Kilometraje is < 0)
             throw new ValidacionException("El kilometraje no puede ser negativo.");
+
         if (datos.ObservacionesRecepcion?.Trim().Length > 1000)
             throw new ValidacionException("Las observaciones de recepción admiten hasta 1000 caracteres.");
-        var tipo = pedidos.All(s => s.Tipo == TipoSolicitudIngreso.TrabajoSolicitado) ? TipoSolicitudAtencion.ServicioDefinido
-            : pedidos.All(s => s.Tipo == TipoSolicitudIngreso.ProblemaInformado) ? TipoSolicitudAtencion.Problema : TipoSolicitudAtencion.Mixta;
+
+        var tipo = pedidos.All(
+            s => s.Tipo == TipoSolicitudIngreso.TrabajoSolicitado) ? 
+                TipoSolicitudAtencion.ServicioDefinido : pedidos.All(
+                        s => s.Tipo == TipoSolicitudIngreso.ProblemaInformado) ?
+                            TipoSolicitudAtencion.Problema : TipoSolicitudAtencion.Mixta;
+
         var resumen = string.Join("; ", pedidos.Select(s => s.Descripcion));
+
         await ValidarClienteAsync(datos.IdCliente);
         await ValidarVehiculoAsync(datos.IdVehiculo);
+
         if (await _atencionRepositorio.ExisteAtencionActivaParaVehiculoAsync(datos.IdVehiculo))
             throw new ValidacionException("El vehículo ya posee una atención activa.");
 
@@ -113,14 +126,30 @@ public sealed class AtencionServicio
             IdUsuarioRecepcion = recepcion.Id,
             TipoSolicitud = tipo,
             KilometrajeRecepcion = datos.Kilometraje,
-            ObservacionesRecepcion = string.IsNullOrWhiteSpace(datos.ObservacionesRecepcion) ? null : datos.ObservacionesRecepcion.Trim(),
-            Solicitudes = pedidos.Select((s, i) => new SolicitudAtencion { Orden = i + 1, Tipo = s.Tipo, Descripcion = s.Descripcion }).ToList(),
+            ObservacionesRecepcion = string.IsNullOrWhiteSpace(datos.ObservacionesRecepcion) ? 
+                                        null : datos.ObservacionesRecepcion.Trim(),
+            Solicitudes = pedidos.Select((s, i) 
+                            => new SolicitudAtencion { 
+                                    Orden = i + 1, 
+                                    Tipo = s.Tipo, 
+                                    Descripcion = s.Descripcion 
+                                    }).ToList(),
             FechaApertura = FechaHoraTaller.Ahora,
             MotivoConsulta = resumen[..Math.Min(resumen.Length, 500)],
             Estado = EstadoAtencion.EnEvaluacionTecnica,
             FechaCierre = null
         };
-        atencion.Historial.Add(new HistorialAtencion { IdUsuario = recepcion.Id, Fecha = atencion.FechaApertura, Accion = "RecepcionRegistrada", EstadoAnterior = null, EstadoNuevo = atencion.Estado, Observaciones = "Solicitudes recibidas y enviadas a preparación técnica. No autoriza trabajos cobrables." });
+
+        atencion.Historial.Add(
+            new HistorialAtencion { 
+                IdUsuario = recepcion.Id, 
+                Fecha = atencion.FechaApertura, 
+                Accion = "RecepcionRegistrada", 
+                EstadoAnterior = null, 
+                EstadoNuevo = atencion.Estado, 
+                Observaciones = "Solicitudes recibidas y enviadas a preparación técnica. No autoriza trabajos cobrables." 
+            });
+
         await _atencionRepositorio.AgregarAsync(atencion);
         return atencion;
     }

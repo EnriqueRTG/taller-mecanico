@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Taller.Aplicacion.DTOs.Reportes;
 namespace Taller.Presentacion.Impresion;
-/// <summary>Resuelve la identidad configurada y la dibuja sin inventar datos de contacto.</summary>
+/// <summary>
+/// Resuelve la identidad configurada y la dibuja sin inventar datos de contacto.
+/// </summary>
 internal static class EncabezadoEmpresa
 {
     public static EmpresaDocumentoDto Cargar(IConfiguration? configuracion)
@@ -19,8 +21,10 @@ internal static class EncabezadoEmpresa
         return new EmpresaDocumentoDto
         {
             Nombre = nombre.Length == 0 ? "Taller mecánico" : nombre,
-            Direccion = Leer("Direccion", 200), Telefono = Leer("Telefono", 80),
-            Correo = Leer("Correo", 150), IdentificacionFiscal = Leer("IdentificacionFiscal", 80),
+            Direccion = Leer("Direccion", 200),
+            Telefono = Leer("Telefono", 80),
+            Correo = Leer("Correo", 150),
+            IdentificacionFiscal = Leer("IdentificacionFiscal", 80),
             LogoPngBase64 = Convert.ToBase64String(memoria.ToArray())
         };
     }

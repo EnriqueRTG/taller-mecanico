@@ -10,6 +10,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
     {
         migrationBuilder.AddColumn<byte[]>(name: "Version", table: "Usuarios", type: "rowversion", rowVersion: true, nullable: false);
         migrationBuilder.Sql("""
+            EXEC(N'
             ALTER PROCEDURE dbo.Usuario_ActualizarDatos
                 @Id int,
                 @Nombre nvarchar(100),
@@ -35,7 +36,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                         WHERE Id = @Id;
 
                     IF @RolActualId IS NULL
-                        THROW 51002, 'El usuario no existe.', 1;
+                        THROW 51002, ''El usuario no existe.'', 1;
 
                     IF @RolActualId = 1
                         AND @Activo = 1
@@ -48,14 +49,14 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                                 AND Activo = 1
                                 AND Id <> @Id
                         )
-                        THROW 51003, 'No se puede cambiar el rol del ultimo administrador activo.', 1;
+                        THROW 51003, ''No se puede cambiar el rol del ultimo administrador activo.'', 1;
 
                     UPDATE dbo.Usuarios
                     SET Nombre = @Nombre,
                         Apellido = @Apellido,
                         RolId = @RolId
                     WHERE Id = @Id AND Version = @Version;
-                    IF @@ROWCOUNT = 0 THROW 51005, 'El usuario fue modificado por otra operacion.', 1;
+                    IF @@ROWCOUNT = 0 THROW 51005, ''El usuario fue modificado por otra operacion.'', 1;
 
                     COMMIT TRANSACTION;
 
@@ -71,8 +72,10 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                 END CATCH
 
             END;
+            ');
             """);
         migrationBuilder.Sql("""
+            EXEC(N'
             ALTER PROCEDURE dbo.Usuario_ActualizarCredenciales
                 @Id int,
                 @NombreUsuario nvarchar(50),
@@ -88,22 +91,24 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                     SET NombreUsuario = @NombreUsuario,
                         PasswordHash = COALESCE(@PasswordHash, PasswordHash)
                     WHERE Id = @Id AND Version = @Version;
-                    IF @@ROWCOUNT = 0 THROW 51005, 'El usuario fue modificado por otra operacion.', 1;
+                    IF @@ROWCOUNT = 0 THROW 51005, ''El usuario fue modificado por otra operacion.'', 1;
 
                 END TRY
 
                 BEGIN CATCH
 
                     IF ERROR_NUMBER() IN (2601, 2627)
-                        THROW 51001, 'El nombre de usuario ya esta registrado.', 1;
+                        THROW 51001, ''El nombre de usuario ya esta registrado.'', 1;
 
                     THROW;
 
                 END CATCH;
 
             END;
+            ');
             """);
         migrationBuilder.Sql("""
+            EXEC(N'
             ALTER PROCEDURE dbo.Usuario_CambiarEstado
                 @Id int,
                 @Activo bit,
@@ -127,7 +132,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                     WHERE Id = @Id;
 
                     IF @RolActualId IS NULL
-                        THROW 51002, 'El usuario no existe.', 1;
+                        THROW 51002, ''El usuario no existe.'', 1;
 
                     IF @Activo = 0
                        AND @ActivoActual = 1
@@ -140,12 +145,12 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                              AND Activo = 1
                              AND Id <> @Id
                        )
-                        THROW 51004, 'No se puede desactivar al ultimo administrador activo.', 1;
+                        THROW 51004, ''No se puede desactivar al ultimo administrador activo.'', 1;
 
                     UPDATE dbo.Usuarios
                     SET Activo = @Activo
                     WHERE Id = @Id AND Version = @Version;
-                    IF @@ROWCOUNT = 0 THROW 51005, 'El usuario fue modificado por otra operacion.', 1;
+                    IF @@ROWCOUNT = 0 THROW 51005, ''El usuario fue modificado por otra operacion.'', 1;
 
                     COMMIT TRANSACTION;
 
@@ -161,11 +166,13 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                 END CATCH;
 
             END
+            ');
             """);
     }
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql("""
+            EXEC(N'
             ALTER PROCEDURE dbo.Usuario_ActualizarDatos
                 @Id int,
                 @Nombre nvarchar(100),
@@ -190,7 +197,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                         WHERE Id = @Id;
 
                     IF @RolActualId IS NULL
-                        THROW 51002, 'El usuario no existe.', 1;
+                        THROW 51002, ''El usuario no existe.'', 1;
 
                     IF @RolActualId = 1
                         AND @Activo = 1
@@ -203,7 +210,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                                 AND Activo = 1
                                 AND Id <> @Id
                         )
-                        THROW 51003, 'No se puede cambiar el rol del ultimo administrador activo.', 1;
+                        THROW 51003, ''No se puede cambiar el rol del ultimo administrador activo.'', 1;
 
                     UPDATE dbo.Usuarios
                     SET Nombre = @Nombre,
@@ -225,8 +232,10 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                 END CATCH
 
             END;
+            ');
             """);
         migrationBuilder.Sql("""
+            EXEC(N'
             ALTER PROCEDURE dbo.Usuario_ActualizarCredenciales
                 @Id int,
                 @NombreUsuario nvarchar(50),
@@ -243,22 +252,24 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                     WHERE Id = @Id;
 
                     IF @@ROWCOUNT = 0
-                        THROW 51002, 'El usuario no existe.', 1;
+                        THROW 51002, ''El usuario no existe.'', 1;
 
                 END TRY
 
                 BEGIN CATCH
 
                     IF ERROR_NUMBER() IN (2601, 2627)
-                        THROW 51001, 'El nombre de usuario ya esta registrado.', 1;
+                        THROW 51001, ''El nombre de usuario ya esta registrado.'', 1;
 
                     THROW;
 
                 END CATCH;
 
             END;
+            ');
             """);
         migrationBuilder.Sql("""
+            EXEC(N'
             ALTER PROCEDURE dbo.Usuario_CambiarEstado
                 @Id int,
                 @Activo bit
@@ -281,7 +292,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                     WHERE Id = @Id;
 
                     IF @RolActualId IS NULL
-                        THROW 51002, 'El usuario no existe.', 1;
+                        THROW 51002, ''El usuario no existe.'', 1;
 
                     IF @Activo = 0
                        AND @ActivoActual = 1
@@ -294,7 +305,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                              AND Activo = 1
                              AND Id <> @Id
                        )
-                        THROW 51004, 'No se puede desactivar al ultimo administrador activo.', 1;
+                        THROW 51004, ''No se puede desactivar al ultimo administrador activo.'', 1;
 
                     UPDATE dbo.Usuarios
                     SET Activo = @Activo
@@ -314,6 +325,7 @@ public partial class AgregarConcurrenciaUsuarios : Migration
                 END CATCH;
 
             END
+            ');
             """);
         migrationBuilder.DropColumn(name: "Version", table: "Usuarios");
     }

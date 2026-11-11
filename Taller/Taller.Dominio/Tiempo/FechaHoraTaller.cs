@@ -13,7 +13,9 @@ public static class FechaHoraTaller
     public static DateTime Hoy => Ahora.Date;
     public static DateTimeOffset DesdeUtc(DateTimeOffset instante) => TimeZoneInfo.ConvertTime(instante, Zona);
 
-    /// <summary>Convierte una hora civil del taller en un instante, sin consultar la zona de la PC.</summary>
+    /// <summary>
+    /// Convierte una hora civil del taller en un instante, sin consultar la zona de la PC.
+    /// </summary>
     public static DateTimeOffset AUTC(DateTime fechaLocal)
     {
         var civil = DateTime.SpecifyKind(fechaLocal, DateTimeKind.Unspecified);

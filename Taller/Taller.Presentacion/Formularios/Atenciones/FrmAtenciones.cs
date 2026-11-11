@@ -1,14 +1,13 @@
-using Taller.Dominio.Tiempo;
 using Microsoft.Extensions.DependencyInjection;
 using Taller.Aplicacion.Servicios;
 using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
+using Taller.Dominio.Tiempo;
 using Taller.Presentacion.Estilos;
-using Taller.Presentacion.Formularios.Diagnosticos;
 using Taller.Presentacion.Formularios.Vehiculos;
-using Taller.Presentacion.Seguridad;
 using Taller.Presentacion.Navegacion;
+using Taller.Presentacion.Seguridad;
 
 namespace Taller.Presentacion.Formularios.Atenciones
 {
@@ -29,7 +28,11 @@ namespace Taller.Presentacion.Formularios.Atenciones
 
 #endregion
 #region Constructor y modelo de presentación
-        public FrmAtenciones(AtencionServicio atencionServicio, SesionUsuario sesionUsuario, IServiceProvider serviceProvider, AutorizacionNavegacion autorizacionNavegacion)
+        public FrmAtenciones(
+            AtencionServicio atencionServicio, 
+            SesionUsuario sesionUsuario, 
+            IServiceProvider serviceProvider, 
+            AutorizacionNavegacion autorizacionNavegacion)
         {
             InitializeComponent();
             _atencionServicio = atencionServicio;
@@ -298,18 +301,21 @@ namespace Taller.Presentacion.Formularios.Atenciones
         {
             IEnumerable<AtencionFila> consulta = _atenciones;
             bool esTecnico = _sesionUsuario.UsuarioActual?.RolId == RolesSistema.TecnicoId;
+
             if (esTecnico)
             {
                 consulta = consulta.Where(a => a.EstadoValor != EstadoAtencion.Cerrada && a.EstadoValor != EstadoAtencion.Cancelada);
             }
 
             string texto = txtBuscar.Text.Trim();
+
             if (!string.IsNullOrWhiteSpace(texto))
             {
                 consulta = consulta.Where(a => Taller.Aplicacion.Consultas.BusquedaTexto.Coincide($"{a.Numero} {a.Dominio} {a.Cliente} {a.Documento} {a.Motivo}", texto));
             }
 
             string estadoSeleccionado = cboEstado.SelectedItem?.ToString() ?? "Todas";
+
             switch (estadoSeleccionado)
             {
                 case "Todas":
@@ -333,6 +339,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             bool filtrarHasta = dtpHasta.Checked;
             DateTime desde = dtpDesde.Value.Date;
             DateTime hasta = dtpHasta.Value.Date;
+
             if (filtrarDesde && filtrarHasta && desde > hasta)
             {
                 dgvAtenciones.DataSource = null;
@@ -380,6 +387,7 @@ namespace Taller.Presentacion.Formularios.Atenciones
             }
 
             bool puedeGestionar = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.GestionarAtenciones);
+
             bool puedeConsultarComoTecnico = _autorizacionNavegacion.TienePermiso(usuario.RolId, PermisoAplicacion.ConsultarAtencionesAsignadas);
             btnVerDetalle.Enabled = puedeGestionar || puedeConsultarComoTecnico;
             btnCancelarAtencion.Enabled = puedeGestionar && (fila.EstadoValor is EstadoAtencion.EnEvaluacionTecnica) && fila.IdTecnicoEnActividad == null && !fila.TieneEvaluacion;

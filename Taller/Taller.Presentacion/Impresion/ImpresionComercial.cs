@@ -2,7 +2,9 @@ using System.Drawing.Printing;
 using Taller.Aplicacion.DTOs.Reportes;
 
 namespace Taller.Presentacion.Impresion;
-/// <summary>Imprime documentos comerciales en tablas. Repite identidad y columnas; divide filas extensas sin perder texto.</summary>
+/// <summary>
+/// Imprime documentos comerciales en tablas. Repite identidad y columnas; divide filas extensas sin perder texto.
+/// </summary>
 internal static class ImpresionComercial
 {
     public static void Mostrar(Form propietario, DocumentoComercialDto datos, EmpresaDocumentoDto empresa, string nombreArchivo,

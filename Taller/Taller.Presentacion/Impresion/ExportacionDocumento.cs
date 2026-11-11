@@ -1,6 +1,8 @@
 using System.Text;
 namespace Taller.Presentacion.Impresion;
-/// <summary>Guarda una copia HTML autónoma con nombre identificable; no abre contenido externo.</summary>
+/// <summary>
+/// Guarda una copia HTML autónoma con nombre identificable; no abre contenido externo.
+/// </summary>
 internal static class ExportacionDocumento
 {
     public static void GuardarHtml(Form propietario, string html, string nombre)

@@ -1,17 +1,58 @@
 :root {
-    color: #182a3e;
-    background: #f2f6f8;
-    font: 1rem/1.6 "Segoe UI", system-ui, sans-serif;
+	color: #182a3e;
+	background: #f2f6f8;
+	font: 1rem/1.6 "Segoe UI", system-ui, sans-serif;
 }
 
-body { margin: 0; }
-header { background: #182a46; padding: .8rem max(1rem, calc((100% - 54rem) / 2)); }
-header a { color: white; }
-main { max-width: 54rem; padding: 1rem 1rem 3rem; margin: auto; }
-h1, h2 { line-height: 1.25; }
-h2 { margin-top: 1.6rem; }
-a { color: #075d63; }
-a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
-table { width: 100%; border-collapse: collapse; background: white; }
-th, td { text-align: left; border: 1px solid #b7c9d4; padding: .45rem; vertical-align: top; }
-th { background: #e0edf1; }
+body {
+	margin: 0;
+}
+
+header {
+	background: #182a46;
+	padding: .8rem max(1rem, calc((100% - 54rem) / 2));
+}
+
+	header a {
+		color: white;
+	}
+
+main {
+	max-width: 54rem;
+	padding: 1rem 1rem 3rem;
+	margin: auto;
+}
+
+h1, h2 {
+	line-height: 1.25;
+}
+
+h2 {
+	margin-top: 1.6rem;
+}
+
+a {
+	color: #075d63;
+}
+
+	a:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 3px;
+	}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	background: white;
+}
+
+th, td {
+	text-align: left;
+	border: 1px solid #b7c9d4;
+	padding: .45rem;
+	vertical-align: top;
+}
+
+th {
+	background: #e0edf1;
+}

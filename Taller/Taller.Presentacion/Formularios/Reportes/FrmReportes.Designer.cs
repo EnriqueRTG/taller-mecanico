@@ -1,5 +1,6 @@
 #nullable enable
 namespace Taller.Presentacion.Formularios.Reportes;
+
 partial class FrmReportes
 {
     private System.ComponentModel.IContainer? components;
@@ -31,69 +32,116 @@ partial class FrmReportes
         lblHasta = new Label(); lblHasta.Name = "lblHasta";
         lblEstado = new Label(); lblEstado.Name = "lblEstado";
         cboGrafico = new ComboBox { Name = "cboGrafico", Width = 120, DropDownStyle = ComboBoxStyle.DropDownList };
-        cboGrafico.Items.AddRange(["Barras", "Columnas", "Torta"]);
+        cboGrafico.Items.AddRange(new object[] { "Barras", "Columnas", "Torta" });
         cboGrafico.SelectedIndex = 0;
         cboGrafico.SelectedIndexChanged += CboGrafico_SelectedIndexChanged;
         lblGrafico = new Label { Name = "lblGrafico", Text = "Gráfico", AutoSize = true, Margin = new Padding(3, 8, 3, 0) };
         SuspendLayout();
         AutoScaleDimensions = new SizeF(7F, 15F); AutoScaleMode = AutoScaleMode.Font; Font = new Font("Segoe UI", 9F);
-        ClientSize = new Size(1060, 650); MinimumSize = new Size(780, 520); BackColor = Color.FromArgb(244,247,251); Text = "Reportes de gestión";
+        ClientSize = new Size(1060, 650); MinimumSize = new Size(780, 520); BackColor = Color.FromArgb(244, 247, 251); Text = "Reportes de gestión";
         tlpPrincipal.Dock = DockStyle.Fill; tlpPrincipal.Padding = new Padding(12); tlpPrincipal.ColumnCount = 1; tlpPrincipal.RowCount = 8;
-        tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,36));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,86));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,42));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,95));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent,40));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent,60));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,28));
-        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute,44));
+        tlpPrincipal.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 86));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 95));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
         Controls.Add(tlpPrincipal);
-        tlpPrincipal.Controls.Add(lblTitulo,0,0); lblTitulo.Dock=DockStyle.Fill; lblTitulo.Font=new Font("Segoe UI",16,FontStyle.Bold); lblTitulo.Text="Reportes para la gestión del taller";
-        tlpPrincipal.Controls.Add(pnlFiltros,0,1); pnlFiltros.Dock=DockStyle.Fill; pnlFiltros.WrapContents=true; pnlFiltros.AutoScroll=true;
-        lblTipo.Text="Reporte"; lblDesde.Text="Desde"; lblHasta.Text="Hasta"; lblEstado.Text="Estado";
-        lblTipo.AutoSize=lblDesde.AutoSize=lblHasta.AutoSize=lblEstado.AutoSize=true;
-        lblTipo.Margin=lblDesde.Margin=lblHasta.Margin=lblEstado.Margin=new Padding(3,8,3,0);
-        cboTipo.Width=310; cboEstado.Width=190; cboTipo.DropDownStyle=cboEstado.DropDownStyle=ComboBoxStyle.DropDownList;
-        dtpDesde.Format=dtpHasta.Format=DateTimePickerFormat.Custom; dtpDesde.CustomFormat=dtpHasta.CustomFormat="dd/MM/yyyy"; dtpDesde.Width=dtpHasta.Width=110;
-        txtBuscar.Width=245; txtBuscar.MaxLength=150; txtBuscar.PlaceholderText="Código, atención, dominio o responsable";
-        pnlFiltros.Controls.AddRange([lblTipo,cboTipo,lblDesde,dtpDesde,lblHasta,dtpHasta,lblEstado,cboEstado,txtBuscar,lblGrafico,cboGrafico]);
-        tlpPrincipal.Controls.Add(lblMetodo,0,2); lblMetodo.Dock=DockStyle.Fill; lblMetodo.ForeColor=Color.FromArgb(71,85,105);
-        tlpPrincipal.Controls.Add(txtResumen,0,3); txtResumen.Dock=DockStyle.Fill; txtResumen.Multiline=true; txtResumen.ReadOnly=true; txtResumen.ScrollBars=ScrollBars.Vertical; txtResumen.BackColor=Color.White;
-        tlpPrincipal.Controls.Add(pnlGrafico,0,4); pnlGrafico.Dock=DockStyle.Fill; pnlGrafico.BackColor=Color.White;
-        tlpPrincipal.Controls.Add(dgvDetalle,0,5); dgvDetalle.Dock=DockStyle.Fill; dgvDetalle.ReadOnly=true; dgvDetalle.AllowUserToAddRows=false; dgvDetalle.AllowUserToDeleteRows=false;
-        dgvDetalle.AutoGenerateColumns=false; dgvDetalle.AllowUserToResizeColumns=true; dgvDetalle.AllowUserToResizeRows=false; dgvDetalle.RowHeadersVisible=false; dgvDetalle.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;
-        dgvDetalle.SelectionMode=DataGridViewSelectionMode.FullRowSelect; dgvDetalle.MultiSelect=false; dgvDetalle.BackgroundColor=Color.White;
-        colCodigo = new DataGridViewTextBoxColumn { Name="colCodigo", DataPropertyName="Codigo", HeaderText="Código", MinimumWidth=70, FillWeight=70, ReadOnly=true };
+        tlpPrincipal.Controls.Add(lblTitulo, 0, 0); lblTitulo.Dock = DockStyle.Fill; lblTitulo.Font = new Font("Segoe UI", 16, FontStyle.Bold); lblTitulo.Text = "Reportes para la gestión del taller";
+        tlpPrincipal.Controls.Add(pnlFiltros, 0, 1); pnlFiltros.Dock = DockStyle.Fill; pnlFiltros.WrapContents = true; pnlFiltros.AutoScroll = true;
+        lblTipo.Text = "Reporte"; lblDesde.Text = "Desde"; lblHasta.Text = "Hasta"; lblEstado.Text = "Estado";
+        lblTipo.AutoSize = true;
+        lblDesde.AutoSize = true;
+        lblHasta.AutoSize = true;
+        lblEstado.AutoSize = true;
+
+        lblTipo.Margin = new Padding(3, 8, 3, 0);
+        lblDesde.Margin = new Padding(3, 8, 3, 0);
+        lblHasta.Margin = new Padding(3, 8, 3, 0);
+        lblEstado.Margin = new Padding(3, 8, 3, 0);
+
+        cboTipo.Width = 310;
+        cboEstado.Width = 190;
+        cboTipo.DropDownStyle = ComboBoxStyle.DropDownList;
+        cboEstado.DropDownStyle = ComboBoxStyle.DropDownList;
+
+        dtpDesde.Format = DateTimePickerFormat.Custom;
+        dtpHasta.Format = DateTimePickerFormat.Custom;
+        dtpDesde.CustomFormat = "dd/MM/yyyy";
+        dtpHasta.CustomFormat = "dd/MM/yyyy";
+        dtpDesde.Width = 110;
+        dtpHasta.Width = 110;
+
+        txtBuscar.Width = 245;
+        txtBuscar.MaxLength = 150;
+        txtBuscar.PlaceholderText = "Código, atención, dominio o responsable";
+
+        pnlFiltros.Controls.AddRange(new Control[]
+        {
+    lblTipo, cboTipo,
+    lblDesde, dtpDesde,
+    lblHasta, dtpHasta,
+    lblEstado, cboEstado,
+    txtBuscar,
+    lblGrafico, cboGrafico
+        });
+        tlpPrincipal.Controls.Add(lblMetodo, 0, 2); lblMetodo.Dock = DockStyle.Fill; lblMetodo.ForeColor = Color.FromArgb(71, 85, 105);
+        tlpPrincipal.Controls.Add(txtResumen, 0, 3); txtResumen.Dock = DockStyle.Fill; txtResumen.Multiline = true; txtResumen.ReadOnly = true; txtResumen.ScrollBars = ScrollBars.Vertical; txtResumen.BackColor = Color.White;
+        tlpPrincipal.Controls.Add(pnlGrafico, 0, 4); pnlGrafico.Dock = DockStyle.Fill; pnlGrafico.BackColor = Color.White;
+        tlpPrincipal.Controls.Add(dgvDetalle, 0, 5); dgvDetalle.Dock = DockStyle.Fill; dgvDetalle.ReadOnly = true; dgvDetalle.AllowUserToAddRows = false; dgvDetalle.AllowUserToDeleteRows = false;
+        dgvDetalle.AutoGenerateColumns = false; dgvDetalle.AllowUserToResizeColumns = true; dgvDetalle.AllowUserToResizeRows = false; dgvDetalle.RowHeadersVisible = false; dgvDetalle.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvDetalle.SelectionMode = DataGridViewSelectionMode.FullRowSelect; dgvDetalle.MultiSelect = false; dgvDetalle.BackgroundColor = Color.White;
+        colCodigo = new DataGridViewTextBoxColumn { Name = "colCodigo", DataPropertyName = "Codigo", HeaderText = "Código", MinimumWidth = 70, FillWeight = 70, ReadOnly = true };
         dgvDetalle.Columns.Add(colCodigo);
-        colAtencion = new DataGridViewTextBoxColumn { Name="colAtencion", DataPropertyName="Atencion", HeaderText="Atención", MinimumWidth=60, FillWeight=60, ReadOnly=true };
+        colAtencion = new DataGridViewTextBoxColumn { Name = "colAtencion", DataPropertyName = "Atencion", HeaderText = "Atención", MinimumWidth = 60, FillWeight = 60, ReadOnly = true };
         dgvDetalle.Columns.Add(colAtencion);
-        colFecha = new DataGridViewTextBoxColumn { Name="colFecha", DataPropertyName="Fecha", HeaderText="Fecha del registro", MinimumWidth=110, FillWeight=120, ReadOnly=true };
-        colFecha.DefaultCellStyle.Format="dd/MM/yyyy HH:mm";
+        colFecha = new DataGridViewTextBoxColumn { Name = "colFecha", DataPropertyName = "Fecha", HeaderText = "Fecha del registro", MinimumWidth = 110, FillWeight = 120, ReadOnly = true };
+        colFecha.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
         dgvDetalle.Columns.Add(colFecha);
-        colDescripcion = new DataGridViewTextBoxColumn { Name="colDescripcion", DataPropertyName="Descripcion", HeaderText="Descripción", MinimumWidth=110, FillWeight=230, ReadOnly=true };
+        colDescripcion = new DataGridViewTextBoxColumn { Name = "colDescripcion", DataPropertyName = "Descripcion", HeaderText = "Descripción", MinimumWidth = 110, FillWeight = 230, ReadOnly = true };
         dgvDetalle.Columns.Add(colDescripcion);
-        colResponsable = new DataGridViewTextBoxColumn { Name="colResponsable", DataPropertyName="Responsable", HeaderText="Responsable", MinimumWidth=110, FillWeight=110, ReadOnly=true };
+        colResponsable = new DataGridViewTextBoxColumn { Name = "colResponsable", DataPropertyName = "Responsable", HeaderText = "Responsable", MinimumWidth = 110, FillWeight = 110, ReadOnly = true };
         dgvDetalle.Columns.Add(colResponsable);
-        colEstado = new DataGridViewTextBoxColumn { Name="colEstado", DataPropertyName="Estado", HeaderText="Estado / acción", MinimumWidth=110, FillWeight=110, ReadOnly=true };
+        colEstado = new DataGridViewTextBoxColumn { Name = "colEstado", DataPropertyName = "Estado", HeaderText = "Estado / acción", MinimumWidth = 110, FillWeight = 110, ReadOnly = true };
         dgvDetalle.Columns.Add(colEstado);
-        colCantidad = new DataGridViewTextBoxColumn { Name="colCantidad", DataPropertyName="Cantidad", HeaderText="Cantidad realizada", MinimumWidth=90, FillWeight=90, ReadOnly=true };
-        colCantidad.DefaultCellStyle.Format="N3"; colCantidad.DefaultCellStyle.NullValue="—";
+        colCantidad = new DataGridViewTextBoxColumn { Name = "colCantidad", DataPropertyName = "Cantidad", HeaderText = "Cantidad realizada", MinimumWidth = 90, FillWeight = 90, ReadOnly = true };
+        colCantidad.DefaultCellStyle.Format = "N3"; colCantidad.DefaultCellStyle.NullValue = "—";
         dgvDetalle.Columns.Add(colCantidad);
-        colImporte = new DataGridViewTextBoxColumn { Name="colImporte", DataPropertyName="Importe", HeaderText="Importe ARS", MinimumWidth=100, FillWeight=100, ReadOnly=true };
-        colImporte.DefaultCellStyle.Format="N2"; colImporte.DefaultCellStyle.NullValue="—";
+        colImporte = new DataGridViewTextBoxColumn { Name = "colImporte", DataPropertyName = "Importe", HeaderText = "Importe ARS", MinimumWidth = 100, FillWeight = 100, ReadOnly = true };
+        colImporte.DefaultCellStyle.Format = "N2"; colImporte.DefaultCellStyle.NullValue = "—";
         dgvDetalle.Columns.Add(colImporte);
-        colImporteAceptado = new DataGridViewTextBoxColumn { Name="colImporteAceptado", DataPropertyName="ImporteAceptado", HeaderText="Autorizado ARS", MinimumWidth=100, FillWeight=100, ReadOnly=true };
-        colImporteAceptado.DefaultCellStyle.Format="N2"; colImporteAceptado.DefaultCellStyle.NullValue="—";
+        colImporteAceptado = new DataGridViewTextBoxColumn { Name = "colImporteAceptado", DataPropertyName = "ImporteAceptado", HeaderText = "Autorizado ARS", MinimumWidth = 100, FillWeight = 100, ReadOnly = true };
+        colImporteAceptado.DefaultCellStyle.Format = "N2"; colImporteAceptado.DefaultCellStyle.NullValue = "—";
         dgvDetalle.Columns.Add(colImporteAceptado);
-        tlpPrincipal.Controls.Add(lblCantidad,0,6); lblCantidad.Dock=DockStyle.Fill;
-        tlpPrincipal.Controls.Add(flpAcciones,0,7); flpAcciones.Dock=DockStyle.Fill; flpAcciones.AutoScroll=true; flpAcciones.WrapContents=false;
-        btnGenerar.Text="Generar reporte"; btnLimpiar.Text="Limpiar filtros"; btnExportar.Text="Guardar documento HTML"; btnCsv.Text="Exportar detalle CSV"; btnImprimir.Text="Imprimir / PDF";
-        btnGenerar.AutoSize=btnLimpiar.AutoSize=btnExportar.AutoSize=btnCsv.AutoSize=btnImprimir.AutoSize=true;
-        btnGenerar.Height=btnLimpiar.Height=btnExportar.Height=btnCsv.Height=btnImprimir.Height=34;
-        btnGenerar.BackColor=Color.FromArgb(30,64,175); btnGenerar.ForeColor=Color.White;
-        btnExportar.Enabled=btnCsv.Enabled=btnImprimir.Enabled=false;
-        flpAcciones.Controls.AddRange([btnGenerar,btnLimpiar,btnExportar,btnCsv,btnImprimir]);
+        tlpPrincipal.Controls.Add(lblCantidad, 0, 6); lblCantidad.Dock = DockStyle.Fill;
+        tlpPrincipal.Controls.Add(flpAcciones, 0, 7); flpAcciones.Dock = DockStyle.Fill; flpAcciones.AutoScroll = true; flpAcciones.WrapContents = false;
+        btnGenerar.Text = "Generar reporte"; btnLimpiar.Text = "Limpiar filtros"; btnExportar.Text = "Guardar documento HTML"; btnCsv.Text = "Exportar detalle CSV"; btnImprimir.Text = "Imprimir / PDF";
+        btnGenerar.AutoSize = true;
+        btnLimpiar.AutoSize = true;
+        btnExportar.AutoSize = true;
+        btnCsv.AutoSize = true;
+        btnImprimir.AutoSize = true;
+
+        btnGenerar.Height = 34;
+        btnLimpiar.Height = 34;
+        btnExportar.Height = 34;
+        btnCsv.Height = 34;
+        btnImprimir.Height = 34;
+
+        btnGenerar.BackColor = Color.FromArgb(30, 64, 175);
+        btnGenerar.ForeColor = Color.White;
+
+        btnExportar.Enabled = false;
+        btnCsv.Enabled = false;
+        btnImprimir.Enabled = false;
+
+        flpAcciones.Controls.AddRange(new Control[]
+        {
+    btnGenerar, btnLimpiar, btnExportar, btnCsv, btnImprimir
+        });
         Load += FrmReportes_Load; FormClosing += FrmReportes_FormClosing;
         cboTipo.SelectedIndexChanged += CboTipo_SelectedIndexChanged; cboEstado.SelectedIndexChanged += Filtro_Cambio;
         dtpDesde.ValueChanged += Filtro_Cambio; dtpHasta.ValueChanged += Filtro_Cambio; txtBuscar.TextChanged += Filtro_Cambio;
@@ -102,8 +150,15 @@ partial class FrmReportes
         lienzoGrafico = new Panel { Name = "lienzoGrafico", BackColor = Color.White, Location = Point.Empty };
         pnlGrafico.Controls.Add(lienzoGrafico);
         lienzoGrafico.Paint += PnlGrafico_Paint;
-        pnlGrafico.SizeChanged += (_, _) => AjustarGrafico();
+        // En FrmReportes.Designer.cs, en lugar de la suscripción con lambda:
+        pnlGrafico.SizeChanged += PnlGrafico_SizeChanged;
         ResumeLayout(false);
+    }
+
+    // En FrmReportes.cs, dentro de la clase FrmReportes:
+    private void PnlGrafico_SizeChanged(object? sender, EventArgs e)
+    {
+        AjustarGrafico();
     }
     private TableLayoutPanel tlpPrincipal = null!;
     private FlowLayoutPanel pnlFiltros = null!;

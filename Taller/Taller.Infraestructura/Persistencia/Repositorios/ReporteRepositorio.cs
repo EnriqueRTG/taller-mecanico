@@ -5,44 +5,83 @@ using Taller.Aplicacion.DTOs.Reportes;
 using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Infraestructura.Persistencia.Repositorios;
-/// <summary>Consultas acotadas y proyectadas en SQL; los importes provienen de documentos, nunca del precio actual del catálogo.</summary>
+
+/// <summary>
+/// Consultas acotadas y proyectadas en SQL; 
+/// los importes provienen de documentos, nunca del precio actual del catálogo.
+/// </summary>
 public sealed class ReporteRepositorio(TallerDbContext contexto) : IReporteRepositorio
 {
     private static readonly string[] AccionesTecnicas = Taller.Aplicacion.Consultas.ActividadTecnicaReporte.Acciones.ToArray();
     private static readonly string[] AccionesAdministrativas = IntervencionAdministrativaReporte.Acciones.ToArray();
 
     /// <summary>
-    /// Proyección liviana de indicadores. El servicio conserva una sola definición
-    /// de las fórmulas; no se materializan nombres, observaciones ni grafos de entidades.
+    /// Obtiene los registros que usa el servicio de reportes para calcular
+    /// los indicadores de las tarjetas de Inicio.
     /// </summary>
-    public Task<List<ReporteRegistroDto>> ListarIndicadoresAsync(TipoReporte tipo, DateTime desde, DateTime hastaExclusivo, int? tecnico)
+    /// <param name="tipo">Tipo de reporte que determina la consulta a ejecutar.</param>
+    /// <param name="desde">
+    /// Inicio inclusivo del período para las consultas que filtran por fecha.
+    /// </param>
+    /// <param name="hastaExclusivo">
+    /// Fin exclusivo del período. Para incluir el último día seleccionado,
+    /// el servicio pasa el comienzo del día siguiente.
+    /// </param>
+    /// <param name="tecnico">
+    /// Identificador opcional del técnico. En Carga técnica incluye sus
+    /// reservas y las atenciones sin técnico asignado. En Actividad técnica
+    /// limita los eventos al usuario indicado. En Presupuestos se pasa
+    /// a la consulta que lista las propuestas.
+    /// </param>
+    /// <returns>
+    /// Tarea con las filas necesarias para calcular los indicadores.
+    /// Los campos proyectados dependen del tipo de reporte.
+    /// </returns>
+    /// <remarks>
+    /// Carga técnica y Saldos pendientes consultan la situación actual.
+    /// Los conteos, las sumas y los porcentajes se calculan en ReporteServicio.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// El tipo solicitado no tiene una consulta para las tarjetas de Inicio.
+    /// </exception>
+    public Task<List<ReporteRegistroDto>> ListarIndicadoresAsync(
+        TipoReporte tipo, 
+        DateTime desde, 
+        DateTime hastaExclusivo,
+        int? tecnico)
     {
         return tipo switch
         {
             TipoReporte.Atenciones => contexto.Atenciones.AsNoTracking()
                 .Where(a => a.FechaApertura >= desde && a.FechaApertura < hastaExclusivo)
                 .Select(a => new ReporteRegistroDto { IdAtencion = a.IdAtencion, Estado = a.Estado.ToString() }).ToListAsync(),
+
             TipoReporte.CargaTecnica => contexto.Atenciones.AsNoTracking()
                 .Where(a => (a.Estado == EstadoAtencion.EnEvaluacionTecnica || a.Estado == EstadoAtencion.EnEjecucion)
                     && (!tecnico.HasValue || a.IdTecnicoEnActividad == null || a.IdTecnicoEnActividad == tecnico))
                 .Select(a => new ReporteRegistroDto { IdAtencion = a.IdAtencion,
                     Estado = a.Pausas.Any(p => p.FechaResolucion == null) ? "Con pausas pendientes"
                         : a.IdTecnicoEnActividad == null ? "Disponible para tomar" : "Reservada" }).ToListAsync(),
+
             TipoReporte.ActividadTecnica => contexto.HistorialAtenciones.AsNoTracking()
                 .Where(h => h.Fecha >= desde && h.Fecha < hastaExclusivo && AccionesTecnicas.Contains(h.Accion)
                     && (!tecnico.HasValue || h.IdUsuario == tecnico))
                 .Select(h => new ReporteRegistroDto { IdAtencion = h.IdAtencion }).ToListAsync(),
+
             TipoReporte.SaldosPendientes => contexto.Comprobantes.AsNoTracking().Where(c => c.Total > c.TotalPagado)
                 .Select(c => new ReporteRegistroDto { IdAtencion = c.IdAtencion, Fecha = c.FechaEmision, Importe = c.Total - c.TotalPagado }).ToListAsync(),
+
             TipoReporte.MovimientosCobro => contexto.PagoMedios.AsNoTracking()
                 .Where(m => m.Pago.Fecha >= desde && m.Pago.Fecha < hastaExclusivo)
                 .Select(m => new ReporteRegistroDto { IdAtencion = m.Pago.Comprobante.IdAtencion, Estado = "Cobro", Importe = m.Importe })
                 .Concat(contexto.PagoMedios.AsNoTracking()
                     .Where(m => m.Pago.Anulado && m.Pago.FechaAnulacion >= desde && m.Pago.FechaAnulacion < hastaExclusivo)
                     .Select(m => new ReporteRegistroDto { IdAtencion = m.Pago.Comprobante.IdAtencion, Estado = "Anulación", Importe = -m.Importe })).ToListAsync(),
+
             // Esta consulta ya proyecta cantidades/precios por ítem. Se conserva el
             // redondeo por ítem en .NET para no alterar importes autorizados.
             TipoReporte.Presupuestos => ListarPresupuestosAsync(desde, hastaExclusivo, tecnico),
+
             _ => throw new InvalidOperationException("El tipo no corresponde a una tarjeta de inicio.")
         };
     }

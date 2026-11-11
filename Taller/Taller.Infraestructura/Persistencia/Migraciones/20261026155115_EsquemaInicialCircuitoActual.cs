@@ -1109,6 +1109,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.Sql("""
+                EXEC(N'
                 CREATE PROCEDURE dbo.Usuario_Crear
                     @NombreUsuario nvarchar(50),
                     @PasswordHash nvarchar(255),
@@ -1137,7 +1138,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         IF ERROR_NUMBER() IN (2601, 2627)
                         
                         BEGIN
-                            THROW 51001, 'El nombre de usuario ya esta registrado.', 1;
+                            THROW 51001, ''El nombre de usuario ya esta registrado.'', 1;
                         END;
 
                         THROW;
@@ -1145,10 +1146,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     END CATCH;
 
                 END;
+                ');
                 """);
 
             migrationBuilder.Sql(
                 """
+                EXEC(N'
                 CREATE PROCEDURE dbo.Usuario_ActualizarDatos
                     @Id int,
                     @Nombre nvarchar(100),
@@ -1173,7 +1176,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                             WHERE Id = @Id;              
 
                         IF @RolActualId IS NULL
-                            THROW 51002, 'El usuario no existe.', 1;
+                            THROW 51002, ''El usuario no existe.'', 1;
 
                         IF @RolActualId = 1
                             AND @Activo = 1
@@ -1186,7 +1189,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                                     AND Activo = 1
                                     AND Id <> @Id
                             )
-                            THROW 51003, 'No se puede cambiar el rol del ultimo administrador activo.', 1;
+                            THROW 51003, ''No se puede cambiar el rol del ultimo administrador activo.'', 1;
 
                         UPDATE dbo.Usuarios
                         SET Nombre = @Nombre,
@@ -1208,10 +1211,12 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     END CATCH
 
                 END;
+                ');
                 """);
 
             migrationBuilder.Sql(
                 """
+                EXEC(N'
                 CREATE PROCEDURE dbo.Usuario_ActualizarCredenciales
                     @Id int,
                     @NombreUsuario nvarchar(50),
@@ -1228,24 +1233,26 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         WHERE Id = @Id;
 
                         IF @@ROWCOUNT = 0
-                            THROW 51002, 'El usuario no existe.', 1;
+                            THROW 51002, ''El usuario no existe.'', 1;
                     
                     END TRY
 
                     BEGIN CATCH
                         
                         IF ERROR_NUMBER() IN (2601, 2627)
-                            THROW 51001, 'El nombre de usuario ya esta registrado.', 1;
+                            THROW 51001, ''El nombre de usuario ya esta registrado.'', 1;
 
                         THROW;
 
                     END CATCH;
 
                 END;
+                ');
                 """);
 
             migrationBuilder.Sql(
                 """
+                EXEC(N'
                 CREATE PROCEDURE dbo.Usuario_CambiarEstado
                     @Id int,
                     @Activo bit
@@ -1268,7 +1275,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                         WHERE Id = @Id;
 
                         IF @RolActualId IS NULL
-                            THROW 51002, 'El usuario no existe.', 1;
+                            THROW 51002, ''El usuario no existe.'', 1;
 
                         IF @Activo = 0
                            AND @ActivoActual = 1
@@ -1281,7 +1288,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                                  AND Activo = 1
                                  AND Id <> @Id
                            )
-                            THROW 51004, 'No se puede desactivar al ultimo administrador activo.', 1;
+                            THROW 51004, ''No se puede desactivar al ultimo administrador activo.'', 1;
 
                         UPDATE dbo.Usuarios
                         SET Activo = @Activo
@@ -1301,6 +1308,7 @@ namespace Taller.Infraestructura.Persistencia.Migraciones
                     END CATCH;
 
                 END
+                ');
                 """);
 
         }

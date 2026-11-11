@@ -8,7 +8,10 @@ using Taller.Presentacion.Impresion;
 using Taller.Presentacion.Navegacion;
 
 namespace Taller.Presentacion.Formularios.Reportes;
-/// <summary>Genera documentos por rol. Los filtros modificados invalidan el documento anterior antes de exportarlo.</summary>
+/// <summary>
+/// Genera documentos por rol. 
+/// Los filtros modificados invalidan el documento anterior antes de exportarlo.
+/// </summary>
 public partial class FrmReportes : Form, IFormularioConOperacion
 {
     private readonly ReporteServicio _servicio;
@@ -19,7 +22,9 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     private bool AlcanceAdministrativo => _rol == RolesSistema.AdministrativoId;
     public bool OperacionEnCurso { get; private set; }
 
-    public FrmReportes(ReporteServicio servicio, EmpresaDocumentoDto empresa)
+    public FrmReportes(
+        ReporteServicio servicio, 
+        EmpresaDocumentoDto empresa)
     {
         InitializeComponent();
         _servicio = servicio;
@@ -88,6 +93,7 @@ public partial class FrmReportes : Form, IFormularioConOperacion
     }
 
     private void Filtro_Cambio(object? sender, EventArgs e) => Invalidar();
+
     private void CboTipo_SelectedIndexChanged(object? sender, EventArgs e)
     {
         if (_configurando)
@@ -110,6 +116,9 @@ public partial class FrmReportes : Form, IFormularioConOperacion
         finally { _configurando = false; }
     }
 
+    /// <summary> 
+    /// Genera el documento de reporte según los filtros y lo muestra en la interfaz.
+    /// </summary>
     private async void BtnGenerar_Click(object? sender, EventArgs e)
     {
         if (OperacionEnCurso || cboTipo.SelectedItem is not Opcion opcion)
@@ -120,17 +129,41 @@ public partial class FrmReportes : Form, IFormularioConOperacion
             pnlFiltros.Enabled = false;
             flpAcciones.Enabled = false;
             Cursor = Cursors.WaitCursor;
-            _documento = await _servicio.GenerarAsync(new SolicitudReporteDto { Tipo = opcion.Tipo, Desde = dtpDesde.Value.Date, Hasta = dtpHasta.Value.Date, Busqueda = txtBuscar.Text, Estado = cboEstado.SelectedItem?.ToString() ?? "Todos" });
-            dgvDetalle.DataSource = _documento.Registros.Select(x => new { x.Codigo, Atencion = x.IdAtencion, x.Fecha, x.Descripcion, x.Responsable, Estado = ReporteServicio.Legible(x.Estado), x.Cantidad, x.Importe, x.ImporteAceptado }).ToList();
+
+            // Genera el documento de reporte según los filtros y lo muestra en la interfaz.
+            _documento = await _servicio.GenerarAsync(
+                new SolicitudReporteDto { 
+                    Tipo = opcion.Tipo, 
+                    Desde = dtpDesde.Value.Date, 
+                    Hasta = dtpHasta.Value.Date, 
+                    Busqueda = txtBuscar.Text, 
+                    Estado = cboEstado.SelectedItem?.ToString() ?? "Todos" });
+
+            dgvDetalle.DataSource = 
+                _documento.Registros.Select(
+                    x => new { 
+                        x.Codigo, 
+                        Atencion = x.IdAtencion, 
+                        x.Fecha, 
+                        x.Descripcion, 
+                        x.Responsable, 
+                        Estado = ReporteServicio.Legible(x.Estado), 
+                        x.Cantidad, 
+                        x.Importe, 
+                        x.ImporteAceptado }).ToList();
+
             colCantidad.Visible = _documento.Registros.Any(x => x.Cantidad.HasValue);
             colImporte.Visible = _documento.Registros.Any(x => x.Importe.HasValue);
             colImporteAceptado.Visible = _documento.Registros.Any(x => x.ImporteAceptado.HasValue);
             dgvDetalle.ClearSelection();
+
             txtResumen.Text = string.Join("   |   ", _documento.Indicadores.Select(x => x.Nombre + ": " + x.Valor)) + Environment.NewLine + _documento.Recomendacion + Environment.NewLine + _documento.Metodologia;
+
             lblMetodo.Text = _documento.Alcance + " · " + _documento.Filtros;
             lblCantidad.Text = $"{_documento.Registros.Count} registros · generado {_documento.Generado:dd/MM/yyyy HH:mm:ss} · gráfico en {_documento.UnidadGrafico}";
             btnExportar.Visible = btnCsv.Visible = btnImprimir.Visible = true;
             btnExportar.Enabled = btnCsv.Enabled = btnImprimir.Enabled = true;
+
             CboGrafico_SelectedIndexChanged(null, EventArgs.Empty);
         }
         catch (Exception ex)

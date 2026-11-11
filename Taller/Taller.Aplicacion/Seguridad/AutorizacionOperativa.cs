@@ -5,20 +5,29 @@ using Taller.Dominio.Constantes;
 using Taller.Dominio.Entidades;
 
 namespace Taller.Aplicacion.Seguridad;
-/// <summary>Revalida contra persistencia el usuario y rol operativo de la sesión.</summary>
+/// <summary>
+/// Revalida contra persistencia el usuario y rol operativo de la sesión.
+/// </summary>
 public sealed class AutorizacionOperativa(IUsuarioRepositorio usuarios, SesionUsuario sesion)
 {
-    /// <summary>Autoriza el rol solicitado o, por defecto, los dos roles operativos del taller.</summary>
+    /// <summary>
+    /// Autoriza el rol solicitado o, por defecto, los dos roles operativos del taller.
+    /// </summary>
     public Task<Usuario> ExigirAsync(int? rol = null) => rol.HasValue
         ? ExigirRolesAsync(rol.Value)
         : ExigirRolesAsync(RolesSistema.AdministrativoId, RolesSistema.TecnicoId);
 
-    /// <summary>Revalida una sesión para una operación concreta. No acepta identidades elegidas por el formulario.</summary>
+    /// <summary>
+    /// Revalida una sesión para una operación concreta. No acepta identidades elegidas por el formulario.
+    /// </summary>
     public async Task<Usuario> ExigirRolesAsync(params int[] roles)
     {
-        var u = sesion.UsuarioActual is { } actual ? await usuarios.ObtenerPorIdAsync(actual.Id) : null;
+        var u = sesion.UsuarioActual is { } actual ? 
+                    await usuarios.ObtenerPorIdAsync(actual.Id) : null;
+
         if (!UsuarioAutorizado.EstaHabilitado(u) || !roles.Contains(u!.RolId))
             throw new ValidacionException("La operación requiere una sesión y un rol activos autorizados.");
+
         return u!;
     }
 

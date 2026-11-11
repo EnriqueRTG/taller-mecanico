@@ -3,7 +3,9 @@ using System.Text;
 using Taller.Aplicacion.DTOs.Ejecuciones;
 
 namespace Taller.Presentacion.Impresion;
-/// <summary>Informe de consulta del expediente: incluye hallazgos sin convertirlos en cargos.</summary>
+/// <summary>
+/// Informe de consulta del expediente: incluye hallazgos sin convertirlos en cargos.
+/// </summary>
 internal static class TextoIntervencion
 {
     public static string Generar(SeguimientoTrabajoDto d)

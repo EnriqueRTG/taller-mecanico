@@ -3,8 +3,10 @@ using Taller.Aplicacion.Reportes;
 
 namespace Taller.Presentacion.Impresion;
 
-/// <summary>Reporte A4 horizontal: resumen y gráfico inicial, detalle tabular con
-/// cabeceras repetidas, cantidades precisas y metodología completa al final.</summary>
+/// <summary>
+/// Reporte A4 horizontal: resumen y gráfico inicial, detalle tabular con
+/// cabeceras repetidas, cantidades precisas y metodología completa al final.
+/// </summary>
 internal static class ImpresionReporte
 {
     public static void Mostrar(Form propietario, ReporteDocumentoDto d, TipoGraficoReporte tipo = TipoGraficoReporte.Barras, EmpresaDocumentoDto? empresa = null)

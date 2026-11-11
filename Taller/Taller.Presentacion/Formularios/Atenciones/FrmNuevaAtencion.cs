@@ -229,7 +229,7 @@ public partial class FrmNuevaAtencion : Form
     /// Invalida la selección cuando cambia el tipo de documento utilizado
     /// para identificar al cliente.
     /// </summary>
-    private void cboTipoDocumento_SelectedIndexChanged(object? sender, EventArgs e)
+    private void CboTipoDocumento_SelectedIndexChanged(object? sender, EventArgs e)
     {
         if (_clienteSeleccionado is null)
             return;
@@ -244,7 +244,7 @@ public partial class FrmNuevaAtencion : Form
     /// Invalida la selección cuando el documento ingresado deja de
     /// coincidir con el cliente previamente seleccionado.
     /// </summary>
-    private void txtDocumento_TextChanged(object? sender, EventArgs e)
+    private void TxtDocumento_TextChanged(object? sender, EventArgs e)
     {
         if (_clienteSeleccionado is null)
             return;
@@ -258,7 +258,7 @@ public partial class FrmNuevaAtencion : Form
     /// Busca un cliente activo por tipo y número de documento y lo establece
     /// como cliente de la atención cuando la consulta resulta exitosa.
     /// </summary>
-    private async void btnBuscarCliente_Click(object? sender, EventArgs e)
+    private async void BtnBuscarCliente_Click(object? sender, EventArgs e)
     {
         try
         {
@@ -280,6 +280,7 @@ public partial class FrmNuevaAtencion : Form
 
             btnBuscarCliente.Enabled = false;
             Cliente? cliente = await _clienteServicio.ObtenerPorDocumentoAsync(tipoDocumento, documento);
+
             if (cliente is null)
             {
                 _clienteSeleccionado = null;
@@ -326,7 +327,7 @@ public partial class FrmNuevaAtencion : Form
     /// Abre el formulario de alta de clientes y selecciona el cliente
     /// creado cuando la operación finaliza correctamente.
     /// </summary>
-    private void btnNuevoCliente_Click(object? sender, EventArgs e)
+    private void BtnNuevoCliente_Click(object? sender, EventArgs e)
     {
         try
         {
@@ -352,7 +353,7 @@ public partial class FrmNuevaAtencion : Form
     /// Invalida la selección cuando el dominio escrito deja de coincidir
     /// con el vehículo previamente seleccionado.
     /// </summary>
-    private void txtDominio_TextChanged(object? sender, EventArgs e)
+    private void TxtDominio_TextChanged(object? sender, EventArgs e)
     {
         if (_vehiculoSeleccionado is null)
             return;
@@ -369,7 +370,7 @@ public partial class FrmNuevaAtencion : Form
     /// Busca un vehículo activo por dominio y lo establece como vehículo
     /// de la atención cuando la consulta resulta exitosa.
     /// </summary>
-    private async void btnBuscarVehiculo_Click(object? sender, EventArgs e)
+    private async void BtnBuscarVehiculo_Click(object? sender, EventArgs e)
     {
         try
         {
@@ -430,7 +431,7 @@ public partial class FrmNuevaAtencion : Form
     /// Abre el formulario de alta de vehículos y selecciona el vehículo
     /// creado cuando la operación finaliza correctamente.
     /// </summary>
-    private async void btnNuevoVehiculo_Click(object? sender, EventArgs e)
+    private async void BtnNuevoVehiculo_Click(object? sender, EventArgs e)
     {
         if (_clienteSeleccionado is null)
         {
@@ -473,7 +474,7 @@ public partial class FrmNuevaAtencion : Form
     /// Registra la nueva atención utilizando el cliente,
     /// vehículo y usuario de recepción seleccionados.
     /// </summary>
-    private async void btnRegistrar_Click(object? sender, EventArgs e)
+    private async void BtnRegistrar_Click(object? sender, EventArgs e)
     {
         if (_clienteSeleccionado is null)
         {
@@ -506,11 +507,17 @@ public partial class FrmNuevaAtencion : Form
             btnRegistrar.Enabled = false;
             btnCancelar.Enabled = false;
             btnRegistrar.Text = "Registrando...";
-            var atencion = await _atencionServicio.RegistrarRecepcionAsync(new Taller.Aplicacion.DTOs.Atenciones.RegistrarRecepcionDto {
-                IdCliente = _clienteSeleccionado.IdCliente, IdVehiculo = _vehiculoSeleccionado.IdVehiculo,
-                IdUsuarioRecepcion = usuario.Id, Solicitudes = editorSolicitudes.Solicitudes,
-                Kilometraje = editorSolicitudes.Kilometraje, ObservacionesRecepcion = editorSolicitudes.Observaciones
-            });
+
+            var atencion = await _atencionServicio.RegistrarRecepcionAsync(
+                new Taller.Aplicacion.DTOs.Atenciones.RegistrarRecepcionDto {
+                    IdCliente = _clienteSeleccionado.IdCliente,
+                    IdVehiculo = _vehiculoSeleccionado.IdVehiculo,
+                    IdUsuarioRecepcion = usuario.Id,
+                    Solicitudes = editorSolicitudes.Solicitudes,
+                    Kilometraje = editorSolicitudes.Kilometraje,
+                    ObservacionesRecepcion = editorSolicitudes.Observaciones
+                });
+
             MessageBox.Show(this, $"Atención {atencion.IdAtencion:D6} · Vehículo {_vehiculoSeleccionado.Dominio} recibida. El técnico puede tomarla desde Preparación técnica.", "Ingreso registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
@@ -541,7 +548,7 @@ public partial class FrmNuevaAtencion : Form
     /// <summary>
     /// Cancela el registro y cierra el formulario sin guardar cambios.
     /// </summary>
-    private void btnCancelar_Click(object? sender, EventArgs e)
+    private void BtnCancelar_Click(object? sender, EventArgs e)
     {
         DialogResult = DialogResult.Cancel;
         Close();

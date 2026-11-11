@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Taller.Aplicacion.Excepciones;
 
 namespace Taller.Infraestructura.Persistencia;
-/// <summary>Traduce conflictos esperables sin confundir fallos de conexión con validaciones de negocio.</summary>
+/// <summary>
+/// Traduce conflictos esperables sin confundir fallos de conexión con validaciones de negocio.
+/// </summary>
 internal static class ErroresPersistencia
 {
     public static Exception Traducir(DbUpdateException e, string indice, string duplicado)

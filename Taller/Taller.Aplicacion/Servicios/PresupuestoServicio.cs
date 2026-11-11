@@ -8,10 +8,17 @@ using Taller.Dominio.Entidades;
 using Taller.Dominio.Enumeraciones;
 
 namespace Taller.Aplicacion.Servicios;
-/// <summary>Registra decisiones por ítem y revisiones conservando propuestas y decisiones anteriores.</summary>
-public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICircuitoRepositorio repositorio, IUnidadDeTrabajo unidad, AutorizacionOperativa acceso)
+/// <summary>
+/// Registra decisiones por ítem y revisiones conservando propuestas y decisiones anteriores.
+/// </summary>
+public sealed class PresupuestoServicio(
+    IEvaluacionRepositorio evaluacion, 
+    ICircuitoRepositorio repositorio, 
+    IUnidadDeTrabajo unidad, 
+    AutorizacionOperativa acceso)
 {
     private async Task<Presupuesto> RequerirAsync(int id) => await repositorio.ObtenerPresupuestoAsync(id) ?? throw new ValidacionException("El presupuesto no existe.");
+
     public async Task<PresupuestoGestionDto> ObtenerAsync(int id)
     {
         try
@@ -41,28 +48,38 @@ public sealed class PresupuestoServicio(IEvaluacionRepositorio evaluacion, ICirc
     public async Task DecidirAsync(DecisionPresupuestoDto datos)
     {
         ArgumentNullException.ThrowIfNull(datos);
+
         try
         {
             var usuario = await acceso.ExigirAsync(RolesSistema.AdministrativoId);
             var p = await RequerirAsync(datos.IdPresupuesto);
             AutorizacionOperativa.Version(datos.Version, p.Version);
+
             if (!p.Vigente || p.Estado != EstadoPresupuesto.PendienteDecision || (!p.EsAdicional && (p.Atencion.Estado != EstadoAtencion.PendienteDecision || p.Atencion.IdTecnicoEnActividad != null)) || (p.EsAdicional && p.Atencion.Estado != (p.EsInspeccion ? EstadoAtencion.EnEvaluacionTecnica : EstadoAtencion.EnEjecucion)))
                 throw new ValidacionException("La propuesta no está disponible para registrar una decisión.");
+
             if (await repositorio.ExisteLiquidacionAsync(p.IdAtencion))
                 throw new ValidacionException("La atención ya está liquidada.");
+
             if (datos.ItemsAceptados is null || datos.ItemsAceptados.Distinct().Count() != datos.ItemsAceptados.Count || datos.ItemsAceptados.Except(p.Detalles.Select(d => d.IdPresupuestoDetalle)).Any())
                 throw new ValidacionException("La selección contiene ítems repetidos o ajenos a esta propuesta.");
+
             if (p.Detalles.Count == 0)
                 throw new ValidacionException("No puede decidir sobre una propuesta vacía.");
+
             var persona = datos.PersonaDecision?.Trim() ?? "";
             var medio = datos.MedioDecision?.Trim() ?? "";
+
             if (persona.Length > 150 || medio.Length > 30 || (persona.Length == 0 || !new[] { "Presencial", "Teléfono", "Correo", "Mensajería" }.Contains(medio)))
                 throw new ValidacionException("Identifique quién comunica la decisión y seleccione el medio de comunicación.");
+
             p.PersonaDecision = persona;
             p.MedioDecision = medio;
             var motivo = AutorizacionOperativa.Texto(datos.Observaciones, datos.ItemsAceptados.Count != p.Detalles.Count);
+
             foreach (var d in p.Detalles)
                 d.AceptadoPorCliente = datos.ItemsAceptados.Contains(d.IdPresupuestoDetalle);
+
             var parcial = datos.ItemsAceptados.Count > 0 && datos.ItemsAceptados.Count < p.Detalles.Count;
             p.Estado = parcial ? EstadoPresupuesto.PendienteRevisionTecnica : datos.ItemsAceptados.Count > 0 ? EstadoPresupuesto.Aceptado : EstadoPresupuesto.Rechazado;
             p.AlcanceValidado = !parcial;

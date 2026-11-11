@@ -10,11 +10,15 @@ public sealed class CircuitoRepositorio(TallerDbContext contexto) : ICircuitoRep
     public Task<List<Taller.Aplicacion.DTOs.Cobros.AtencionCobroDto>> ListarResumenCobrosAsync() => contexto.Atenciones.AsNoTracking()
         .Where(a => a.Estado == EstadoAtencion.TrabajoFinalizado || a.Estado == EstadoAtencion.PendienteLiquidacion || a.Estado == EstadoAtencion.Cerrada)
         .Select(a => new { Atencion = a, Documento = contexto.Comprobantes.Where(c => c.IdAtencion == a.IdAtencion).FirstOrDefault() })
-        .Select(x => new Taller.Aplicacion.DTOs.Cobros.AtencionCobroDto {
-            IdAtencion = x.Atencion.IdAtencion, Cliente = x.Atencion.Cliente.Apellido + ", " + x.Atencion.Cliente.Nombre,
-            Dominio = x.Atencion.Vehiculo.Dominio, Estado = x.Atencion.Estado,
+        .Select(x => new Taller.Aplicacion.DTOs.Cobros.AtencionCobroDto
+        {
+            IdAtencion = x.Atencion.IdAtencion,
+            Cliente = x.Atencion.Cliente.Apellido + ", " + x.Atencion.Cliente.Nombre,
+            Dominio = x.Atencion.Vehiculo.Dominio,
+            Estado = x.Atencion.Estado,
             IdComprobante = x.Documento == null ? null : x.Documento.IdComprobante,
-            Total = x.Documento == null ? null : x.Documento.Total, Pagado = x.Documento == null ? null : x.Documento.TotalPagado,
+            Total = x.Documento == null ? null : x.Documento.Total,
+            Pagado = x.Documento == null ? null : x.Documento.TotalPagado,
             Fecha = x.Documento == null ? x.Atencion.FechaApertura
                 : (x.Documento.Pagos.Select(p => (DateTime?)(p.FechaAnulacion ?? p.Fecha)).Max() ?? x.Documento.FechaEmision)
                     > x.Documento.FechaEmision
